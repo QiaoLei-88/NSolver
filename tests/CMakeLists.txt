@@ -5,7 +5,7 @@ ADD_CUSTOM_TARGET(run_tests)
 ADD_DEPENDENCIES(run_tests ${PRJ_NAME} run_test_case_000)
 
 ENABLE_TESTING()
-ADD_CUSTOM_TARGET(test
+ADD_CUSTOM_TARGET(tests
 	ctest
 	)
-ADD_DEPENDENCIES(test run_tests)
+ADD_DEPENDENCIES(tests run_tests)
