@@ -1,0 +1,13 @@
+
+ADD_EXECUTABLE(${PRJ_NAME}
+  ConservationLaw.cpp
+  NSEquation.cpp
+  AllParameters.cpp
+  main.cpp
+  )
+
+SET_PROPERTY(TARGET ${PRJ_NAME}
+  PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+  )
+
+DEAL_II_SETUP_TARGET(${PRJ_NAME})

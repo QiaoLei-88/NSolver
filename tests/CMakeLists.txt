@@ -1,0 +1,11 @@
+
+ADD_SUBDIRECTORY(case000)
+
+ADD_CUSTOM_TARGET(run_tests)
+ADD_DEPENDENCIES(run_tests ${PRJ_NAME} run_test_case_000)
+
+ENABLE_TESTING()
+ADD_CUSTOM_TARGET(test
+	ctest
+	)
+ADD_DEPENDENCIES(test run_tests)
