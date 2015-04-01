@@ -17,6 +17,7 @@
 #include <deal.II/base/function_parser.h>
 #include <deal.II/base/utilities.h>
 #include <deal.II/base/conditional_ostream.h>
+#include <deal.II/base/std_cxx11/array.h>
 
 #include <deal.II/lac/vector.h>
 #include <deal.II/lac/dynamic_sparsity_pattern.h>
@@ -199,7 +200,7 @@ namespace Step33
     template <typename InputVector, typename Number>
     static
     void compute_flux_matrix (const InputVector &W,
-                              std::array <std::array <Number, dim>, n_components > &flux);
+                              std_cxx11::array <std_cxx11::array <Number, dim>, n_components > &flux);
 
 
     // @sect4{EulerEquations::compute_normal_flux}
@@ -214,7 +215,7 @@ namespace Step33
                                 const InputVector                  &Wplus,
                                 const InputVector                  &Wminus,
                                 const double                        alpha,
-                                std::array < Number, n_components> &normal_flux);
+                                std_cxx11::array < Number, n_components> &normal_flux);
 
     // @sect4{EulerEquations::compute_forcing_vector}
 
@@ -229,7 +230,7 @@ namespace Step33
     template <typename InputVector, typename Number>
     static
     void compute_forcing_vector (const InputVector &W,
-                                 std::array < Number, n_components> &forcing,
+                                 std_cxx11::array < Number, n_components> &forcing,
                                  const double gravity);
 
     // @sect4{Dealing with boundary conditions}
@@ -466,7 +467,7 @@ namespace Step33
   template <int dim>
   template <typename InputVector, typename Number>
   void EulerEquations<dim>::compute_flux_matrix (const InputVector &W,
-                                                 std::array <std::array <Number, dim>, EulerEquations<dim>::n_components > &flux)
+                                                 std_cxx11::array <std_cxx11::array <Number, dim>, EulerEquations<dim>::n_components > &flux)
   {
     // First compute the pressure that appears in the flux matrix, and then
     // compute the first <code>dim</code> columns of the matrix that
@@ -510,10 +511,10 @@ namespace Step33
                                                    const InputVector                  &Wplus,
                                                    const InputVector                  &Wminus,
                                                    const double                        alpha,
-                                                   std::array < Number, n_components> &normal_flux)
+                                                   std_cxx11::array < Number, n_components> &normal_flux)
   {
 
-    std::array <std::array <Number, dim>, EulerEquations<dim>::n_components > iflux, oflux;
+    std_cxx11::array <std_cxx11::array <Number, dim>, EulerEquations<dim>::n_components > iflux, oflux;
     compute_flux_matrix (Wplus, iflux);
     compute_flux_matrix (Wminus, oflux);
 
@@ -542,7 +543,7 @@ namespace Step33
   template <int dim>
   template <typename InputVector, typename Number>
   void EulerEquations<dim>::compute_forcing_vector (const InputVector &W,
-                                                    std::array < Number, n_components> &forcing,
+                                                    std_cxx11::array < Number, n_components> &forcing,
                                                     const double gravity)
   {
     for (unsigned int c=0; c<n_components; ++c)

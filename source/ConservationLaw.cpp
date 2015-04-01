@@ -504,16 +504,16 @@ namespace Step33
     // autodifferentiation variables, so that the Jacobian contributions can
     // later easily be computed from it:
     std::vector <
-    std::array <std::array <Sacado::Fad::DFad<double>, dim>, EulerEquations<dim>::n_components >
+    std_cxx11::array <std_cxx11::array <Sacado::Fad::DFad<double>, dim>, EulerEquations<dim>::n_components >
     > flux(n_q_points);
 
     std::vector <
-    std::array <std::array <double, dim>, EulerEquations<dim>::n_components >
+    std_cxx11::array <std_cxx11::array <double, dim>, EulerEquations<dim>::n_components >
     > flux_old(n_q_points);
 
-    std::vector < std::array< Sacado::Fad::DFad<double>, EulerEquations<dim>::n_components> > forcing(n_q_points);
+    std::vector < std_cxx11::array< Sacado::Fad::DFad<double>, EulerEquations<dim>::n_components> > forcing(n_q_points);
 
-    std::vector < std::array< double, EulerEquations<dim>::n_components> > forcing_old(n_q_points);
+    std::vector < std_cxx11::array< double, EulerEquations<dim>::n_components> > forcing_old(n_q_points);
 
     for (unsigned int q=0; q<n_q_points; ++q)
       {
@@ -533,7 +533,7 @@ namespace Step33
           {
             // Here, we need to evaluate the derivatives of entropy flux respect to Euler equation independent variables $w$
             // rather than the unknown vector $W$. So we have to set up a new Sacado::Fad::DFad syetem.
-            std::array<Sacado::Fad::DFad<double>, EulerEquations<dim>::n_components> w_for_entropy_flux;
+            std_cxx11::array<Sacado::Fad::DFad<double>, EulerEquations<dim>::n_components> w_for_entropy_flux;
             for (unsigned int c=0; c<EulerEquations<dim>::n_components; ++c)
               {
                 w_for_entropy_flux[c] = W[q][c].val();
@@ -843,8 +843,8 @@ namespace Step33
     // w^-, \mathbf n)$ for each quadrature point. Before calling the function
     // that does so, we also need to determine the Lax-Friedrich's stability
     // parameter:
-    std::vector< std::array < Sacado::Fad::DFad<double>, EulerEquations<dim>::n_components> >  normal_fluxes(n_q_points);
-    std::vector< std::array < double, EulerEquations<dim>::n_components> >  normal_fluxes_old(n_q_points);
+    std::vector< std_cxx11::array < Sacado::Fad::DFad<double>, EulerEquations<dim>::n_components> >  normal_fluxes(n_q_points);
+    std::vector< std_cxx11::array < double, EulerEquations<dim>::n_components> >  normal_fluxes_old(n_q_points);
 
 
     double alpha;
