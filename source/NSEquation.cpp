@@ -18,19 +18,19 @@ namespace Step33
   template <int dim>
   std::vector<std::string>
   EulerEquations<dim>::component_names ()
-    {
+  {
     std::vector<std::string> names (dim, "momentum");
     names.push_back ("density");
     names.push_back ("energy_density");
 
     return names;
-    }
+  }
 
 
   template <int dim>
   std::vector<DataComponentInterpretation::DataComponentInterpretation>
   EulerEquations<dim>::component_interpretation ()
-    {
+  {
     std::vector<DataComponentInterpretation::DataComponentInterpretation>
     data_component_interpretation
     (dim, DataComponentInterpretation::component_is_part_of_vector);
@@ -40,7 +40,7 @@ namespace Step33
     .push_back (DataComponentInterpretation::component_is_scalar);
 
     return data_component_interpretation;
-    }
+  }
 
 
   // @sect4{Transformations between variables}
@@ -74,10 +74,10 @@ namespace Step33
   template <int dim>
   void
   EulerEquations<dim>::compute_refinement_indicators (const DoFHandler<dim> &dof_handler,
-                                 const Mapping<dim>    &mapping,
-                                 const Vector<double>  &solution,
-                                 Vector<double>        &refinement_indicators)
-    {
+                                                      const Mapping<dim>    &mapping,
+                                                      const Vector<double>  &solution,
+                                                      Vector<double>        &refinement_indicators)
+  {
     const unsigned int dofs_per_cell = dof_handler.get_fe().dofs_per_cell;
     std::vector<unsigned int> dofs (dofs_per_cell);
 
@@ -94,15 +94,15 @@ namespace Step33
     endc = dof_handler.end();
     for (unsigned int cell_no=0; cell!=endc; ++cell, ++cell_no)
       {
-      fe_v.reinit(cell);
-      fe_v.get_function_gradients (solution, dU);
+        fe_v.reinit(cell);
+        fe_v.get_function_gradients (solution, dU);
 
-      refinement_indicators(cell_no)
-      = std::log(1+
-                 std::sqrt(dU[0][density_component] *
-                           dU[0][density_component]));
+        refinement_indicators(cell_no)
+          = std::log(1+
+                     std::sqrt(dU[0][density_component] *
+                               dU[0][density_component]));
       }
-    }
+  }
 
   template <int dim>
   const double EulerEquations<dim>::gas_gamma = 1.4;
@@ -112,8 +112,8 @@ namespace Step33
   template <int dim>
   EulerEquations<dim>::Postprocessor::
   Postprocessor (const bool do_schlieren_plot)
-  :
-  do_schlieren_plot (do_schlieren_plot)
+    :
+    do_schlieren_plot (do_schlieren_plot)
   {}
 
 
@@ -136,57 +136,57 @@ namespace Step33
                                      const std::vector<Point<dim> >                  &/*evaluation_points*/,
                                      std::vector<Vector<double> >                    &computed_quantities) const
   {
-  // At the beginning of the function, let us make sure that all variables
-  // have the correct sizes, so that we can access individual vector
-  // elements without having to wonder whether we might read or write
-  // invalid elements; we also check that the <code>duh</code> vector only
-  // contains data if we really need it (the system knows about this because
-  // we say so in the <code>get_needed_update_flags()</code> function
-  // below). For the inner vectors, we check that at least the first element
-  // of the outer vector has the correct inner size:
-  const unsigned int n_quadrature_points = static_cast<const unsigned int>(uh.size());
-
-  if (do_schlieren_plot == true)
-    Assert (duh.size() == n_quadrature_points,
-            ExcInternalError())
-    else
-      Assert (duh.size() == 0,
-              ExcInternalError());
-
-  Assert (computed_quantities.size() == n_quadrature_points,
-          ExcInternalError());
-
-  Assert (uh[0].size() == n_components,
-          ExcInternalError());
-
-  if (do_schlieren_plot == true)
-    Assert (computed_quantities[0].size() == dim+2, ExcInternalError())
-    else
-      {
-      Assert (computed_quantities[0].size() == dim+1, ExcInternalError());
-      }
-
-  // Then loop over all quadrature points and do our work there. The code
-  // should be pretty self-explanatory. The order of output variables is
-  // first <code>dim</code> velocities, then the pressure, and if so desired
-  // the schlieren plot. Note that we try to be generic about the order of
-  // variables in the input vector, using the
-  // <code>first_momentum_component</code> and
-  // <code>density_component</code> information:
-  for (unsigned int q=0; q<n_quadrature_points; ++q)
-    {
-    const double density = uh[q](density_component);
-
-    for (unsigned int d=0; d<dim; ++d)
-      computed_quantities[q](d)
-      = uh[q](first_momentum_component+d) / density;
-
-    computed_quantities[q](dim) = compute_pressure<double> (uh[q]);
+    // At the beginning of the function, let us make sure that all variables
+    // have the correct sizes, so that we can access individual vector
+    // elements without having to wonder whether we might read or write
+    // invalid elements; we also check that the <code>duh</code> vector only
+    // contains data if we really need it (the system knows about this because
+    // we say so in the <code>get_needed_update_flags()</code> function
+    // below). For the inner vectors, we check that at least the first element
+    // of the outer vector has the correct inner size:
+    const unsigned int n_quadrature_points = static_cast<const unsigned int>(uh.size());
 
     if (do_schlieren_plot == true)
-      computed_quantities[q](dim+1) = duh[q][density_component] *
-      duh[q][density_component];
-    }
+      Assert (duh.size() == n_quadrature_points,
+              ExcInternalError())
+      else
+        Assert (duh.size() == 0,
+                ExcInternalError());
+
+    Assert (computed_quantities.size() == n_quadrature_points,
+            ExcInternalError());
+
+    Assert (uh[0].size() == n_components,
+            ExcInternalError());
+
+    if (do_schlieren_plot == true)
+      Assert (computed_quantities[0].size() == dim+2, ExcInternalError())
+      else
+        {
+          Assert (computed_quantities[0].size() == dim+1, ExcInternalError());
+        }
+
+    // Then loop over all quadrature points and do our work there. The code
+    // should be pretty self-explanatory. The order of output variables is
+    // first <code>dim</code> velocities, then the pressure, and if so desired
+    // the schlieren plot. Note that we try to be generic about the order of
+    // variables in the input vector, using the
+    // <code>first_momentum_component</code> and
+    // <code>density_component</code> information:
+    for (unsigned int q=0; q<n_quadrature_points; ++q)
+      {
+        const double density = uh[q](density_component);
+
+        for (unsigned int d=0; d<dim; ++d)
+          computed_quantities[q](d)
+            = uh[q](first_momentum_component+d) / density;
+
+        computed_quantities[q](dim) = compute_pressure<double> (uh[q]);
+
+        if (do_schlieren_plot == true)
+          computed_quantities[q](dim+1) = duh[q][density_component] *
+                                          duh[q][density_component];
+      }
   }
 
 
@@ -195,19 +195,19 @@ namespace Step33
   EulerEquations<dim>::Postprocessor::
   get_names () const
   {
-  std::vector<std::string> names;
-  for (unsigned int d=0; d<dim; ++d)
-    {
-    names.push_back ("velocity");
-    }
-  names.push_back ("pressure");
+    std::vector<std::string> names;
+    for (unsigned int d=0; d<dim; ++d)
+      {
+        names.push_back ("velocity");
+      }
+    names.push_back ("pressure");
 
-  if (do_schlieren_plot == true)
-    {
-    names.push_back ("schlieren_plot");
-    }
+    if (do_schlieren_plot == true)
+      {
+        names.push_back ("schlieren_plot");
+      }
 
-  return names;
+    return names;
   }
 
 
@@ -216,18 +216,18 @@ namespace Step33
   EulerEquations<dim>::Postprocessor::
   get_data_component_interpretation () const
   {
-  std::vector<DataComponentInterpretation::DataComponentInterpretation>
-  interpretation (dim,
-                  DataComponentInterpretation::component_is_part_of_vector);
+    std::vector<DataComponentInterpretation::DataComponentInterpretation>
+    interpretation (dim,
+                    DataComponentInterpretation::component_is_part_of_vector);
 
-  interpretation.push_back (DataComponentInterpretation::
-                            component_is_scalar);
-
-  if (do_schlieren_plot == true)
     interpretation.push_back (DataComponentInterpretation::
                               component_is_scalar);
 
-  return interpretation;
+    if (do_schlieren_plot == true)
+      interpretation.push_back (DataComponentInterpretation::
+                                component_is_scalar);
+
+    return interpretation;
   }
 
 
@@ -237,14 +237,14 @@ namespace Step33
   EulerEquations<dim>::Postprocessor::
   get_needed_update_flags () const
   {
-  if (do_schlieren_plot == true)
-    {
-    return update_values | update_gradients;
-    }
-  else
-    {
-    return update_values;
-    }
+    if (do_schlieren_plot == true)
+      {
+        return update_values | update_gradients;
+      }
+    else
+      {
+        return update_values;
+      }
   }
 
 
