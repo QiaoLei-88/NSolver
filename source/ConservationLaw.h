@@ -96,10 +96,11 @@ namespace Step33
     void setup_system ();
 
     void calc_time_step();
-    void assemble_system ();
+    void assemble_system (const unsigned int nonlin_iter);
     void assemble_cell_term (const FEValues<dim>             &fe_v,
                              const std::vector<types::global_dof_index> &dofs,
-                             const unsigned int cell_index);
+                             const unsigned int cell_index,
+                             const unsigned int nonlin_iter);
     void assemble_face_term (const unsigned int               face_no,
                              const FEFaceValuesBase<dim>     &fe_v,
                              const FEFaceValuesBase<dim>     &fe_v_neighbor,

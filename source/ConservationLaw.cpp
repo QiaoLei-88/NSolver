@@ -161,7 +161,7 @@ namespace Step33
   // the normal vectors are known to be the negative of the normal vectors of
   // the current cell.
   template <int dim>
-  void ConservationLaw<dim>::assemble_system ()
+  void ConservationLaw<dim>::assemble_system (const unsigned int nonlin_iter)
   {
     const unsigned int dofs_per_cell = dof_handler.get_fe().dofs_per_cell;
 
@@ -201,7 +201,7 @@ namespace Step33
         fe_v.reinit (cell);
         cell->get_dof_indices (dof_indices);
 
-        assemble_cell_term(fe_v, dof_indices, cell_index);
+        assemble_cell_term(fe_v, dof_indices, cell_index, nonlin_iter);
 
         // Then loop over all the faces of this cell.  If a face is part of
         // the external boundary, then assemble boundary conditions there (the
@@ -404,7 +404,8 @@ namespace Step33
   ConservationLaw<dim>::
   assemble_cell_term (const FEValues<dim>             &fe_v,
                       const std::vector<types::global_dof_index> &dof_indices,
-                      const unsigned int cell_index)
+                      const unsigned int cell_index,
+                      const unsigned int nonlin_iter)
   {
     const unsigned int dofs_per_cell = fe_v.dofs_per_cell;
     const unsigned int n_q_points    = fe_v.n_quadrature_points;
@@ -522,76 +523,77 @@ namespace Step33
         EulerEquations<dim>::compute_forcing_vector (W[q], forcing[q], parameters.gravity);
       }
 
-    // evaluate viscosity coefficient
-    //
-    double viscos_coeff = 0.001;
-    double rho_max(-1.0), D_h_max(-1.0), characteristic_speed_max(-1.0);
-
-    for (unsigned int q=0; q<n_q_points; ++q)
+    // evaluate entropy viscosity
+    if (nonlin_iter == 0 &&
+        parameters.diffusion_type == Parameters::AllParameters<dim>::diffu_entropy)
       {
-        // Here, we need to evaluate the derivatives of entropy flux respect to Euler equation independent variables $w$
-        // rather than the unknown vector $W$. So we have to set up a new Sacado::Fad::DFad syetem.
-        std::array<Sacado::Fad::DFad<double>, EulerEquations<dim>::n_components> w_for_entropy_flux;
-        for (unsigned int c=0; c<EulerEquations<dim>::n_components; ++c)
+        double rho_max(-1.0), D_h_max(-1.0), characteristic_speed_max(-1.0);
+
+        for (unsigned int q=0; q<n_q_points; ++q)
           {
-            w_for_entropy_flux[c] = W[q][c].val();
-            w_for_entropy_flux[c].diff(c, EulerEquations<dim>::n_components);
-          }
-
-        const Sacado::Fad::DFad<double> entropy = EulerEquations<dim>::template compute_entropy<Sacado::Fad::DFad<double> >
-        (w_for_entropy_flux);
-        const double entroy_old = EulerEquations<dim>::template compute_entropy<double>(W_old[q]);
-
-        double D_h1(0.0),D_h2(0.0);
-        D_h1 = (entropy.val() - entroy_old)/parameters.time_step;
-        D_h2 = (W[q][EulerEquations<dim>::density_component].val() - W_old[q][EulerEquations<dim>::density_component])/
-               parameters.time_step;
-
-        //sum up divergence
-        for (unsigned int d=0; d<dim; d++)
-          {
-            const Sacado::Fad::DFad<double> entropy_flux = entropy *
-                                                           w_for_entropy_flux[EulerEquations<dim>::first_momentum_component + d]/
-                                                           w_for_entropy_flux[EulerEquations<dim>::density_component];
+            // Here, we need to evaluate the derivatives of entropy flux respect to Euler equation independent variables $w$
+            // rather than the unknown vector $W$. So we have to set up a new Sacado::Fad::DFad syetem.
+            std::array<Sacado::Fad::DFad<double>, EulerEquations<dim>::n_components> w_for_entropy_flux;
             for (unsigned int c=0; c<EulerEquations<dim>::n_components; ++c)
               {
-                D_h1 += entropy_flux.fastAccessDx(c) * grad_W[q][c][d].val();
+                w_for_entropy_flux[c] = W[q][c].val();
+                w_for_entropy_flux[c].diff(c, EulerEquations<dim>::n_components);
               }
-            D_h2 += grad_W[q][EulerEquations<dim>::first_momentum_component + d][d].val();
+
+            const Sacado::Fad::DFad<double> entropy = EulerEquations<dim>::template compute_entropy<Sacado::Fad::DFad<double> >
+            (w_for_entropy_flux);
+            const double entroy_old = EulerEquations<dim>::template compute_entropy<double>(W_old[q]);
+
+            double D_h1(0.0),D_h2(0.0);
+            D_h1 = (entropy.val() - entroy_old)/parameters.time_step;
+            D_h2 = (W[q][EulerEquations<dim>::density_component].val() - W_old[q][EulerEquations<dim>::density_component])/
+                   parameters.time_step;
+
+            //sum up divergence
+            for (unsigned int d=0; d<dim; d++)
+              {
+                const Sacado::Fad::DFad<double> entropy_flux = entropy *
+                                                               w_for_entropy_flux[EulerEquations<dim>::first_momentum_component + d]/
+                                                               w_for_entropy_flux[EulerEquations<dim>::density_component];
+                for (unsigned int c=0; c<EulerEquations<dim>::n_components; ++c)
+                  {
+                    D_h1 += entropy_flux.fastAccessDx(c) * grad_W[q][c][d].val();
+                  }
+                D_h2 += grad_W[q][EulerEquations<dim>::first_momentum_component + d][d].val();
+              }
+            D_h2 *= entropy.val()/W[q][EulerEquations<dim>::density_component].val();
+            D_h_max = std::max(D_h_max, std::abs(D_h1));
+            D_h_max = std::max(D_h_max, std::abs(D_h2));
+
+            rho_max = std::max(rho_max, W[q][EulerEquations<dim>::density_component].val());
+
+            // Calculate local sound speed.
+            const double density = W[q][EulerEquations<dim>::density_component].val();
+            const double pressure =
+              EulerEquations<dim>::template compute_pressure<Sacado::Fad::DFad<double> >(W[q]).val();
+
+            const double sound_speed = std::sqrt(EulerEquations<dim>::gas_gamma * pressure/density);
+
+            // Calculate local velosity magnitude.
+            Tensor<1,dim> momentum;
+            for (unsigned int i=EulerEquations<dim>::first_momentum_component;
+                 i < EulerEquations<dim>::first_momentum_component+dim; ++i)
+              {
+                momentum[i] = W[q][i].val();
+              }
+            const double velocity = momentum.norm()/density;
+
+            characteristic_speed_max = std::max(characteristic_speed_max, velocity + sound_speed);
           }
-        D_h2 *= entropy.val()/W[q][EulerEquations<dim>::density_component].val();
-        D_h_max = std::max(D_h_max, std::abs(D_h1));
-        D_h_max = std::max(D_h_max, std::abs(D_h2));
+        const double cE = 1.0;
+        const double entropy_visc = cE * rho_max * std::pow(fe_v.get_cell()->diameter(), 1.5) * D_h_max;
+        const double cMax = 0.25;
+        const double miu_max = cMax * fe_v.get_cell()->diameter() * rho_max * characteristic_speed_max;
+        //  const double miu_max = 1.0*std::pow(fe_v.get_cell()->diameter(), parameters.diffusion_power);
 
-        rho_max = std::max(rho_max, W[q][EulerEquations<dim>::density_component].val());
-
-        // Calculate local sound speed.
-        const double density = W[q][EulerEquations<dim>::density_component].val();
-        const double pressure =
-          EulerEquations<dim>::template compute_pressure<Sacado::Fad::DFad<double> >(W[q]).val();
-
-        const double sound_speed = std::sqrt(EulerEquations<dim>::gas_gamma * pressure/density);
-
-        // Calculate local velosity magnitude.
-        Tensor<1,dim> momentum;
-        for (unsigned int i=EulerEquations<dim>::first_momentum_component;
-             i < EulerEquations<dim>::first_momentum_component+dim; ++i)
-          {
-            momentum[i] = W[q][i].val();
-          }
-        const double velocity = momentum.norm()/density;
-
-        characteristic_speed_max = std::max(characteristic_speed_max, velocity + sound_speed);
+        entropy_viscosity[cell_index] = std::min(miu_max, entropy_visc);
       }
-    const double cE = 1.0;
-    const double entropy_visc = cE * rho_max * std::pow(fe_v.get_cell()->diameter(), 1.5) * D_h_max;
-    const double cMax = 0.25;
-    const double miu_max = cMax * fe_v.get_cell()->diameter() * rho_max * characteristic_speed_max;
-    //  const double miu_max = 1.0*std::pow(fe_v.get_cell()->diameter(), parameters.diffusion_power);
 
-    entropy_viscosity[cell_index] = std::min(miu_max, entropy_visc);
-    //  entropy_viscosity[cell_index] = std::max(0.002, entropy_viscosity[cell_index]);
-    //
 
 
     // We now have all of the pieces in place, so perform the assembly.  We
@@ -658,7 +660,7 @@ namespace Step33
 
             cellSize_viscosity[cell_index] = 1.0*std::pow(fe_v.get_cell()->diameter(), parameters.diffusion_power);
 
-            viscos_coeff = 0.000;
+            double viscos_coeff(0.000);
             if (parameters.diffusion_type == Parameters::AllParameters<dim>::diffu_entropy)
               {
                 viscos_coeff = entropy_viscosity[cell_index];
@@ -1318,7 +1320,7 @@ namespace Step33
             system_matrix = 0;
 
             right_hand_side = 0;
-            assemble_system ();
+            assemble_system (nonlin_iter);
 
             const double res_norm = right_hand_side.l2_norm();
             if (std::fabs(res_norm) < 1e-10)
