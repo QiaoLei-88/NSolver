@@ -1396,13 +1396,11 @@ namespace Step33
 
       predictor = current_solution;
 
-      if ( converged_newton_iters%10 == 0 )
+      if ( parameters.allow_double_time_step && converged_newton_iters%10 == 0 )
         {
 
         //Since every thing goes so well, let's try a larger time step next.
-        if (parameters.allow_double_time_step) {
-          parameters.time_step_factor *= 2.0;
-        }
+        parameters.time_step_factor *= 2.0;
         time_step_doubled = true;
         index_linear_search_length = 0;
         std::cout << "  We got ten successive converged time steps.\n"
