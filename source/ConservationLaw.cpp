@@ -117,10 +117,8 @@ namespace Step33
       for (unsigned int q=0; q<n_q_points; ++q)
         {
         const double density = solution_values[q](EulerEquations<dim>::density_component);
-        AssertThrow (density > 0.0, ExcMessage ("Negative density encountered!"));
         const double pressure =
         EulerEquations<dim>::template compute_pressure<double>(solution_values[q]);
-        AssertThrow (pressure > 0.0, ExcMessage ("Negative pressure encountered!"));
 
         const double sound_speed = std::sqrt(EulerEquations<dim>::gas_gamma * pressure/density);
         Tensor<1,dim> momentum;
@@ -568,10 +566,8 @@ namespace Step33
 
     // Calculate local sound speed.
     const double density = W[q][EulerEquations<dim>::density_component].val();
-    AssertThrow (density > 0.0, ExcMessage ("Negative density encountered!"));
     const double pressure =
     EulerEquations<dim>::template compute_pressure<Sacado::Fad::DFad<double> >(W[q]).val();
-    AssertThrow (pressure > 0.0, ExcMessage ("Negative pressure encountered!"));
 
     const double sound_speed = std::sqrt(EulerEquations<dim>::gas_gamma * pressure/density);
 
@@ -1433,6 +1429,32 @@ namespace Step33
         newton_update.reinit (dof_handler.n_dofs());
         }
       current_solution_backup = current_solution;
+
+      //Check for negative density and pressure
+      {
+        FEValues<dim> fe_v (mapping, fe, quadrature, update_values);
+        const unsigned int   n_q_points = fe_v.n_quadrature_points;
+        std::vector<Vector<double> > solution_values(n_q_points,
+                                                     Vector<double>(dim+2));
+        typename DoFHandler<dim>::active_cell_iterator
+        cell = dof_handler.begin_active(),
+        endc = dof_handler.end();
+        for (; cell!=endc; ++cell)
+          {
+          fe_v.reinit (cell);
+          fe_v.get_function_values (current_solution, solution_values);
+          for (unsigned int q=0; q<n_q_points; ++q)
+            {
+            const double density = solution_values[q](EulerEquations<dim>::density_component);
+            AssertThrow (density > 0.0, ExcMessage ("Negative density encountered!"));
+            const double pressure =
+            EulerEquations<dim>::template compute_pressure<double>(solution_values[q]);
+            AssertThrow (pressure > 0.0, ExcMessage ("Negative pressure encountered!"));
+            }
+          }
+        }
+
+
       calc_time_step();
       // Uncomment the following line if you want reset the linear_search_length immediatly after a converged Newton iter.
       //index_linear_search_length = 0;
