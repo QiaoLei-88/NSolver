@@ -82,7 +82,7 @@ namespace Step33
   void ConservationLaw<dim>::setup_system ()
   {
     DynamicSparsityPattern sparsity_pattern (dof_handler.n_dofs(),
-                                                dof_handler.n_dofs());
+                                             dof_handler.n_dofs());
     DoFTools::make_sparsity_pattern (dof_handler, sparsity_pattern);
 
     system_matrix.reinit (sparsity_pattern);
@@ -843,7 +843,8 @@ namespace Step33
     // w^-, \mathbf n)$ for each quadrature point. Before calling the function
     // that does so, we also need to determine the Lax-Friedrich's stability
     // parameter:
-    std::vector< std_cxx11::array < Sacado::Fad::DFad<double>, EulerEquations<dim>::n_components> >  normal_fluxes(n_q_points);
+    std::vector< std_cxx11::array < Sacado::Fad::DFad<double>, EulerEquations<dim>::n_components> >  normal_fluxes(
+      n_q_points);
     std::vector< std_cxx11::array < double, EulerEquations<dim>::n_components> >  normal_fluxes_old(n_q_points);
 
 
@@ -1355,13 +1356,21 @@ namespace Step33
 
             if (nonlin_iter > nonlin_iter_threshold)
               {
-                std::cout << "  Newton iteration not converge in " << nonlin_iter_threshold << " steps.\n"
-                          << "  Recompute with different linear search length or time step...\n\n";
-                newton_iter_converged = false;
-                break;
+                // Limit lower bound of time step that can be tried.
+                // 1/1024 < 0.0005 < 1/2048
+                if (parameters.time_step_factor > 0.0005)
+                  {
+                    std::cout << "  Newton iteration not converge in " << nonlin_iter_threshold << " steps.\n"
+                              << "  Recompute with different linear search length or time step...\n\n";
+                    newton_iter_converged = false;
+                    break;
+                  }
+                else
+                  {
+                    AssertThrow (false,
+                                 ExcMessage ("No convergence in nonlinear solver after all small time step and linear search length trid out."));
+                  }
               }
-            //            AssertThrow (nonlin_iter <= 10,
-            //                         ExcMessage ("No convergence in nonlinear solver"));
           }
 
         if (newton_iter_converged)
