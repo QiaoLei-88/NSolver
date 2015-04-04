@@ -21,3 +21,4 @@ SET(_test_name_prefix ${_current_dir_name})
 UNSET(_current_dir_name)
 
 PICKUP_ALL_SUBDIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+
