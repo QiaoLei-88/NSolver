@@ -16,26 +16,24 @@ ENDIF()
 # Are all dependencies fullfilled?
 #
 IF(NOT DEAL_II_WITH_TRILINOS)
-  MESSAGE(FATAL_ERROR "
-Error! The deal.II library found at ${DEAL_II_PATH} was not configured with
-    DEAL_II_WITH_TRILINOS = ON
-One or all of these are OFF in your installation but are required for this tutorial step."
+  MESSAGE(FATAL_ERROR "\n"
+    "Error! The deal.II library found at ${DEAL_II_PATH} was not configured with"
+    "    DEAL_II_WITH_TRILINOS = ON"
+    "One or all of these are OFF in your installation but are required for this tutorial step."
     )
 ENDIF()
 
 #
 # Let's move
 #
-
+INCLUDE(${CMAKE_SOURCE_DIR}/utilities/cmake/list_all_subdirectories.macro.cmake)
 SET(PRJ_NAME "NSolver")
 
 
 DEAL_II_INITIALIZE_CACHED_VARIABLES()
 PROJECT(${PRJ_NAME})
-# ENABLE_TESTING()
 
+ENABLE_TESTING()
 
 ADD_SUBDIRECTORY(source)
 ADD_SUBDIRECTORY(tests)
-
-#DEAL_II_INVOKE_AUTOPILOT()

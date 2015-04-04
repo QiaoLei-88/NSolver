@@ -1,11 +1,12 @@
 
-ADD_SUBDIRECTORY(case000)
+INCLUDE(${CMAKE_SOURCE_DIR}/utilities/cmake/setup_test_case.macro.cmake)
 
-ADD_CUSTOM_TARGET(run_tests)
-ADD_DEPENDENCIES(run_tests ${PRJ_NAME} run_test_case_000)
+SET (_exec_copy ln )
+SET (_para_copy -s )
 
-ENABLE_TESTING()
-ADD_CUSTOM_TARGET(tests
-	ctest
-	)
-ADD_DEPENDENCIES(tests run_tests)
+SET (_exec_diff diff )
+SET (_para_diff "" )
+
+SET (_exec_run ${CMAKE_BINARY_DIR}/bin/${PRJ_NAME})
+
+PICKUP_ALL_SUBDIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
