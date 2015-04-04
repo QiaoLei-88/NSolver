@@ -38,7 +38,10 @@ MACRO(SETUP_TEST_CASE)
     DEPENDS
       ${_input_file_list_full}
       ${_test_src_directory}/${_comparison_file}
-      ${PRJ_NAME} 
+      # Remove dependency on the project main target to avoid race condition
+      # in parallel testing.
+      # Always build the excutable before run cTest.
+      # ${PRJ_NAME} 
     VERBATIM
     )
 
