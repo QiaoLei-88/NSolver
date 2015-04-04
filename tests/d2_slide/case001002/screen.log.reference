@@ -1,0 +1,1075 @@
+T=0
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   1.656e-02        0000        0.00e+00                  1             0.02                1
+   3.199e-03        0000        0.00e+00                  1             0.02                1
+   5.116e-04        0000        0.00e+00                  1             0.02                1
+   2.805e-05        0000        0.00e+00                  1             0.02                1
+   1.325e-07        0000        0.00e+00                  1             0.02                1
+   5.336e-12        (converged)
+
+  Order of time advancing L_infty norm = -0.27734
+  Order of time advancing L_2     norm = 0.576406
+T=0.02
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   1.691e-02        0000        0.00e+00                  1             0.02                1
+   3.778e-04        0000        0.00e+00                  1             0.02                1
+   4.129e-06        0000        0.00e+00                  1             0.02                1
+   1.556e-09        0000        0.00e+00                  1             0.02                1
+   2.090e-12        (converged)
+
+  Order of time advancing L_infty norm = -0.863724
+  Order of time advancing L_2     norm = 0.0831795
+T=0.04
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   6.879e-03        0000        0.00e+00                  1             0.02                1
+   5.013e-05        0000        0.00e+00                  1             0.02                1
+   2.790e-08        0000        0.00e+00                  1             0.02                1
+   2.291e-12        (converged)
+
+  Order of time advancing L_infty norm = -1.11938
+  Order of time advancing L_2     norm = -0.130672
+T=0.06
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   5.589e-03        0000        0.00e+00                  1             0.02                1
+   1.810e-05        0000        0.00e+00                  1             0.02                1
+   1.924e-09        0000        0.00e+00                  1             0.02                1
+   2.305e-12        (converged)
+
+  Order of time advancing L_infty norm = -1.30691
+  Order of time advancing L_2     norm = -0.256565
+T=0.08
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   5.097e-03        0000        0.00e+00                  1             0.02                1
+   8.632e-06        0000        0.00e+00                  1             0.02                1
+   2.903e-10        0000        0.00e+00                  1             0.02                1
+   2.582e-12        (converged)
+
+  Order of time advancing L_infty norm = -1.41754
+  Order of time advancing L_2     norm = -0.346675
+T=0.1
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   4.882e-03        0000        0.00e+00                  1             0.02                1
+   4.744e-06        0000        0.00e+00                  1             0.02                1
+   6.213e-11        (converged)
+
+  Order of time advancing L_infty norm = -1.51743
+  Order of time advancing L_2     norm = -0.422657
+T=0.12
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   4.643e-03        0000        0.00e+00                  1             0.02                1
+   3.005e-06        0000        0.00e+00                  1             0.02                1
+   1.636e-11        (converged)
+
+  Order of time advancing L_infty norm = -1.58347
+  Order of time advancing L_2     norm = -0.490771
+T=0.14
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   4.375e-03        0000        0.00e+00                  1             0.02                1
+   1.998e-06        0000        0.00e+00                  1             0.02                1
+   5.958e-12        (converged)
+
+  Order of time advancing L_infty norm = -1.6655
+  Order of time advancing L_2     norm = -0.550779
+T=0.16
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   4.144e-03        0000        0.00e+00                  1             0.02                1
+   1.373e-06        0000        0.00e+00                  1             0.02                1
+   3.121e-12        (converged)
+
+  Order of time advancing L_infty norm = -1.74681
+  Order of time advancing L_2     norm = -0.602766
+T=0.18
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   3.970e-03        0000        0.00e+00                  1             0.02                1
+   9.828e-07        0000        0.00e+00                  1             0.02                1
+   2.473e-12        (converged)
+
+  We got ten successive converged time steps.
+  Time step size increased to 0.02
+
+  Order of time advancing L_infty norm = -1.78483
+  Order of time advancing L_2     norm = -0.648244
+T=0.2
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   7.675e-03        0000        0.00e+00                  1             0.04                2
+   7.490e-06        0000        0.00e+00                  1             0.04                2
+   7.142e-11        (converged)
+
+  Order of time advancing L_infty norm = -1.6467
+  Order of time advancing L_2     norm = -0.429824
+T=0.24
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   6.692e-03        0000        0.00e+00                  1             0.04                2
+   4.043e-06        0000        0.00e+00                  1             0.04                2
+   1.592e-11        (converged)
+
+  Order of time advancing L_infty norm = -1.73445
+  Order of time advancing L_2     norm = -0.499996
+T=0.28
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   5.893e-03        0000        0.00e+00                  1             0.04                2
+   2.312e-06        0000        0.00e+00                  1             0.04                2
+   4.199e-12        (converged)
+
+  Order of time advancing L_infty norm = -1.81111
+  Order of time advancing L_2     norm = -0.56043
+T=0.32
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   5.246e-03        0000        0.00e+00                  1             0.04                2
+   1.430e-06        0000        0.00e+00                  1             0.04                2
+   1.568e-12        (converged)
+
+  Order of time advancing L_infty norm = -1.87337
+  Order of time advancing L_2     norm = -0.612702
+T=0.36
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   4.760e-03        0000        0.00e+00                  1             0.04                2
+   9.277e-07        0000        0.00e+00                  1             0.04                2
+   1.267e-12        (converged)
+
+  Order of time advancing L_infty norm = -1.93191
+  Order of time advancing L_2     norm = -0.658807
+T=0.4
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   4.403e-03        0000        0.00e+00                  1             0.04                2
+   5.980e-07        0000        0.00e+00                  1             0.04                2
+   9.552e-13        (converged)
+
+  Order of time advancing L_infty norm = -1.9782
+  Order of time advancing L_2     norm = -0.701603
+T=0.44
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   4.125e-03        0000        0.00e+00                  1             0.04                2
+   3.970e-07        0000        0.00e+00                  1             0.04                2
+   1.203e-12        (converged)
+
+  Order of time advancing L_infty norm = -2.01542
+  Order of time advancing L_2     norm = -0.74426
+T=0.48
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   3.885e-03        0000        0.00e+00                  1             0.04                2
+   2.731e-07        0000        0.00e+00                  1             0.04                2
+   1.086e-12        (converged)
+
+  Order of time advancing L_infty norm = -2.04782
+  Order of time advancing L_2     norm = -0.789329
+T=0.52
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   3.660e-03        0000        0.00e+00                  1             0.04                2
+   1.895e-07        0000        0.00e+00                  1             0.04                2
+   8.195e-13        (converged)
+
+  Order of time advancing L_infty norm = -2.10913
+  Order of time advancing L_2     norm = -0.838128
+T=0.56
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   3.440e-03        0000        0.00e+00                  1             0.04                2
+   1.328e-07        0000        0.00e+00                  1             0.04                2
+   1.146e-12        (converged)
+
+  We got ten successive converged time steps.
+  Time step size increased to 0.04
+
+  Order of time advancing L_infty norm = -2.17312
+  Order of time advancing L_2     norm = -0.890742
+T=0.6
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   6.452e-03        0000        0.00e+00                  1             0.08                4
+   1.066e-06        0000        0.00e+00                  1             0.08                4
+   5.896e-13        (converged)
+
+  Order of time advancing L_infty norm = -1.96622
+  Order of time advancing L_2     norm = -0.700748
+T=0.68
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   5.441e-03        0000        0.00e+00                  1             0.08                4
+   5.759e-07        0000        0.00e+00                  1             0.08                4
+   5.420e-13        (converged)
+
+  Order of time advancing L_infty norm = -2.02451
+  Order of time advancing L_2     norm = -0.813956
+T=0.76
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   4.652e-03        0000        0.00e+00                  1             0.08                4
+   3.293e-07        0000        0.00e+00                  1             0.08                4
+   8.082e-13        (converged)
+
+  Order of time advancing L_infty norm = -2.11525
+  Order of time advancing L_2     norm = -0.923593
+T=0.84
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   4.041e-03        0000        0.00e+00                  1             0.08                4
+   1.964e-07        0000        0.00e+00                  1             0.08                4
+   5.256e-13        (converged)
+
+  Order of time advancing L_infty norm = -2.20579
+  Order of time advancing L_2     norm = -1.02629
+T=0.92
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   3.558e-03        0000        0.00e+00                  1             0.08                4
+   1.224e-07        0000        0.00e+00                  1             0.08                4
+   6.448e-13        (converged)
+
+  Order of time advancing L_infty norm = -2.2792
+  Order of time advancing L_2     norm = -1.12235
+T=1
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   3.158e-03        0000        0.00e+00                  1             0.08                4
+   7.965e-08        0000        0.00e+00                  1             0.08                4
+   5.775e-13        (converged)
+
+  Order of time advancing L_infty norm = -2.35776
+  Order of time advancing L_2     norm = -1.2145
+T=1.08
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   2.809e-03        0000        0.00e+00                  1             0.08                4
+   5.341e-08        0000        0.00e+00                  1             0.08                4
+   6.164e-13        (converged)
+
+  Order of time advancing L_infty norm = -2.40359
+  Order of time advancing L_2     norm = -1.30512
+T=1.16
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   2.494e-03        0000        0.00e+00                  1             0.08                4
+   3.664e-08        0000        0.00e+00                  1             0.08                4
+   7.196e-13        (converged)
+
+  Order of time advancing L_infty norm = -2.46855
+  Order of time advancing L_2     norm = -1.39461
+T=1.24
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   2.209e-03        0000        0.00e+00                  1             0.08                4
+   2.573e-08        0000        0.00e+00                  1             0.08                4
+   5.692e-13        (converged)
+
+  Order of time advancing L_infty norm = -2.54857
+  Order of time advancing L_2     norm = -1.4812
+T=1.32
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   1.953e-03        0000        0.00e+00                  1             0.08                4
+   1.849e-08        0000        0.00e+00                  1             0.08                4
+   5.569e-13        (converged)
+
+  We got ten successive converged time steps.
+  Time step size increased to 0.08
+
+  Order of time advancing L_infty norm = -2.59896
+  Order of time advancing L_2     norm = -1.56172
+T=1.4
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   3.452e-03        0000        0.00e+00                  1             0.16                8
+   1.597e-07        0000        0.00e+00                  1             0.16                8
+   3.886e-13        (converged)
+
+  Order of time advancing L_infty norm = -2.42758
+  Order of time advancing L_2     norm = -1.39223
+T=1.56
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   2.669e-03        0000        0.00e+00                  1             0.16                8
+   9.042e-08        0000        0.00e+00                  1             0.16                8
+   3.116e-13        (converged)
+
+  Order of time advancing L_infty norm = -2.55072
+  Order of time advancing L_2     norm = -1.49268
+T=1.72
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   2.110e-03        0000        0.00e+00                  1             0.16                8
+   5.249e-08        0000        0.00e+00                  1             0.16                8
+   2.715e-13        (converged)
+
+  Order of time advancing L_infty norm = -2.67715
+  Order of time advancing L_2     norm = -1.57343
+T=1.88
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   1.702e-03        0000        0.00e+00                  1             0.16                8
+   3.075e-08        0000        0.00e+00                  1             0.16                8
+   2.918e-13        (converged)
+
+  Order of time advancing L_infty norm = -2.80017
+  Order of time advancing L_2     norm = -1.6448
+T=2.04
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   1.392e-03        0000        0.00e+00                  1             0.16                8
+   1.809e-08        0000        0.00e+00                  1             0.16                8
+   3.318e-13        (converged)
+
+  Order of time advancing L_infty norm = -2.871
+  Order of time advancing L_2     norm = -1.71008
+T=2.2
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   1.150e-03        0000        0.00e+00                  1             0.16                8
+   1.071e-08        0000        0.00e+00                  1             0.16                8
+   3.284e-13        (converged)
+
+  Order of time advancing L_infty norm = -2.90767
+  Order of time advancing L_2     norm = -1.76992
+T=2.36
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   9.577e-04        0000        0.00e+00                  1             0.16                8
+   6.408e-09        0000        0.00e+00                  1             0.16                8
+   3.282e-13        (converged)
+
+  Order of time advancing L_infty norm = -2.94409
+  Order of time advancing L_2     norm = -1.82492
+T=2.52
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   8.026e-04        0000        0.00e+00                  1             0.16                8
+   3.865e-09        0000        0.00e+00                  1             0.16                8
+   3.624e-13        (converged)
+
+  Order of time advancing L_infty norm = -2.97873
+  Order of time advancing L_2     norm = -1.87613
+T=2.68
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   6.772e-04        0000        0.00e+00                  1             0.16                8
+   2.337e-09        0000        0.00e+00                  1             0.16                8
+   3.323e-13        (converged)
+
+  Order of time advancing L_infty norm = -3.01125
+  Order of time advancing L_2     norm = -1.92466
+T=2.84
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   5.757e-04        0000        0.00e+00                  1             0.16                8
+   1.414e-09        0000        0.00e+00                  1             0.16                8
+   3.165e-13        (converged)
+
+  We got ten successive converged time steps.
+  Time step size increased to 0.16
+
+  Order of time advancing L_infty norm = -3.04233
+  Order of time advancing L_2     norm = -1.97139
+T=3
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   9.920e-04        0000        0.00e+00                  1             0.32               16
+   4.036e-06        0000        0.00e+00                  1             0.32               16
+   2.456e-13        (converged)
+
+  Order of time advancing L_infty norm = -2.806
+  Order of time advancing L_2     norm = -1.75623
+T=3.32
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   7.414e-04        0000        0.00e+00                  1             0.32               16
+   9.232e-06        0000        0.00e+00                  1             0.32               16
+   3.006e-13        (converged)
+
+  Order of time advancing L_infty norm = -2.87386
+  Order of time advancing L_2     norm = -1.84209
+T=3.64
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   5.748e-04        0000        0.00e+00                  1             0.32               16
+   1.439e-05        0000        0.00e+00                  1             0.32               16
+   4.555e-13        (converged)
+
+  Order of time advancing L_infty norm = -2.95212
+  Order of time advancing L_2     norm = -1.92569
+T=3.96
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   4.571e-04        0000        0.00e+00                  1             0.32               16
+   6.416e-06        0000        0.00e+00                  1             0.32               16
+   2.664e-13        (converged)
+
+  Order of time advancing L_infty norm = -3.03715
+  Order of time advancing L_2     norm = -2.00744
+T=4.28
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   3.687e-04        0000        0.00e+00                  1             0.32               16
+   4.795e-10        0000        0.00e+00                  1             0.32               16
+   2.888e-13        (converged)
+
+  Order of time advancing L_infty norm = -3.12624
+  Order of time advancing L_2     norm = -2.08676
+T=4.6
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   2.984e-04        0000        0.00e+00                  1             0.32               16
+   2.689e-10        0000        0.00e+00                  1             0.32               16
+   2.737e-13        (converged)
+
+  Order of time advancing L_infty norm = -3.21623
+  Order of time advancing L_2     norm = -2.16331
+T=4.92
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   2.444e-04        0000        0.00e+00                  1             0.32               16
+   3.450e-05        0000        0.00e+00                  1             0.32               16
+   1.088e-12        (converged)
+
+  Order of time advancing L_infty norm = -3.30471
+  Order of time advancing L_2     norm = -2.23717
+T=5.24
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   2.034e-04        0000        0.00e+00                  1             0.32               16
+   9.727e-11        (converged)
+
+  Order of time advancing L_infty norm = -3.39027
+  Order of time advancing L_2     norm = -2.30867
+T=5.56
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   1.714e-04        0000        0.00e+00                  1             0.32               16
+   6.299e-11        (converged)
+
+  Order of time advancing L_infty norm = -3.47243
+  Order of time advancing L_2     norm = -2.37824
+T=5.88
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   1.460e-04        0000        0.00e+00                  1             0.32               16
+   4.219e-11        (converged)
+
+  We got ten successive converged time steps.
+  Time step size increased to 0.32
+
+  Order of time advancing L_infty norm = -3.55133
+  Order of time advancing L_2     norm = -2.44631
+T=6.2
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   3.229e-04        0000        0.00e+00                  1             0.64               32
+   3.626e-10        0000        0.00e+00                  1             0.64               32
+   2.369e-13        (converged)
+
+  Order of time advancing L_infty norm = -3.28658
+  Order of time advancing L_2     norm = -2.26677
+T=6.84
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   2.448e-04        0000        0.00e+00                  1             0.64               32
+   2.081e-10        0000        0.00e+00                  1             0.64               32
+   2.387e-13        (converged)
+
+  Order of time advancing L_infty norm = -3.48233
+  Order of time advancing L_2     norm = -2.39133
+T=7.48
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   1.625e-04        0000        0.00e+00                  1             0.64               32
+   1.010e-10        0000        0.00e+00                  1             0.64               32
+   2.073e-13        (converged)
+
+  Order of time advancing L_infty norm = -3.59627
+  Order of time advancing L_2     norm = -2.51206
+T=8.12
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   1.359e-04        0000        0.00e+00                  1             0.64               32
+   5.624e-11        (converged)
+
+  Order of time advancing L_infty norm = -3.71183
+  Order of time advancing L_2     norm = -2.63203
+T=8.76
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   1.126e-04        0000        0.00e+00                  1             0.64               32
+   3.174e-11        (converged)
+
+  Order of time advancing L_infty norm = -3.82893
+  Order of time advancing L_2     norm = -2.75163
+T=9.4
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   1.010e-04        0000        0.00e+00                  1             0.64               32
+   1.815e-11        (converged)
+
+  Order of time advancing L_infty norm = -3.9477
+  Order of time advancing L_2     norm = -2.87122
+T=10.04
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   8.538e-05        0000        0.00e+00                  1             0.64               32
+   1.041e-11        (converged)
+
+  Order of time advancing L_infty norm = -4.06849
+  Order of time advancing L_2     norm = -2.99114
+T=10.68
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   7.582e-05        0000        0.00e+00                  1             0.64               32
+   6.133e-12        (converged)
+
+  Order of time advancing L_infty norm = -4.19183
+  Order of time advancing L_2     norm = -3.11175
+T=11.32
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   6.869e-05        0000        0.00e+00                  1             0.64               32
+   3.719e-12        (converged)
+
+  Order of time advancing L_infty norm = -4.31849
+  Order of time advancing L_2     norm = -3.23342
+T=11.96
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   6.240e-05        0000        0.00e+00                  1             0.64               32
+   2.394e-12        (converged)
+
+  We got ten successive converged time steps.
+  Time step size increased to 0.64
+
+  Order of time advancing L_infty norm = -4.44959
+  Order of time advancing L_2     norm = -3.35655
+T=12.6
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   3.830e-04        0000        0.00e+00                  1             1.28               64
+   3.172e-11        (converged)
+
+  Order of time advancing L_infty norm = -3.96694
+  Order of time advancing L_2     norm = -3.2209
+T=13.88
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   3.022e-04        0000        0.00e+00                  1             1.28               64
+   2.227e-11        (converged)
+
+  Order of time advancing L_infty norm = -4.59705
+  Order of time advancing L_2     norm = -3.51605
+T=15.16
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   7.037e-05        0000        0.00e+00                  1             1.28               64
+   2.998e-12        (converged)
+
+  Order of time advancing L_infty norm = -4.79009
+  Order of time advancing L_2     norm = -3.75519
+T=16.44
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   5.363e-05        0000        0.00e+00                  1             1.28               64
+   1.822e-12        (converged)
+
+  Order of time advancing L_infty norm = -4.97632
+  Order of time advancing L_2     norm = -3.96504
+T=17.72
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   4.607e-05        0000        0.00e+00                  1             1.28               64
+   1.381e-12        (converged)
+
+  Order of time advancing L_infty norm = -5.15403
+  Order of time advancing L_2     norm = -4.06863
+T=19
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   4.055e-05        0000        0.00e+00                  1             1.28               64
+   1.115e-12        (converged)
+
+  Order of time advancing L_infty norm = -5.13529
+  Order of time advancing L_2     norm = -4.0699
+T=20.28
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   3.604e-05        0000        0.00e+00                  1             1.28               64
+   9.464e-13        (converged)
+
+  Order of time advancing L_infty norm = -5.04697
+  Order of time advancing L_2     norm = -4.04665
+T=21.56
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   3.226e-05        0000        0.00e+00                  1             1.28               64
+   7.897e-13        (converged)
+
+  Order of time advancing L_infty norm = -5.00708
+  Order of time advancing L_2     norm = -4.03105
+T=22.84
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   2.903e-05        0000        0.00e+00                  1             1.28               64
+   7.197e-13        (converged)
+
+  Order of time advancing L_infty norm = -4.99185
+  Order of time advancing L_2     norm = -4.02676
+T=24.12
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   2.626e-05        0000        0.00e+00                  1             1.28               64
+   5.898e-13        (converged)
+
+  We got ten successive converged time steps.
+  Time step size increased to 1.28
+
+  Order of time advancing L_infty norm = -4.99096
+  Order of time advancing L_2     norm = -4.03157
+T=25.4
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   4.539e-04        0000        0.00e+00                  1             2.56              128
+   3.264e-11        (converged)
+
+  Order of time advancing L_infty norm = -4.27655
+  Order of time advancing L_2     norm = -3.61988
+T=27.96
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   3.832e-04        0000        0.00e+00                  1             2.56              128
+   1.296e-11        (converged)
+
+  Order of time advancing L_infty norm = -4.68254
+  Order of time advancing L_2     norm = -3.72539
+T=30.52
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   4.483e-05        0000        0.00e+00                  1             2.56              128
+   2.505e-12        (converged)
+
+  Order of time advancing L_infty norm = -4.68083
+  Order of time advancing L_2     norm = -3.7261
+T=33.08
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   2.809e-05        0000        0.00e+00                  1             2.56              128
+   1.625e-12        (converged)
+
+  Order of time advancing L_infty norm = -4.68919
+  Order of time advancing L_2     norm = -3.73749
+T=35.64
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   2.377e-05        0000        0.00e+00                  1             2.56              128
+   1.307e-12        (converged)
+
+  Order of time advancing L_infty norm = -4.70925
+  Order of time advancing L_2     norm = -3.75979
+T=38.2
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   2.134e-05        0000        0.00e+00                  1             2.56              128
+   1.075e-12        (converged)
+
+  Order of time advancing L_infty norm = -4.73836
+  Order of time advancing L_2     norm = -3.79025
+T=40.76
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   1.950e-05        0000        0.00e+00                  1             2.56              128
+   9.089e-13        (converged)
+
+  Order of time advancing L_infty norm = -4.7734
+  Order of time advancing L_2     norm = -3.82599
+T=43.32
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   1.792e-05        0000        0.00e+00                  1             2.56              128
+   7.562e-13        (converged)
+
+  Order of time advancing L_infty norm = -4.81189
+  Order of time advancing L_2     norm = -3.86479
+T=45.88
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   1.648e-05        0000        0.00e+00                  1             2.56              128
+   6.604e-13        (converged)
+
+  Order of time advancing L_infty norm = -4.85222
+  Order of time advancing L_2     norm = -3.90521
+T=48.44
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   1.513e-05        0000        0.00e+00                  1             2.56              128
+   5.367e-13        (converged)
+
+  We got ten successive converged time steps.
+  Time step size increased to 2.56
+
+  Order of time advancing L_infty norm = -4.89341
+  Order of time advancing L_2     norm = -3.94638
+T=51
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   4.294e-04        0000        0.00e+00                  1             5.12              256
+   6.360e-11        (converged)
+
+  Order of time advancing L_infty norm = -4.37825
+  Order of time advancing L_2     norm = -3.58499
+T=56.12
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   3.804e-04        0000        0.00e+00                  1             5.12              256
+   1.644e-11        (converged)
+
+  Order of time advancing L_infty norm = -4.53135
+  Order of time advancing L_2     norm = -3.57851
+T=61.24
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   4.500e-05        0000        0.00e+00                  1             5.12              256
+   3.775e-12        (converged)
+
+  Order of time advancing L_infty norm = -4.54163
+  Order of time advancing L_2     norm = -3.59262
+T=66.36
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   2.549e-05        0000        0.00e+00                  1             5.12              256
+   2.405e-12        (converged)
+
+  Order of time advancing L_infty norm = -4.58134
+  Order of time advancing L_2     norm = -3.63413
+T=71.48
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   1.930e-05        0000        0.00e+00                  1             5.12              256
+   1.925e-12        (converged)
+
+  Order of time advancing L_infty norm = -4.6355
+  Order of time advancing L_2     norm = -3.6887
+T=76.6
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   1.666e-05        0000        0.00e+00                  1             5.12              256
+   1.555e-12        (converged)
+
+  Order of time advancing L_infty norm = -4.69502
+  Order of time advancing L_2     norm = -3.74801
+T=81.72
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   1.487e-05        0000        0.00e+00                  1             5.12              256
+   1.281e-12        (converged)
+
+  Order of time advancing L_infty norm = -4.75571
+  Order of time advancing L_2     norm = -3.80829
+T=86.84
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   1.326e-05        0000        0.00e+00                  1             5.12              256
+   1.011e-12        (converged)
+
+  Order of time advancing L_infty norm = -4.81605
+  Order of time advancing L_2     norm = -3.86818
+T=91.96
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   1.175e-05        0000        0.00e+00                  1             5.12              256
+   7.910e-13        (converged)
+
+  Order of time advancing L_infty norm = -4.87565
+  Order of time advancing L_2     norm = -3.92732
+T=97.08
+   Number of active cells:       1393
+   Number of degrees of freedom: 6112
+
+   NonLin Res     Lin Iter       Lin Res     Linear Search Len      Time Step Size      Time Step Factor
+   _______________________________________________________________________________________
+   1.034e-05        0000        0.00e+00                  1             5.12              256
+   6.145e-13        (converged)
+
+  We got ten successive converged time steps.
+  Time step size increased to 5.12
+
+  Order of time advancing L_infty norm = -4.93454
+  Order of time advancing L_2     norm = -3.9857
