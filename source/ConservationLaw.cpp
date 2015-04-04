@@ -1209,6 +1209,18 @@ namespace Step33
         }
     }
 
+    std::ofstream time_advance_history_file
+    (parameters.time_advance_history_filename.c_str());
+    Assert (time_advance_history_file,
+            ExcFileNotOpen(parameters.time_advance_history_filename.c_str()));
+
+    std::ofstream interation_history_file
+    (parameters.interation_history_filename.c_str());
+    Assert (interation_history_file,
+            ExcFileNotOpen(parameters.interation_history_filename.c_str()));
+
+
+
     dof_handler.clear();
     dof_handler.distribute_dofs (fe);
 
@@ -1263,8 +1275,30 @@ namespace Step33
     bool newton_iter_converged(false);
     bool time_step_doubled(false);
     int index_linear_search_length(0);
-    const double linear_search_length[12]= {1.0, 0.8, 0.6, 0.4, 0.2, 0.1, 0.05, 0.025, 0.0125, 1.2, 1.5, 2.0};
+    const double linear_search_length[12] = {1.0, 0.8, 0.6, 0.4, 0.2, 0.1, 0.05, 0.025, 0.0125, 1.2, 1.5, 2.0};
     unsigned int converged_newton_iters(0);
+
+    unsigned int n_time_step(0);
+    unsigned int n_total_inter(0);
+
+    time_advance_history_file
+        << "   iter     n_cell     n_dofs          time   i_step"
+        << "  i_Newton    Newton_res  n_linear_iter    linear_res"
+        << "  linear_search_len  time_step_size  time_step_factor"
+        << "  time_march_res"
+        << '\n';
+    interation_history_file
+        << "   iter     n_cell     n_dofs          time   i_step"
+        << "  i_Newton    Newton_res  n_linear_iter    linear_res"
+        << "  linear_search_len  time_step_size  time_step_factor"
+        << "  Newton_update_norm"
+        << '\n';
+
+
+    time_advance_history_file.setf(std::ios::scientific);
+    time_advance_history_file.precision(6);
+    interation_history_file.setf(std::ios::scientific);
+    interation_history_file.precision(6);
 
     while (time < parameters.final_time)
       {
@@ -1318,6 +1352,11 @@ namespace Step33
         bool linear_solver_diverged(true);
         const unsigned int nonlin_iter_threshold(10);
 
+
+        double res_norm;
+        double newton_update_norm;
+        std::pair<unsigned int, double> convergence;
+
         do // Newton iteration
           {
             system_matrix = 0;
@@ -1325,16 +1364,16 @@ namespace Step33
             right_hand_side = 0;
             assemble_system (nonlin_iter);
 
-            const double res_norm = std::fabs(right_hand_side.l2_norm());
+            res_norm = std::fabs(right_hand_side.l2_norm());
 
             newton_update = 0;
 
-            std::pair<unsigned int, double> convergence
-              = solve (newton_update);
+            convergence = solve (newton_update);
+
             Assert(index_linear_search_length < 9, ExcIndexRange(index_linear_search_length,0,9));
             newton_update *= linear_search_length[index_linear_search_length];
             current_solution += newton_update;
-            const double newton_update_norm = newton_update.l2_norm();
+            newton_update_norm = newton_update.l2_norm();
 
             std::printf("   %-13.6e    %-13.6e  %04d        %-5.2e            %7.4g          %7.4g          %7.4g\n",
                         res_norm,newton_update_norm, convergence.first, convergence.second,
@@ -1343,6 +1382,24 @@ namespace Step33
             linear_solver_diverged = std::isnan(convergence.second);
 
             ++nonlin_iter;
+            ++n_total_inter;
+
+            // Out put convergence history
+            interation_history_file
+                << std::setw(7) << n_total_inter << ' '
+                << std::setw(10) << triangulation.n_active_cells() << ' '
+                << std::setw(10) << dof_handler.n_dofs() << ' '
+                << std::setw(13) << time << ' '
+                << std::setw(8) << n_time_step << ' '
+                << std::setw(9) << nonlin_iter << ' '
+                << std::setw(13) << res_norm << ' '
+                << std::setw(14) << convergence.first << ' '
+                << std::setw(13) << convergence.second << ' '
+                << std::setw(18) << linear_search_length[index_linear_search_length] << ' '
+                << std::setw(15) << parameters.time_step << ' '
+                << std::setw(17) << parameters.time_step_factor << ' '
+                << std::setw(19) << newton_update_norm << ' '
+                << '\n';
 
             // Check result.
             if (res_norm < 1e-10)
@@ -1390,6 +1447,23 @@ namespace Step33
 
         if (newton_iter_converged)
           {
+
+            //Output time marching history
+            time_advance_history_file
+                << std::setw(7) << n_total_inter << ' '
+                << std::setw(10) << triangulation.n_active_cells() << ' '
+                << std::setw(10) << dof_handler.n_dofs() << ' '
+                << std::setw(13) << time << ' '
+                << std::setw(8) << n_time_step << ' '
+                << std::setw(9) << nonlin_iter << ' '
+                << std::setw(13) << res_norm << ' '
+                << std::setw(14) << convergence.first << ' '
+                << std::setw(13) << convergence.second << ' '
+                << std::setw(18) << linear_search_length[index_linear_search_length] << ' '
+                << std::setw(15) << parameters.time_step << ' '
+                << std::setw(17) << parameters.time_step_factor << ' ';
+
+
             // We only get to this point if the Newton iteration has converged, so
             // do various post convergence tasks here:
             //
@@ -1406,6 +1480,7 @@ namespace Step33
             // finally continue on with the next time step:
             ++converged_newton_iters;
             time += parameters.time_step;
+            ++n_time_step;
 
             if (parameters.output_step < 0)
               {
@@ -1441,6 +1516,10 @@ namespace Step33
                       << std::log(old_solution.linfty_norm())/std::log(10.0) << std::endl;
             std::cout << "  Order of time advancing L_2     norm = "
                       << std::log(old_solution.l2_norm())/std::log(10.0) << std::endl;
+
+            time_advance_history_file
+                << std::setw(15) << old_solution.l2_norm()
+                << '\n';
 
             old_solution = current_solution;
 
@@ -1517,8 +1596,12 @@ namespace Step33
               }
             converged_newton_iters = 0;
           }
-      }
-  }
+        time_advance_history_file << std::flush;
+        interation_history_file << std::flush;
+      } // End of time advancing
+    time_advance_history_file.close();
+    interation_history_file.close();
+  } //End of ConservationLaw<dim>::run ()
 
   template class ConservationLaw<2>;
   template class ConservationLaw<3>;

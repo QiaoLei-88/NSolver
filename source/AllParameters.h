@@ -212,6 +212,8 @@ namespace Step33
       bool allow_double_time_step;
 
       std::string mesh_filename;
+      std::string time_advance_history_filename;
+      std::string interation_history_filename;
 
       enum MeshFormat
       {

@@ -67,6 +67,7 @@
 
 // And this again is C++:
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <vector>
 #include <memory>

@@ -220,6 +220,15 @@ namespace Step33
                         Patterns::Anything(),
                         "intput mesh file format");
 
+      prm.declare_entry("time history", "time_history.out",
+                        Patterns::Anything(),
+                        "output file for time history.");
+
+      prm.declare_entry("iteration history", "iter_history.out",
+                        Patterns::Anything(),
+                        "output file for all iteration history.");
+
+
       prm.declare_entry("diffusion type", "cell size",
                         Patterns::Anything(),
                         "How to calculate diffusion");
@@ -318,6 +327,8 @@ namespace Step33
     AllParameters<dim>::parse_parameters (ParameterHandler &prm)
     {
       mesh_filename = prm.get("mesh");
+      time_advance_history_filename = prm.get("time history");
+      interation_history_filename = prm.get("iteration history");
 
       {
         const std::string mesh_format_buf = prm.get("mesh format");
