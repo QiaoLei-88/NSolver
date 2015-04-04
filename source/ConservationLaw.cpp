@@ -1306,56 +1306,67 @@ namespace Step33
         // happen; however, it is generally a very useful tool when one wants
         // to find out where an error occurred.
 
-        double predictor_leap_ratio = 1.0; // Instead of always extrapolating predictor to the next
-        // time step, we can make the forward extrapolation at
-        // an adjustable ratio.
+
+        // Instead of always extrapolating predictor to the next time step,
+        // we can make the forward extrapolation at an adjustable ratio.
+        double predictor_leap_ratio = 1.0;
         newton_iter_converged = false;
         current_solution_backup = current_solution;
 
         unsigned int nonlin_iter = 0;
         current_solution = predictor;
         bool linear_solver_diverged(true);
+        const unsigned int nonlin_iter_threshold(10);
 
-        while (true)  //Begine Newton iteration
+        do // Newton iteration
           {
             system_matrix = 0;
 
             right_hand_side = 0;
             assemble_system (nonlin_iter);
 
-            const double res_norm = right_hand_side.l2_norm();
-            if (std::fabs(res_norm) < 1e-10)
-              {
-                std::printf("   %-16.3e (converged)\n\n", res_norm);
-                newton_iter_converged = true;
-                break;
-              }
-            else
-              {
-                newton_update = 0;
+            const double res_norm = std::fabs(right_hand_side.l2_norm());
 
-                std::pair<unsigned int, double> convergence
-                  = solve (newton_update);
-                Assert(index_linear_search_length < 9, ExcIndexRange(index_linear_search_length,0,9));
-                newton_update *= linear_search_length[index_linear_search_length];
-                current_solution += newton_update;
+            newton_update = 0;
 
-                std::printf("   %-16.3e %04d        %-5.2e            %7.4g          %7.4g          %7.4g\n",
-                            res_norm, convergence.first, convergence.second,
-                            linear_search_length[index_linear_search_length],
-                            parameters.time_step, parameters.time_step_factor);
-                linear_solver_diverged = std::isnan(convergence.second);
-              }
+            std::pair<unsigned int, double> convergence
+              = solve (newton_update);
+            Assert(index_linear_search_length < 9, ExcIndexRange(index_linear_search_length,0,9));
+            newton_update *= linear_search_length[index_linear_search_length];
+            current_solution += newton_update;
+
+            std::printf("   %-16.3e %04d        %-5.2e            %7.4g          %7.4g          %7.4g\n",
+                        res_norm, convergence.first, convergence.second,
+                        linear_search_length[index_linear_search_length],
+                        parameters.time_step, parameters.time_step_factor);
+            linear_solver_diverged = std::isnan(convergence.second);
+
             ++nonlin_iter;
-            const unsigned int nonlin_iter_threshold(10);
+
+            // Check result.
+            if (res_norm < 1e-10)
+              {
+                newton_iter_converged = true;
+              }
+
             if (linear_solver_diverged)
               {
-                nonlin_iter = nonlin_iter_threshold + 1;
                 std::cout << "  Linear solver diverged..\n";
               }
+            // May 'newton_iter_converged' and 'linear_solver_diverged' be true
+            // together? I don't think so but not sure.
 
-            if (nonlin_iter > nonlin_iter_threshold)
+
+            // If linear solver diverged or Newton interation not converge in
+            // a reasonable interations, we terminate this time step and set
+            // 'newton_iter_converged' to false. Then further action will be taken
+            // to handle this situation.
+
+            //                                 Using '>='  here because this condition
+            //                                 is evaluated after '++nonlin_iter'.
+            if (linear_solver_diverged || nonlin_iter >= nonlin_iter_threshold)
               {
+                newton_iter_converged = false;
                 // Limit lower bound of time step that can be tried.
                 // 1/1024 < 0.0005 < 1/2048
                 if (parameters.time_step_factor > 0.0005)
@@ -1372,6 +1383,9 @@ namespace Step33
                   }
               }
           }
+        while ( (!newton_iter_converged)
+                && nonlin_iter < nonlin_iter_threshold
+                && (!linear_solver_diverged) );
 
         if (newton_iter_converged)
           {
