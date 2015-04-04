@@ -1277,7 +1277,7 @@ namespace Step33
                   << std::endl
                   << std::endl;
 
-        std::cout << "   NonLin Res     Lin Iter       Lin Res     "
+        std::cout << "   NonLin Res   NewtonUpdateNorm  Lin Iter     Lin Res     "
                   << "Linear Search Len      Time Step Size      Time Step Factor" << std::endl
                   << "   __________________________________________"
                   << "_____________________________________________" << std::endl;
@@ -1334,9 +1334,10 @@ namespace Step33
             Assert(index_linear_search_length < 9, ExcIndexRange(index_linear_search_length,0,9));
             newton_update *= linear_search_length[index_linear_search_length];
             current_solution += newton_update;
+            const double newton_update_norm = newton_update.l2_norm();
 
-            std::printf("   %-16.3e %04d        %-5.2e            %7.4g          %7.4g          %7.4g\n",
-                        res_norm, convergence.first, convergence.second,
+            std::printf("   %-13.6e    %-13.6e  %04d        %-5.2e            %7.4g          %7.4g          %7.4g\n",
+                        res_norm,newton_update_norm, convergence.first, convergence.second,
                         linear_search_length[index_linear_search_length],
                         parameters.time_step, parameters.time_step_factor);
             linear_solver_diverged = std::isnan(convergence.second);
