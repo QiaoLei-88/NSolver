@@ -18,7 +18,7 @@ int main (int argc, char *argv[])
     {
       std::cerr << "  Can not open error log file! \n"
                 << "  Aborting!" << std::endl;
-      return (2);
+      return (1);
     }
   try
     {
@@ -47,7 +47,7 @@ int main (int argc, char *argv[])
                  << "Aborting!" << std::endl
                  << "----------------------------------------------------"
                  << std::endl;
-      return 1;
+      return (2);
     }
   catch (...)
     {
@@ -58,8 +58,8 @@ int main (int argc, char *argv[])
                  << "Aborting!" << std::endl
                  << "----------------------------------------------------"
                  << std::endl;
-      return 1;
+      return (-1);
     };
 
-  return 0;
+  return (0);
 }
