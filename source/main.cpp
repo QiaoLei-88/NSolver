@@ -7,11 +7,19 @@
 //
 
 #include <iostream>
+#include <fstream>
 #include "ConservationLaw.h"
 
 
 int main (int argc, char *argv[])
 {
+  std::ofstream error_info("runtime.error");
+  if (!error_info)
+    {
+      std::cerr << "  Can not open error log file! \n"
+                << "  Aborting!" << std::endl;
+      return (2);
+    }
   try
     {
       using namespace dealii;
@@ -31,25 +39,25 @@ int main (int argc, char *argv[])
     }
   catch (std::exception &exc)
     {
-      std::cerr << std::endl << std::endl
-                << "----------------------------------------------------"
-                << std::endl;
-      std::cerr << "Exception on processing: " << std::endl
-                << exc.what() << std::endl
-                << "Aborting!" << std::endl
-                << "----------------------------------------------------"
-                << std::endl;
+      error_info << std::endl << std::endl
+                 << "----------------------------------------------------"
+                 << std::endl;
+      error_info << "Exception on processing: " << std::endl
+                 << exc.what() << std::endl
+                 << "Aborting!" << std::endl
+                 << "----------------------------------------------------"
+                 << std::endl;
       return 1;
     }
   catch (...)
     {
-      std::cerr << std::endl << std::endl
-                << "----------------------------------------------------"
-                << std::endl;
-      std::cerr << "Unknown exception!" << std::endl
-                << "Aborting!" << std::endl
-                << "----------------------------------------------------"
-                << std::endl;
+      error_info << std::endl << std::endl
+                 << "----------------------------------------------------"
+                 << std::endl;
+      error_info << "Unknown exception!" << std::endl
+                 << "Aborting!" << std::endl
+                 << "----------------------------------------------------"
+                 << std::endl;
       return 1;
     };
 
