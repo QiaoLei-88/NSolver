@@ -8,8 +8,8 @@ SET(_shared_input_file_list slide.inp)
 SET (_input_file_list input.prm)
 
 ###
-SET (_output_file screen.log)
-SET (_comparison_file screen.log.reference)
+SET (_output_file iter_history.out)
+SET (_comparison_file iter_history.out.reference)
 
 ###
 # SET (_exec_run ${CMAKE_BINARY_DIR}/bin/${PRJ_NAME})
