@@ -524,8 +524,7 @@ namespace Step33
       }
 
     // evaluate entropy viscosity
-    if (nonlin_iter == 0 &&
-        parameters.diffusion_type == Parameters::AllParameters<dim>::diffu_entropy)
+    if (nonlin_iter == 0)
       {
         double rho_max(-1.0), D_h_max(-1.0), characteristic_speed_max(-1.0);
 
