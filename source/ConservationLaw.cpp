@@ -1128,6 +1128,8 @@ namespace Step33
     current_solution.reinit(dof_handler.n_dofs());
     current_solution = old_solution;
     right_hand_side.reinit (dof_handler.n_dofs());
+    residual_for_output.reinit (dof_handler.n_dofs());
+
     current_solution_backup.reinit (dof_handler.n_dofs());
 
     entropy_viscosity.reinit(triangulation.n_active_cells());
@@ -1173,6 +1175,31 @@ namespace Step33
       data_out.add_data_vector (cellSize_viscosity,
                                 data_name,
                                 DataOut<dim>::type_cell_data);
+    }
+    {
+      AssertThrow ( dim <= 3, ExcNotImplemented());
+      char prefix[3][4] = {"1st", "2nd", "3rd"};
+
+      std::vector<std::string> data_names;
+      data_names.clear();
+      for (unsigned id=0; id < dim; ++id)
+        {
+          data_names.push_back("_residualAt1stNewtonIter");
+          data_names[id] = prefix[id] + data_names[id];
+          data_names[id] = "momentum" + data_names[id];
+        }
+
+      data_names.push_back ("density_residualAt1stNewtonIter");
+      data_names.push_back ("energy_residualAt1stNewtonIter");
+
+      std::vector<DataComponentInterpretation::DataComponentInterpretation>
+      data_component_interpretation
+      (dim+2, DataComponentInterpretation::component_is_scalar);
+
+      data_out.add_data_vector (residual_for_output,
+                                data_names,
+                                DataOut<dim>::type_dof_data,
+                                data_component_interpretation);
     }
 
     data_out.build_patches ();
@@ -1243,6 +1270,7 @@ namespace Step33
     current_solution_backup.reinit(dof_handler.n_dofs());
     predictor.reinit (dof_handler.n_dofs());
     right_hand_side.reinit (dof_handler.n_dofs());
+    residual_for_output.reinit (dof_handler.n_dofs());
 
     entropy_viscosity.reinit(triangulation.n_active_cells());
     cellSize_viscosity.reinit(triangulation.n_active_cells());
@@ -1373,11 +1401,15 @@ namespace Step33
         do // Newton iteration
           {
             system_matrix = 0;
-
             right_hand_side = 0;
+
             assemble_system (nonlin_iter);
 
             res_norm = std::fabs(right_hand_side.l2_norm());
+            if (nonlin_iter == 0)
+              {
+                residual_for_output = right_hand_side;
+              }
 
             newton_update = 0;
 

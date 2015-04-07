@@ -154,6 +154,9 @@ namespace Step33
     Vector<double>       predictor;
 
     Vector<double>       right_hand_side;
+    // Cache up the right_hand_side for out put at the first Newton iteration
+    // of each time step.
+    Vector<double>       residual_for_output;
 
     Vector<double>       entropy_viscosity;
     Vector<double>       cellSize_viscosity;
