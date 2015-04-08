@@ -836,20 +836,6 @@ namespace Step33
           }
       }
 
-    //W_plus and W_minus should be same on internal face.
-    if (external_face == false)
-      {
-        for (unsigned int q=0; q<n_q_points; ++q)
-          {
-            for (unsigned int c=0; c<EulerEquations<dim>::n_components; ++c)
-              {
-                const double diff = std::abs(Wplus[q][c].val()-Wminus[q][c].val());
-                AssertThrow ( diff < 1e-12, ExcMessage ("Flux mismatch on internal face!"));
-              }
-          }
-
-      }
-
     // Now that we have $\mathbf w^+$ and $\mathbf w^-$, we can go about
     // computing the numerical flux function $\mathbf H(\mathbf w^+,\mathbf
     // w^-, \mathbf n)$ for each quadrature point. Before calling the function
