@@ -21,7 +21,8 @@
 #include <deal.II/base/timer.h>
 
 #include <deal.II/lac/vector.h>
-#include <deal.II/lac/dynamic_sparsity_pattern.h>
+//#include <deal.II/lac/dynamic_sparsity_pattern.h>
+#include <deal.II/lac/trilinos_sparsity_pattern.h>
 
 //#include <deal.II/grid/tria.h>
 #include <deal.II/grid/grid_generator.h>
@@ -116,7 +117,8 @@ namespace Step33
 
   private:
     void setup_system ();
-
+    void check_negative_density_pressure() const;
+    
     void calc_time_step();
     void assemble_system (const unsigned int nonlin_iter);
     void assemble_cell_term (const FEValues<dim>             &fe_v,
@@ -179,6 +181,10 @@ namespace Step33
     // converged final result of the previous time step), and a predictor for
     // the solution at the next time step, computed by extrapolating the
     // current and previous solution one time step into the future:
+
+    LA::MPI::Vector       newton_update;
+    LA::MPI::Vector       locally_owned_solution;
+
     LA::MPI::Vector       old_solution;
     //    LA::MPI::Vector locally_relevant_solution;
     //    LA::MPI::Vector system_rhs;
@@ -190,10 +196,14 @@ namespace Step33
     LA::MPI::Vector       right_hand_side;
     // Cache up the right_hand_side for out put at the first Newton iteration
     // of each time step.
-    Vector<double>       residual_for_output;
 
-    Vector<double>       entropy_viscosity;
-    Vector<double>       cellSize_viscosity;
+
+    // All output relevant vectors need to have parallel capability and be
+    // size to "locally_relevant_dofs" because ghost cell is needed to
+    // determine the outmost face values.
+    LA::MPI::Vector      residual_for_output;
+    Vector<double>      entropy_viscosity;
+    Vector<double>     cellSize_viscosity;
 
     // This final set of member variables (except for the object holding all
     // run-time parameters at the very bottom and a screen output stream that

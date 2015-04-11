@@ -94,6 +94,32 @@ namespace Step33
   template <int dim>
   void ConservationLaw<dim>::setup_system ()
   {
+    dof_handler.clear();
+    dof_handler.distribute_dofs (fe);
+
+    locally_owned_dofs = dof_handler.locally_owned_dofs ();
+    locally_relevant_dofs.clear();
+    DoFTools::extract_locally_relevant_dofs (dof_handler,
+                                             locally_relevant_dofs);
+    // Set vector_writable=true for solution interpolation
+    locally_owned_solution.reinit(locally_owned_dofs);
+    current_solution.reinit (locally_relevant_dofs,
+                             //          locally_relevant_dofs,
+                             mpi_communicator);
+//                             /*const bool vector_writable=*/ true);
+    // const bool fast = true means leave its content untouched.
+    old_solution.reinit (current_solution, /*const bool fast = */ true);
+    current_solution_backup.reinit(current_solution, true);
+    predictor.reinit (current_solution, true);
+
+    right_hand_side.reinit (locally_owned_dofs, mpi_communicator);
+
+    residual_for_output.reinit (locally_relevant_dofs);
+
+    entropy_viscosity.reinit(triangulation.n_active_cells());
+    cellSize_viscosity.reinit(triangulation.n_active_cells());
+    newton_update.reinit(locally_owned_dofs, mpi_communicator);
+
 //    DynamicSparsityPattern sparsity_pattern (dof_handler.n_dofs(),
 //                                             dof_handler.n_dofs());
 //    DoFTools::make_sparsity_pattern (dof_handler, sparsity_pattern);
@@ -101,7 +127,8 @@ namespace Step33
 //    system_matrix.reinit (sparsity_pattern);
 
     // Parallel version
-    DynamicSparsityPattern sparsity_pattern (locally_relevant_dofs);
+    TrilinosWrappers::SparsityPattern sparsity_pattern (locally_owned_dofs,
+                                             mpi_communicator);
     DoFTools::make_sparsity_pattern (dof_handler,
                                      sparsity_pattern,
                                      /*const ConstraintMatrix constraints = */ ConstraintMatrix(),
@@ -115,13 +142,49 @@ namespace Step33
 //                                              dof_handler.n_locally_owned_dofs_per_processor(),
 //                                              mpi_communicator,
 //                                              locally_relevant_dofs);
-    system_matrix.reinit (locally_owned_dofs,
-                          locally_owned_dofs,
-                          sparsity_pattern,
-                          mpi_communicator);
+    sparsity_pattern.compress();
+    system_matrix.reinit (sparsity_pattern);
+//    system_matrix.reinit (locally_owned_dofs,
+//                          locally_owned_dofs,
+//                          sparsity_pattern,
+//                          mpi_communicator);
     // End parallel version
 
   }
+
+
+  template <int dim>
+  void ConservationLaw<dim>::check_negative_density_pressure () const
+  //Check for negative density and pressure
+  {
+  FEValues<dim> fe_v (mapping, fe, quadrature, update_values);
+  const unsigned int   n_q_points = fe_v.n_quadrature_points;
+  std::vector<Vector<double> > solution_values(n_q_points,
+                                               Vector<double>(dim+2));
+  typename DoFHandler<dim>::active_cell_iterator
+  cell = dof_handler.begin_active(),
+  endc = dof_handler.end();
+  for (; cell!=endc; ++cell)
+    if (cell -> is_locally_owned())
+      {
+      fe_v.reinit (cell);
+      fe_v.get_function_values (current_solution, solution_values);
+      for (unsigned int q=0; q<n_q_points; ++q)
+        {
+        const double density = solution_values[q](EulerEquations<dim>::density_component);
+        AssertThrow (density > 0.0, ExcMessage ("Negative density encountered!"));
+        const double pressure =
+        EulerEquations<dim>::template compute_pressure<double>(solution_values[q]);
+        AssertThrow (pressure > 0.0, ExcMessage ("Negative pressure encountered!"));
+        }
+      }
+  }
+
+//  template <int dim>
+//  void ConservationLaw<dim>::set_vectors_size()
+//  {
+//
+//  }
 
   // @sect4{ConservationLaw::calc_time_step}
   //
@@ -737,6 +800,7 @@ namespace Step33
         // data types we have chosen).
         for (unsigned int k=0; k<dofs_per_cell; ++k)
           {
+             AssertIsFinite(R_i.fastAccessDx(k));
             residual_derivatives[k] = R_i.fastAccessDx(k);
           }
         system_matrix.add(dof_indices[i], dof_indices, residual_derivatives);
@@ -1071,7 +1135,7 @@ namespace Step33
   template <int dim>
   void
   ConservationLaw<dim>::
-  compute_refinement_indicators (Vector<double> &refinement_indicators) const
+  compute_refinement_indicators (Vector<double>  &refinement_indicators) const
   {
     EulerEquations<dim>::compute_refinement_indicators (dof_handler,
                                                         mapping,
@@ -1088,7 +1152,7 @@ namespace Step33
   // think should be refined:
   template <int dim>
   void
-  ConservationLaw<dim>::refine_grid (const Vector<double> &refinement_indicators)
+  ConservationLaw<dim>::refine_grid (const Vector<double>  &refinement_indicators)
   {
     typename DoFHandler<dim>::active_cell_iterator
     cell = dof_handler.begin_active(),
@@ -1096,6 +1160,9 @@ namespace Step33
 
     for (unsigned int cell_no=0; cell!=endc; ++cell, ++cell_no)
       {
+      if (cell->is_locally_owned())
+        {
+
         cell->clear_coarsen_flag();
         cell->clear_refine_flag();
 
@@ -1109,6 +1176,7 @@ namespace Step33
           {
             cell->set_coarsen_flag();
           }
+        }
       }
 
     // Then we need to transfer the various solution vectors from the old to
@@ -1130,33 +1198,7 @@ namespace Step33
 
     triangulation.execute_coarsening_and_refinement ();
 
-    dof_handler.clear();
-    dof_handler.distribute_dofs (fe);
-
-    locally_owned_dofs = dof_handler.locally_owned_dofs ();
-    DoFTools::extract_locally_relevant_dofs (dof_handler,
-                                             locally_relevant_dofs);
-
-
-    // Size all of the fields.
-    {
-    // Set vector_writable=true for solution interpolation
-    current_solution.reinit (locally_owned_dofs,
-                   //          locally_relevant_dofs,
-                             mpi_communicator,
-                             /*const bool vector_writable=*/ true);
-    // const bool fast = true means leave its content untouched.
-    old_solution.reinit (current_solution, /*const bool fast = */ true);
-    current_solution_backup.reinit(current_solution, true);
-    predictor.reinit (current_solution, true);
-
-    right_hand_side.reinit (locally_owned_dofs, mpi_communicator);
-
-    residual_for_output.reinit (locally_owned_dofs.size());
-
-    entropy_viscosity.reinit(triangulation.n_active_cells());
-    cellSize_viscosity.reinit(triangulation.n_active_cells());
-    }
+    setup_system();
 
     // Transfer data out
     {
@@ -1216,104 +1258,104 @@ namespace Step33
   // time we come to this function and is incremented by one at the end of
   // each invocation.
   template <int dim>
-  void ConservationLaw<dim>::output_results () const
-  {
-    typename EulerEquations<dim>::Postprocessor
-    postprocessor (parameters.schlieren_plot);
-
-    DataOut<dim> data_out;
-    data_out.attach_dof_handler (dof_handler);
-
-    data_out.add_data_vector (current_solution,
-                              EulerEquations<dim>::component_names (),
-                              DataOut<dim>::type_dof_data,
-                              EulerEquations<dim>::component_interpretation ());
-
-    data_out.add_data_vector (current_solution, postprocessor);
-
-    {
-      const std::string data_name("entropy_viscosity");
-      data_out.add_data_vector (entropy_viscosity,
-                                data_name,
-                                DataOut<dim>::type_cell_data);
-    }
-    {
-      const std::string data_name("cellSize_viscosity");
-      data_out.add_data_vector (cellSize_viscosity,
-                                data_name,
-                                DataOut<dim>::type_cell_data);
-    }
-    {
-      AssertThrow ( dim <= 3, ExcNotImplemented());
-      char prefix[3][4] = {"1st", "2nd", "3rd"};
-
-      std::vector<std::string> data_names;
-      data_names.clear();
-      for (unsigned id=0; id < dim; ++id)
-        {
-          data_names.push_back("_residualAt1stNewtonIter");
-          data_names[id] = prefix[id] + data_names[id];
-          data_names[id] = "momentum" + data_names[id];
-        }
-
-      data_names.push_back ("density_residualAt1stNewtonIter");
-      data_names.push_back ("energy_residualAt1stNewtonIter");
-
-      std::vector<DataComponentInterpretation::DataComponentInterpretation>
-      data_component_interpretation
-      (dim+2, DataComponentInterpretation::component_is_scalar);
-
-      data_out.add_data_vector (residual_for_output,
-                                data_names,
-                                DataOut<dim>::type_dof_data,
-                                data_component_interpretation);
-    }
-    {
-      Vector<float> subdomain (triangulation.n_active_cells());
-      for (unsigned int i=0; i<subdomain.size(); ++i)
-        subdomain(i) = triangulation.locally_owned_subdomain();
-      data_out.add_data_vector (subdomain,
-                                "subdomain");
-    }
-
-    data_out.build_patches ();
-
-    static unsigned int output_file_number = 0;
-
-
-    const std::string filename = ("solution-" +
-                                  Utilities::int_to_string (output_file_number, 2) +
-                                  "." +
-                                  Utilities::int_to_string
-                                  (triangulation.locally_owned_subdomain(), 4));
-    std::ofstream output ((filename + ".vtu").c_str());
-    data_out.write_vtu (output);
-
-    if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
-      {
-      std::vector<std::string> filenames;
-      for (unsigned int i=0;
-           i<Utilities::MPI::n_mpi_processes(mpi_communicator);
-           ++i)
-        {
-        filenames.push_back ("solution-" +
-                             Utilities::int_to_string (output_file_number, 2) +
-                             "." +
-                             Utilities::int_to_string (i, 4) +
-                             ".vtu");
-        }
-      std::ofstream master_output ((filename + ".pvtu").c_str());
-      data_out.write_pvtu_record (master_output, filenames);
-      }
-
-//    std::string filename = "solution-" +
-//                           Utilities::int_to_string (output_file_number, 3) +
-//                           ".vtk";
-//    std::ofstream output (filename.c_str());
-//    data_out.write_vtk (output);
-
-    ++output_file_number;
-  }
+  void ConservationLaw<dim>::output_results () const {}
+//  {
+//    typename EulerEquations<dim>::Postprocessor
+//    postprocessor (parameters.schlieren_plot);
+//
+//    DataOut<dim> data_out;
+//    data_out.attach_dof_handler (dof_handler);
+//
+//    data_out.add_data_vector (current_solution,
+//                              EulerEquations<dim>::component_names (),
+//                              DataOut<dim>::type_dof_data,
+//                              EulerEquations<dim>::component_interpretation ());
+//
+//   // data_out.add_data_vector (current_solution, postprocessor);
+//
+//    {
+//      const std::string data_name("entropy_viscosity");
+//      data_out.add_data_vector (entropy_viscosity,
+//                                data_name,
+//                                DataOut<dim>::type_cell_data);
+//    }
+//    {
+//      const std::string data_name("cellSize_viscosity");
+//      data_out.add_data_vector (cellSize_viscosity,
+//                                data_name,
+//                                DataOut<dim>::type_cell_data);
+//    }
+//    {
+//      AssertThrow ( dim <= 3, ExcNotImplemented());
+//      char prefix[3][4] = {"1st", "2nd", "3rd"};
+//
+//      std::vector<std::string> data_names;
+//      data_names.clear();
+//      for (unsigned id=0; id < dim; ++id)
+//        {
+//          data_names.push_back("_residualAt1stNewtonIter");
+//          data_names[id] = prefix[id] + data_names[id];
+//          data_names[id] = "momentum" + data_names[id];
+//        }
+//
+//      data_names.push_back ("density_residualAt1stNewtonIter");
+//      data_names.push_back ("energy_residualAt1stNewtonIter");
+//
+//      std::vector<DataComponentInterpretation::DataComponentInterpretation>
+//      data_component_interpretation
+//      (dim+2, DataComponentInterpretation::component_is_scalar);
+//
+//      data_out.add_data_vector (residual_for_output,
+//                                data_names,
+//                                DataOut<dim>::type_dof_data,
+//                                data_component_interpretation);
+//    }
+//    {
+//      Vector<float> subdomain (triangulation.n_active_cells());
+//      for (unsigned int i=0; i<subdomain.size(); ++i)
+//        subdomain(i) = triangulation.locally_owned_subdomain();
+//      data_out.add_data_vector (subdomain,
+//                                "subdomain");
+//    }
+//
+//    data_out.build_patches ();
+//
+//    static unsigned int output_file_number = 0;
+//
+//
+//    const std::string filename = ("solution-" +
+//                                  Utilities::int_to_string (output_file_number, 2) +
+//                                  "." +
+//                                  Utilities::int_to_string
+//                                  (triangulation.locally_owned_subdomain(), 4));
+//    std::ofstream output ((filename + ".vtu").c_str());
+//    data_out.write_vtu (output);
+//
+//    if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
+//      {
+//      std::vector<std::string> filenames;
+//      for (unsigned int i=0;
+//           i<Utilities::MPI::n_mpi_processes(mpi_communicator);
+//           ++i)
+//        {
+//        filenames.push_back ("solution-" +
+//                             Utilities::int_to_string (output_file_number, 2) +
+//                             "." +
+//                             Utilities::int_to_string (i, 4) +
+//                             ".vtu");
+//        }
+//      std::ofstream master_output ((filename + ".pvtu").c_str());
+//      data_out.write_pvtu_record (master_output, filenames);
+//      }
+//
+////    std::string filename = "solution-" +
+////                           Utilities::int_to_string (output_file_number, 3) +
+////                           ".vtk";
+////    std::ofstream output (filename.c_str());
+////    data_out.write_vtk (output);
+//
+//    ++output_file_number;
+//  }
 
 
 
@@ -1353,56 +1395,36 @@ namespace Step33
 
 //    TimerOutput::Scope t(computing_timer, "initialization");
 
-    std::ofstream time_advance_history_file
-    (parameters.time_advance_history_filename.c_str());
+  std::ofstream time_advance_history_file;
+  std::ofstream interation_history_file;
+  if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
+   {
+    time_advance_history_file.open(
+    parameters.time_advance_history_filename.c_str());
     Assert (time_advance_history_file,
             ExcFileNotOpen(parameters.time_advance_history_filename.c_str()));
+//    ConditionalOStream time_advance_history_file(time_advance_history_file_std,
+//                                                 (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
+//                                                  );
 
-    std::ofstream interation_history_file
-    (parameters.interation_history_filename.c_str());
+    interation_history_file.open(
+    parameters.interation_history_filename.c_str());
     Assert (interation_history_file,
             ExcFileNotOpen(parameters.interation_history_filename.c_str()));
 
+//    ConditionalOStream interation_history_file (interation_history_file_std,
+//                                                (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
+//                                                );
+   }
 
-
-    dof_handler.clear();
-    dof_handler.distribute_dofs (fe);
-
-    locally_owned_dofs = dof_handler.locally_owned_dofs ();
-    DoFTools::extract_locally_relevant_dofs (dof_handler,
-                                           locally_relevant_dofs);
-
-//    locally_relevant_solution.reinit (locally_owned_dofs,
-//                                    locally_relevant_dofs, mpi_communicator);
-//    system_rhs.reinit (locally_owned_dofs, mpi_communicator);
-
-    // Size all of the fields.
-    {
-    // Set vector_writable=true for solution interpolation
-    current_solution.reinit (locally_owned_dofs,
-                          //   locally_relevant_dofs,
-                             mpi_communicator,
-                             /*const bool vector_writable=*/ true);
-
-    old_solution.reinit (current_solution, /*const bool fast = */ true);
-    current_solution_backup.reinit(current_solution, true);
-    predictor.reinit (current_solution, true);
-
-    right_hand_side.reinit (locally_owned_dofs, mpi_communicator);
-
-    residual_for_output.reinit (locally_owned_dofs.size());
-
-    entropy_viscosity.reinit(triangulation.n_active_cells());
-    cellSize_viscosity.reinit(triangulation.n_active_cells());
-    }
     setup_system();
 
     VectorTools::interpolate(dof_handler,
-                             parameters.initial_conditions, old_solution);
-    current_solution = old_solution;
-    predictor = old_solution;
+                             parameters.initial_conditions, locally_owned_solution);
 
-    calc_time_step();
+    old_solution = locally_owned_solution;
+    current_solution = locally_owned_solution;
+    predictor = locally_owned_solution;
 
     if (parameters.do_refine == true)
       for (unsigned int i=0; i<parameters.shock_levels; ++i)
@@ -1412,22 +1434,23 @@ namespace Step33
           compute_refinement_indicators(refinement_indicators);
           refine_grid(refinement_indicators);
 
-          setup_system();
-
           VectorTools::interpolate(dof_handler,
-                                   parameters.initial_conditions, old_solution);
+                                   parameters.initial_conditions, locally_owned_solution);
+          old_solution = locally_owned_solution;
           current_solution = old_solution;
           predictor = old_solution;
         }
 
+    check_negative_density_pressure();
+    calc_time_step();
     output_results ();
 
     // We then enter into the main time stepping loop. At the top we simply
     // output some status information so one can keep track of where a
     // computation is, as well as the header for a table that indicates
     // progress of the nonlinear inner iteration:
-    LA::MPI::Vector newton_update (locally_owned_dofs,
-                                           locally_relevant_dofs, mpi_communicator);
+//    LA::MPI::Vector newton_update (locally_owned_dofs,
+//                                           locally_relevant_dofs, mpi_communicator);
 
     double time = 0;
     double next_output = time + parameters.output_step;
@@ -1443,6 +1466,8 @@ namespace Step33
     unsigned int n_time_step(0);
     unsigned int n_total_inter(0);
 
+  if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
+    {
     time_advance_history_file
         << "   iter     n_cell     n_dofs          time   i_step"
         << "  i_Newton    Newton_res  n_linear_iter    linear_res"
@@ -1455,7 +1480,7 @@ namespace Step33
         << "  linear_search_len  time_step_size  time_step_factor"
         << "  Newton_update_norm"
         << '\n';
-
+    }
 
     time_advance_history_file.setf(std::ios::scientific);
     time_advance_history_file.precision(6);
@@ -1464,6 +1489,8 @@ namespace Step33
 
     while (time < parameters.final_time)
       {
+        if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
+          {
         std::cout << "T=" << time << std::endl
                   << "   Number of active cells:       "
                   << triangulation.n_active_cells()
@@ -1477,7 +1504,7 @@ namespace Step33
                   << "Linear Search Len      Time Step Size      Time Step Factor" << std::endl
                   << "   __________________________________________"
                   << "_____________________________________________" << std::endl;
-
+          }
         // Then comes the inner Newton iteration to solve the nonlinear
         // problem in each time step. The way it works is to reset matrix and
         // right hand side to zero, then assemble the linear system. If the
@@ -1541,15 +1568,20 @@ namespace Step33
             current_solution += newton_update;
             newton_update_norm = newton_update.l2_norm();
 
+            if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
+              {
             std::printf("   %-13.6e    %-13.6e  %04d        %-5.2e            %7.4g          %7.4g          %7.4g\n",
                         res_norm,newton_update_norm, convergence.first, convergence.second,
                         linear_search_length[index_linear_search_length],
                         parameters.time_step, parameters.time_step_factor);
+              }
             linear_solver_diverged = std::isnan(convergence.second);
 
             ++nonlin_iter;
             ++n_total_inter;
 
+if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
+  {
             // Out put convergence history
             interation_history_file
                 << std::setw(7) << n_total_inter << ' '
@@ -1566,7 +1598,7 @@ namespace Step33
                 << std::setw(17) << parameters.time_step_factor << ' '
                 << std::setw(19) << newton_update_norm << ' '
                 << '\n';
-
+  }
             // Check result.
             if (res_norm < 1e-10)
               {
@@ -1614,6 +1646,8 @@ namespace Step33
         if (newton_iter_converged)
           {
 
+if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
+  {
             //Output time marching history
             time_advance_history_file
                 << std::setw(7) << n_total_inter << ' '
@@ -1628,7 +1662,7 @@ namespace Step33
                 << std::setw(18) << linear_search_length[index_linear_search_length] << ' '
                 << std::setw(15) << parameters.time_step << ' '
                 << std::setw(17) << parameters.time_step_factor << ' ';
-
+  }
 
             // We only get to this point if the Newton iteration has converged, so
             // do various post convergence tasks here:
@@ -1695,38 +1729,13 @@ namespace Step33
                 compute_refinement_indicators(refinement_indicators);
 
                 refine_grid(refinement_indicators);
-                setup_system();
 
                 //newton_update.reinit (dof_handler.n_dofs());
-                newton_update.reinit(locally_owned_dofs,
-                                     locally_relevant_dofs, mpi_communicator);
               }
             current_solution_backup = current_solution;
 
-            //Check for negative density and pressure
-            {
-              FEValues<dim> fe_v (mapping, fe, quadrature, update_values);
-              const unsigned int   n_q_points = fe_v.n_quadrature_points;
-              std::vector<Vector<double> > solution_values(n_q_points,
-                                                           Vector<double>(dim+2));
-              typename DoFHandler<dim>::active_cell_iterator
-              cell = dof_handler.begin_active(),
-              endc = dof_handler.end();
-              for (; cell!=endc; ++cell)
-                {
-                  fe_v.reinit (cell);
-                  fe_v.get_function_values (current_solution, solution_values);
-                  for (unsigned int q=0; q<n_q_points; ++q)
-                    {
-                      const double density = solution_values[q](EulerEquations<dim>::density_component);
-                      AssertThrow (density > 0.0, ExcMessage ("Negative density encountered!"));
-                      const double pressure =
-                        EulerEquations<dim>::template compute_pressure<double>(solution_values[q]);
-                      AssertThrow (pressure > 0.0, ExcMessage ("Negative pressure encountered!"));
-                    }
-                }
-            }
-
+ 
+            check_negative_density_pressure();
 
             calc_time_step();
             // Uncomment the following line if you want reset the linear_search_length immediatly after a converged Newton iter.
