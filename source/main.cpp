@@ -32,7 +32,7 @@ int main (int argc, char *argv[])
           std::exit(1);
         }
 
-      Utilities::MPI::MPI_InitFinalize mpi_initialization(argc, argv, dealii::numbers::invalid_unsigned_int);
+      Utilities::MPI::MPI_InitFinalize mpi_initialization(argc, argv, /* int max_num_threads */ 1);
 
       ConservationLaw<2> cons (argv[1]);
       cons.run ();

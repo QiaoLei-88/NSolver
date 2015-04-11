@@ -18,14 +18,15 @@
 #include <deal.II/base/utilities.h>
 #include <deal.II/base/conditional_ostream.h>
 #include <deal.II/base/std_cxx11/array.h>
+#include <deal.II/base/timer.h>
 
 #include <deal.II/lac/vector.h>
 #include <deal.II/lac/dynamic_sparsity_pattern.h>
 
-#include <deal.II/grid/tria.h>
+//#include <deal.II/grid/tria.h>
 #include <deal.II/grid/grid_generator.h>
 #include <deal.II/grid/grid_out.h>
-#include <deal.II/grid/grid_refinement.h>
+//#include <deal.II/grid/grid_refinement.h>
 
 //Include grid_tools to scale mesh.
 #include <deal.II/grid/grid_tools.h>
@@ -45,7 +46,26 @@
 
 #include <deal.II/numerics/data_out.h>
 #include <deal.II/numerics/vector_tools.h>
-#include <deal.II/numerics/solution_transfer.h>
+//#include <deal.II/numerics/solution_transfer.h>
+
+// Header files for MPI parallel computing
+#include <deal.II/base/index_set.h>
+#include <deal.II/lac/sparsity_tools.h>
+#include <deal.II/lac/generic_linear_algebra.h>
+
+//#define USE_TRILINOS_LA
+namespace LA
+{
+//#ifdef USE_PETSC_LA
+//  using namespace dealii::LinearAlgebraPETSc;
+//#else
+  using namespace dealii::LinearAlgebraTrilinos;
+//#endif
+}
+#include <deal.II/distributed/tria.h>
+#include <deal.II/distributed/grid_refinement.h>
+#include <deal.II/distributed/solution_transfer.h>
+
 
 // Then, as mentioned in the introduction, we use various Trilinos packages as
 // linear solvers as well as for automatic differentiation. These are in the
@@ -112,7 +132,7 @@ namespace Step33
                              const unsigned int               boundary_id,
                              const double                     face_diameter);
 
-    std::pair<unsigned int, double> solve (Vector<double> &solution);
+    std::pair<unsigned int, double> solve (LA::MPI::Vector &solution);
 
     void compute_refinement_indicators (Vector<double> &indicator) const;
     void refine_grid (const Vector<double> &indicator);
@@ -131,7 +151,18 @@ namespace Step33
     // known that for transsonic simulations with the Euler equations,
     // computations do not converge even as $h\rightarrow 0$ if the boundary
     // approximation is not of sufficiently high order.
-    Triangulation<dim>   triangulation;
+
+
+    MPI_Comm                                  mpi_communicator;
+    parallel::distributed::Triangulation<dim> triangulation;
+    //    DoFHandler<dim>                           dof_handler;
+    //    FE_Q<dim>                                 fe;
+    IndexSet                                  locally_owned_dofs;
+    IndexSet                                  locally_relevant_dofs;
+
+   // TimerOutput                               computing_timer;
+
+    //// Triangulation<dim>   triangulation;
     const MappingQ1<dim> mapping;
 
     const FESystem<dim>  fe;
@@ -148,12 +179,15 @@ namespace Step33
     // converged final result of the previous time step), and a predictor for
     // the solution at the next time step, computed by extrapolating the
     // current and previous solution one time step into the future:
-    Vector<double>       old_solution;
-    Vector<double>       current_solution;
-    Vector<double>       current_solution_backup;
-    Vector<double>       predictor;
+    LA::MPI::Vector       old_solution;
+    //    LA::MPI::Vector locally_relevant_solution;
+    //    LA::MPI::Vector system_rhs;
 
-    Vector<double>       right_hand_side;
+    LA::MPI::Vector       current_solution;
+    LA::MPI::Vector       current_solution_backup;
+    LA::MPI::Vector       predictor;
+
+    LA::MPI::Vector       right_hand_side;
     // Cache up the right_hand_side for out put at the first Newton iteration
     // of each time step.
     Vector<double>       residual_for_output;
@@ -172,10 +206,16 @@ namespace Step33
     // not intend to run this program in parallel (which wouldn't be too hard
     // with Trilinos data structures, though), we don't have to think about
     // anything else like distributing the degrees of freedom.
-    TrilinosWrappers::SparseMatrix system_matrix;
+
+    // The following statement is equivalent to
+    // TrilinosWrappers::SparseMatrix system_matrix. It is defined by
+    // typedef TrilinosWrappers::SparseMatrix SparseMatrix inside namespace
+    // MPI in generic_linear_algebra.h
+    LA::MPI::SparseMatrix system_matrix;
 
     Parameters::AllParameters<dim>  parameters;
     ConditionalOStream              verbose_cout;
+    ConditionalOStream              pcout;
   };
 
 }

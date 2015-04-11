@@ -53,12 +53,20 @@ namespace Step33
   template <int dim>
   ConservationLaw<dim>::ConservationLaw (const char *input_filename)
     :
+    mpi_communicator (MPI_COMM_WORLD),
+    triangulation (mpi_communicator,
+                 typename Triangulation<dim>::MeshSmoothing
+                 (Triangulation<dim>::smoothing_on_refinement |
+                  Triangulation<dim>::smoothing_on_coarsening)),
     mapping (),
     fe (FE_Q<dim>(1), EulerEquations<dim>::n_components),
     dof_handler (triangulation),
     quadrature (2),
     face_quadrature (2),
-    verbose_cout (std::cout, false)
+    verbose_cout (std::cout, false),
+    pcout (std::cout,
+         (Utilities::MPI::this_mpi_process(mpi_communicator)
+          == 0))
   {
     ParameterHandler prm;
     Parameters::AllParameters<dim>::declare_parameters (prm);
@@ -68,6 +76,11 @@ namespace Step33
     parameters.time_step_factor = 1.0;
 
     verbose_cout.set_condition (parameters.output == Parameters::Solver::verbose);
+
+//    computing_timer (mpi_communicator,
+//                   pcout,
+//                   TimerOutput::summary,
+//                   TimerOutput::wall_times),
   }
 
 
@@ -81,11 +94,33 @@ namespace Step33
   template <int dim>
   void ConservationLaw<dim>::setup_system ()
   {
-    DynamicSparsityPattern sparsity_pattern (dof_handler.n_dofs(),
-                                             dof_handler.n_dofs());
-    DoFTools::make_sparsity_pattern (dof_handler, sparsity_pattern);
+//    DynamicSparsityPattern sparsity_pattern (dof_handler.n_dofs(),
+//                                             dof_handler.n_dofs());
+//    DoFTools::make_sparsity_pattern (dof_handler, sparsity_pattern);
+//
+//    system_matrix.reinit (sparsity_pattern);
 
-    system_matrix.reinit (sparsity_pattern);
+    // Parallel version
+    DynamicSparsityPattern sparsity_pattern (locally_relevant_dofs);
+    DoFTools::make_sparsity_pattern (dof_handler,
+                                     sparsity_pattern,
+                                     /*const ConstraintMatrix constraints = */ ConstraintMatrix(),
+                                     /*const bool keep_constrained_dofs = */ true,
+                                     Utilities::MPI::this_mpi_process(mpi_communicator)
+                                     );
+
+//    DoFTools::make_sparsity_pattern (dof_handler, dsp,
+//                                   constraints, false);
+//    SparsityTools::distribute_sparsity_pattern (sparsity_pattern,
+//                                              dof_handler.n_locally_owned_dofs_per_processor(),
+//                                              mpi_communicator,
+//                                              locally_relevant_dofs);
+    system_matrix.reinit (locally_owned_dofs,
+                          locally_owned_dofs,
+                          sparsity_pattern,
+                          mpi_communicator);
+    // End parallel version
+
   }
 
   // @sect4{ConservationLaw::calc_time_step}
@@ -198,6 +233,10 @@ namespace Step33
     unsigned int cell_index(0);
     for (; cell!=endc; ++cell, ++cell_index)
       {
+      if (cell->is_locally_owned())
+        {
+
+
         fe_v.reinit (cell);
         cell->get_dof_indices (dof_indices);
 
@@ -333,7 +372,9 @@ namespace Step33
                                       cell->face(face_no)->diameter());
                 }
             }
+      } // End of if (cell->is_locally_owned())
       }
+
 
     // After all this assembling, notify the Trilinos matrix object that the
     // matrix is done:
@@ -923,7 +964,7 @@ namespace Step33
 
   template <int dim>
   std::pair<unsigned int, double>
-  ConservationLaw<dim>::solve (Vector<double> &newton_update)
+  ConservationLaw<dim>::solve (LA::MPI::Vector &newton_update)
   {
     switch (parameters.solver)
       {
@@ -1076,15 +1117,15 @@ namespace Step33
     // examples, so we won't comment much on the following code. The last
     // three lines simply re-set the sizes of some other vectors to the now
     // correct size:
-    std::vector<Vector<double> > transfer_in;
-    std::vector<Vector<double> > transfer_out;
+    std::vector<const LA::MPI::Vector * > transfer_in;
 
-    transfer_in.push_back(old_solution);
-    transfer_in.push_back(predictor);
+
+    transfer_in.push_back(&old_solution);
+    transfer_in.push_back(&predictor);
 
     triangulation.prepare_coarsening_and_refinement();
 
-    SolutionTransfer<dim> soltrans(dof_handler);
+    parallel::distributed::SolutionTransfer<dim, LA::MPI::Vector> soltrans(dof_handler);
     soltrans.prepare_for_coarsening_and_refinement(transfer_in);
 
     triangulation.execute_coarsening_and_refinement ();
@@ -1092,33 +1133,74 @@ namespace Step33
     dof_handler.clear();
     dof_handler.distribute_dofs (fe);
 
+    locally_owned_dofs = dof_handler.locally_owned_dofs ();
+    DoFTools::extract_locally_relevant_dofs (dof_handler,
+                                             locally_relevant_dofs);
+
+
+    // Size all of the fields.
     {
-      Vector<double> new_old_solution(1);
-      Vector<double> new_predictor(1);
+    // Set vector_writable=true for solution interpolation
+    current_solution.reinit (locally_owned_dofs,
+                   //          locally_relevant_dofs,
+                             mpi_communicator,
+                             /*const bool vector_writable=*/ true);
+    // const bool fast = true means leave its content untouched.
+    old_solution.reinit (current_solution, /*const bool fast = */ true);
+    current_solution_backup.reinit(current_solution, true);
+    predictor.reinit (current_solution, true);
 
-      transfer_out.push_back(new_old_solution);
-      transfer_out.push_back(new_predictor);
-      transfer_out[0].reinit(dof_handler.n_dofs());
-      transfer_out[1].reinit(dof_handler.n_dofs());
-    }
+    right_hand_side.reinit (locally_owned_dofs, mpi_communicator);
 
-    soltrans.interpolate(transfer_in, transfer_out);
-
-    old_solution.reinit (transfer_out[0].size());
-    old_solution = transfer_out[0];
-
-    predictor.reinit (transfer_out[1].size());
-    predictor = transfer_out[1];
-
-    current_solution.reinit(dof_handler.n_dofs());
-    current_solution = old_solution;
-    right_hand_side.reinit (dof_handler.n_dofs());
-    residual_for_output.reinit (dof_handler.n_dofs());
-
-    current_solution_backup.reinit (dof_handler.n_dofs());
+    residual_for_output.reinit (locally_owned_dofs.size());
 
     entropy_viscosity.reinit(triangulation.n_active_cells());
     cellSize_viscosity.reinit(triangulation.n_active_cells());
+    }
+
+    // Transfer data out
+    {
+      std::vector<LA::MPI::Vector * > transfer_out;
+      LA::MPI::Vector interpolated_old_solution(old_solution);
+      LA::MPI::Vector interpolated_predictor(predictor);
+      transfer_out.push_back(&interpolated_old_solution);
+      transfer_out.push_back(&interpolated_predictor);
+      soltrans.interpolate(transfer_out);
+      old_solution = interpolated_old_solution;
+      predictor = interpolated_predictor;
+      current_solution = old_solution;
+    }
+
+
+
+
+
+
+//    old_solution.reinit (transfer_out[0].size());
+//    old_solution = transfer_out[0];
+//
+//    predictor.reinit (transfer_out[1].size());
+//    predictor = transfer_out[1];
+
+
+
+
+    // current_solution.reinit(locally_owned_dofs);
+
+    //right_hand_side.reinit (locally_owned_dofs);
+//    residual_for_output.reinit (locally_owned_dofs);
+//
+//    current_solution_backup.reinit (locally_owned_dofs);
+
+//    current_solution.reinit(dof_handler.n_dofs());
+//    current_solution = old_solution;
+//    right_hand_side.reinit (dof_handler.n_dofs());
+//    residual_for_output.reinit (dof_handler.n_dofs());
+//
+//    current_solution_backup.reinit (dof_handler.n_dofs());
+
+//    entropy_viscosity.reinit(triangulation.n_active_cells());
+//    cellSize_viscosity.reinit(triangulation.n_active_cells());
   }
 
 
@@ -1186,15 +1268,49 @@ namespace Step33
                                 DataOut<dim>::type_dof_data,
                                 data_component_interpretation);
     }
+    {
+      Vector<float> subdomain (triangulation.n_active_cells());
+      for (unsigned int i=0; i<subdomain.size(); ++i)
+        subdomain(i) = triangulation.locally_owned_subdomain();
+      data_out.add_data_vector (subdomain,
+                                "subdomain");
+    }
 
     data_out.build_patches ();
 
     static unsigned int output_file_number = 0;
-    std::string filename = "solution-" +
-                           Utilities::int_to_string (output_file_number, 3) +
-                           ".vtk";
-    std::ofstream output (filename.c_str());
-    data_out.write_vtk (output);
+
+
+    const std::string filename = ("solution-" +
+                                  Utilities::int_to_string (output_file_number, 2) +
+                                  "." +
+                                  Utilities::int_to_string
+                                  (triangulation.locally_owned_subdomain(), 4));
+    std::ofstream output ((filename + ".vtu").c_str());
+    data_out.write_vtu (output);
+
+    if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
+      {
+      std::vector<std::string> filenames;
+      for (unsigned int i=0;
+           i<Utilities::MPI::n_mpi_processes(mpi_communicator);
+           ++i)
+        {
+        filenames.push_back ("solution-" +
+                             Utilities::int_to_string (output_file_number, 2) +
+                             "." +
+                             Utilities::int_to_string (i, 4) +
+                             ".vtu");
+        }
+      std::ofstream master_output ((filename + ".pvtu").c_str());
+      data_out.write_pvtu_record (master_output, filenames);
+      }
+
+//    std::string filename = "solution-" +
+//                           Utilities::int_to_string (output_file_number, 3) +
+//                           ".vtk";
+//    std::ofstream output (filename.c_str());
+//    data_out.write_vtk (output);
 
     ++output_file_number;
   }
@@ -1216,6 +1332,7 @@ namespace Step33
   template <int dim>
   void ConservationLaw<dim>::run ()
   {
+//    TimerOutput::Scope t(computing_timer, "Read grid");
     {
       GridIn<dim> grid_in;
       grid_in.attach_triangulation(triangulation);
@@ -1234,6 +1351,8 @@ namespace Step33
         }
     }
 
+//    TimerOutput::Scope t(computing_timer, "initialization");
+
     std::ofstream time_advance_history_file
     (parameters.time_advance_history_filename.c_str());
     Assert (time_advance_history_file,
@@ -1249,17 +1368,33 @@ namespace Step33
     dof_handler.clear();
     dof_handler.distribute_dofs (fe);
 
+    locally_owned_dofs = dof_handler.locally_owned_dofs ();
+    DoFTools::extract_locally_relevant_dofs (dof_handler,
+                                           locally_relevant_dofs);
+
+//    locally_relevant_solution.reinit (locally_owned_dofs,
+//                                    locally_relevant_dofs, mpi_communicator);
+//    system_rhs.reinit (locally_owned_dofs, mpi_communicator);
+
     // Size all of the fields.
-    old_solution.reinit (dof_handler.n_dofs());
-    current_solution.reinit (dof_handler.n_dofs());
-    current_solution_backup.reinit(dof_handler.n_dofs());
-    predictor.reinit (dof_handler.n_dofs());
-    right_hand_side.reinit (dof_handler.n_dofs());
-    residual_for_output.reinit (dof_handler.n_dofs());
+    {
+    // Set vector_writable=true for solution interpolation
+    current_solution.reinit (locally_owned_dofs,
+                          //   locally_relevant_dofs,
+                             mpi_communicator,
+                             /*const bool vector_writable=*/ true);
+
+    old_solution.reinit (current_solution, /*const bool fast = */ true);
+    current_solution_backup.reinit(current_solution, true);
+    predictor.reinit (current_solution, true);
+
+    right_hand_side.reinit (locally_owned_dofs, mpi_communicator);
+
+    residual_for_output.reinit (locally_owned_dofs.size());
 
     entropy_viscosity.reinit(triangulation.n_active_cells());
     cellSize_viscosity.reinit(triangulation.n_active_cells());
-
+    }
     setup_system();
 
     VectorTools::interpolate(dof_handler,
@@ -1291,7 +1426,8 @@ namespace Step33
     // output some status information so one can keep track of where a
     // computation is, as well as the header for a table that indicates
     // progress of the nonlinear inner iteration:
-    Vector<double> newton_update (dof_handler.n_dofs());
+    LA::MPI::Vector newton_update (locally_owned_dofs,
+                                           locally_relevant_dofs, mpi_communicator);
 
     double time = 0;
     double next_output = time + parameters.output_step;
@@ -1561,7 +1697,9 @@ namespace Step33
                 refine_grid(refinement_indicators);
                 setup_system();
 
-                newton_update.reinit (dof_handler.n_dofs());
+                //newton_update.reinit (dof_handler.n_dofs());
+                newton_update.reinit(locally_owned_dofs,
+                                     locally_relevant_dofs, mpi_communicator);
               }
             current_solution_backup = current_solution;
 
