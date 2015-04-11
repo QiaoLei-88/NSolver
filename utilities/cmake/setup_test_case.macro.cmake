@@ -37,7 +37,6 @@ MACRO(SETUP_TEST_CASE)
       ${_test_directory}
     DEPENDS
       ${_input_file_list_full}
-      ${_test_src_directory}/${_comparison_file}
       # Remove dependency on the project main target to avoid race condition
       # in parallel testing.
       # Always build the excutable before run cTest.
@@ -45,12 +44,21 @@ MACRO(SETUP_TEST_CASE)
     VERBATIM
     )
 
+  # Bring ${_comparison_file} into ${_test_directory} for possible manuel comparision.
+    ADD_CUSTOM_COMMAND(OUTPUT ${_test_directory}/${_comparison_file}
+    COMMAND  ${_exec_copy}  ${_para_copy} ${_test_src_directory}/${_comparison_file} ${_test_directory}/${_comparison_file}
+    WORKING_DIRECTORY
+      ${_test_directory}
+    DEPENDS
+      ${_test_src_directory}/${_comparison_file}
+    VERBATIM
+    )
   # Compare output
   ADD_CUSTOM_TARGET(diff_${_test_name}
-    COMMAND ${_exec_diff} ${_para_diff} ${_test_directory}/${_output_file}  ${_test_src_directory}/${_comparison_file}
+    COMMAND ${_exec_diff} ${_para_diff} ${_test_directory}/${_output_file}  ${_test_directory}/${_comparison_file}
     DEPENDS
       ${_test_directory}/${_output_file}
-      ${_test_src_directory}/${_comparison_file}
+      ${_test_directory}/${_comparison_file}
     VERBATIM
     )
 
