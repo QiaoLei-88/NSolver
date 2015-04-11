@@ -118,7 +118,7 @@ namespace Step33
   private:
     void setup_system ();
     void check_negative_density_pressure() const;
-    
+
     void calc_time_step();
     void assemble_system (const unsigned int nonlin_iter);
     void assemble_cell_term (const FEValues<dim>             &fe_v,
@@ -162,7 +162,7 @@ namespace Step33
     IndexSet                                  locally_owned_dofs;
     IndexSet                                  locally_relevant_dofs;
 
-   // TimerOutput                               computing_timer;
+    // TimerOutput                               computing_timer;
 
     //// Triangulation<dim>   triangulation;
     const MappingQ1<dim> mapping;
@@ -202,8 +202,8 @@ namespace Step33
     // size to "locally_relevant_dofs" because ghost cell is needed to
     // determine the outmost face values.
     LA::MPI::Vector      residual_for_output;
-    Vector<double>      entropy_viscosity;
-    Vector<double>     cellSize_viscosity;
+    Vector<double>       entropy_viscosity;
+    Vector<double>       cellSize_viscosity;
 
     // This final set of member variables (except for the object holding all
     // run-time parameters at the very bottom and a screen output stream that

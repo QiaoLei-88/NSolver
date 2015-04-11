@@ -93,15 +93,16 @@ namespace Step33
     cell = dof_handler.begin_active(),
     endc = dof_handler.end();
     for (unsigned int cell_no=0; cell!=endc; ++cell, ++cell_no)
-      {
-        fe_v.reinit(cell);
-        fe_v.get_function_gradients (solution, dU);
+      if (cell->is_locally_owned())
+        {
+          fe_v.reinit(cell);
+          fe_v.get_function_gradients (solution, dU);
 
-        refinement_indicators(cell_no)
-          = std::log(1+
-                     std::sqrt(dU[0][density_component] *
-                               dU[0][density_component]));
-      }
+          refinement_indicators(cell_no)
+            = std::log(1+
+                       std::sqrt(dU[0][density_component] *
+                                 dU[0][density_component]));
+        }
   }
 
   template <int dim>

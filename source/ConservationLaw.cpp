@@ -55,9 +55,9 @@ namespace Step33
     :
     mpi_communicator (MPI_COMM_WORLD),
     triangulation (mpi_communicator,
-                 typename Triangulation<dim>::MeshSmoothing
-                 (Triangulation<dim>::smoothing_on_refinement |
-                  Triangulation<dim>::smoothing_on_coarsening)),
+                   typename Triangulation<dim>::MeshSmoothing
+                   (Triangulation<dim>::smoothing_on_refinement |
+                    Triangulation<dim>::smoothing_on_coarsening)),
     mapping (),
     fe (FE_Q<dim>(1), EulerEquations<dim>::n_components),
     dof_handler (triangulation),
@@ -65,8 +65,8 @@ namespace Step33
     face_quadrature (2),
     verbose_cout (std::cout, false),
     pcout (std::cout,
-         (Utilities::MPI::this_mpi_process(mpi_communicator)
-          == 0))
+           (Utilities::MPI::this_mpi_process(mpi_communicator)
+            == 0))
   {
     ParameterHandler prm;
     Parameters::AllParameters<dim>::declare_parameters (prm);
@@ -102,23 +102,24 @@ namespace Step33
     DoFTools::extract_locally_relevant_dofs (dof_handler,
                                              locally_relevant_dofs);
     // Set vector_writable=true for solution interpolation
-    locally_owned_solution.reinit(locally_owned_dofs);
+    locally_owned_solution.reinit(locally_owned_dofs, mpi_communicator);
     current_solution.reinit (locally_relevant_dofs,
                              //          locally_relevant_dofs,
                              mpi_communicator);
 //                             /*const bool vector_writable=*/ true);
+
     // const bool fast = true means leave its content untouched.
     old_solution.reinit (current_solution, /*const bool fast = */ true);
     current_solution_backup.reinit(current_solution, true);
     predictor.reinit (current_solution, true);
 
-    right_hand_side.reinit (locally_owned_dofs, mpi_communicator);
+    right_hand_side.reinit (locally_owned_solution, true);
+    newton_update.reinit(locally_owned_solution, true);
 
-    residual_for_output.reinit (locally_relevant_dofs);
+    residual_for_output.reinit (current_solution, true);
 
     entropy_viscosity.reinit(triangulation.n_active_cells());
     cellSize_viscosity.reinit(triangulation.n_active_cells());
-    newton_update.reinit(locally_owned_dofs, mpi_communicator);
 
 //    DynamicSparsityPattern sparsity_pattern (dof_handler.n_dofs(),
 //                                             dof_handler.n_dofs());
@@ -128,13 +129,13 @@ namespace Step33
 
     // Parallel version
     TrilinosWrappers::SparsityPattern sparsity_pattern (locally_owned_dofs,
-                                             mpi_communicator);
+                                                        mpi_communicator);
     DoFTools::make_sparsity_pattern (dof_handler,
                                      sparsity_pattern,
                                      /*const ConstraintMatrix constraints = */ ConstraintMatrix(),
                                      /*const bool keep_constrained_dofs = */ true,
                                      Utilities::MPI::this_mpi_process(mpi_communicator)
-                                     );
+                                    );
 
 //    DoFTools::make_sparsity_pattern (dof_handler, dsp,
 //                                   constraints, false);
@@ -157,27 +158,27 @@ namespace Step33
   void ConservationLaw<dim>::check_negative_density_pressure () const
   //Check for negative density and pressure
   {
-  FEValues<dim> fe_v (mapping, fe, quadrature, update_values);
-  const unsigned int   n_q_points = fe_v.n_quadrature_points;
-  std::vector<Vector<double> > solution_values(n_q_points,
-                                               Vector<double>(dim+2));
-  typename DoFHandler<dim>::active_cell_iterator
-  cell = dof_handler.begin_active(),
-  endc = dof_handler.end();
-  for (; cell!=endc; ++cell)
-    if (cell -> is_locally_owned())
-      {
-      fe_v.reinit (cell);
-      fe_v.get_function_values (current_solution, solution_values);
-      for (unsigned int q=0; q<n_q_points; ++q)
+    FEValues<dim> fe_v (mapping, fe, quadrature, update_values);
+    const unsigned int   n_q_points = fe_v.n_quadrature_points;
+    std::vector<Vector<double> > solution_values(n_q_points,
+                                                 Vector<double>(dim+2));
+    typename DoFHandler<dim>::active_cell_iterator
+    cell = dof_handler.begin_active(),
+    endc = dof_handler.end();
+    for (; cell!=endc; ++cell)
+      if (cell -> is_locally_owned())
         {
-        const double density = solution_values[q](EulerEquations<dim>::density_component);
-        AssertThrow (density > 0.0, ExcMessage ("Negative density encountered!"));
-        const double pressure =
-        EulerEquations<dim>::template compute_pressure<double>(solution_values[q]);
-        AssertThrow (pressure > 0.0, ExcMessage ("Negative pressure encountered!"));
+          fe_v.reinit (cell);
+          fe_v.get_function_values (current_solution, solution_values);
+          for (unsigned int q=0; q<n_q_points; ++q)
+            {
+              const double density = solution_values[q](EulerEquations<dim>::density_component);
+              AssertThrow (density > 0.0, ExcMessage ("Negative density encountered!"));
+              const double pressure =
+                EulerEquations<dim>::template compute_pressure<double>(solution_values[q]);
+              AssertThrow (pressure > 0.0, ExcMessage ("Negative pressure encountered!"));
+            }
         }
-      }
   }
 
 //  template <int dim>
@@ -207,30 +208,31 @@ namespace Step33
         cell = dof_handler.begin_active(),
         endc = dof_handler.end();
         for (; cell!=endc; ++cell)
-          {
-            fe_v.reinit (cell);
-            fe_v.get_function_values (current_solution, solution_values);
-            const double cell_size = fe_v.get_cell()->diameter();
-            double velocity;
-            for (unsigned int q=0; q<n_q_points; ++q)
-              {
-                const double density = solution_values[q](EulerEquations<dim>::density_component);
-                const double pressure =
-                  EulerEquations<dim>::template compute_pressure<double>(solution_values[q]);
+          if (cell -> is_locally_owned() )
+            {
+              fe_v.reinit (cell);
+              fe_v.get_function_values (current_solution, solution_values);
+              const double cell_size = fe_v.get_cell()->diameter();
+              double velocity;
+              for (unsigned int q=0; q<n_q_points; ++q)
+                {
+                  const double density = solution_values[q](EulerEquations<dim>::density_component);
+                  const double pressure =
+                    EulerEquations<dim>::template compute_pressure<double>(solution_values[q]);
 
-                const double sound_speed = std::sqrt(EulerEquations<dim>::gas_gamma * pressure/density);
-                Tensor<1,dim> momentum;
-                for (unsigned int i=EulerEquations<dim>::first_momentum_component;
-                     i < EulerEquations<dim>::first_momentum_component+dim; ++i)
-                  {
-                    momentum[i] = solution_values[q](i);
-                  }
-                velocity = momentum.norm()/density;
-                min_time_step = std::min(min_time_step,
-                                         cell_size / (velocity+sound_speed) * parameters.CFL_number);
-              }
-          }
-        parameters.time_step = min_time_step;
+                  const double sound_speed = std::sqrt(EulerEquations<dim>::gas_gamma * pressure/density);
+                  Tensor<1,dim> momentum;
+                  for (unsigned int i=EulerEquations<dim>::first_momentum_component;
+                       i < EulerEquations<dim>::first_momentum_component+dim; ++i)
+                    {
+                      momentum[i] = solution_values[q](i);
+                    }
+                  velocity = momentum.norm()/density;
+                  min_time_step = std::min(min_time_step,
+                                           cell_size / (velocity+sound_speed) * parameters.CFL_number);
+                }
+            }
+        parameters.time_step = Utilities::MPI::min_max_avg(min_time_step, mpi_communicator).min;
       }
     parameters.time_step *= parameters.time_step_factor;
   }
@@ -295,148 +297,144 @@ namespace Step33
     endc = dof_handler.end();
     unsigned int cell_index(0);
     for (; cell!=endc; ++cell, ++cell_index)
-      {
       if (cell->is_locally_owned())
         {
+          fe_v.reinit (cell);
+          cell->get_dof_indices (dof_indices);
 
+          assemble_cell_term(fe_v, dof_indices, cell_index, nonlin_iter);
 
-        fe_v.reinit (cell);
-        cell->get_dof_indices (dof_indices);
+          // Then loop over all the faces of this cell.  If a face is part of
+          // the external boundary, then assemble boundary conditions there (the
+          // fifth argument to <code>assemble_face_terms</code> indicates
+          // whether we are working on an external or internal face; if it is an
+          // external face, the fourth argument denoting the degrees of freedom
+          // indices of the neighbor is ignored, so we pass an empty vector):
+          for (unsigned int face_no=0; face_no<GeometryInfo<dim>::faces_per_cell;
+               ++face_no)
+            if (cell->at_boundary(face_no))
+              {
+                fe_v_face.reinit (cell, face_no);
+                assemble_face_term (face_no, fe_v_face,
+                                    fe_v_face,
+                                    dof_indices,
+                                    std::vector<types::global_dof_index>(),
+                                    true,
+                                    cell->face(face_no)->boundary_indicator(),
+                                    cell->face(face_no)->diameter());
+              }
 
-        assemble_cell_term(fe_v, dof_indices, cell_index, nonlin_iter);
+          // The alternative is that we are dealing with an internal face. There
+          // are two cases that we need to distinguish: that this is a normal
+          // face between two cells at the same refinement level, and that it is
+          // a face between two cells of the different refinement levels.
+          //
+          // In the first case, there is nothing we need to do: we are using a
+          // continuous finite element, and face terms do not appear in the
+          // bilinear form in this case. The second case usually does not lead
+          // to face terms either if we enforce hanging node constraints
+          // strongly (as in all previous tutorial programs so far whenever we
+          // used continuous finite elements -- this enforcement is done by the
+          // ConstraintMatrix class together with
+          // DoFTools::make_hanging_node_constraints). In the current program,
+          // however, we opt to enforce continuity weakly at faces between cells
+          // of different refinement level, for two reasons: (i) because we can,
+          // and more importantly (ii) because we would have to thread the
+          // automatic differentiation we use to compute the elements of the
+          // Newton matrix from the residual through the operations of the
+          // ConstraintMatrix class. This would be possible, but is not trivial,
+          // and so we choose this alternative approach.
+          //
+          // What needs to be decided is which side of an interface between two
+          // cells of different refinement level we are sitting on.
+          //
+          // Let's take the case where the neighbor is more refined first. We
+          // then have to loop over the children of the face of the current cell
+          // and integrate on each of them. We sprinkle a couple of assertions
+          // into the code to ensure that our reasoning trying to figure out
+          // which of the neighbor's children's faces coincides with a given
+          // subface of the current cell's faces is correct -- a bit of
+          // defensive programming never hurts.
+          //
+          // We then call the function that integrates over faces; since this is
+          // an internal face, the fifth argument is false, and the sixth one is
+          // ignored so we pass an invalid value again:
+            else
+              {
+                if (cell->neighbor(face_no)->has_children())
+                  {
+                    const unsigned int neighbor2=
+                      cell->neighbor_of_neighbor(face_no);
 
-        // Then loop over all the faces of this cell.  If a face is part of
-        // the external boundary, then assemble boundary conditions there (the
-        // fifth argument to <code>assemble_face_terms</code> indicates
-        // whether we are working on an external or internal face; if it is an
-        // external face, the fourth argument denoting the degrees of freedom
-        // indices of the neighbor is ignored, so we pass an empty vector):
-        for (unsigned int face_no=0; face_no<GeometryInfo<dim>::faces_per_cell;
-             ++face_no)
-          if (cell->at_boundary(face_no))
-            {
-              fe_v_face.reinit (cell, face_no);
-              assemble_face_term (face_no, fe_v_face,
-                                  fe_v_face,
-                                  dof_indices,
-                                  std::vector<types::global_dof_index>(),
-                                  true,
-                                  cell->face(face_no)->boundary_indicator(),
-                                  cell->face(face_no)->diameter());
-            }
+                    for (unsigned int subface_no=0;
+                         subface_no < cell->face(face_no)->n_children();
+                         ++subface_no)
+                      {
+                        const typename DoFHandler<dim>::active_cell_iterator
+                        neighbor_child
+                          = cell->neighbor_child_on_subface (face_no, subface_no);
 
-        // The alternative is that we are dealing with an internal face. There
-        // are two cases that we need to distinguish: that this is a normal
-        // face between two cells at the same refinement level, and that it is
-        // a face between two cells of the different refinement levels.
-        //
-        // In the first case, there is nothing we need to do: we are using a
-        // continuous finite element, and face terms do not appear in the
-        // bilinear form in this case. The second case usually does not lead
-        // to face terms either if we enforce hanging node constraints
-        // strongly (as in all previous tutorial programs so far whenever we
-        // used continuous finite elements -- this enforcement is done by the
-        // ConstraintMatrix class together with
-        // DoFTools::make_hanging_node_constraints). In the current program,
-        // however, we opt to enforce continuity weakly at faces between cells
-        // of different refinement level, for two reasons: (i) because we can,
-        // and more importantly (ii) because we would have to thread the
-        // automatic differentiation we use to compute the elements of the
-        // Newton matrix from the residual through the operations of the
-        // ConstraintMatrix class. This would be possible, but is not trivial,
-        // and so we choose this alternative approach.
-        //
-        // What needs to be decided is which side of an interface between two
-        // cells of different refinement level we are sitting on.
-        //
-        // Let's take the case where the neighbor is more refined first. We
-        // then have to loop over the children of the face of the current cell
-        // and integrate on each of them. We sprinkle a couple of assertions
-        // into the code to ensure that our reasoning trying to figure out
-        // which of the neighbor's children's faces coincides with a given
-        // subface of the current cell's faces is correct -- a bit of
-        // defensive programming never hurts.
-        //
-        // We then call the function that integrates over faces; since this is
-        // an internal face, the fifth argument is false, and the sixth one is
-        // ignored so we pass an invalid value again:
-          else
-            {
-              if (cell->neighbor(face_no)->has_children())
-                {
-                  const unsigned int neighbor2=
-                    cell->neighbor_of_neighbor(face_no);
+                        Assert (neighbor_child->face(neighbor2) ==
+                                cell->face(face_no)->child(subface_no),
+                                ExcInternalError());
+                        Assert (neighbor_child->has_children() == false,
+                                ExcInternalError());
 
-                  for (unsigned int subface_no=0;
-                       subface_no < cell->face(face_no)->n_children();
-                       ++subface_no)
-                    {
-                      const typename DoFHandler<dim>::active_cell_iterator
-                      neighbor_child
-                        = cell->neighbor_child_on_subface (face_no, subface_no);
+                        fe_v_subface.reinit (cell, face_no, subface_no);
+                        fe_v_face_neighbor.reinit (neighbor_child, neighbor2);
 
-                      Assert (neighbor_child->face(neighbor2) ==
-                              cell->face(face_no)->child(subface_no),
-                              ExcInternalError());
-                      Assert (neighbor_child->has_children() == false,
-                              ExcInternalError());
+                        neighbor_child->get_dof_indices (dof_indices_neighbor);
 
-                      fe_v_subface.reinit (cell, face_no, subface_no);
-                      fe_v_face_neighbor.reinit (neighbor_child, neighbor2);
+                        assemble_face_term (face_no, fe_v_subface,
+                                            fe_v_face_neighbor,
+                                            dof_indices,
+                                            dof_indices_neighbor,
+                                            false,
+                                            numbers::invalid_unsigned_int,
+                                            neighbor_child->face(neighbor2)->diameter());
+                      }
+                  }
 
-                      neighbor_child->get_dof_indices (dof_indices_neighbor);
+                // The other possibility we have to care for is if the neighbor
+                // is coarser than the current cell (in particular, because of
+                // the usual restriction of only one hanging node per face, the
+                // neighbor must be exactly one level coarser than the current
+                // cell, something that we check with an assertion). Again, we
+                // then integrate over this interface:
+                else if (cell->neighbor(face_no)->level() != cell->level())
+                  {
+                    const typename DoFHandler<dim>::cell_iterator
+                    neighbor = cell->neighbor(face_no);
+                    Assert(neighbor->level() == cell->level()-1,
+                           ExcInternalError());
 
-                      assemble_face_term (face_no, fe_v_subface,
-                                          fe_v_face_neighbor,
-                                          dof_indices,
-                                          dof_indices_neighbor,
-                                          false,
-                                          numbers::invalid_unsigned_int,
-                                          neighbor_child->face(neighbor2)->diameter());
-                    }
-                }
+                    neighbor->get_dof_indices (dof_indices_neighbor);
 
-              // The other possibility we have to care for is if the neighbor
-              // is coarser than the current cell (in particular, because of
-              // the usual restriction of only one hanging node per face, the
-              // neighbor must be exactly one level coarser than the current
-              // cell, something that we check with an assertion). Again, we
-              // then integrate over this interface:
-              else if (cell->neighbor(face_no)->level() != cell->level())
-                {
-                  const typename DoFHandler<dim>::cell_iterator
-                  neighbor = cell->neighbor(face_no);
-                  Assert(neighbor->level() == cell->level()-1,
-                         ExcInternalError());
+                    const std::pair<unsigned int, unsigned int>
+                    faceno_subfaceno = cell->neighbor_of_coarser_neighbor(face_no);
+                    const unsigned int neighbor_face_no    = faceno_subfaceno.first,
+                                       neighbor_subface_no = faceno_subfaceno.second;
 
-                  neighbor->get_dof_indices (dof_indices_neighbor);
+                    Assert (neighbor->neighbor_child_on_subface (neighbor_face_no,
+                                                                 neighbor_subface_no)
+                            == cell,
+                            ExcInternalError());
 
-                  const std::pair<unsigned int, unsigned int>
-                  faceno_subfaceno = cell->neighbor_of_coarser_neighbor(face_no);
-                  const unsigned int neighbor_face_no    = faceno_subfaceno.first,
-                                     neighbor_subface_no = faceno_subfaceno.second;
+                    fe_v_face.reinit (cell, face_no);
+                    fe_v_subface_neighbor.reinit (neighbor,
+                                                  neighbor_face_no,
+                                                  neighbor_subface_no);
 
-                  Assert (neighbor->neighbor_child_on_subface (neighbor_face_no,
-                                                               neighbor_subface_no)
-                          == cell,
-                          ExcInternalError());
-
-                  fe_v_face.reinit (cell, face_no);
-                  fe_v_subface_neighbor.reinit (neighbor,
-                                                neighbor_face_no,
-                                                neighbor_subface_no);
-
-                  assemble_face_term (face_no, fe_v_face,
-                                      fe_v_subface_neighbor,
-                                      dof_indices,
-                                      dof_indices_neighbor,
-                                      false,
-                                      numbers::invalid_unsigned_int,
-                                      cell->face(face_no)->diameter());
-                }
-            }
-      } // End of if (cell->is_locally_owned())
-      }
+                    assemble_face_term (face_no, fe_v_face,
+                                        fe_v_subface_neighbor,
+                                        dof_indices,
+                                        dof_indices_neighbor,
+                                        false,
+                                        numbers::invalid_unsigned_int,
+                                        cell->face(face_no)->diameter());
+                  }
+              }
+        } // End of if (cell->is_locally_owned())
 
 
     // After all this assembling, notify the Trilinos matrix object that the
@@ -800,7 +798,7 @@ namespace Step33
         // data types we have chosen).
         for (unsigned int k=0; k<dofs_per_cell; ++k)
           {
-             AssertIsFinite(R_i.fastAccessDx(k));
+            AssertIsFinite(R_i.fastAccessDx(k));
             residual_derivatives[k] = R_i.fastAccessDx(k);
           }
         system_matrix.add(dof_indices[i], dof_indices, residual_derivatives);
@@ -1159,25 +1157,24 @@ namespace Step33
     endc = dof_handler.end();
 
     for (unsigned int cell_no=0; cell!=endc; ++cell, ++cell_no)
-      {
       if (cell->is_locally_owned())
         {
 
-        cell->clear_coarsen_flag();
-        cell->clear_refine_flag();
+          cell->clear_coarsen_flag();
+          cell->clear_refine_flag();
 
-        if ((cell->level() < parameters.shock_levels) &&
-            (std::fabs(refinement_indicators(cell_no)) > parameters.shock_val))
-          {
-            cell->set_refine_flag();
-          }
-        else if ((cell->level() > 0) &&
-                 (std::fabs(refinement_indicators(cell_no)) < 0.75*parameters.shock_val))
-          {
-            cell->set_coarsen_flag();
-          }
+          if ((cell->level() < parameters.shock_levels) &&
+              (std::fabs(refinement_indicators(cell_no)) > parameters.shock_val))
+            {
+              cell->set_refine_flag();
+            }
+          else if ((cell->level() > 0) &&
+                   (std::fabs(refinement_indicators(cell_no)) < 0.75*parameters.shock_val))
+            {
+              cell->set_coarsen_flag();
+            }
         }
-      }
+
 
     // Then we need to transfer the various solution vectors from the old to
     // the new grid while we do the refinement. The SolutionTransfer class is
@@ -1395,27 +1392,34 @@ namespace Step33
 
 //    TimerOutput::Scope t(computing_timer, "initialization");
 
-  std::ofstream time_advance_history_file;
-  std::ofstream interation_history_file;
-  if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
-   {
-    time_advance_history_file.open(
-    parameters.time_advance_history_filename.c_str());
-    Assert (time_advance_history_file,
-            ExcFileNotOpen(parameters.time_advance_history_filename.c_str()));
+    std::ofstream time_advance_history_file;
+    std::ofstream interation_history_file;
+    if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
+      {
+        time_advance_history_file.open(
+          parameters.time_advance_history_filename.c_str());
+        Assert (time_advance_history_file,
+                ExcFileNotOpen(parameters.time_advance_history_filename.c_str()));
+
+        time_advance_history_file.setf(std::ios::scientific);
+        time_advance_history_file.precision(6);
+
+
 //    ConditionalOStream time_advance_history_file(time_advance_history_file_std,
 //                                                 (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
 //                                                  );
 
-    interation_history_file.open(
-    parameters.interation_history_filename.c_str());
-    Assert (interation_history_file,
-            ExcFileNotOpen(parameters.interation_history_filename.c_str()));
+        interation_history_file.open(
+          parameters.interation_history_filename.c_str());
+        Assert (interation_history_file,
+                ExcFileNotOpen(parameters.interation_history_filename.c_str()));
+        interation_history_file.setf(std::ios::scientific);
+        interation_history_file.precision(6);
 
 //    ConditionalOStream interation_history_file (interation_history_file_std,
 //                                                (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
 //                                                );
-   }
+      }
 
     setup_system();
 
@@ -1423,8 +1427,8 @@ namespace Step33
                              parameters.initial_conditions, locally_owned_solution);
 
     old_solution = locally_owned_solution;
-    current_solution = locally_owned_solution;
-    predictor = locally_owned_solution;
+    current_solution = old_solution;
+    predictor = old_solution;
 
     if (parameters.do_refine == true)
       for (unsigned int i=0; i<parameters.shock_levels; ++i)
@@ -1466,45 +1470,39 @@ namespace Step33
     unsigned int n_time_step(0);
     unsigned int n_total_inter(0);
 
-  if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
-    {
-    time_advance_history_file
-        << "   iter     n_cell     n_dofs          time   i_step"
-        << "  i_Newton    Newton_res  n_linear_iter    linear_res"
-        << "  linear_search_len  time_step_size  time_step_factor"
-        << "  time_march_res"
-        << '\n';
-    interation_history_file
-        << "   iter     n_cell     n_dofs          time   i_step"
-        << "  i_Newton    Newton_res  n_linear_iter    linear_res"
-        << "  linear_search_len  time_step_size  time_step_factor"
-        << "  Newton_update_norm"
-        << '\n';
-    }
+    if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
+      {
+        time_advance_history_file
+            << "   iter     n_cell     n_dofs          time   i_step"
+            << "  i_Newton    Newton_res  n_linear_iter    linear_res"
+            << "  linear_search_len  time_step_size  time_step_factor"
+            << "  time_march_res"
+            << '\n';
+        interation_history_file
+            << "   iter     n_cell     n_dofs          time   i_step"
+            << "  i_Newton    Newton_res  n_linear_iter    linear_res"
+            << "  linear_search_len  time_step_size  time_step_factor"
+            << "  Newton_update_norm"
+            << '\n';
+      }
 
-    time_advance_history_file.setf(std::ios::scientific);
-    time_advance_history_file.precision(6);
-    interation_history_file.setf(std::ios::scientific);
-    interation_history_file.precision(6);
 
     while (time < parameters.final_time)
       {
-        if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
-          {
-        std::cout << "T=" << time << std::endl
-                  << "   Number of active cells:       "
-                  << triangulation.n_active_cells()
-                  << std::endl
-                  << "   Number of degrees of freedom: "
-                  << dof_handler.n_dofs()
-                  << std::endl
-                  << std::endl;
+        pcout << "T=" << time << std::endl
+              << "   Number of active cells:       "
+              << triangulation.n_active_cells()
+              << std::endl
+              << "   Number of degrees of freedom: "
+              << dof_handler.n_dofs()
+              << std::endl
+              << std::endl;
 
-        std::cout << "   NonLin Res   NewtonUpdateNorm  Lin Iter     Lin Res     "
-                  << "Linear Search Len      Time Step Size      Time Step Factor" << std::endl
-                  << "   __________________________________________"
-                  << "_____________________________________________" << std::endl;
-          }
+        pcout << "   NonLin Res   NewtonUpdateNorm  Lin Iter     Lin Res     "
+              << "Linear Search Len      Time Step Size      Time Step Factor" << std::endl
+              << "   __________________________________________"
+              << "_____________________________________________" << std::endl;
+
         // Then comes the inner Newton iteration to solve the nonlinear
         // problem in each time step. The way it works is to reset matrix and
         // right hand side to zero, then assemble the linear system. If the
@@ -1546,6 +1544,7 @@ namespace Step33
         double newton_update_norm;
         std::pair<unsigned int, double> convergence;
 
+        locally_owned_solution = current_solution;
         do // Newton iteration
           {
             system_matrix = 0;
@@ -1565,40 +1564,41 @@ namespace Step33
 
             Assert(index_linear_search_length < 9, ExcIndexRange(index_linear_search_length,0,9));
             newton_update *= linear_search_length[index_linear_search_length];
-            current_solution += newton_update;
+            locally_owned_solution += newton_update;
+            current_solution = locally_owned_solution;
             newton_update_norm = newton_update.l2_norm();
 
             if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
               {
-            std::printf("   %-13.6e    %-13.6e  %04d        %-5.2e            %7.4g          %7.4g          %7.4g\n",
-                        res_norm,newton_update_norm, convergence.first, convergence.second,
-                        linear_search_length[index_linear_search_length],
-                        parameters.time_step, parameters.time_step_factor);
+                std::printf("   %-13.6e    %-13.6e  %04d        %-5.2e            %7.4g          %7.4g          %7.4g\n",
+                            res_norm,newton_update_norm, convergence.first, convergence.second,
+                            linear_search_length[index_linear_search_length],
+                            parameters.time_step, parameters.time_step_factor);
               }
             linear_solver_diverged = std::isnan(convergence.second);
 
             ++nonlin_iter;
             ++n_total_inter;
 
-if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
-  {
-            // Out put convergence history
-            interation_history_file
-                << std::setw(7) << n_total_inter << ' '
-                << std::setw(10) << triangulation.n_active_cells() << ' '
-                << std::setw(10) << dof_handler.n_dofs() << ' '
-                << std::setw(13) << time << ' '
-                << std::setw(8) << n_time_step << ' '
-                << std::setw(9) << nonlin_iter << ' '
-                << std::setw(13) << res_norm << ' '
-                << std::setw(14) << convergence.first << ' '
-                << std::setw(13) << convergence.second << ' '
-                << std::setw(18) << linear_search_length[index_linear_search_length] << ' '
-                << std::setw(15) << parameters.time_step << ' '
-                << std::setw(17) << parameters.time_step_factor << ' '
-                << std::setw(19) << newton_update_norm << ' '
-                << '\n';
-  }
+            if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
+              {
+                // Out put convergence history
+                interation_history_file
+                    << std::setw(7) << n_total_inter << ' '
+                    << std::setw(10) << triangulation.n_active_cells() << ' '
+                    << std::setw(10) << dof_handler.n_dofs() << ' '
+                    << std::setw(13) << time << ' '
+                    << std::setw(8) << n_time_step << ' '
+                    << std::setw(9) << nonlin_iter << ' '
+                    << std::setw(13) << res_norm << ' '
+                    << std::setw(14) << convergence.first << ' '
+                    << std::setw(13) << convergence.second << ' '
+                    << std::setw(18) << linear_search_length[index_linear_search_length] << ' '
+                    << std::setw(15) << parameters.time_step << ' '
+                    << std::setw(17) << parameters.time_step_factor << ' '
+                    << std::setw(19) << newton_update_norm << ' '
+                    << '\n';
+              }
             // Check result.
             if (res_norm < 1e-10)
               {
@@ -1607,7 +1607,7 @@ if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
 
             if (linear_solver_diverged)
               {
-                std::cout << "  Linear solver diverged..\n";
+                pcout << "  Linear solver diverged..\n";
               }
             // May 'newton_iter_converged' and 'linear_solver_diverged' be true
             // together? I don't think so but not sure.
@@ -1627,8 +1627,8 @@ if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
                 // 1/1024 < 0.0005 < 1/2048
                 if (parameters.time_step_factor > 0.0005)
                   {
-                    std::cout << "  Newton iteration not converge in " << nonlin_iter_threshold << " steps.\n"
-                              << "  Recompute with different linear search length or time step...\n\n";
+                    pcout << "  Newton iteration not converge in " << nonlin_iter_threshold << " steps.\n"
+                          << "  Recompute with different linear search length or time step...\n\n";
                     newton_iter_converged = false;
                     break;
                   }
@@ -1646,23 +1646,23 @@ if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
         if (newton_iter_converged)
           {
 
-if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
-  {
-            //Output time marching history
-            time_advance_history_file
-                << std::setw(7) << n_total_inter << ' '
-                << std::setw(10) << triangulation.n_active_cells() << ' '
-                << std::setw(10) << dof_handler.n_dofs() << ' '
-                << std::setw(13) << time << ' '
-                << std::setw(8) << n_time_step << ' '
-                << std::setw(9) << nonlin_iter << ' '
-                << std::setw(13) << res_norm << ' '
-                << std::setw(14) << convergence.first << ' '
-                << std::setw(13) << convergence.second << ' '
-                << std::setw(18) << linear_search_length[index_linear_search_length] << ' '
-                << std::setw(15) << parameters.time_step << ' '
-                << std::setw(17) << parameters.time_step_factor << ' ';
-  }
+            if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
+              {
+                //Output time marching history
+                time_advance_history_file
+                    << std::setw(7) << n_total_inter << ' '
+                    << std::setw(10) << triangulation.n_active_cells() << ' '
+                    << std::setw(10) << dof_handler.n_dofs() << ' '
+                    << std::setw(13) << time << ' '
+                    << std::setw(8) << n_time_step << ' '
+                    << std::setw(9) << nonlin_iter << ' '
+                    << std::setw(13) << res_norm << ' '
+                    << std::setw(14) << convergence.first << ' '
+                    << std::setw(13) << convergence.second << ' '
+                    << std::setw(18) << linear_search_length[index_linear_search_length] << ' '
+                    << std::setw(15) << parameters.time_step << ' '
+                    << std::setw(17) << parameters.time_step_factor << ' ';
+              }
 
             // We only get to this point if the Newton iteration has converged, so
             // do various post convergence tasks here:
@@ -1700,8 +1700,8 @@ if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
                 parameters.time_step_factor *= 2.0;
                 time_step_doubled = true;
                 index_linear_search_length = 0;
-                std::cout << "  We got ten successive converged time steps.\n"
-                          << "  Time step size increased to " << parameters.time_step << "\n\n";
+                pcout << "  We got ten successive converged time steps.\n"
+                      << "  Time step size increased to " << parameters.time_step << "\n\n";
                 predictor.sadd (1.0+predictor_leap_ratio*2.0, 0.0-predictor_leap_ratio*2.0, old_solution);
               }
             else
@@ -1712,14 +1712,17 @@ if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
             // old_solution is going to be overwritten immediately.
             // Just use it to calculate the time advancing norms.
             old_solution.sadd (-1.0, current_solution);
-            std::cout << "  Order of time advancing L_infty norm = "
-                      << std::log(old_solution.linfty_norm())/std::log(10.0) << std::endl;
-            std::cout << "  Order of time advancing L_2     norm = "
-                      << std::log(old_solution.l2_norm())/std::log(10.0) << std::endl;
+            pcout << "  Order of time advancing L_infty norm = "
+                  << std::log(old_solution.linfty_norm())/std::log(10.0) << std::endl;
+            pcout << "  Order of time advancing L_2     norm = "
+                  << std::log(old_solution.l2_norm())/std::log(10.0) << std::endl;
 
-            time_advance_history_file
-                << std::setw(15) << old_solution.l2_norm()
-                << '\n';
+            if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
+              {
+                time_advance_history_file
+                    << std::setw(15) << old_solution.l2_norm()
+                    << '\n';
+              }
 
             old_solution = current_solution;
 
@@ -1734,7 +1737,7 @@ if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
               }
             current_solution_backup = current_solution;
 
- 
+
             check_negative_density_pressure();
 
             calc_time_step();
@@ -1756,7 +1759,7 @@ if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
                 parameters.time_step_factor *= 0.5;
                 time_step_doubled = false;
                 index_linear_search_length = 0;
-                std::cout << "  Time step size reduced to " << parameters.time_step << "\n\n";
+                pcout << "  Time step size reduced to " << parameters.time_step << "\n\n";
               }
 
             current_solution = current_solution_backup;
@@ -1773,8 +1776,11 @@ if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
               }
             converged_newton_iters = 0;
           }
-        time_advance_history_file << std::flush;
-        interation_history_file << std::flush;
+        if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
+          {
+            time_advance_history_file << std::flush;
+            interation_history_file << std::flush;
+          }
       } // End of time advancing
     time_advance_history_file.close();
     interation_history_file.close();
