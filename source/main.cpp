@@ -19,13 +19,11 @@ int main (int argc, char *argv[])
   try
     {
       Utilities::MPI::MPI_InitFinalize mpi_initialization(argc, argv, /* int max_num_threads */ 1);
-      ConditionalOStream pcout(std::cout,
-                               (Utilities::MPI::this_mpi_process(MPI_COMM_WORLD) == 0));
 
       deallog.depth_console(0);
-      if (argc != 2)
+      if ((argc != 2) && (Utilities::MPI::this_mpi_process(MPI_COMM_WORLD) == 0))
         {
-          pcout << "Usage:" << argv[0] << " input_file" << std::endl;
+          std::cout << "Usage:" << argv[0] << " input_file" << std::endl;
           std::exit(1);
         }
 
@@ -36,7 +34,7 @@ int main (int argc, char *argv[])
     {
       std::ofstream error_info;
       {
-        std::string filename("node");
+        std::string filename("slot");
         filename = filename + Utilities::int_to_string(Utilities::MPI::this_mpi_process(MPI_COMM_WORLD), 4);
         filename = filename + ("_runtime.error");
         error_info.open(filename.c_str());
@@ -45,7 +43,7 @@ int main (int argc, char *argv[])
         {
           std::cerr << "  Can not open error log file! \n"
                     << "  Aborting!" << std::endl;
-          return (1);
+          return (7);
         }
 
       error_info << std::endl << std::endl
@@ -63,7 +61,7 @@ int main (int argc, char *argv[])
     {
       std::ofstream error_info;
       {
-        std::string filename("node");
+        std::string filename("slot");
         filename = filename + Utilities::int_to_string(Utilities::MPI::this_mpi_process(MPI_COMM_WORLD), 4);
         filename = filename + ("_runtime.error");
         error_info.open(filename.c_str());
@@ -72,7 +70,7 @@ int main (int argc, char *argv[])
         {
           std::cerr << "  Can not open error log file! \n"
                     << "  Aborting!" << std::endl;
-          return (1);
+          return (7);
         }
 
       error_info << std::endl << std::endl

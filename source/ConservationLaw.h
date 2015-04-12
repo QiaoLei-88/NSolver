@@ -21,13 +21,10 @@
 #include <deal.II/base/timer.h>
 
 #include <deal.II/lac/vector.h>
-//#include <deal.II/lac/dynamic_sparsity_pattern.h>
 #include <deal.II/lac/trilinos_sparsity_pattern.h>
 
-//#include <deal.II/grid/tria.h>
 #include <deal.II/grid/grid_generator.h>
 #include <deal.II/grid/grid_out.h>
-//#include <deal.II/grid/grid_refinement.h>
 
 //Include grid_tools to scale mesh.
 #include <deal.II/grid/grid_tools.h>
@@ -47,26 +44,25 @@
 
 #include <deal.II/numerics/data_out.h>
 #include <deal.II/numerics/vector_tools.h>
-//#include <deal.II/numerics/solution_transfer.h>
 
 // Header files for MPI parallel computing
 #include <deal.II/base/index_set.h>
 #include <deal.II/lac/sparsity_tools.h>
 #include <deal.II/lac/generic_linear_algebra.h>
 
-//#define USE_TRILINOS_LA
+#define USE_TRILINOS_LA
 namespace LA
 {
-//#ifdef USE_PETSC_LA
-//  using namespace dealii::LinearAlgebraPETSc;
-//#else
+#ifdef USE_PETSC_LA
+  using namespace dealii::LinearAlgebraPETSc;
+#else
   using namespace dealii::LinearAlgebraTrilinos;
-//#endif
+#endif
 }
 #include <deal.II/distributed/tria.h>
 #include <deal.II/distributed/grid_refinement.h>
 #include <deal.II/distributed/solution_transfer.h>
-
+// End Header files for MPI
 
 // Then, as mentioned in the introduction, we use various Trilinos packages as
 // linear solvers as well as for automatic differentiation. These are in the
@@ -157,14 +153,12 @@ namespace Step33
 
     MPI_Comm                                  mpi_communicator;
     parallel::distributed::Triangulation<dim> triangulation;
-    //    DoFHandler<dim>                           dof_handler;
-    //    FE_Q<dim>                                 fe;
+
     IndexSet                                  locally_owned_dofs;
     IndexSet                                  locally_relevant_dofs;
 
     // TimerOutput                               computing_timer;
 
-    //// Triangulation<dim>   triangulation;
     const MappingQ1<dim> mapping;
 
     const FESystem<dim>  fe;
@@ -186,8 +180,6 @@ namespace Step33
     LA::MPI::Vector       locally_owned_solution;
 
     LA::MPI::Vector       old_solution;
-    //    LA::MPI::Vector locally_relevant_solution;
-    //    LA::MPI::Vector system_rhs;
 
     LA::MPI::Vector       current_solution;
     LA::MPI::Vector       current_solution_backup;
@@ -202,6 +194,7 @@ namespace Step33
     // size to "locally_relevant_dofs" because ghost cell is needed to
     // determine the outmost face values.
     LA::MPI::Vector      residual_for_output;
+    LA::MPI::Vector      tmp_vector;
     Vector<double>       entropy_viscosity;
     Vector<double>       cellSize_viscosity;
 
@@ -223,6 +216,8 @@ namespace Step33
     // MPI in generic_linear_algebra.h
     LA::MPI::SparseMatrix system_matrix;
 
+    const bool I_am_host;
+    const unsigned int myid;
     Parameters::AllParameters<dim>  parameters;
     ConditionalOStream              verbose_cout;
     ConditionalOStream              pcout;
