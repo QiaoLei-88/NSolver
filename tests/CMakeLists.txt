@@ -4,6 +4,8 @@ INCLUDE(${CMAKE_SOURCE_DIR}/utilities/cmake/setup_test_case.macro.cmake)
 SET (_exec_copy ln )
 SET (_para_copy -s )
 
+SET (_exec_mpi mpirun)
+
 # Find and set diff executable. Use numdiff if it exits, otherwise use standard diff
 # instead. If non of them exits, abort building.
 FIND_PROGRAM(_exec_diff
