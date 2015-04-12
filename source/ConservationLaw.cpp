@@ -1329,34 +1329,32 @@ namespace Step33
         }
     }
 
-    std::ofstream time_advance_history_file;
-    std::ofstream interation_history_file;
-    if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
+
+
+    std::ofstream interation_history_file_std;
+    std::ofstream time_advance_history_file_std;
+    if (I_am_host)
       {
-        time_advance_history_file.open(
+        time_advance_history_file_std.open(
           parameters.time_advance_history_filename.c_str());
-        Assert (time_advance_history_file,
+        Assert (time_advance_history_file_std,
                 ExcFileNotOpen(parameters.time_advance_history_filename.c_str()));
 
-        time_advance_history_file.setf(std::ios::scientific);
-        time_advance_history_file.precision(6);
+        time_advance_history_file_std.setf(std::ios::scientific);
+        time_advance_history_file_std.precision(6);
 
-
-//    ConditionalOStream time_advance_history_file(time_advance_history_file_std,
-//                                                 (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
-//                                                  );
-
-        interation_history_file.open(
+        interation_history_file_std.open(
           parameters.interation_history_filename.c_str());
-        Assert (interation_history_file,
+        Assert (interation_history_file_std,
                 ExcFileNotOpen(parameters.interation_history_filename.c_str()));
-        interation_history_file.setf(std::ios::scientific);
-        interation_history_file.precision(6);
-
-//    ConditionalOStream interation_history_file (interation_history_file_std,
-//                                                (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
-//                                                );
+        interation_history_file_std.setf(std::ios::scientific);
+        interation_history_file_std.precision(6);
       }
+    ConditionalOStream interation_history_file (interation_history_file_std,
+                                                I_am_host);
+    ConditionalOStream time_advance_history_file(time_advance_history_file_std,
+                                                 I_am_host);
+
 
     setup_system();
 
@@ -1402,21 +1400,18 @@ namespace Step33
     unsigned int n_time_step(0);
     unsigned int n_total_inter(0);
 
-    if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
-      {
-        time_advance_history_file
-            << "   iter     n_cell     n_dofs          time   i_step"
-            << "  i_Newton    Newton_res  n_linear_iter    linear_res"
-            << "  linear_search_len  time_step_size  time_step_factor"
-            << "  time_march_res"
-            << '\n';
-        interation_history_file
-            << "   iter     n_cell     n_dofs          time   i_step"
-            << "  i_Newton    Newton_res  n_linear_iter    linear_res"
-            << "  linear_search_len  time_step_size  time_step_factor"
-            << "  Newton_update_norm"
-            << '\n';
-      }
+    time_advance_history_file
+        << "   iter     n_cell     n_dofs          time   i_step"
+        << "  i_Newton    Newton_res  n_linear_iter    linear_res"
+        << "  linear_search_len  time_step_size  time_step_factor"
+        << "  time_march_res"
+        << '\n';
+    interation_history_file
+        << "   iter     n_cell     n_dofs          time   i_step"
+        << "  i_Newton    Newton_res  n_linear_iter    linear_res"
+        << "  linear_search_len  time_step_size  time_step_factor"
+        << "  Newton_update_norm"
+        << '\n';
 
     LA::MPI::Vector      tmp_vector;
     while (time < parameters.final_time)
@@ -1500,7 +1495,7 @@ namespace Step33
             current_solution = locally_owned_solution;
             newton_update_norm = newton_update.l2_norm();
 
-            if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
+            if (I_am_host)
               {
                 std::printf("   %-13.6e    %-13.6e  %04d        %-5.2e            %7.4g          %7.4g          %7.4g\n",
                             res_norm,newton_update_norm, convergence.first, convergence.second,
@@ -1512,25 +1507,22 @@ namespace Step33
             ++nonlin_iter;
             ++n_total_inter;
 
-            if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
-              {
-                // Out put convergence history
-                interation_history_file
-                    << std::setw(7) << n_total_inter << ' '
-                    << std::setw(10) << triangulation.n_active_cells() << ' '
-                    << std::setw(10) << dof_handler.n_dofs() << ' '
-                    << std::setw(13) << time << ' '
-                    << std::setw(8) << n_time_step << ' '
-                    << std::setw(9) << nonlin_iter << ' '
-                    << std::setw(13) << res_norm << ' '
-                    << std::setw(14) << convergence.first << ' '
-                    << std::setw(13) << convergence.second << ' '
-                    << std::setw(18) << linear_search_length[index_linear_search_length] << ' '
-                    << std::setw(15) << parameters.time_step << ' '
-                    << std::setw(17) << parameters.time_step_factor << ' '
-                    << std::setw(19) << newton_update_norm << ' '
-                    << '\n';
-              }
+            // Out put convergence history
+            interation_history_file
+                << std::setw(7) << n_total_inter << ' '
+                << std::setw(10) << triangulation.n_active_cells() << ' '
+                << std::setw(10) << dof_handler.n_dofs() << ' '
+                << std::setw(13) << time << ' '
+                << std::setw(8) << n_time_step << ' '
+                << std::setw(9) << nonlin_iter << ' '
+                << std::setw(13) << res_norm << ' '
+                << std::setw(14) << convergence.first << ' '
+                << std::setw(13) << convergence.second << ' '
+                << std::setw(18) << linear_search_length[index_linear_search_length] << ' '
+                << std::setw(15) << parameters.time_step << ' '
+                << std::setw(17) << parameters.time_step_factor << ' '
+                << std::setw(19) << newton_update_norm << ' '
+                << '\n';
             // Check result.
             if (res_norm < 1e-10)
               {
@@ -1577,24 +1569,20 @@ namespace Step33
 
         if (newton_iter_converged)
           {
-
-            if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
-              {
-                //Output time marching history
-                time_advance_history_file
-                    << std::setw(7) << n_total_inter << ' '
-                    << std::setw(10) << triangulation.n_active_cells() << ' '
-                    << std::setw(10) << dof_handler.n_dofs() << ' '
-                    << std::setw(13) << time << ' '
-                    << std::setw(8) << n_time_step << ' '
-                    << std::setw(9) << nonlin_iter << ' '
-                    << std::setw(13) << res_norm << ' '
-                    << std::setw(14) << convergence.first << ' '
-                    << std::setw(13) << convergence.second << ' '
-                    << std::setw(18) << linear_search_length[index_linear_search_length] << ' '
-                    << std::setw(15) << parameters.time_step << ' '
-                    << std::setw(17) << parameters.time_step_factor << ' ';
-              }
+            //Output time marching history
+            time_advance_history_file
+                << std::setw(7) << n_total_inter << ' '
+                << std::setw(10) << triangulation.n_active_cells() << ' '
+                << std::setw(10) << dof_handler.n_dofs() << ' '
+                << std::setw(13) << time << ' '
+                << std::setw(8) << n_time_step << ' '
+                << std::setw(9) << nonlin_iter << ' '
+                << std::setw(13) << res_norm << ' '
+                << std::setw(14) << convergence.first << ' '
+                << std::setw(13) << convergence.second << ' '
+                << std::setw(18) << linear_search_length[index_linear_search_length] << ' '
+                << std::setw(15) << parameters.time_step << ' '
+                << std::setw(17) << parameters.time_step_factor << ' ';
 
             // We only get to this point if the Newton iteration has converged, so
             // do various post convergence tasks here:
@@ -1656,11 +1644,8 @@ namespace Step33
                   << std::log(time_advance_l2_norm)/std::log(10.0) << std::endl;
 
 
-            if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
-              {
-                time_advance_history_file
-                    << std::setw(15) << time_advance_l2_norm << '\n';
-              }
+            time_advance_history_file
+                << std::setw(15) << time_advance_l2_norm << '\n';
 
             old_solution = current_solution;
 
@@ -1711,14 +1696,16 @@ namespace Step33
               }
             converged_newton_iters = 0;
           }
-        if (Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
-          {
-            time_advance_history_file << std::flush;
-            interation_history_file << std::flush;
-          }
+
+        time_advance_history_file << std::flush;
+        interation_history_file << std::flush;
+
       } // End of time advancing
-    time_advance_history_file.close();
-    interation_history_file.close();
+    if (I_am_host)
+      {
+        time_advance_history_file_std.close();
+        interation_history_file_std.close();
+      }
   } //End of ConservationLaw<dim>::run ()
 
   template class ConservationLaw<2>;
