@@ -75,7 +75,7 @@ namespace Step33
   void
   EulerEquations<dim>::compute_refinement_indicators (const DoFHandler<dim> &dof_handler,
                                                       const Mapping<dim>    &mapping,
-                                                      const Vector<double>  &solution,
+                                                      const LA::MPI::Vector  &solution,
                                                       Vector<double>        &refinement_indicators)
   {
     const unsigned int dofs_per_cell = dof_handler.get_fe().dofs_per_cell;

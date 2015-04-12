@@ -1104,9 +1104,12 @@ namespace Step33
   ConservationLaw<dim>::
   compute_refinement_indicators (Vector<double>  &refinement_indicators) const
   {
+    LA::MPI::Vector      tmp_vector;
+    tmp_vector.reinit(current_solution, true);
+    tmp_vector = predictor;
     EulerEquations<dim>::compute_refinement_indicators (dof_handler,
                                                         mapping,
-                                                        predictor,
+                                                        tmp_vector,
                                                         refinement_indicators);
   }
 
@@ -1119,8 +1122,12 @@ namespace Step33
   // think should be refined:
   template <int dim>
   void
-  ConservationLaw<dim>::refine_grid (const Vector<double>  &refinement_indicators)
+  ConservationLaw<dim>::refine_grid()
   {
+
+    Vector<double> refinement_indicators (triangulation.n_active_cells());
+    compute_refinement_indicators(refinement_indicators);
+
     typename DoFHandler<dim>::active_cell_iterator
     cell = dof_handler.begin_active(),
     endc = dof_handler.end();
@@ -1128,7 +1135,6 @@ namespace Step33
     for (unsigned int cell_no=0; cell!=endc; ++cell, ++cell_no)
       if (cell->is_locally_owned())
         {
-
           cell->clear_coarsen_flag();
           cell->clear_refine_flag();
 
@@ -1144,33 +1150,36 @@ namespace Step33
             }
         }
 
-
     // Then we need to transfer the various solution vectors from the old to
     // the new grid while we do the refinement. The SolutionTransfer class is
     // our friend here; it has a fairly extensive documentation, including
     // examples, so we won't comment much on the following code. The last
     // three lines simply re-set the sizes of some other vectors to the now
     // correct size:
+
+    LA::MPI::Vector      tmp_vector;
+    tmp_vector.reinit(old_solution, true);
+    tmp_vector = predictor;
+    // transfer_in needs vectors with ghost cells.
     std::vector<const LA::MPI::Vector * > transfer_in;
-
-
     transfer_in.push_back(&old_solution);
-    transfer_in.push_back(&predictor);
-
-    triangulation.prepare_coarsening_and_refinement();
+    transfer_in.push_back(&tmp_vector);
 
     parallel::distributed::SolutionTransfer<dim, LA::MPI::Vector> soltrans(dof_handler);
+
+    triangulation.prepare_coarsening_and_refinement();
     soltrans.prepare_for_coarsening_and_refinement(transfer_in);
 
-    triangulation.execute_coarsening_and_refinement ();
+    triangulation.execute_coarsening_and_refinement();
 
     setup_system();
 
     // Transfer data out
     {
       std::vector<LA::MPI::Vector * > transfer_out;
-      LA::MPI::Vector interpolated_old_solution(old_solution);
+      LA::MPI::Vector interpolated_old_solution(predictor);
       LA::MPI::Vector interpolated_predictor(predictor);
+      // transfer_out needs vectors without ghost cells.
       transfer_out.push_back(&interpolated_old_solution);
       transfer_out.push_back(&interpolated_predictor);
       soltrans.interpolate(transfer_out);
@@ -1361,10 +1370,7 @@ namespace Step33
     if (parameters.do_refine == true)
       for (unsigned int i=0; i<parameters.shock_levels; ++i)
         {
-          Vector<double> refinement_indicators (triangulation.n_active_cells());
-
-          compute_refinement_indicators(refinement_indicators);
-          refine_grid(refinement_indicators);
+          refine_grid();
 
           VectorTools::interpolate(dof_handler,
                                    parameters.initial_conditions, locally_owned_solution);
@@ -1412,7 +1418,7 @@ namespace Step33
             << '\n';
       }
 
-
+    LA::MPI::Vector      tmp_vector;
     while (time < parameters.final_time)
       {
         pcout << "T=" << time << std::endl
@@ -1660,11 +1666,9 @@ namespace Step33
 
             if (parameters.do_refine == true)
               {
-                Vector<double> refinement_indicators (triangulation.n_active_cells());
-                compute_refinement_indicators(refinement_indicators);
-
-                refine_grid(refinement_indicators);
+                refine_grid();
               }
+
             current_solution_backup = current_solution;
 
             check_negative_density_pressure();

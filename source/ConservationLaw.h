@@ -133,7 +133,7 @@ namespace Step33
     std::pair<unsigned int, double> solve (LA::MPI::Vector &solution);
 
     void compute_refinement_indicators (Vector<double> &indicator) const;
-    void refine_grid (const Vector<double> &indicator);
+    void refine_grid ();
 
     void output_results () const;
 
@@ -194,7 +194,7 @@ namespace Step33
     // size to "locally_relevant_dofs" because ghost cell is needed to
     // determine the outmost face values.
     LA::MPI::Vector      residual_for_output;
-    LA::MPI::Vector      tmp_vector;
+
     Vector<double>       entropy_viscosity;
     Vector<double>       cellSize_viscosity;
 

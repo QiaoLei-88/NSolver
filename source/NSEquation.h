@@ -64,6 +64,17 @@
 // used to find the Jacobian for a fully implicit Newton iteration:
 #include <Sacado.hpp>
 
+// Header file for MPI parallel vectors
+#include <deal.II/lac/generic_linear_algebra.h>
+#define USE_TRILINOS_LA
+namespace LA
+{
+#ifdef USE_PETSC_LA
+  using namespace dealii::LinearAlgebraPETSc;
+#else
+  using namespace dealii::LinearAlgebraTrilinos;
+#endif
+}
 
 // And this again is C++:
 #include <iostream>
@@ -313,7 +324,7 @@ namespace Step33
     void
     compute_refinement_indicators (const DoFHandler<dim> &dof_handler,
                                    const Mapping<dim>    &mapping,
-                                   const Vector<double>  &solution,
+                                   const LA::MPI::Vector &solution,
                                    Vector<double>        &refinement_indicators);
 
     // @sect4{EulerEquations::Postprocessor}
