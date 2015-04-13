@@ -1336,7 +1336,7 @@ namespace Step33
     computing_timer.leave_subsection ("0:Read grid");
     computing_timer.enter_subsection ("1:Initialization");
 
-    std::ofstream interation_history_file_std;
+    std::ofstream iteration_history_file_std;
     std::ofstream time_advance_history_file_std;
     if (I_am_host)
       {
@@ -1348,14 +1348,14 @@ namespace Step33
         time_advance_history_file_std.setf (std::ios::scientific);
         time_advance_history_file_std.precision (6);
 
-        interation_history_file_std.open (
-          parameters.interation_history_filename.c_str());
-        Assert (interation_history_file_std,
-                ExcFileNotOpen (parameters.interation_history_filename.c_str()));
-        interation_history_file_std.setf (std::ios::scientific);
-        interation_history_file_std.precision (6);
+        iteration_history_file_std.open (
+          parameters.iteration_history_filename.c_str());
+        Assert (iteration_history_file_std,
+                ExcFileNotOpen (parameters.iteration_history_filename.c_str()));
+        iteration_history_file_std.setf (std::ios::scientific);
+        iteration_history_file_std.precision (6);
       }
-    ConditionalOStream interation_history_file (interation_history_file_std,
+    ConditionalOStream iteration_history_file (iteration_history_file_std,
                                                 I_am_host);
     ConditionalOStream time_advance_history_file (time_advance_history_file_std,
                                                   I_am_host);
@@ -1411,7 +1411,7 @@ namespace Step33
         << "  linear_search_len  time_step_size  time_step_factor"
         << "  time_march_res"
         << '\n';
-    interation_history_file
+    iteration_history_file
         << "   iter     n_cell     n_dofs          time   i_step"
         << "  i_Newton    Newton_res  n_linear_iter    linear_res"
         << "  linear_search_len  time_step_size  time_step_factor"
@@ -1524,7 +1524,7 @@ namespace Step33
             ++n_total_inter;
 
             // Out put convergence history
-            interation_history_file
+            iteration_history_file
                 << std::setw (7) << n_total_inter << ' '
                 << std::setw (10) << triangulation.n_active_cells() << ' '
                 << std::setw (10) << dof_handler.n_dofs() << ' '
@@ -1719,12 +1719,12 @@ namespace Step33
           }
 
         time_advance_history_file << std::flush;
-        interation_history_file << std::flush;
+        iteration_history_file << std::flush;
       } // End of time advancing
     if (I_am_host)
       {
         time_advance_history_file_std.close();
-        interation_history_file_std.close();
+        iteration_history_file_std.close();
       }
     // Timer initialized with TimerOutput::summary will print summery information
     // on its destruction.

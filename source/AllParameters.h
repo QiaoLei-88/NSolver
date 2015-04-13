@@ -213,7 +213,7 @@ namespace Step33
 
       std::string mesh_filename;
       std::string time_advance_history_filename;
-      std::string interation_history_filename;
+      std::string iteration_history_filename;
 
       enum MeshFormat
       {

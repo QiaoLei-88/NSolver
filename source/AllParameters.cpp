@@ -328,7 +328,7 @@ namespace Step33
     {
       mesh_filename = prm.get ("mesh");
       time_advance_history_filename = prm.get ("time history");
-      interation_history_filename = prm.get ("iteration history");
+      iteration_history_filename = prm.get ("iteration history");
 
       {
         const std::string mesh_format_buf = prm.get ("mesh format");
