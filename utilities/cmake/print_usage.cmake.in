@@ -12,6 +12,10 @@ MESSAGE(
 #       ${_make_command} debug          - to switch the build type to 'Debug'
 #       ${_make_command} release        - to switch the build type to 'Release'
 #
+#       ${_make_command} distclean      - to clean the build directory
+#                               This will remove directory bin, source and tests.
+#                               Use with caution!
+#
 #       ${_make_command} info           - to view this message again
 #
 #  Have a nice day!

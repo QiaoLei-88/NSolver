@@ -58,6 +58,16 @@ ADD_CUSTOM_TARGET(release
   COMMENT "Switch CMAKE_BUILD_TYPE to Release"
   )
 
+# Define a distclean target to remove every generated file:
+ADD_CUSTOM_TARGET(distclean
+  COMMAND ${CMAKE_COMMAND} -E remove_directory CMakeFiles
+  COMMAND ${CMAKE_COMMAND} -E remove_directory bin
+  COMMAND ${CMAKE_COMMAND} -E remove_directory source
+  COMMAND ${CMAKE_COMMAND} -E remove_directory tests
+  COMMAND ${CMAKE_COMMAND} -E remove CMakeCache.txt cmake_install.cmake Makefile CTestTestfile.cmake
+  COMMENT "distclean invoked"
+  )
+
 ADD_CUSTOM_TARGET(info
   COMMAND ${CMAKE_COMMAND} -P ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/print_usage.cmake
   )
