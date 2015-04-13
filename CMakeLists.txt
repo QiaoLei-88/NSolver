@@ -46,8 +46,26 @@ ADD_CUSTOM_TARGET(release
   COMMENT "Switch CMAKE_BUILD_TYPE to Release"
   )
 
+ADD_CUSTOM_TARGET(info
+  COMMAND ${CMAKE_COMMAND} -P ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/print_usage.cmake
+  )
 
 ENABLE_TESTING()
 
 ADD_SUBDIRECTORY(source)
 ADD_SUBDIRECTORY(tests)
+
+# Print help message once:
+IF(CMAKE_GENERATOR MATCHES "Ninja")
+  SET(_make_command "$ ninja")
+ELSE()
+  SET(_make_command "$ make")
+ENDIF()
+
+IF(NOT USAGE_PRINTED)
+  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/utilities/cmake/print_usage.cmake.in  ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/print_usage.cmake ESCAPE_QUOTES)
+  INCLUDE(${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/print_usage.cmake)
+  SET(USAGE_PRINTED TRUE CACHE INTERNAL "")
+ELSE()
+  MESSAGE(STATUS "Run  ${_make_command} info  to print a detailed help message")
+ENDIF()
