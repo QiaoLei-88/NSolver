@@ -36,4 +36,5 @@
 --lineend=linux
 --max-code-length=120
 --add-brackets
-
+--unpad-paren
+--pad-first-paren-out
