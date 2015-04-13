@@ -24,6 +24,18 @@ IF(NOT DEAL_II_WITH_TRILINOS)
 ENDIF()
 
 #
+# Never build in source directory
+#
+IF("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
+  MESSAGE(FATAL_ERROR "\n"
+    "  Do not build inside source directory!\n"
+    "  Set up a dedicated build directory and run\n"
+    "      ${CMAKE_COMMAND} ${CMAKE_SOURCE_DIR}\n"
+    "  from that directory.\n\n"
+    )
+ENDIF()
+
+#
 # Let's move
 #
 INCLUDE(${CMAKE_SOURCE_DIR}/utilities/cmake/list_all_subdirectories.macro.cmake)
