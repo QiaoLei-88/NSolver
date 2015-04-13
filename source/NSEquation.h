@@ -132,11 +132,11 @@ namespace Step33
     // functions:
     static
     std::vector<std::string>
-    component_names ();
+    component_names();
 
     static
     std::vector<DataComponentInterpretation::DataComponentInterpretation>
-    component_interpretation ();
+    component_interpretation();
 
     // @sect4{Transformations between variables}
 
@@ -299,7 +299,7 @@ namespace Step33
     template <typename DataVector>
     static
     void
-    compute_Wminus (const BoundaryKind  (&boundary_kind)[n_components],
+    compute_Wminus (const BoundaryKind (&boundary_kind)[n_components],
                     const Point<dim>     &normal_vector,
                     const DataVector     &Wplus,
                     const Vector<double> &boundary_values,
@@ -380,13 +380,13 @@ namespace Step33
                                          const std::vector<Point<dim> >                  &evaluation_points,
                                          std::vector<Vector<double> >                    &computed_quantities) const;
 
-      virtual std::vector<std::string> get_names () const;
+      virtual std::vector<std::string> get_names() const;
 
       virtual
       std::vector<DataComponentInterpretation::DataComponentInterpretation>
-      get_data_component_interpretation () const;
+      get_data_component_interpretation() const;
 
-      virtual UpdateFlags get_needed_update_flags () const;
+      virtual UpdateFlags get_needed_update_flags() const;
 
     private:
       const bool do_schlieren_plot;
@@ -424,9 +424,9 @@ namespace Step33
   {
     Number kinetic_energy = 0;
     for (unsigned int d=0; d<dim; ++d)
-      kinetic_energy += *(W.begin()+first_momentum_component+d) *
-                        *(W.begin()+first_momentum_component+d);
-    kinetic_energy *= 1./(2 * *(W.begin() + density_component));
+      kinetic_energy += * (W.begin()+first_momentum_component+d) *
+                        * (W.begin()+first_momentum_component+d);
+    kinetic_energy *= 1./ (2 * * (W.begin() + density_component));
 
     return kinetic_energy;
   }
@@ -437,8 +437,8 @@ namespace Step33
   EulerEquations<dim>::compute_pressure (const InputVector &W)
   {
     return ((gas_gamma-1.0) *
-            (*(W.begin() + energy_component) -
-             compute_kinetic_energy<Number>(W)));
+            (* (W.begin() + energy_component) -
+             compute_kinetic_energy<Number> (W)));
   }
 
 
@@ -451,9 +451,9 @@ namespace Step33
   Number
   EulerEquations<dim>::compute_entropy (const InputVector &W)
   {
-    return ( *(W.begin() + density_component) / (gas_gamma-1.0) *
-             std::log(compute_pressure<Number>(W)/
-                      std::pow( (*(W.begin() + density_component)), gas_gamma)
+    return (* (W.begin() + density_component) / (gas_gamma-1.0) *
+            std::log (compute_pressure<Number> (W)/
+                      std::pow ((* (W.begin() + density_component)), gas_gamma)
                      )
            );
   }
@@ -534,10 +534,10 @@ namespace Step33
         normal_flux[di] = 0;
         for (unsigned int d=0; d<dim; ++d)
           {
-            normal_flux[di] += 0.5*(iflux[di][d] + oflux[di][d]) * normal[d];
+            normal_flux[di] += 0.5* (iflux[di][d] + oflux[di][d]) * normal[d];
           }
 
-        normal_flux[di] += 0.5*alpha*(Wplus[di] - Wminus[di]);
+        normal_flux[di] += 0.5*alpha* (Wplus[di] - Wminus[di]);
       }
   }
 
@@ -616,7 +616,7 @@ namespace Step33
   template <int dim>
   template <typename DataVector>
   void
-  EulerEquations<dim>::compute_Wminus (const BoundaryKind  (&boundary_kind)[n_components],
+  EulerEquations<dim>::compute_Wminus (const BoundaryKind (&boundary_kind)[n_components],
                                        const Point<dim>     &normal_vector,
                                        const DataVector     &Wplus,
                                        const Vector<double> &boundary_values,
@@ -642,18 +642,18 @@ namespace Step33
               typename DataVector::value_type normal_velocity_incoming = 0.0;
               for (unsigned int d = first_momentum_component; d < first_momentum_component+dim; ++d)
                 {
-                  normal_velocity_incoming += boundary_values(d)*normal_vector[d];
+                  normal_velocity_incoming += boundary_values (d)*normal_vector[d];
                 }
               typename DataVector::value_type riemann_invariant_incoming = normal_velocity_incoming
-                  - 2.0 * sound_speed_incoming/(gas_gamma - 1.0);
+                  - 2.0 * sound_speed_incoming/ (gas_gamma - 1.0);
               const typename DataVector::value_type
-              mach_incoming = std::fabs(normal_velocity_incoming) / sound_speed_incoming;
+              mach_incoming = std::fabs (normal_velocity_incoming) / sound_speed_incoming;
 
               //Calculate outcoming Riemann invariant from interior conditions
               const typename DataVector::value_type pressure_outcoming
-                = compute_pressure<typename DataVector::value_type>(Wplus);
+                = compute_pressure<typename DataVector::value_type> (Wplus);
               const typename DataVector::value_type sound_speed_outcoming
-                = std::sqrt(gas_gamma * pressure_outcoming / Wplus[density_component]);
+                = std::sqrt (gas_gamma * pressure_outcoming / Wplus[density_component]);
 
               typename DataVector::value_type normal_velocity_outcoming = 0.0;
               for (unsigned int d = first_momentum_component; d < first_momentum_component+dim; ++d)
@@ -663,9 +663,9 @@ namespace Step33
               normal_velocity_outcoming /= Wplus[density_component];
 
               typename DataVector::value_type riemann_invariant_outcoming = normal_velocity_outcoming
-                  + 2.0 * sound_speed_outcoming/(gas_gamma - 1.0);
+                  + 2.0 * sound_speed_outcoming/ (gas_gamma - 1.0);
               const typename DataVector::value_type
-              mach_outcoming = std::fabs(normal_velocity_outcoming) / sound_speed_outcoming;
+              mach_outcoming = std::fabs (normal_velocity_outcoming) / sound_speed_outcoming;
               //Adjust Riemann invairant according to local Mach number
               //First case: inflow boundary with a supersonic speed,  then no out going characteristic
               //wave exists and the incoming Riemann invariant dominates.
@@ -685,24 +685,24 @@ namespace Step33
               const typename DataVector::value_type sound_speed_boundary =
                 0.25 * (gas_gamma - 1.0) * (riemann_invariant_outcoming - riemann_invariant_incoming);
               //Finally, component values of boundary element
-              Assert(sound_speed_boundary > 0.1, ExcLowerRangeType<typename DataVector::value_type> (sound_speed_boundary , 0.1));
+              Assert (sound_speed_boundary > 0.1, ExcLowerRangeType<typename DataVector::value_type> (sound_speed_boundary , 0.1));
               if (normal_velocity_boundary <= 0.0)
                 {
                   //For inflow boundary, boundary values are determined by the far field conditions
-                  Wminus[density_component] = boundary_values(density_component) *
-                                              std::pow(sound_speed_boundary/sound_speed_incoming, 2.0/(gas_gamma-1.0));
+                  Wminus[density_component] = boundary_values (density_component) *
+                                              std::pow (sound_speed_boundary/sound_speed_incoming, 2.0/ (gas_gamma-1.0));
                   const typename DataVector::value_type
                   deltaV = normal_velocity_boundary - normal_velocity_incoming;
                   for (unsigned int d = first_momentum_component; d < first_momentum_component+dim; ++d)
                     {
-                      Wminus[d] = (boundary_values(d) + deltaV * normal_vector[d]) * Wminus[density_component];
+                      Wminus[d] = (boundary_values (d) + deltaV * normal_vector[d]) * Wminus[density_component];
                     }
                 }
               else
                 {
                   //For outflow boundary, boundary values are calculated from inteiror value
                   Wminus[density_component] = Wplus[density_component] *
-                                              std::pow(sound_speed_boundary/sound_speed_outcoming, 2.0/(gas_gamma-1.0));
+                                              std::pow (sound_speed_boundary/sound_speed_outcoming, 2.0/ (gas_gamma-1.0));
                   const typename DataVector::value_type
                   deltaV = normal_velocity_boundary - normal_velocity_outcoming;
                   for (unsigned int d = first_momentum_component; d < first_momentum_component+dim; ++d)
@@ -714,13 +714,13 @@ namespace Step33
               const typename DataVector::value_type pressure_boundary = Wminus[density_component] * sound_speed_boundary *
                                                                         sound_speed_boundary / gas_gamma;
               Wminus[energy_component] = (pressure_boundary / (gas_gamma-1.0)) +
-                                         compute_kinetic_energy<typename DataVector::value_type>(Wminus);
+                                         compute_kinetic_energy<typename DataVector::value_type> (Wminus);
             }
           break;
         }
         case inflow_boundary:
         {
-          Wminus[c] = boundary_values(c);
+          Wminus[c] = boundary_values (c);
           break;
         }
 
@@ -743,7 +743,7 @@ namespace Step33
           density = (boundary_kind[density_component] ==
                      inflow_boundary
                      ?
-                     boundary_values(density_component)
+                     boundary_values (density_component)
                      :
                      Wplus[density_component]);
 
@@ -751,7 +751,7 @@ namespace Step33
           for (unsigned int d=0; d<dim; ++d)
             if (boundary_kind[d] == inflow_boundary)
               {
-                kinetic_energy += boundary_values(d)*boundary_values(d);
+                kinetic_energy += boundary_values (d)*boundary_values (d);
               }
             else
               {
@@ -759,7 +759,7 @@ namespace Step33
               }
           kinetic_energy *= 1./2./density;
 
-          Wminus[c] = boundary_values(c) / (gas_gamma-1.0) +
+          Wminus[c] = boundary_values (c) / (gas_gamma-1.0) +
                       kinetic_energy;
 
           break;
@@ -767,10 +767,10 @@ namespace Step33
 
         case no_penetration_boundary:
         {
-          Assert(c!=density_component,
-                 ExcMessage("Can not apply no_penetration_boundary to density."));
-          Assert(c!=energy_component ,
-                 ExcMessage("Can not apply no_penetration_boundary to energy."));
+          Assert (c!=density_component,
+                  ExcMessage ("Can not apply no_penetration_boundary to density."));
+          Assert (c!=energy_component ,
+                  ExcMessage ("Can not apply no_penetration_boundary to energy."));
           // We prescribe the velocity (we are dealing with a particular
           // component here so that the average of the velocities is
           // orthogonal to the surface normal.  This creates sensitivities of

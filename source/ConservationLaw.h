@@ -109,10 +109,10 @@ namespace Step33
   {
   public:
     ConservationLaw (const char *input_filename);
-    void run ();
+    void run();
 
   private:
-    void setup_system ();
+    void setup_system();
     void check_negative_density_pressure() const;
 
     void calc_time_step();
@@ -133,9 +133,9 @@ namespace Step33
     std::pair<unsigned int, double> solve (LA::MPI::Vector &solution);
 
     void compute_refinement_indicators (Vector<double> &indicator) const;
-    void refine_grid ();
+    void refine_grid();
 
-    void output_results () const;
+    void output_results() const;
 
 
 

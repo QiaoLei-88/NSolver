@@ -17,7 +17,7 @@ namespace Step33
 
   template <int dim>
   std::vector<std::string>
-  EulerEquations<dim>::component_names ()
+  EulerEquations<dim>::component_names()
   {
     std::vector<std::string> names (dim, "momentum");
     names.push_back ("density");
@@ -29,7 +29,7 @@ namespace Step33
 
   template <int dim>
   std::vector<DataComponentInterpretation::DataComponentInterpretation>
-  EulerEquations<dim>::component_interpretation ()
+  EulerEquations<dim>::component_interpretation()
   {
     std::vector<DataComponentInterpretation::DataComponentInterpretation>
     data_component_interpretation
@@ -87,7 +87,7 @@ namespace Step33
                         quadrature_formula, update_flags);
 
     std::vector<std::vector<Tensor<1,dim> > >
-    dU (1, std::vector<Tensor<1,dim> >(n_components));
+    dU (1, std::vector<Tensor<1,dim> > (n_components));
 
     typename DoFHandler<dim>::active_cell_iterator
     cell = dof_handler.begin_active(),
@@ -95,13 +95,13 @@ namespace Step33
     for (unsigned int cell_no=0; cell!=endc; ++cell, ++cell_no)
       if (cell->is_locally_owned())
         {
-          fe_v.reinit(cell);
+          fe_v.reinit (cell);
           fe_v.get_function_gradients (solution, dU);
 
-          refinement_indicators(cell_no)
-            = std::log(1+
-                       std::sqrt(dU[0][density_component] *
-                                 dU[0][density_component]));
+          refinement_indicators (cell_no)
+            = std::log (1+
+                        std::sqrt (dU[0][density_component] *
+                                   dU[0][density_component]));
         }
   }
 
@@ -145,7 +145,7 @@ namespace Step33
     // we say so in the <code>get_needed_update_flags()</code> function
     // below). For the inner vectors, we check that at least the first element
     // of the outer vector has the correct inner size:
-    const unsigned int n_quadrature_points = static_cast<const unsigned int>(uh.size());
+    const unsigned int n_quadrature_points = static_cast<const unsigned int> (uh.size());
 
     if (do_schlieren_plot == true)
       Assert (duh.size() == n_quadrature_points,
@@ -176,17 +176,17 @@ namespace Step33
     // <code>density_component</code> information:
     for (unsigned int q=0; q<n_quadrature_points; ++q)
       {
-        const double density = uh[q](density_component);
+        const double density = uh[q] (density_component);
 
         for (unsigned int d=0; d<dim; ++d)
-          computed_quantities[q](d)
-            = uh[q](first_momentum_component+d) / density;
+          computed_quantities[q] (d)
+            = uh[q] (first_momentum_component+d) / density;
 
-        computed_quantities[q](dim) = compute_pressure<double> (uh[q]);
+        computed_quantities[q] (dim) = compute_pressure<double> (uh[q]);
 
         if (do_schlieren_plot == true)
-          computed_quantities[q](dim+1) = duh[q][density_component] *
-                                          duh[q][density_component];
+          computed_quantities[q] (dim+1) = duh[q][density_component] *
+                                           duh[q][density_component];
       }
   }
 
@@ -194,7 +194,7 @@ namespace Step33
   template <int dim>
   std::vector<std::string>
   EulerEquations<dim>::Postprocessor::
-  get_names () const
+  get_names() const
   {
     std::vector<std::string> names;
     for (unsigned int d=0; d<dim; ++d)
@@ -215,7 +215,7 @@ namespace Step33
   template <int dim>
   std::vector<DataComponentInterpretation::DataComponentInterpretation>
   EulerEquations<dim>::Postprocessor::
-  get_data_component_interpretation () const
+  get_data_component_interpretation() const
   {
     std::vector<DataComponentInterpretation::DataComponentInterpretation>
     interpretation (dim,
@@ -236,7 +236,7 @@ namespace Step33
   template <int dim>
   UpdateFlags
   EulerEquations<dim>::Postprocessor::
-  get_needed_update_flags () const
+  get_needed_update_flags() const
   {
     if (do_schlieren_plot == true)
       {

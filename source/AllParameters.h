@@ -189,11 +189,11 @@ namespace Step33
 
         FunctionParser<dim> values;
 
-        BoundaryConditions ();
+        BoundaryConditions();
       };
 
 
-      AllParameters ();
+      AllParameters();
 
       double diffusion_power;
 
