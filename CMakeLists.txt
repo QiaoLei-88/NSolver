@@ -68,6 +68,21 @@ ADD_CUSTOM_TARGET(distclean
   COMMENT "distclean invoked"
   )
 
+# Define a reset target to regenerate the cmake files:
+# This target just do distclean plus ${CMAKE_COMMAND} ${CMAKE_SOURCE_DIR}, but we 
+# cannot make it depending on target distclean because after distclean there will 
+# be no rule to make target reset.
+ADD_CUSTOM_TARGET(reset
+  COMMAND ${CMAKE_COMMAND} -E remove_directory CMakeFiles
+  COMMAND ${CMAKE_COMMAND} -E remove_directory bin
+  COMMAND ${CMAKE_COMMAND} -E remove_directory source
+  COMMAND ${CMAKE_COMMAND} -E remove_directory tests
+  COMMAND ${CMAKE_COMMAND} -E remove CMakeCache.txt cmake_install.cmake Makefile CTestTestfile.cmake
+  COMMAND ${CMAKE_COMMAND} ${CMAKE_SOURCE_DIR}
+  COMMENT "reset invoked"
+  )
+
+
 ADD_CUSTOM_TARGET(info
   COMMAND ${CMAKE_COMMAND} -P ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/print_usage.cmake
   )

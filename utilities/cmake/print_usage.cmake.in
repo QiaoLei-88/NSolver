@@ -15,6 +15,7 @@ MESSAGE(
 #       ${_make_command} distclean      - to clean the build directory
 #                               This will remove directory bin, source and tests.
 #                               Use with caution!
+#       ${_make_command} reset          - to regenerate cmake files after a distclean
 #
 #       ${_make_command} info           - to view this message again
 #
