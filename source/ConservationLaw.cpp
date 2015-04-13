@@ -68,7 +68,11 @@ namespace Step33
     verbose_cout (std::cout, false),
     pcout (std::cout,
            (Utilities::MPI::this_mpi_process (mpi_communicator)
-            == 0))
+            == 0)),
+    computing_timer (MPI_COMM_WORLD,
+                     pcout,
+                     TimerOutput::summary,
+                     TimerOutput::cpu_and_wall_times)
   {
     ParameterHandler prm;
     Parameters::AllParameters<dim>::declare_parameters (prm);
@@ -1311,6 +1315,7 @@ namespace Step33
   template <int dim>
   void ConservationLaw<dim>::run()
   {
+    computing_timer.enter_subsection ("0:Read grid");
     {
       GridIn<dim> grid_in;
       grid_in.attach_triangulation (triangulation);
@@ -1328,8 +1333,8 @@ namespace Step33
           GridTools::scale (0.001,triangulation);
         }
     }
-
-
+    computing_timer.leave_subsection ("0:Read grid");
+    computing_timer.enter_subsection ("1:Initialization");
 
     std::ofstream interation_history_file_std;
     std::ofstream time_advance_history_file_std;
@@ -1414,8 +1419,11 @@ namespace Step33
         << '\n';
 
     LA::MPI::Vector      tmp_vector;
+
+    computing_timer.leave_subsection ("1:Initialization");
     while (time < parameters.final_time)
       {
+        computing_timer.enter_subsection ("2:Prepare Newton iteration");
         pcout << "T=" << time << std::endl
               << "   Number of active cells:       "
               << triangulation.n_active_cells()
@@ -1472,8 +1480,11 @@ namespace Step33
         std::pair<unsigned int, double> convergence;
 
         locally_owned_solution = current_solution;
+
+        computing_timer.leave_subsection ("2:Prepare Newton iteration");
         do // Newton iteration
           {
+            computing_timer.enter_subsection ("3:Assemble Newton system");
             system_matrix = 0;
             right_hand_side = 0;
 
@@ -1487,8 +1498,13 @@ namespace Step33
 
             newton_update = 0;
 
-            convergence = solve (newton_update);
+            computing_timer.leave_subsection ("3:Assemble Newton system");
 
+            computing_timer.enter_subsection ("4:Solve Newton system");
+            convergence = solve (newton_update);
+            computing_timer.leave_subsection ("4:Solve Newton system");
+
+            computing_timer.enter_subsection ("5:Postprocess Newton solution");
             Assert (index_linear_search_length < 9, ExcIndexRange (index_linear_search_length,0,9));
             newton_update *= linear_search_length[index_linear_search_length];
             locally_owned_solution += newton_update;
@@ -1562,6 +1578,7 @@ namespace Step33
                                  ExcMessage ("No convergence in nonlinear solver after all small time step and linear search length trid out."));
                   }
               }
+            computing_timer.leave_subsection ("5:Postprocess Newton solution");
           }
         while ((!newton_iter_converged)
                && nonlin_iter < nonlin_iter_threshold
@@ -1569,6 +1586,7 @@ namespace Step33
 
         if (newton_iter_converged)
           {
+            computing_timer.enter_subsection ("6:Postprocess time step");
             //Output time marching history
             time_advance_history_file
                 << std::setw (7) << n_total_inter << ' '
@@ -1660,9 +1678,11 @@ namespace Step33
             calc_time_step();
             // Uncomment the following line if you want reset the linear_search_length immediatly after a converged Newton iter.
             //index_linear_search_length = 0;
+            computing_timer.leave_subsection ("6:Postprocess time step");
           }
         else
           {
+            computing_timer.enter_subsection ("6:Rolling back time step");
             // Newton iteration not converge in reasonable steps
             if (index_linear_search_length < 8 && (!time_step_doubled))
               {
@@ -1695,17 +1715,20 @@ namespace Step33
                 predictor.sadd (1.0+predictor_leap_ratio, 0.0-predictor_leap_ratio, tmp_vector);
               }
             converged_newton_iters = 0;
+            computing_timer.leave_subsection ("6:Rolling back time step");
           }
 
         time_advance_history_file << std::flush;
         interation_history_file << std::flush;
-
       } // End of time advancing
     if (I_am_host)
       {
         time_advance_history_file_std.close();
         interation_history_file_std.close();
       }
+    // Timer initialized with TimerOutput::summary will print summery information
+    // on its destruction.
+    // computing_timer.print_summary();
   } //End of ConservationLaw<dim>::run ()
 
   template class ConservationLaw<2>;

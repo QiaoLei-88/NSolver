@@ -221,6 +221,7 @@ namespace Step33
     Parameters::AllParameters<dim>  parameters;
     ConditionalOStream              verbose_cout;
     ConditionalOStream              pcout;
+    TimerOutput                     computing_timer;
   };
 
 }
