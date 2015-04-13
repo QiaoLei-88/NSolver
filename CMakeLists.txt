@@ -81,7 +81,7 @@ ADD_SUBDIRECTORY(tests)
 IF(CMAKE_GENERATOR MATCHES "Ninja")
   SET(_make_command "$ ninja")
 ELSE()
-  SET(_make_command "$ make")
+  SET(_make_command "$  make")
 ENDIF()
 
 IF(NOT USAGE_PRINTED)
