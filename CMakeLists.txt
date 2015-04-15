@@ -15,13 +15,18 @@ ENDIF()
 #
 # Are all dependencies fullfilled?
 #
-IF(NOT DEAL_II_WITH_TRILINOS)
+SET (_depend_features TRILINOS P4EST MPI) 
+FOREACH (_feature ${_depend_features})
+IF(NOT DEAL_II_WITH_${_feature})
   MESSAGE(FATAL_ERROR "\n"
-    "Error! The deal.II library found at ${DEAL_II_PATH} was not configured with"
-    "    DEAL_II_WITH_TRILINOS = ON"
-    "One or all of these are OFF in your installation but are required for this tutorial step."
+    "Error! The deal.II library found at ${DEAL_II_PATH} was not configured with\n"
+    "    DEAL_II_WITH_${_feature}=ON\n"
+    "This feature is set to OFF in your installation but are required for this program step.\n"
     )
 ENDIF()
+ENDFOREACH(_feature)
+UNSET(_feature)
+UNSET(_depend_features)
 
 #
 # Never build in source directory
