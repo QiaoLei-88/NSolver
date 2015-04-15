@@ -220,6 +220,10 @@ namespace Step33
                          Patterns::Anything(),
                          "intput mesh file format");
 
+      prm.declare_entry ("global refinement", "0",
+                         Patterns::Integer(),
+                         "level of global refinement before run");
+
       prm.declare_entry ("time history", "time_history.out",
                          Patterns::Anything(),
                          "output file for time history.");
@@ -345,6 +349,8 @@ namespace Step33
             AssertThrow (false, ExcNotImplemented());
           }
       }
+
+      n_global_refinement = prm.get_integer ("global refinement");
 
       {
         const std::string prm_buf = prm.get ("diffusion type");

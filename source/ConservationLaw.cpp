@@ -1332,6 +1332,11 @@ namespace Step33
           grid_in.read_msh (input_file); //QiaoL
           GridTools::scale (0.001,triangulation);
         }
+
+      if (parameters.n_global_refinement > 0)
+        {
+          triangulation.refine_global (parameters.n_global_refinement);
+        }
     }
     computing_timer.leave_subsection ("0:Read grid");
     computing_timer.enter_subsection ("1:Initialization");
@@ -1356,7 +1361,7 @@ namespace Step33
         iteration_history_file_std.precision (6);
       }
     ConditionalOStream iteration_history_file (iteration_history_file_std,
-                                                I_am_host);
+                                               I_am_host);
     ConditionalOStream time_advance_history_file (time_advance_history_file_std,
                                                   I_am_host);
 
