@@ -1570,7 +1570,6 @@ namespace Step33
                     pcout << "  Newton iteration not converge in " << nonlin_iter_threshold << " steps.\n"
                           << "  Recompute with different linear search length or time step...\n\n";
                     newton_iter_converged = false;
-                    break;
                   }
                 else
                   {
