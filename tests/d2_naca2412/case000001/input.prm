@@ -6,6 +6,7 @@ set gravity = 0.0
 # The input grid 
 set mesh = 2412.msh
 set mesh format = gmsh
+set scale mesh = 0.001
 
 # Stabilization parameter
 set diffusion type  = cell size
