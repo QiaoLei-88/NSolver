@@ -1329,7 +1329,7 @@ namespace Step33
         }
       if (parameters.mesh_format == Parameters::AllParameters<dim>::format_gmsh)
         {
-          grid_in.read_msh (input_file); //QiaoL
+          grid_in.read_msh (input_file);
           GridTools::scale (0.001,triangulation);
         }
 
