@@ -1431,7 +1431,7 @@ namespace Step33
         computing_timer.enter_subsection ("2:Prepare Newton iteration");
         pcout << "T=" << time << std::endl
               << "   Number of active cells:       "
-              << triangulation.n_active_cells()
+              << triangulation.n_global_active_cells()
               << std::endl
               << "   Number of degrees of freedom: "
               << dof_handler.n_dofs()
@@ -1531,7 +1531,7 @@ namespace Step33
             // Out put convergence history
             iteration_history_file
                 << std::setw (7) << n_total_inter << ' '
-                << std::setw (10) << triangulation.n_active_cells() << ' '
+                << std::setw (10) << triangulation.n_global_active_cells() << ' '
                 << std::setw (10) << dof_handler.n_dofs() << ' '
                 << std::setw (13) << time << ' '
                 << std::setw (8) << n_time_step << ' '
@@ -1594,7 +1594,7 @@ namespace Step33
             //Output time marching history
             time_advance_history_file
                 << std::setw (7) << n_total_inter << ' '
-                << std::setw (10) << triangulation.n_active_cells() << ' '
+                << std::setw (10) << triangulation.n_global_active_cells() << ' '
                 << std::setw (10) << dof_handler.n_dofs() << ' '
                 << std::setw (13) << time << ' '
                 << std::setw (8) << n_time_step << ' '
