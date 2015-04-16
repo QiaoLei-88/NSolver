@@ -13,7 +13,7 @@ SET (_comparison_file iter_history.out.reference)
 
 ###
 # SET (_exec_run ${CMAKE_BINARY_DIR}/bin/${PRJ_NAME})
-SET (_para_run ${_input_file_list} 1>screen.log 2>&1)
+SET (_para_run ${_input_file_list} > screen.log 2>&1)
 
 ###
 GET_FILENAME_COMPONENT(_current_dir_name ${CMAKE_CURRENT_SOURCE_DIR} NAME)

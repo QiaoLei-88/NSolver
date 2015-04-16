@@ -27,7 +27,7 @@ SET (_test_src_directory ${CMAKE_CURRENT_SOURCE_DIR})
 
 
 SET (_exec_run ${_exec_mpi})
-SET (_para_run -n 2 ${CMAKE_BINARY_DIR}/bin/${PRJ_NAME} input.prm 1>screen.log 2>&1)
+SET (_para_run -n 2 ${CMAKE_BINARY_DIR}/bin/${PRJ_NAME} input.prm > screen.log 2>&1)
 
 
 # _test_name_prefix is setted in the parent CMakeList.txt.
