@@ -6,9 +6,8 @@
 #  PATH needs to be setup manually for running by crontab.
 #
 
-WORK_DIR="p/a/t/h"
-PATH=$PATH
-EMAIL_ADDR="qiaol618@gmail.com"
+WORK_DIR=/u/qiaolei/devel/NSolver/regTest
+PATH=/u/qiaolei/Library/mpi/bin:/u/qiaolei/Library/cmake-3.0.2/bin:/u/qiaolei/.bin:/usr/NX/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/u/qiaolei/Library/cgnslib/bin
 
 function bdie () {
   echo "**** Error in line $1"
@@ -18,13 +17,12 @@ function bdie () {
 
 function run_tests() {
 	echo -e '\n'
-	echo "## Start test for ${LAST_LOCAL_VER}: "
+	echo "${LAST_LOCAL_VER}" >> /u/qiaolei/.regressionTestList
 	cmake ${SRC_DIR} || bdie "$LINENO" "cmake failed."
 	make -j16 || bdie "$LINENO" "make failed."
 	(
 		START_TIME=`date`
 		touch ${TEST_RUNNING} 
-		echo "ctest output for ${LAST_LOCAL_VER}:" > ctest.output
 		ctest -j16 >> ctest.output
 		rm ${TEST_RUNNING}
 		echo ${START_TIME} > ${TEST_FINISHED}
@@ -33,12 +31,14 @@ function run_tests() {
 }
 
 PRJNAME=NSolver
-TEST_DIR=regressionTests
 TEST_FINISHED=testFinished
 TEST_RUNNING=testRunning
+SRC_DIR=${WORK_DIR}/${PRJNAME}
+TEST_DIR=${WORK_DIR}/regressionTests
+
 
 # main()
-source ~/.bashrc
+source /u/qiaolei/.bashrc
 
 cd ${WORK_DIR} || bdie "$LINENO" "${WORK_DIR} doesn't accessible!"
 
@@ -55,8 +55,7 @@ fi
 
 # Get the latest revision of locat repository
 pushd . >> /dev/null
-cd ${PRJNAME}
-SRC_DIR=`pwd`
+cd ${SRC_DIR}
 git checkout master -q
 LAST_LOCAL_VER=`git log -1 --format=format:%H`
 popd >> /dev/null
@@ -65,19 +64,17 @@ popd >> /dev/null
 pushd . >> /dev/null
 
 cd ${TEST_DIR}
-TEST_DIR=`pwd`
-
 if [ ! -d ${LAST_LOCAL_VER} ]; then
-	LAST_LOCAL_VER_TESTED=`false`
+	LAST_LOCAL_VER_TESTED=false
 else 
 	cd ${LAST_LOCAL_VER}
 	if [ -e ${TEST_FINISHED} ]; then
-		LAST_LOCAL_VER_TESTED=`true`
+		LAST_LOCAL_VER_TESTED=true
 	else 
 		if [ -e ${TEST_RUNNING} ]; then
 			bdie "$LINENO" "It seems there is an unfinished test."
 		fi
-		LAST_LOCAL_VER_TESTED=`false`
+		LAST_LOCAL_VER_TESTED=false
 	fi
 fi
 popd >> /dev/null
@@ -85,7 +82,7 @@ popd >> /dev/null
 # If the latest local revision is still not tested then test it.
 # This usually should not happen.
 pushd . >> /dev/null
-if [ ! ${LAST_LOCAL_VER_TESTED} ]; then
+if [ ${LAST_LOCAL_VER_TESTED} == 'false' ]; then
 	cd ${TEST_DIR}
 	if [ ! -d ${LAST_LOCAL_VER} ]; then
 		mkdir ${LAST_LOCAL_VER}
@@ -133,6 +130,4 @@ if [ -z "${NEED_UPDATE}" ] ; then
 	cd ${LAST_LOCAL_VER} || bdie "$LINENO" "Can not get into directory ${LAST_LOCAL_VER}."
 
 	run_tests
-else
-	echo "You are too lazy on `date +"%Y-%m-%d"`!" | sendmail ${EMAIL_ADDR}
 fi
