@@ -220,6 +220,10 @@ namespace Step33
                          Patterns::Anything(),
                          "intput mesh file format");
 
+      prm.declare_entry ("scale mesh", "1.0",
+                         Patterns::Double(),
+                         "scale mesh uniformly");
+
       prm.declare_entry ("global refinement", "0",
                          Patterns::Integer(),
                          "level of global refinement before run");
@@ -349,6 +353,8 @@ namespace Step33
             AssertThrow (false, ExcNotImplemented());
           }
       }
+
+      scale_mesh = std::abs (prm.get_double ("scale mesh"));
 
       n_global_refinement = prm.get_integer ("global refinement");
 

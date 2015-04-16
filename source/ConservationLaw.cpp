@@ -1330,7 +1330,11 @@ namespace Step33
       if (parameters.mesh_format == Parameters::AllParameters<dim>::format_gmsh)
         {
           grid_in.read_msh (input_file);
-          GridTools::scale (0.001,triangulation);
+        }
+
+      if (parameters.scale_mesh != 1.0)
+        {
+          GridTools::scale (parameters.scale_mesh,triangulation);
         }
 
       if (parameters.n_global_refinement > 0)

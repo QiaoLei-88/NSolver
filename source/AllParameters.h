@@ -221,6 +221,7 @@ namespace Step33
         format_ucd
       };
       MeshFormat mesh_format;
+      double scale_mesh;
       int n_global_refinement;
 
       enum DiffusionType
