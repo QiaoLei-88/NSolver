@@ -23,7 +23,7 @@
 #include <deal.II/base/parameter_handler.h>
 #include "NSEquation.h"
 
-namespace Step33
+namespace NSolver
 {
   namespace Parameters
   {
@@ -242,6 +242,6 @@ namespace Step33
 
   } /* End of namespace Parameters */
 
-} /* End of namespace Step33 */
+} /* End of namespace NSolver */
 
 #endif /* defined(__NSolver__AllParameters__) */

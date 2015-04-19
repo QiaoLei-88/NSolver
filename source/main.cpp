@@ -14,7 +14,7 @@
 int main (int argc, char *argv[])
 {
   using namespace dealii;
-  using namespace Step33;
+  using namespace NSolver;
 
   try
     {

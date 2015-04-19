@@ -100,7 +100,7 @@ namespace LA
 // and that then calls the other two for integrals over cells and faces,
 // respectively.
 
-namespace Step33
+namespace NSolver
 {
   using namespace dealii;
 

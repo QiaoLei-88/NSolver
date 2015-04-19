@@ -8,7 +8,7 @@
 
 #include "NSEquation.h"
 
-namespace Step33
+namespace NSolver
 {
   using namespace dealii;
 

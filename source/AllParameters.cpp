@@ -8,7 +8,7 @@
 
 #include "AllParameters.h"
 
-namespace Step33
+namespace NSolver
 {
   namespace Parameters
   {
@@ -481,4 +481,4 @@ namespace Step33
 
   } /* End namespace Parameters */
 
-} /* End of namespace Step33 */
+} /* End of namespace NSolver */

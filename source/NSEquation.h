@@ -84,7 +84,7 @@ namespace LA
 
 #include <vector>
 
-namespace Step33
+namespace NSolver
 {
   using namespace dealii;
 
@@ -790,7 +790,7 @@ namespace Step33
         }
   }
 
-} /* End of namespace Step33 */
+} /* End of namespace NSolver */
 
 
 #endif /* defined(__NSolver__NSEquation__) */
