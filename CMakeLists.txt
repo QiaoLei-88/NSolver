@@ -66,6 +66,7 @@ ADD_CUSTOM_TARGET(release
 # Define a distclean target to remove every generated file:
 ADD_CUSTOM_TARGET(distclean
   COMMAND ${CMAKE_COMMAND} -E remove_directory CMakeFiles
+  COMMAND ${CMAKE_COMMAND} -E remove_directory Testing
   COMMAND ${CMAKE_COMMAND} -E remove_directory bin
   COMMAND ${CMAKE_COMMAND} -E remove_directory source
   COMMAND ${CMAKE_COMMAND} -E remove_directory tests
@@ -79,6 +80,7 @@ ADD_CUSTOM_TARGET(distclean
 # be no rule to make target reset.
 ADD_CUSTOM_TARGET(reset
   COMMAND ${CMAKE_COMMAND} -E remove_directory CMakeFiles
+  COMMAND ${CMAKE_COMMAND} -E remove_directory Testing
   COMMAND ${CMAKE_COMMAND} -E remove_directory bin
   COMMAND ${CMAKE_COMMAND} -E remove_directory source
   COMMAND ${CMAKE_COMMAND} -E remove_directory tests
