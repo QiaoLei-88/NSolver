@@ -182,7 +182,7 @@ namespace NSolver
           computed_quantities[q] (d)
             = uh[q] (first_momentum_component+d) * density;
 
-        computed_quantities[q] (dim) = compute_energy_density<double> (uh[q]);
+        computed_quantities[q] (dim) = compute_energy_density (uh[q]);
 
         if (do_schlieren_plot == true)
           computed_quantities[q] (dim+1) = duh[q][density_component] *

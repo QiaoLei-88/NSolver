@@ -189,9 +189,9 @@ namespace NSolver
               for (unsigned int q=0; q<n_q_points; ++q)
                 {
                   const double sound_speed
-                    = EulerEquations<dim>::template compute_sound_speed<double>(solution_values[q]);
+                    = EulerEquations<dim>::template compute_sound_speed (solution_values[q]);
                   const double velocity
-                    = EulerEquations<dim>::template compute_velocity_magnitude<double>(solution_values[q]);
+                  = EulerEquations<dim>::template compute_velocity_magnitude (solution_values[q]);
                   min_time_step = std::min (min_time_step,
                                             cell_size / (velocity+sound_speed) * parameters.CFL_number);
                 }
@@ -606,14 +606,13 @@ namespace NSolver
                 w_for_entropy_flux[c].diff (c, EulerEquations<dim>::n_components);
               }
 
-            const Sacado::Fad::DFad<double> entropy = EulerEquations<dim>::template compute_entropy<Sacado::Fad::DFad<double> >
-            (w_for_entropy_flux);
-            const double entroy_old = EulerEquations<dim>::template compute_entropy<double> (W_old[q]);
+            const Sacado::Fad::DFad<double> entropy = EulerEquations<dim>::template compute_entropy (w_for_entropy_flux);
+            const double entroy_old = EulerEquations<dim>::template compute_entropy (W_old[q]);
 
             double D_h1 (0.0),D_h2 (0.0);
             D_h1 = (entropy.val() - entroy_old)/parameters.time_step;
             D_h2 = (W[q][EulerEquations<dim>::density_component].val() - W_old[q][EulerEquations<dim>::density_component])/
-                   parameters.time_step;
+            parameters.time_step;
 
             //sum up divergence
             for (unsigned int d=0; d<dim; d++)
@@ -625,9 +624,9 @@ namespace NSolver
                     D_h1 += entropy_flux.fastAccessDx (c) * grad_W[q][c][d].val();
                   }
                 D_h2 += grad_W[q][EulerEquations<dim>::first_velocity_component + d][d].val()
-                  * W[q][EulerEquations<dim>::density_component].val()
-                  + W[q][EulerEquations<dim>::first_velocity_component + d].val()
-                  * grad_W[q][EulerEquations<dim>::density_component][d].val();
+                        * W[q][EulerEquations<dim>::density_component].val()
+                        + W[q][EulerEquations<dim>::first_velocity_component + d].val()
+                        * grad_W[q][EulerEquations<dim>::density_component][d].val();
               }
             D_h2 *= entropy.val()/W[q][EulerEquations<dim>::density_component].val();
             D_h_max = std::max (D_h_max, std::abs (D_h1));
@@ -636,9 +635,9 @@ namespace NSolver
             rho_max = std::max (rho_max, W[q][EulerEquations<dim>::density_component].val());
 
             const double sound_speed
-              = EulerEquations<dim>::template compute_sound_speed<Sacado::Fad::DFad<double> >(W[q]).val();
+              = EulerEquations<dim>::template compute_sound_speed (W[q]).val();
             const double velocity
-              = EulerEquations<dim>::template compute_velocity_magnitude<Sacado::Fad::DFad<double> >(W[q]).val();
+            = EulerEquations<dim>::template compute_velocity_magnitude (W[q]).val();
             characteristic_speed_max = std::max (characteristic_speed_max, velocity + sound_speed);
           }
         const double cE = 1.0;
@@ -704,20 +703,20 @@ namespace NSolver
           {
             std_cxx11::array<Sacado::Fad::DFad<double> , EulerEquations<dim>::n_components> w_conservative;
             std_cxx11::array<double, EulerEquations<dim>::n_components> w_conservative_old;
-            EulerEquations<dim>::compute_conservative_vector(W[point], w_conservative);
-            EulerEquations<dim>::compute_conservative_vector(W_old[point], w_conservative_old);
+            EulerEquations<dim>::compute_conservative_vector (W[point], w_conservative);
+            EulerEquations<dim>::compute_conservative_vector (W_old[point], w_conservative_old);
 
             if (parameters.is_stationary == false)
               R_i += 1.0 / parameters.time_step *
-                     (w_conservative[component_i] - w_conservative_old[component_i]) *
-                     fe_v.shape_value_component (i, point, component_i) *
-                     fe_v.JxW (point);
+              (w_conservative[component_i] - w_conservative_old[component_i]) *
+              fe_v.shape_value_component (i, point, component_i) *
+              fe_v.JxW (point);
 
             for (unsigned int d=0; d<dim; d++)
-              R_i -= (parameters.theta * flux[point][component_i][d] +
-                      (1.0-parameters.theta) * flux_old[point][component_i][d]) *
-                     fe_v.shape_grad_component (i, point, component_i)[d] *
-                     fe_v.JxW (point);
+                   R_i -= (parameters.theta * flux[point][component_i][d] +
+                           (1.0-parameters.theta) * flux_old[point][component_i][d]) *
+                   fe_v.shape_grad_component (i, point, component_i)[d] *
+                   fe_v.JxW (point);
 
             cellSize_viscosity[cell_index] = 1.0*std::pow (fe_v.get_cell()->diameter(), parameters.diffusion_power);
 
@@ -737,16 +736,16 @@ namespace NSolver
             for (unsigned int d=0; d<dim; d++)
               {
                 R_i += viscos_coeff *
-                       (parameters.theta * grad_W[point][component_i][d] +
-                        (1.0-parameters.theta) * grad_W_old[point][component_i][d]) *
-                       fe_v.shape_grad_component (i, point, component_i)[d] *
-                       fe_v.JxW (point);
+                (parameters.theta * grad_W[point][component_i][d] +
+                 (1.0-parameters.theta) * grad_W_old[point][component_i][d]) *
+                fe_v.shape_grad_component (i, point, component_i)[d] *
+                fe_v.JxW (point);
               }
 
             R_i -= (parameters.theta  * forcing[point][component_i] +
                     (1.0 - parameters.theta) * forcing_old[point][component_i]) *
-                   fe_v.shape_value_component (i, point, component_i) *
-                   fe_v.JxW (point);
+            fe_v.shape_value_component (i, point, component_i) *
+            fe_v.JxW (point);
           }
 
         // At the end of the loop, we have to add the sensitivities to the
@@ -789,7 +788,7 @@ namespace NSolver
 
     std::vector<Sacado::Fad::DFad<double> >
     independent_local_dof_values (dofs_per_cell),
-                                 independent_neighbor_dof_values (external_face == false ?
+    independent_neighbor_dof_values (external_face == false ?
                                      dofs_per_cell :
                                      0);
 
@@ -807,7 +806,7 @@ namespace NSolver
       for (unsigned int i = 0; i < dofs_per_cell; i++)
         {
           independent_neighbor_dof_values[i]
-            = current_solution (dof_indices_neighbor[i]);
+          = current_solution (dof_indices_neighbor[i]);
           independent_neighbor_dof_values[i]
           .diff (i+dofs_per_cell, n_independent_variables);
         }
@@ -823,19 +822,19 @@ namespace NSolver
     // FESubfaceValues:
     Table<2,Sacado::Fad::DFad<double> >
     Wplus (n_q_points, EulerEquations<dim>::n_components),
-          Wminus (n_q_points, EulerEquations<dim>::n_components);
+    Wminus (n_q_points, EulerEquations<dim>::n_components);
     Table<2,double>
     Wplus_old (n_q_points, EulerEquations<dim>::n_components),
-              Wminus_old (n_q_points, EulerEquations<dim>::n_components);
+    Wminus_old (n_q_points, EulerEquations<dim>::n_components);
 
     for (unsigned int q=0; q<n_q_points; ++q)
-      for (unsigned int i=0; i<dofs_per_cell; ++i)
+           for (unsigned int i=0; i<dofs_per_cell; ++i)
         {
           const unsigned int component_i = fe_v.get_fe().system_to_component_index (i).first;
           Wplus[q][component_i] +=  independent_local_dof_values[i] *
-                                    fe_v.shape_value_component (i, q, component_i);
+          fe_v.shape_value_component (i, q, component_i);
           Wplus_old[q][component_i] +=  old_solution (dof_indices[i]) *
-                                        fe_v.shape_value_component (i, q, component_i);
+          fe_v.shape_value_component (i, q, component_i);
         }
 
     // Computing "opposite side" is a bit more complicated. If this is
@@ -844,14 +843,14 @@ namespace NSolver
     if (external_face == false)
       {
         for (unsigned int q=0; q<n_q_points; ++q)
-          for (unsigned int i=0; i<dofs_per_cell; ++i)
+               for (unsigned int i=0; i<dofs_per_cell; ++i)
             {
               const unsigned int component_i = fe_v_neighbor.get_fe().
-                                               system_to_component_index (i).first;
+              system_to_component_index (i).first;
               Wminus[q][component_i] += independent_neighbor_dof_values[i] *
-                                        fe_v_neighbor.shape_value_component (i, q, component_i);
+              fe_v_neighbor.shape_value_component (i, q, component_i);
               Wminus_old[q][component_i] += old_solution (dof_indices_neighbor[i])*
-                                            fe_v_neighbor.shape_value_component (i, q, component_i);
+              fe_v_neighbor.shape_value_component (i, q, component_i);
             }
       }
     // On the other hand, if this is an external boundary face, then the
@@ -872,8 +871,8 @@ namespace NSolver
     else
       {
         Assert (boundary_id < Parameters::AllParameters<dim>::max_n_boundaries,
-                ExcIndexRange (boundary_id, 0,
-                               Parameters::AllParameters<dim>::max_n_boundaries));
+                              ExcIndexRange (boundary_id, 0,
+                                             Parameters::AllParameters<dim>::max_n_boundaries));
 
         std::vector<Vector<double> >
         boundary_values (n_q_points, Vector<double> (EulerEquations<dim>::n_components));
@@ -940,7 +939,7 @@ namespace NSolver
     // the neighboring cell:
     std::vector<double> residual_derivatives (dofs_per_cell);
     for (unsigned int i=0; i<fe_v.dofs_per_cell; ++i)
-      if (fe_v.get_fe().has_support_on_face (i, face_no) == true)
+           if (fe_v.get_fe().has_support_on_face (i, face_no) == true)
         {
           Sacado::Fad::DFad<double> R_i = 0;
 
@@ -951,8 +950,8 @@ namespace NSolver
 
               R_i += (parameters.theta * normal_fluxes[point][component_i] +
                       (1.0 - parameters.theta) * normal_fluxes_old[point][component_i]) *
-                     fe_v.shape_value_component (i, point, component_i) *
-                     fe_v.JxW (point);
+              fe_v.shape_value_component (i, point, component_i) *
+              fe_v.JxW (point);
             }
 
           for (unsigned int k=0; k<dofs_per_cell; ++k)
@@ -1129,12 +1128,12 @@ namespace NSolver
           cell->clear_refine_flag();
 
           if ((cell->level() < parameters.shock_levels) &&
-              (std::fabs (refinement_indicators (cell_no)) > parameters.shock_val))
+               (std::fabs (refinement_indicators (cell_no)) > parameters.shock_val))
             {
               cell->set_refine_flag();
             }
           else if ((cell->level() > 0) &&
-                   (std::fabs (refinement_indicators (cell_no)) < 0.75*parameters.shock_val))
+          (std::fabs (refinement_indicators (cell_no)) < 0.75*parameters.shock_val))
             {
               cell->set_coarsen_flag();
             }
@@ -1269,7 +1268,7 @@ namespace NSolver
         std::vector<std::string> filenames;
         for (unsigned int i=0;
              i<Utilities::MPI::n_mpi_processes (mpi_communicator);
-             ++i)
+               ++i)
           {
             filenames.push_back ("solution-" +
                                  Utilities::int_to_string (output_file_number, 4) +
@@ -1401,83 +1400,83 @@ namespace NSolver
     unsigned int n_total_inter (0);
 
     time_advance_history_file
-        << "   iter     n_cell     n_dofs          time   i_step"
-        << "  i_Newton    Newton_res  n_linear_iter    linear_res"
-        << "  linear_search_len  time_step_size  time_step_factor"
-        << "  time_march_res"
+    << "   iter     n_cell     n_dofs          time   i_step"
+     << "  i_Newton    Newton_res  n_linear_iter    linear_res"
+      << "  linear_search_len  time_step_size  time_step_factor"
+       << "  time_march_res"
         << '\n';
-    iteration_history_file
+        iteration_history_file
         << "   iter     n_cell     n_dofs          time   i_step"
-        << "  i_Newton    Newton_res  n_linear_iter    linear_res"
-        << "  linear_search_len  time_step_size  time_step_factor"
-        << "  Newton_update_norm"
-        << '\n';
+         << "  i_Newton    Newton_res  n_linear_iter    linear_res"
+          << "  linear_search_len  time_step_size  time_step_factor"
+           << "  Newton_update_norm"
+            << '\n';
 
-    LA::MPI::Vector      tmp_vector;
+            LA::MPI::Vector      tmp_vector;
 
-    computing_timer.leave_subsection ("1:Initialization");
-    while (time < parameters.final_time)
+            computing_timer.leave_subsection ("1:Initialization");
+            while (time < parameters.final_time)
       {
         computing_timer.enter_subsection ("2:Prepare Newton iteration");
         pcout << "T=" << time << std::endl
-              << "   Number of active cells:       "
-              << triangulation.n_global_active_cells()
-              << std::endl
-              << "   Number of degrees of freedom: "
-              << dof_handler.n_dofs()
-              << std::endl
-              << std::endl;
+                               << "   Number of active cells:       "
+                                << triangulation.n_global_active_cells()
+                                 << std::endl
+                                  << "   Number of degrees of freedom: "
+                                   << dof_handler.n_dofs()
+                                    << std::endl
+                                     << std::endl;
 
-        pcout << "   NonLin Res   NewtonUpdateNorm  Lin Iter     Lin Res     "
-              << "Linear Search Len      Time Step Size      Time Step Factor" << std::endl
-              << "   __________________________________________"
-              << "_____________________________________________" << std::endl;
+                                     pcout << "   NonLin Res   NewtonUpdateNorm  Lin Iter     Lin Res     "
+                                            << "Linear Search Len      Time Step Size      Time Step Factor" << std::endl
+                                                << "   __________________________________________"
+                                                 << "_____________________________________________" << std::endl;
 
-        // Then comes the inner Newton iteration to solve the nonlinear
-        // problem in each time step. The way it works is to reset matrix and
-        // right hand side to zero, then assemble the linear system. If the
-        // norm of the right hand side is small enough, then we declare that
-        // the Newton iteration has converged. Otherwise, we solve the linear
-        // system, update the current solution with the Newton increment, and
-        // output convergence information. At the end, we check that the
-        // number of Newton iterations is not beyond a limit of 10 -- if it
-        // is, it appears likely that iterations are diverging and further
-        // iterations would do no good. If that happens, we throw an exception
-        // that will be caught in <code>main()</code> with status information
-        // being displayed before the program aborts.
-        //
-        // Note that the way we write the AssertThrow macro below is by and
-        // large equivalent to writing something like <code>if (!(nonlin_iter
-        // @<= 10)) throw ExcMessage ("No convergence in nonlinear
-        // solver");</code>. The only significant difference is that
-        // AssertThrow also makes sure that the exception being thrown carries
-        // with it information about the location (file name and line number)
-        // where it was generated. This is not overly critical here, because
-        // there is only a single place where this sort of exception can
-        // happen; however, it is generally a very useful tool when one wants
-        // to find out where an error occurred.
-
-
-        // Instead of always extrapolating predictor to the next time step,
-        // we can make the forward extrapolation at an adjustable ratio.
-        double predictor_leap_ratio = 1.0;
-        newton_iter_converged = false;
-        current_solution_backup = current_solution;
-
-        unsigned int nonlin_iter = 0;
-        current_solution = predictor;
-        bool linear_solver_diverged (true);
-        const unsigned int nonlin_iter_threshold (10);
+                                                  // Then comes the inner Newton iteration to solve the nonlinear
+                                                  // problem in each time step. The way it works is to reset matrix and
+                                                  // right hand side to zero, then assemble the linear system. If the
+                                                  // norm of the right hand side is small enough, then we declare that
+                                                  // the Newton iteration has converged. Otherwise, we solve the linear
+                                                  // system, update the current solution with the Newton increment, and
+                                                  // output convergence information. At the end, we check that the
+                                                  // number of Newton iterations is not beyond a limit of 10 -- if it
+                                                  // is, it appears likely that iterations are diverging and further
+                                                  // iterations would do no good. If that happens, we throw an exception
+                                                  // that will be caught in <code>main()</code> with status information
+                                                  // being displayed before the program aborts.
+                                                  //
+                                                  // Note that the way we write the AssertThrow macro below is by and
+                                                  // large equivalent to writing something like <code>if (!(nonlin_iter
+                                                  // @<= 10)) throw ExcMessage ("No convergence in nonlinear
+                                                  // solver");</code>. The only significant difference is that
+                                                  // AssertThrow also makes sure that the exception being thrown carries
+                                                  // with it information about the location (file name and line number)
+                                                  // where it was generated. This is not overly critical here, because
+                                                  // there is only a single place where this sort of exception can
+                                                  // happen; however, it is generally a very useful tool when one wants
+                                                  // to find out where an error occurred.
 
 
-        double res_norm;
-        double newton_update_norm;
-        std::pair<unsigned int, double> convergence;
+                                                  // Instead of always extrapolating predictor to the next time step,
+                                                  // we can make the forward extrapolation at an adjustable ratio.
+                                                  double predictor_leap_ratio = 1.0;
+                                                  newton_iter_converged = false;
+                                                  current_solution_backup = current_solution;
 
-        locally_owned_solution = current_solution;
+                                                  unsigned int nonlin_iter = 0;
+                                                  current_solution = predictor;
+                                                  bool linear_solver_diverged (true);
+                                                  const unsigned int nonlin_iter_threshold (10);
 
-        computing_timer.leave_subsection ("2:Prepare Newton iteration");
-        do // Newton iteration
+
+                                                  double res_norm;
+                                                  double newton_update_norm;
+                                                  std::pair<unsigned int, double> convergence;
+
+                                                  locally_owned_solution = current_solution;
+
+                                                  computing_timer.leave_subsection ("2:Prepare Newton iteration");
+                                                  do // Newton iteration
           {
             computing_timer.enter_subsection ("3:Assemble Newton system");
             system_matrix = 0;
@@ -1520,22 +1519,22 @@ namespace NSolver
 
             // Out put convergence history
             iteration_history_file
-                << std::setw (7) << n_total_inter << ' '
-                << std::setw (10) << triangulation.n_global_active_cells() << ' '
-                << std::setw (10) << dof_handler.n_dofs() << ' '
-                << std::setw (13) << time << ' '
-                << std::setw (8) << n_time_step << ' '
-                << std::setw (9) << nonlin_iter << ' '
-                << std::setw (13) << res_norm << ' '
-                << std::setw (14) << convergence.first << ' '
-                << std::setw (13) << convergence.second << ' '
-                << std::setw (18) << linear_search_length[index_linear_search_length] << ' '
-                << std::setw (15) << parameters.time_step << ' '
-                << std::setw (17) << parameters.time_step_factor << ' '
-                << std::setw (19) << newton_update_norm << ' '
-                << '\n';
-            // Check result.
-            if (res_norm < 1e-10)
+            << std::setw (7) << n_total_inter << ' '
+                                               << std::setw (10) << triangulation.n_global_active_cells() << ' '
+                                                                  << std::setw (10) << dof_handler.n_dofs() << ' '
+                                                                      << std::setw (13) << time << ' '
+                                                                          << std::setw (8) << n_time_step << ' '
+                                                                              << std::setw (9) << nonlin_iter << ' '
+                                                                                  << std::setw (13) << res_norm << ' '
+                                                                                      << std::setw (14) << convergence.first << ' '
+                                                                                          << std::setw (13) << convergence.second << ' '
+                                                                                              << std::setw (18) << linear_search_length[index_linear_search_length] << ' '
+                                                                                                  << std::setw (15) << parameters.time_step << ' '
+                                                                                                      << std::setw (17) << parameters.time_step_factor << ' '
+                                                                                                          << std::setw (19) << newton_update_norm << ' '
+                                                                                                              << '\n';
+                                                                                                              // Check result.
+                                                                                                              if (res_norm < 1e-10)
               {
                 newton_iter_converged = true;
               }
@@ -1563,10 +1562,10 @@ namespace NSolver
                 if (parameters.time_step_factor > 0.0005)
                   {
                     pcout << "  Newton iteration not converge in " << nonlin_iter_threshold << " steps.\n"
-                          << "  Recompute with different linear search length or time step...\n\n";
-                    newton_iter_converged = false;
+                                                                    << "  Recompute with different linear search length or time step...\n\n";
+                                                                    newton_iter_converged = false;
                   }
-                else
+                                                                else
                   {
                     AssertThrow (false,
                                  ExcMessage ("No convergence in nonlinear solver after all small time step and linear search length trid out."));
@@ -1576,45 +1575,45 @@ namespace NSolver
           }
         while ((!newton_iter_converged)
                && nonlin_iter < nonlin_iter_threshold
-               && (!linear_solver_diverged));
+                                && (!linear_solver_diverged));
 
         if (newton_iter_converged)
           {
             computing_timer.enter_subsection ("6:Postprocess time step");
             //Output time marching history
             time_advance_history_file
-                << std::setw (7) << n_total_inter << ' '
-                << std::setw (10) << triangulation.n_global_active_cells() << ' '
-                << std::setw (10) << dof_handler.n_dofs() << ' '
-                << std::setw (13) << time << ' '
-                << std::setw (8) << n_time_step << ' '
-                << std::setw (9) << nonlin_iter << ' '
-                << std::setw (13) << res_norm << ' '
-                << std::setw (14) << convergence.first << ' '
-                << std::setw (13) << convergence.second << ' '
-                << std::setw (18) << linear_search_length[index_linear_search_length] << ' '
-                << std::setw (15) << parameters.time_step << ' '
-                << std::setw (17) << parameters.time_step_factor << ' ';
+            << std::setw (7) << n_total_inter << ' '
+                                               << std::setw (10) << triangulation.n_global_active_cells() << ' '
+                                                                  << std::setw (10) << dof_handler.n_dofs() << ' '
+                                                                      << std::setw (13) << time << ' '
+                                                                          << std::setw (8) << n_time_step << ' '
+                                                                              << std::setw (9) << nonlin_iter << ' '
+                                                                                  << std::setw (13) << res_norm << ' '
+                                                                                      << std::setw (14) << convergence.first << ' '
+                                                                                          << std::setw (13) << convergence.second << ' '
+                                                                                              << std::setw (18) << linear_search_length[index_linear_search_length] << ' '
+                                                                                                  << std::setw (15) << parameters.time_step << ' '
+                                                                                                      << std::setw (17) << parameters.time_step_factor << ' ';
 
-            // We only get to this point if the Newton iteration has converged, so
-            // do various post convergence tasks here:
-            //
-            // First, we update the time and produce graphical output if so
-            // desired. Then we update a predictor for the solution at the next
-            // time step by approximating $\mathbf w^{n+1}\approx \mathbf w^n +
-            // \delta t \frac{\partial \mathbf w}{\partial t} \approx \mathbf w^n
-            // + \delta t \; \frac{\mathbf w^n-\mathbf w^{n-1}}{\delta t} = 2
-            // \mathbf w^n - \mathbf w^{n-1}$ to try and make adaptivity work
-            // better.  The idea is to try and refine ahead of a front, rather
-            // than stepping into a coarse set of elements and smearing the
-            // old_solution.  This simple time extrapolator does the job. With
-            // this, we then refine the mesh if so desired by the user, and
-            // finally continue on with the next time step:
-            ++converged_newton_iters;
-            time += parameters.time_step;
-            ++n_time_step;
+                                                                                                          // We only get to this point if the Newton iteration has converged, so
+                                                                                                          // do various post convergence tasks here:
+                                                                                                          //
+                                                                                                          // First, we update the time and produce graphical output if so
+                                                                                                          // desired. Then we update a predictor for the solution at the next
+                                                                                                          // time step by approximating $\mathbf w^{n+1}\approx \mathbf w^n +
+                                                                                                          // \delta t \frac{\partial \mathbf w}{\partial t} \approx \mathbf w^n
+                                                                                                          // + \delta t \; \frac{\mathbf w^n-\mathbf w^{n-1}}{\delta t} = 2
+                                                                                                          // \mathbf w^n - \mathbf w^{n-1}$ to try and make adaptivity work
+                                                                                                          // better.  The idea is to try and refine ahead of a front, rather
+                                                                                                          // than stepping into a coarse set of elements and smearing the
+                                                                                                          // old_solution.  This simple time extrapolator does the job. With
+                                                                                                          // this, we then refine the mesh if so desired by the user, and
+                                                                                                          // finally continue on with the next time step:
+                                                                                                          ++converged_newton_iters;
+                                                                                                          time += parameters.time_step;
+                                                                                                          ++n_time_step;
 
-            if (parameters.output_step < 0)
+                                                                                                          if (parameters.output_step < 0)
               {
                 output_results();
               }
@@ -1635,11 +1634,11 @@ namespace NSolver
                 time_step_doubled = true;
                 index_linear_search_length = 0;
                 pcout << "  We got ten successive converged time steps.\n"
-                      << "  Time step size increased to " << parameters.time_step << "\n\n";
+                       << "  Time step size increased to " << parameters.time_step << "\n\n";
 
-                predictor.sadd (1.0+predictor_leap_ratio*2.0, 0.0-predictor_leap_ratio*2.0, tmp_vector);
+                                                            predictor.sadd (1.0+predictor_leap_ratio*2.0, 0.0-predictor_leap_ratio*2.0, tmp_vector);
               }
-            else
+                                                        else
               {
                 predictor.sadd (1.0+predictor_leap_ratio,     0.0-predictor_leap_ratio,     tmp_vector);
               }
@@ -1651,17 +1650,17 @@ namespace NSolver
             tmp_vector.sadd (-1.0, locally_owned_solution);
             const double time_advance_l2_norm  = tmp_vector.l2_norm();
             pcout << "  Order of time advancing L_infty norm = "
-                  << std::log (tmp_vector.linfty_norm())/std::log (10.0) << std::endl;
-            pcout << "  Order of time advancing L_2     norm = "
-                  << std::log (time_advance_l2_norm)/std::log (10.0) << std::endl;
+                   << std::log (tmp_vector.linfty_norm())/std::log (10.0) << std::endl;
+                    pcout << "  Order of time advancing L_2     norm = "
+                           << std::log (time_advance_l2_norm)/std::log (10.0) << std::endl;
 
 
-            time_advance_history_file
-                << std::setw (15) << time_advance_l2_norm << '\n';
+                            time_advance_history_file
+                            << std::setw (15) << time_advance_l2_norm << '\n';
 
-            old_solution = current_solution;
+                                               old_solution = current_solution;
 
-            if (parameters.do_refine == true)
+                                               if (parameters.do_refine == true)
               {
                 refine_grid();
               }
@@ -1693,12 +1692,12 @@ namespace NSolver
                 pcout << "  Time step size reduced to " << parameters.time_step << "\n\n";
               }
 
-            current_solution = current_solution_backup;
-            predictor = current_solution;
+                                                     current_solution = current_solution_backup;
+                   predictor = current_solution;
 
-            tmp_vector.reinit (predictor);
-            tmp_vector  = old_solution;
-            if (converged_newton_iters > 0)
+                   tmp_vector.reinit (predictor);
+                   tmp_vector  = old_solution;
+                   if (converged_newton_iters > 0)
               {
                 // The last good "current_solution" is calculated with a "large" time step,
                 // so we need to make a near extrapolation.

@@ -174,47 +174,49 @@ namespace NSolver
     // to the <code>i</code>th element, and then dereference it. This works
     // for both kinds of vectors -- not the prettiest solution, but one that
     // works.
-    template <typename Number, typename InputVector>
+    template <typename InputVector>
     static
-    Number
+    typename InputVector::value_type
     compute_kinetic_energy (const InputVector &W);
 
 
-    template <typename Number, typename InputVector>
+    template <typename InputVector>
     static
-    Number
+    typename InputVector::value_type
     compute_pressure (const InputVector &W);
 
 
     // Compute total energy density := pressure/(\gamma-1) + 0.5 * \rho * |v|^2
-    template <typename Number, typename InputVector>
+    template <typename InputVector>
     static
-    Number
+    typename InputVector::value_type
     compute_energy_density (const InputVector &W);
 
 
-    template <typename Number, typename InputVector>
+    template <typename InputVector>
     static
-    Number
+    typename InputVector::value_type
     compute_velocity_magnitude (const InputVector &W);
 
 
-    template <typename Number, typename InputVector>
+    template <typename InputVector>
     static
     void
     compute_conservative_vector (const InputVector &W,
-                                 std_cxx11::array <Number, n_components> &conservative_vector);
+                                 std_cxx11::array
+                                 <typename InputVector::value_type, n_components>
+                                 &conservative_vector);
 
 
-    template <typename Number, typename InputVector>
+    template <typename InputVector>
     static
-    Number
+    typename InputVector::value_type
     compute_temperature (const InputVector &W);
 
 
-    template <typename Number, typename InputVector>
+    template <typename InputVector>
     static
-    Number
+    typename InputVector::value_type
     compute_sound_speed (const InputVector &W);
 
 
@@ -222,9 +224,9 @@ namespace NSolver
     // @f{eqnarray*}
     // S(p,\rho)=\frac{\rho}{\gamma -1}log(\frac{p}{\rho ^ \gamma})
     // @f}
-    template <typename Number, typename InputVector>
+    template <typename InputVector>
     static
-    Number
+    typename InputVector::value_type
     compute_entropy (const InputVector &W);
 
 
@@ -244,10 +246,12 @@ namespace NSolver
     // use the automatic differentiation type here.  Similarly, we will call
     // the function with different input vector data types, so we templatize
     // on it as well:
-    template <typename InputVector, typename Number>
+    template <typename InputVector>
     static
     void compute_flux_matrix (const InputVector &W,
-                              std_cxx11::array <std_cxx11::array <Number, dim>, n_components > &flux);
+                              std_cxx11::array <std_cxx11::array
+                              <typename InputVector::value_type, dim>,
+                              n_components > &flux);
 
 
     // @sect4{EulerEquations::compute_normal_flux}
@@ -256,13 +260,14 @@ namespace NSolver
     // numerical flux function to enforce boundary conditions.  This routine
     // is the basic Lax-Friedrich's flux with a stabilization parameter
     // $\alpha$. It's form has also been given already in the introduction:
-    template <typename InputVector, typename Number>
+    template <typename InputVector>
     static
     void numerical_normal_flux (const Point<dim>                   &normal,
                                 const InputVector                  &Wplus,
                                 const InputVector                  &Wminus,
                                 const double                        alpha,
-                                std_cxx11::array < Number, n_components> &normal_flux);
+                                std_cxx11::array < typename InputVector::value_type,
+                                n_components> &normal_flux);
 
     // @sect4{EulerEquations::compute_forcing_vector}
 
@@ -274,10 +279,11 @@ namespace NSolver
     // \right)^T$, shown here for the 3d case. More specifically, we will
     // consider only $\mathbf g=(0,0,-1)^T$ in 3d, or $\mathbf g=(0,-1)^T$ in
     // 2d. This naturally leads to the following function:
-    template <typename InputVector, typename Number>
+    template <typename InputVector>
     static
     void compute_forcing_vector (const InputVector &W,
-                                 std_cxx11::array < Number, n_components> &forcing,
+                                 std_cxx11::array < typename InputVector::value_type,
+                                 n_components> &forcing,
                                  const double gravity);
 
     // @sect4{Dealing with boundary conditions}
@@ -454,81 +460,84 @@ namespace NSolver
   // works.
 
   template <int dim>
-  template <typename Number, typename InputVector>
-  Number
+  template <typename InputVector>
+  typename InputVector::value_type
   EulerEquations<dim>::compute_kinetic_energy (const InputVector &W)
   {
-    Number kinetic_energy = 0;
+    typename InputVector::value_type kinetic_energy = 0;
     for (unsigned int d=0; d<dim; ++d)
-      kinetic_energy += *(W.begin()+first_velocity_component+d) *
-                        *(W.begin()+first_velocity_component+d);
-    kinetic_energy *= 0.5 * *(W.begin() + density_component);
+      kinetic_energy += * (W.begin()+first_velocity_component+d) *
+                        * (W.begin()+first_velocity_component+d);
+    kinetic_energy *= 0.5 * * (W.begin() + density_component);
 
     return kinetic_energy;
   }
 
   template <int dim>
-  template <typename Number, typename InputVector>
-  Number
+  template <typename InputVector>
+  typename InputVector::value_type
   EulerEquations<dim>::compute_pressure (const InputVector &W)
   {
-    return (*(W.begin() + pressure_component));
+    return (* (W.begin() + pressure_component));
   }
 
   template <int dim>
-  template <typename Number, typename InputVector>
-  Number
+  template <typename InputVector>
+  typename InputVector::value_type
   EulerEquations<dim>::compute_energy_density (const InputVector &W)
   {
-  return (*(W.begin() + pressure_component)/(gas_gamma-1.0)
-          + compute_kinetic_energy<Number>(W)
-          );
+    return (* (W.begin() + pressure_component)/ (gas_gamma-1.0)
+            + compute_kinetic_energy (W)
+           );
   }
 
   template <int dim>
-  template <typename Number, typename InputVector>
-  Number
+  template <typename InputVector>
+  typename InputVector::value_type
   EulerEquations<dim>::compute_velocity_magnitude (const InputVector &W)
   {
-    Number velocity_magnitude = 0;
+    typename InputVector::value_type velocity_magnitude = 0;
     for (unsigned int d=0; d<dim; ++d)
-      velocity_magnitude += *(W.begin()+first_velocity_component+d) *
-      *(W.begin()+first_velocity_component+d);
-    velocity_magnitude = std::sqrt(velocity_magnitude);
+      velocity_magnitude += * (W.begin()+first_velocity_component+d) *
+                            * (W.begin()+first_velocity_component+d);
+    velocity_magnitude = std::sqrt (velocity_magnitude);
 
     return velocity_magnitude;
   }
 
   template <int dim>
-  template <typename Number, typename InputVector>
+  template <typename InputVector>
   void
   EulerEquations<dim>::compute_conservative_vector (const InputVector &W,
-                               std_cxx11::array <Number, n_components> &conservative_vector)
+                                                    std_cxx11::array
+                                                    <typename InputVector::value_type, n_components>
+                                                    &conservative_vector)
   {
-    for (unsigned int d = 0; d<dim; ++d) {
-      conservative_vector[first_velocity_component+d]
-      =*(W.begin()+first_velocity_component+d) * *(W.begin() + density_component);
-    }
-    conservative_vector[density_component] = *(W.begin() + density_component);
-    conservative_vector[energy_component] = compute_energy_density<Number>(W);
+    for (unsigned int d = 0; d<dim; ++d)
+      {
+        conservative_vector[first_velocity_component+d]
+          =* (W.begin()+first_velocity_component+d) ** (W.begin() + density_component);
+      }
+    conservative_vector[density_component] = * (W.begin() + density_component);
+    conservative_vector[energy_component] = compute_energy_density (W);
     return;
   }
 
   template <int dim>
-  template <typename Number, typename InputVector>
-  Number
+  template <typename InputVector>
+  typename InputVector::value_type
   EulerEquations<dim>::compute_temperature (const InputVector &W)
   {
-    return(gas_gamma * *(W.begin() + pressure_component)/ *(W.begin() + density_component));
+    return (gas_gamma ** (W.begin() + pressure_component)/ * (W.begin() + density_component));
   }
 
 
   template <int dim>
-  template <typename Number, typename InputVector>
-  Number
+  template <typename InputVector>
+  typename InputVector::value_type
   EulerEquations<dim>::compute_sound_speed (const InputVector &W)
   {
-    return(std::sqrt(compute_temperature<Number>(W)));
+    return (std::sqrt (compute_temperature (W)));
   }
 
   // Calculate entropy according to
@@ -536,13 +545,13 @@ namespace NSolver
   // S(p,\rho)=\frac{\rho}{\gamma -1}log(\frac{p}{\rho ^ \gamma})
   // @f}
   template <int dim>
-  template <typename Number, typename InputVector>
-  Number
+  template <typename InputVector>
+  typename InputVector::value_type
   EulerEquations<dim>::compute_entropy (const InputVector &W)
   {
-    return (*(W.begin() + density_component) / (gas_gamma-1.0) *
-            std::log (*(W.begin() + pressure_component) /
-                      std::pow ((*(W.begin() + density_component)), gas_gamma)
+    return (* (W.begin() + density_component) / (gas_gamma-1.0) *
+            std::log (* (W.begin() + pressure_component) /
+                      std::pow ((* (W.begin() + density_component)), gas_gamma)
                      )
            );
   }
@@ -565,15 +574,16 @@ namespace NSolver
   // the function with different input vector data types, so we templatize
   // on it as well:
   template <int dim>
-  template <typename InputVector, typename Number>
+  template <typename InputVector>
   void EulerEquations<dim>::compute_flux_matrix (const InputVector &W,
-                                                 std_cxx11::array <std_cxx11::array <Number, dim>,
+                                                 std_cxx11::array <std_cxx11::array
+                                                 <typename InputVector::value_type, dim>,
                                                  EulerEquations<dim>::n_components > &flux)
   {
     // First compute the pressure that appears in the flux matrix, and then
     // compute the first <code>dim</code> columns of the matrix that
     // correspond to the momentum terms:
-    const Number pressure = W[pressure_component];
+    const typename InputVector::value_type pressure = W[pressure_component];
 
     for (unsigned int d=0; d<dim; ++d)
       {
@@ -596,7 +606,7 @@ namespace NSolver
 
     for (unsigned int d=0; d<dim; ++d)
       flux[energy_component][d] = W[first_velocity_component+d] *
-                                  (compute_energy_density<Number>(W) + pressure);
+                                  (compute_energy_density (W) + pressure);
   }
 
 
@@ -607,15 +617,16 @@ namespace NSolver
   // is the basic Lax-Friedrich's flux with a stabilization parameter
   // $\alpha$. It's form has also been given already in the introduction:
   template <int dim>
-  template <typename InputVector, typename Number>
+  template <typename InputVector>
   void EulerEquations<dim>::numerical_normal_flux (const Point<dim>                   &normal,
                                                    const InputVector                  &Wplus,
                                                    const InputVector                  &Wminus,
                                                    const double                        alpha,
-                                                   std_cxx11::array < Number, n_components> &normal_flux)
+                                                   std_cxx11::array < typename InputVector::value_type, n_components> &normal_flux)
   {
-
-    std_cxx11::array <std_cxx11::array <Number, dim>, EulerEquations<dim>::n_components > iflux, oflux;
+    std_cxx11::array <std_cxx11::array
+    <typename InputVector::value_type, dim>,
+    EulerEquations<dim>::n_components > iflux, oflux;
     compute_flux_matrix (Wplus, iflux);
     compute_flux_matrix (Wminus, oflux);
 
@@ -642,9 +653,11 @@ namespace NSolver
   // consider only $\mathbf g=(0,0,-1)^T$ in 3d, or $\mathbf g=(0,-1)^T$ in
   // 2d. This naturally leads to the following function:
   template <int dim>
-  template <typename InputVector, typename Number>
+  template <typename InputVector>
   void EulerEquations<dim>::compute_forcing_vector (const InputVector &W,
-                                                    std_cxx11::array < Number, n_components> &forcing,
+                                                    std_cxx11::array
+                                                    < typename InputVector::value_type, n_components>
+                                                    &forcing,
                                                     const double gravity)
   {
     for (unsigned int c=0; c<n_components; ++c)
@@ -742,7 +755,7 @@ namespace NSolver
               //Calculate outcoming Riemann invariant from interior conditions
               const typename DataVector::value_type pressure_outcoming
                 = Wplus[pressure_component];
-             //   = compute_pressure<typename DataVector::value_type> (Wplus);
+              //   = compute_pressure<typename DataVector::value_type> (Wplus);
               const typename DataVector::value_type sound_speed_outcoming
                 = std::sqrt (gas_gamma * pressure_outcoming / Wplus[density_component]);
 
@@ -786,7 +799,7 @@ namespace NSolver
                   deltaV = normal_velocity_boundary - normal_velocity_incoming;
                   for (unsigned int d = first_velocity_component; d < first_velocity_component+dim; ++d)
                     {
-                      Wminus[d] = boundary_values(d) + deltaV * normal_vector[d];
+                      Wminus[d] = boundary_values (d) + deltaV * normal_vector[d];
                     }
                 }
               else
@@ -808,7 +821,7 @@ namespace NSolver
             }
           break;
         }
-        
+
         case inflow_boundary:
         {
           Wminus[c] = boundary_values (c);
@@ -823,7 +836,7 @@ namespace NSolver
 
         case pressure_boundary:
         {
-          Wminus[c] = boundary_values(c);
+          Wminus[c] = boundary_values (c);
           break;
         }
 
