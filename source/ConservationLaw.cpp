@@ -153,8 +153,7 @@ namespace NSolver
             {
               const double density = solution_values[q] (EulerEquations<dim>::density_component);
               AssertThrow (density > 0.0, ExcMessage ("Negative density encountered!"));
-              const double pressure =
-                EulerEquations<dim>::template compute_pressure<double> (solution_values[q]);
+              const double pressure = solution_values[q] (EulerEquations<dim>::pressure_component);
               AssertThrow (pressure > 0.0, ExcMessage ("Negative pressure encountered!"));
             }
         }
@@ -189,18 +188,10 @@ namespace NSolver
               double velocity;
               for (unsigned int q=0; q<n_q_points; ++q)
                 {
-                  const double density = solution_values[q] (EulerEquations<dim>::density_component);
-                  const double pressure =
-                    EulerEquations<dim>::template compute_pressure<double> (solution_values[q]);
-
-                  const double sound_speed = std::sqrt (EulerEquations<dim>::gas_gamma * pressure/density);
-                  Tensor<1,dim> momentum;
-                  for (unsigned int i=EulerEquations<dim>::first_momentum_component;
-                       i < EulerEquations<dim>::first_momentum_component+dim; ++i)
-                    {
-                      momentum[i] = solution_values[q] (i);
-                    }
-                  velocity = momentum.norm()/density;
+                  const double sound_speed
+                    = EulerEquations<dim>::template compute_sound_speed<double>(solution_values[q]);
+                  const double velocity
+                    = EulerEquations<dim>::template compute_velocity_magnitude<double>(solution_values[q]);
                   min_time_step = std::min (min_time_step,
                                             cell_size / (velocity+sound_speed) * parameters.CFL_number);
                 }
@@ -628,13 +619,15 @@ namespace NSolver
             for (unsigned int d=0; d<dim; d++)
               {
                 const Sacado::Fad::DFad<double> entropy_flux = entropy *
-                                                               w_for_entropy_flux[EulerEquations<dim>::first_momentum_component + d]/
-                                                               w_for_entropy_flux[EulerEquations<dim>::density_component];
+                                                               w_for_entropy_flux[EulerEquations<dim>::first_velocity_component + d];
                 for (unsigned int c=0; c<EulerEquations<dim>::n_components; ++c)
                   {
                     D_h1 += entropy_flux.fastAccessDx (c) * grad_W[q][c][d].val();
                   }
-                D_h2 += grad_W[q][EulerEquations<dim>::first_momentum_component + d][d].val();
+                D_h2 += grad_W[q][EulerEquations<dim>::first_velocity_component + d][d].val()
+                  * W[q][EulerEquations<dim>::density_component].val()
+                  + W[q][EulerEquations<dim>::first_velocity_component + d].val()
+                  * grad_W[q][EulerEquations<dim>::density_component][d].val();
               }
             D_h2 *= entropy.val()/W[q][EulerEquations<dim>::density_component].val();
             D_h_max = std::max (D_h_max, std::abs (D_h1));
@@ -642,22 +635,10 @@ namespace NSolver
 
             rho_max = std::max (rho_max, W[q][EulerEquations<dim>::density_component].val());
 
-            // Calculate local sound speed.
-            const double density = W[q][EulerEquations<dim>::density_component].val();
-            const double pressure =
-              EulerEquations<dim>::template compute_pressure<Sacado::Fad::DFad<double> > (W[q]).val();
-
-            const double sound_speed = std::sqrt (EulerEquations<dim>::gas_gamma * pressure/density);
-
-            // Calculate local velosity magnitude.
-            Tensor<1,dim> momentum;
-            for (unsigned int i=EulerEquations<dim>::first_momentum_component;
-                 i < EulerEquations<dim>::first_momentum_component+dim; ++i)
-              {
-                momentum[i] = W[q][i].val();
-              }
-            const double velocity = momentum.norm()/density;
-
+            const double sound_speed
+              = EulerEquations<dim>::template compute_sound_speed<Sacado::Fad::DFad<double> >(W[q]).val();
+            const double velocity
+              = EulerEquations<dim>::template compute_velocity_magnitude<Sacado::Fad::DFad<double> >(W[q]).val();
             characteristic_speed_max = std::max (characteristic_speed_max, velocity + sound_speed);
           }
         const double cE = 1.0;
@@ -721,9 +702,14 @@ namespace NSolver
 
         for (unsigned int point=0; point<fe_v.n_quadrature_points; ++point)
           {
+            std_cxx11::array<Sacado::Fad::DFad<double> , EulerEquations<dim>::n_components> w_conservative;
+            std_cxx11::array<double, EulerEquations<dim>::n_components> w_conservative_old;
+            EulerEquations<dim>::compute_conservative_vector(W[point], w_conservative);
+            EulerEquations<dim>::compute_conservative_vector(W_old[point], w_conservative_old);
+
             if (parameters.is_stationary == false)
               R_i += 1.0 / parameters.time_step *
-                     (W[point][component_i] - W_old[point][component_i]) *
+                     (w_conservative[component_i] - w_conservative_old[component_i]) *
                      fe_v.shape_value_component (i, point, component_i) *
                      fe_v.JxW (point);
 

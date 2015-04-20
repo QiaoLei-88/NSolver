@@ -19,9 +19,9 @@ namespace NSolver
   std::vector<std::string>
   EulerEquations<dim>::component_names()
   {
-    std::vector<std::string> names (dim, "momentum");
+    std::vector<std::string> names (dim, "velocity");
     names.push_back ("density");
-    names.push_back ("energy_density");
+    names.push_back ("pressure");
 
     return names;
   }
@@ -169,7 +169,7 @@ namespace NSolver
 
     // Then loop over all quadrature points and do our work there. The code
     // should be pretty self-explanatory. The order of output variables is
-    // first <code>dim</code> velocities, then the pressure, and if so desired
+    // first <code>dim</code> momentums, then the energy_density, and if so desired
     // the schlieren plot. Note that we try to be generic about the order of
     // variables in the input vector, using the
     // <code>first_momentum_component</code> and
@@ -180,9 +180,9 @@ namespace NSolver
 
         for (unsigned int d=0; d<dim; ++d)
           computed_quantities[q] (d)
-            = uh[q] (first_momentum_component+d) / density;
+            = uh[q] (first_momentum_component+d) * density;
 
-        computed_quantities[q] (dim) = compute_pressure<double> (uh[q]);
+        computed_quantities[q] (dim) = compute_energy_density<double> (uh[q]);
 
         if (do_schlieren_plot == true)
           computed_quantities[q] (dim+1) = duh[q][density_component] *
@@ -199,9 +199,9 @@ namespace NSolver
     std::vector<std::string> names;
     for (unsigned int d=0; d<dim; ++d)
       {
-        names.push_back ("velocity");
+        names.push_back ("momentum");
       }
-    names.push_back ("pressure");
+    names.push_back ("energy_density");
 
     if (do_schlieren_plot == true)
       {

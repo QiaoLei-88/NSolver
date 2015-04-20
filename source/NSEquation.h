@@ -120,8 +120,12 @@ namespace NSolver
     // for example by adding more components to the equations.
     static const unsigned int n_components             = dim + 2;
     static const unsigned int first_momentum_component = 0;
+    static const unsigned int first_velocity_component = 0;
     static const unsigned int density_component        = dim;
     static const unsigned int energy_component         = dim+1;
+    static const unsigned int pressure_component       = dim+1;
+
+
 
     // When generating graphical output way down in this program, we need to
     // specify the names of the solution variables as well as how the various
@@ -180,6 +184,38 @@ namespace NSolver
     static
     Number
     compute_pressure (const InputVector &W);
+
+
+    // Compute total energy density := pressure/(\gamma-1) + 0.5 * \rho * |v|^2
+    template <typename Number, typename InputVector>
+    static
+    Number
+    compute_energy_density (const InputVector &W);
+
+
+    template <typename Number, typename InputVector>
+    static
+    Number
+    compute_velocity_magnitude (const InputVector &W);
+
+
+    template <typename Number, typename InputVector>
+    static
+    void
+    compute_conservative_vector (const InputVector &W,
+                                 std_cxx11::array <Number, n_components> &conservative_vector);
+
+
+    template <typename Number, typename InputVector>
+    static
+    Number
+    compute_temperature (const InputVector &W);
+
+
+    template <typename Number, typename InputVector>
+    static
+    Number
+    compute_sound_speed (const InputVector &W);
 
 
     // Calculate entropy according to
@@ -424,9 +460,9 @@ namespace NSolver
   {
     Number kinetic_energy = 0;
     for (unsigned int d=0; d<dim; ++d)
-      kinetic_energy += * (W.begin()+first_momentum_component+d) *
-                        * (W.begin()+first_momentum_component+d);
-    kinetic_energy *= 1./ (2 * * (W.begin() + density_component));
+      kinetic_energy += *(W.begin()+first_velocity_component+d) *
+                        *(W.begin()+first_velocity_component+d);
+    kinetic_energy *= 0.5 * *(W.begin() + density_component);
 
     return kinetic_energy;
   }
@@ -436,11 +472,64 @@ namespace NSolver
   Number
   EulerEquations<dim>::compute_pressure (const InputVector &W)
   {
-    return ((gas_gamma-1.0) *
-            (* (W.begin() + energy_component) -
-             compute_kinetic_energy<Number> (W)));
+    return (*(W.begin() + pressure_component));
   }
 
+  template <int dim>
+  template <typename Number, typename InputVector>
+  Number
+  EulerEquations<dim>::compute_energy_density (const InputVector &W)
+  {
+  return (*(W.begin() + pressure_component)/(gas_gamma-1.0)
+          + compute_kinetic_energy<Number>(W)
+          );
+  }
+
+  template <int dim>
+  template <typename Number, typename InputVector>
+  Number
+  EulerEquations<dim>::compute_velocity_magnitude (const InputVector &W)
+  {
+    Number velocity_magnitude = 0;
+    for (unsigned int d=0; d<dim; ++d)
+      velocity_magnitude += *(W.begin()+first_velocity_component+d) *
+      *(W.begin()+first_velocity_component+d);
+    velocity_magnitude = std::sqrt(velocity_magnitude);
+
+    return velocity_magnitude;
+  }
+
+  template <int dim>
+  template <typename Number, typename InputVector>
+  void
+  EulerEquations<dim>::compute_conservative_vector (const InputVector &W,
+                               std_cxx11::array <Number, n_components> &conservative_vector)
+  {
+    for (unsigned int d = 0; d<dim; ++d) {
+      conservative_vector[first_velocity_component+d]
+      =*(W.begin()+first_velocity_component+d) * *(W.begin() + density_component);
+    }
+    conservative_vector[density_component] = *(W.begin() + density_component);
+    conservative_vector[energy_component] = compute_energy_density<Number>(W);
+    return;
+  }
+
+  template <int dim>
+  template <typename Number, typename InputVector>
+  Number
+  EulerEquations<dim>::compute_temperature (const InputVector &W)
+  {
+    return(gas_gamma * *(W.begin() + pressure_component)/ *(W.begin() + density_component));
+  }
+
+
+  template <int dim>
+  template <typename Number, typename InputVector>
+  Number
+  EulerEquations<dim>::compute_sound_speed (const InputVector &W)
+  {
+    return(std::sqrt(compute_temperature<Number>(W)));
+  }
 
   // Calculate entropy according to
   // @f{eqnarray*}
@@ -451,9 +540,9 @@ namespace NSolver
   Number
   EulerEquations<dim>::compute_entropy (const InputVector &W)
   {
-    return (* (W.begin() + density_component) / (gas_gamma-1.0) *
-            std::log (compute_pressure<Number> (W)/
-                      std::pow ((* (W.begin() + density_component)), gas_gamma)
+    return (*(W.begin() + density_component) / (gas_gamma-1.0) *
+            std::log (*(W.begin() + pressure_component) /
+                      std::pow ((*(W.begin() + density_component)), gas_gamma)
                      )
            );
   }
@@ -478,19 +567,20 @@ namespace NSolver
   template <int dim>
   template <typename InputVector, typename Number>
   void EulerEquations<dim>::compute_flux_matrix (const InputVector &W,
-                                                 std_cxx11::array <std_cxx11::array <Number, dim>, EulerEquations<dim>::n_components > &flux)
+                                                 std_cxx11::array <std_cxx11::array <Number, dim>,
+                                                 EulerEquations<dim>::n_components > &flux)
   {
     // First compute the pressure that appears in the flux matrix, and then
     // compute the first <code>dim</code> columns of the matrix that
     // correspond to the momentum terms:
-    const Number pressure = compute_pressure<Number> (W);
+    const Number pressure = W[pressure_component];
 
     for (unsigned int d=0; d<dim; ++d)
       {
         for (unsigned int e=0; e<dim; ++e)
           flux[first_momentum_component+d][e]
-            = W[first_momentum_component+d] *
-              W[first_momentum_component+e] /
+            = W[first_velocity_component+d] *
+              W[first_velocity_component+e] *
               W[density_component];
 
         flux[first_momentum_component+d][d] += pressure;
@@ -500,13 +590,13 @@ namespace NSolver
     // conservation of energy:
     for (unsigned int d=0; d<dim; ++d)
       {
-        flux[density_component][d] = W[first_momentum_component+d];
+        flux[density_component][d]
+          = W[first_velocity_component+d] * W[density_component];
       }
 
     for (unsigned int d=0; d<dim; ++d)
-      flux[energy_component][d] = W[first_momentum_component+d] /
-                                  W[density_component] *
-                                  (W[energy_component] + pressure);
+      flux[energy_component][d] = W[first_velocity_component+d] *
+                                  (compute_energy_density<Number>(W) + pressure);
   }
 
 
@@ -565,8 +655,8 @@ namespace NSolver
           break;
         case energy_component:
           forcing[c] = gravity *
-                       //                         W[density_component] *
-                       W[first_momentum_component+dim-1];
+                       W[density_component] *
+                       W[first_velocity_component+dim-1];
           break;
         default:
           forcing[c] = 0;
@@ -640,7 +730,7 @@ namespace NSolver
               const typename DataVector::value_type sound_speed_incoming = 1.0;
 
               typename DataVector::value_type normal_velocity_incoming = 0.0;
-              for (unsigned int d = first_momentum_component; d < first_momentum_component+dim; ++d)
+              for (unsigned int d = first_velocity_component; d < first_velocity_component+dim; ++d)
                 {
                   normal_velocity_incoming += boundary_values (d)*normal_vector[d];
                 }
@@ -651,16 +741,17 @@ namespace NSolver
 
               //Calculate outcoming Riemann invariant from interior conditions
               const typename DataVector::value_type pressure_outcoming
-                = compute_pressure<typename DataVector::value_type> (Wplus);
+                = Wplus[pressure_component];
+             //   = compute_pressure<typename DataVector::value_type> (Wplus);
               const typename DataVector::value_type sound_speed_outcoming
                 = std::sqrt (gas_gamma * pressure_outcoming / Wplus[density_component]);
 
               typename DataVector::value_type normal_velocity_outcoming = 0.0;
-              for (unsigned int d = first_momentum_component; d < first_momentum_component+dim; ++d)
+              for (unsigned int d = first_velocity_component; d < first_velocity_component+dim; ++d)
                 {
                   normal_velocity_outcoming += Wplus[d]*normal_vector[d];
                 }
-              normal_velocity_outcoming /= Wplus[density_component];
+              //normal_velocity_outcoming /= Wplus[density_component];
 
               typename DataVector::value_type riemann_invariant_outcoming = normal_velocity_outcoming
                   + 2.0 * sound_speed_outcoming/ (gas_gamma - 1.0);
@@ -693,9 +784,9 @@ namespace NSolver
                                               std::pow (sound_speed_boundary/sound_speed_incoming, 2.0/ (gas_gamma-1.0));
                   const typename DataVector::value_type
                   deltaV = normal_velocity_boundary - normal_velocity_incoming;
-                  for (unsigned int d = first_momentum_component; d < first_momentum_component+dim; ++d)
+                  for (unsigned int d = first_velocity_component; d < first_velocity_component+dim; ++d)
                     {
-                      Wminus[d] = (boundary_values (d) + deltaV * normal_vector[d]) * Wminus[density_component];
+                      Wminus[d] = boundary_values(d) + deltaV * normal_vector[d];
                     }
                 }
               else
@@ -705,19 +796,19 @@ namespace NSolver
                                               std::pow (sound_speed_boundary/sound_speed_outcoming, 2.0/ (gas_gamma-1.0));
                   const typename DataVector::value_type
                   deltaV = normal_velocity_boundary - normal_velocity_outcoming;
-                  for (unsigned int d = first_momentum_component; d < first_momentum_component+dim; ++d)
+                  for (unsigned int d = first_velocity_component; d < first_velocity_component+dim; ++d)
                     {
-                      Wminus[d] = (Wplus[d]/Wplus[density_component] + deltaV * normal_vector[d]) * Wminus[density_component];;
+                      Wminus[d] = Wplus[d] + deltaV * normal_vector[d];
                     }
                 }
               //Calculate boundary pressure then energy in the same pattern.
               const typename DataVector::value_type pressure_boundary = Wminus[density_component] * sound_speed_boundary *
                                                                         sound_speed_boundary / gas_gamma;
-              Wminus[energy_component] = (pressure_boundary / (gas_gamma-1.0)) +
-                                         compute_kinetic_energy<typename DataVector::value_type> (Wminus);
+              Wminus[pressure_component] = pressure_boundary;
             }
           break;
         }
+        
         case inflow_boundary:
         {
           Wminus[c] = boundary_values (c);
@@ -730,38 +821,9 @@ namespace NSolver
           break;
         }
 
-        // Prescribed pressure boundary conditions are a bit more
-        // complicated by the fact that even though the pressure is
-        // prescribed, we really are setting the energy component here,
-        // which will depend on velocity and pressure. So even though this
-        // seems like a Dirichlet type boundary condition, we get
-        // sensitivities of energy to velocity and density (unless these are
-        // also prescribed):
         case pressure_boundary:
         {
-          const typename DataVector::value_type
-          density = (boundary_kind[density_component] ==
-                     inflow_boundary
-                     ?
-                     boundary_values (density_component)
-                     :
-                     Wplus[density_component]);
-
-          typename DataVector::value_type kinetic_energy = 0;
-          for (unsigned int d=0; d<dim; ++d)
-            if (boundary_kind[d] == inflow_boundary)
-              {
-                kinetic_energy += boundary_values (d)*boundary_values (d);
-              }
-            else
-              {
-                kinetic_energy += Wplus[d]*Wplus[d];
-              }
-          kinetic_energy *= 1./2./density;
-
-          Wminus[c] = boundary_values (c) / (gas_gamma-1.0) +
-                      kinetic_energy;
-
+          Wminus[c] = boundary_values(c);
           break;
         }
 
