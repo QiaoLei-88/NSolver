@@ -160,20 +160,6 @@ namespace NSolver
     // = \frac{|\rho \mathbf v|^2}{2\rho}$ (note that the independent
     // variables contain the momentum components $\rho v_i$, not the
     // velocities $v_i$).
-    //
-    // There is one slight problem: We will need to call the following
-    // functions with input arguments of type
-    // <code>std::vector@<number@></code> and
-    // <code>Vector@<number@></code>. The problem is that the former has an
-    // access operator <code>operator[]</code> whereas the latter, for
-    // historical reasons, has <code>operator()</code>. We wouldn't be able to
-    // write the function in a generic way if we were to use one or the other
-    // of these. Fortunately, we can use the following trick: instead of
-    // writing <code>v[i]</code> or <code>v(i)</code>, we can use
-    // <code>*(v.begin() + i)</code>, i.e. we generate an iterator that points
-    // to the <code>i</code>th element, and then dereference it. This works
-    // for both kinds of vectors -- not the prettiest solution, but one that
-    // works.
     template <typename InputVector>
     static
     typename InputVector::value_type
@@ -444,20 +430,6 @@ namespace NSolver
   // = \frac{|\rho \mathbf v|^2}{2\rho}$ (note that the independent
   // variables contain the momentum components $\rho v_i$, not the
   // velocities $v_i$).
-  //
-  // There is one slight problem: We will need to call the following
-  // functions with input arguments of type
-  // <code>std::vector@<number@></code> and
-  // <code>Vector@<number@></code>. The problem is that the former has an
-  // access operator <code>operator[]</code> whereas the latter, for
-  // historical reasons, has <code>operator()</code>. We wouldn't be able to
-  // write the function in a generic way if we were to use one or the other
-  // of these. Fortunately, we can use the following trick: instead of
-  // writing <code>v[i]</code> or <code>v(i)</code>, we can use
-  // <code>*(v.begin() + i)</code>, i.e. we generate an iterator that points
-  // to the <code>i</code>th element, and then dereference it. This works
-  // for both kinds of vectors -- not the prettiest solution, but one that
-  // works.
 
   template <int dim>
   template <typename InputVector>
@@ -466,9 +438,9 @@ namespace NSolver
   {
     typename InputVector::value_type kinetic_energy = 0;
     for (unsigned int d=0; d<dim; ++d)
-      kinetic_energy += * (W.begin()+first_velocity_component+d) *
-                        * (W.begin()+first_velocity_component+d);
-    kinetic_energy *= 0.5 * * (W.begin() + density_component);
+      kinetic_energy += W[first_velocity_component+d] *
+                        W[first_velocity_component+d];
+    kinetic_energy *= 0.5 * W[density_component];
 
     return kinetic_energy;
   }
@@ -498,8 +470,8 @@ namespace NSolver
   {
     typename InputVector::value_type velocity_magnitude = 0;
     for (unsigned int d=0; d<dim; ++d)
-      velocity_magnitude += * (W.begin()+first_velocity_component+d) *
-                            * (W.begin()+first_velocity_component+d);
+      velocity_magnitude += W[first_velocity_component+d] *
+                            W[first_velocity_component+d];
     velocity_magnitude = std::sqrt (velocity_magnitude);
 
     return velocity_magnitude;
@@ -516,9 +488,9 @@ namespace NSolver
     for (unsigned int d = 0; d<dim; ++d)
       {
         conservative_vector[first_velocity_component+d]
-          =* (W.begin()+first_velocity_component+d) ** (W.begin() + density_component);
+          =W[first_velocity_component+d] * W[density_component];
       }
-    conservative_vector[density_component] = * (W.begin() + density_component);
+    conservative_vector[density_component] = W[density_component];
     conservative_vector[energy_component] = compute_energy_density (W);
     return;
   }
@@ -528,7 +500,7 @@ namespace NSolver
   typename InputVector::value_type
   EulerEquations<dim>::compute_temperature (const InputVector &W)
   {
-    return (gas_gamma ** (W.begin() + pressure_component)/ * (W.begin() + density_component));
+    return (gas_gamma * W[pressure_component]/W[density_component]);
   }
 
 
@@ -549,9 +521,9 @@ namespace NSolver
   typename InputVector::value_type
   EulerEquations<dim>::compute_entropy (const InputVector &W)
   {
-    return (* (W.begin() + density_component) / (gas_gamma-1.0) *
-            std::log (* (W.begin() + pressure_component) /
-                      std::pow ((* (W.begin() + density_component)), gas_gamma)
+    return (W[density_component] / (gas_gamma-1.0) *
+            std::log (W[pressure_component] /
+                      std::pow (W[density_component], gas_gamma)
                      )
            );
   }
