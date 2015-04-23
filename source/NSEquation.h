@@ -153,7 +153,6 @@ namespace NSolver
     // traces almost entirely of $N_2$ and $O_2$.
     static const double gas_gamma;
 
-
     // In the following, we will need to compute the kinetic energy and the
     // pressure from a vector of conserved variables. This we can do based on
     // the energy density and the kinetic energy $\frac 12 \rho |\mathbf v|^2
@@ -216,7 +215,7 @@ namespace NSolver
     compute_entropy (const InputVector &W);
 
 
-    // @sect4{EulerEquations::compute_flux_matrix}
+    // @sect4{EulerEquations::compute_inviscid_flux}
 
     // We define the flux function $F(W)$ as one large matrix.  Each row of
     // this matrix represents a scalar conservation law for the component in
@@ -234,11 +233,24 @@ namespace NSolver
     // on it as well:
     template <typename InputVector>
     static
-    void compute_flux_matrix (const InputVector &W,
-                              std_cxx11::array <std_cxx11::array
-                              <typename InputVector::value_type, dim>,
-                              n_components > &flux);
+    void compute_inviscid_flux (const InputVector &W,
+                                std_cxx11::array <std_cxx11::array
+                                <typename InputVector::value_type, dim>,
+                                n_components > &flux);
 
+    // Compute viscos flux as if viscosity coefficent is 1. Viscosity coefficent
+    // is a linear factor of viscos flux, so you can scale the viscos flux before
+    // add it to system matrix. If you want to bring sensitivity of viscosity
+    // coefficent into Newton matrix, you can declare the viscosity coefficient
+    // as a Sacado::FAD:DFAD<> type, otherwise you can declare the viscosity
+    // as a regular double type.
+    template <typename InputVector, typename InputMatrix>
+    static
+    void compute_viscous_flux (const InputVector &W,
+                               const InputMatrix &grad_w,
+                               std_cxx11::array <std_cxx11::array
+                               <typename InputVector::value_type, dim>,
+                               n_components > &flux);
 
     // @sect4{EulerEquations::compute_normal_flux}
 
@@ -529,7 +541,7 @@ namespace NSolver
   }
 
 
-  // @sect4{EulerEquations::compute_flux_matrix}
+  // @sect4{EulerEquations::compute_inviscid_flux}
 
   // We define the flux function $F(W)$ as one large matrix.  Each row of
   // this matrix represents a scalar conservation law for the component in
@@ -547,14 +559,11 @@ namespace NSolver
   // on it as well:
   template <int dim>
   template <typename InputVector>
-  void EulerEquations<dim>::compute_flux_matrix (const InputVector &W,
-                                                 std_cxx11::array <std_cxx11::array
-                                                 <typename InputVector::value_type, dim>,
-                                                 EulerEquations<dim>::n_components > &flux)
+  void EulerEquations<dim>::compute_inviscid_flux (const InputVector &W,
+                                                   std_cxx11::array <std_cxx11::array
+                                                   <typename InputVector::value_type, dim>,
+                                                   EulerEquations<dim>::n_components > &flux)
   {
-    // First compute the pressure that appears in the flux matrix, and then
-    // compute the first <code>dim</code> columns of the matrix that
-    // correspond to the momentum terms:
     const typename InputVector::value_type pressure = W[pressure_component];
 
     for (unsigned int d=0; d<dim; ++d)
@@ -568,8 +577,6 @@ namespace NSolver
         flux[first_momentum_component+d][d] += pressure;
       }
 
-    // Then the terms for the density (i.e. mass conservation), and, lastly,
-    // conservation of energy:
     for (unsigned int d=0; d<dim; ++d)
       {
         flux[density_component][d]
@@ -579,6 +586,86 @@ namespace NSolver
     for (unsigned int d=0; d<dim; ++d)
       flux[energy_component][d] = W[first_velocity_component+d] *
                                   (compute_energy_density (W) + pressure);
+
+  }
+
+  // Compute viscos flux as if viscosity coefficent is 1. Viscosity coefficent
+  // is a linear factor of viscos flux, so you can scale the viscos flux before
+  // add it to system matrix. If you want to bring sensitivity of viscosity
+  // coefficent into Newton matrix, you can declare the viscosity coefficient
+  // as a Sacado::FAD:DFAD<> type, otherwise you can declare the viscosity
+  // as a regular double type.
+  template <int dim>
+  template <typename InputVector, typename InputMatrix>
+  void EulerEquations<dim>::compute_viscous_flux (const InputVector &W,
+                                                  const InputMatrix &grad_w,
+                                                  std_cxx11::array <std_cxx11::array
+                                                  <typename InputVector::value_type, dim>,
+                                                  EulerEquations<dim>::n_components > &flux)
+  {
+    // First evaluate viscous flux's contribution to momentum equations.
+
+    // At the first of first we evaluate shear stress tensor
+    std_cxx11::array <std_cxx11::array <typename InputVector::value_type, dim>, dim>
+    stress_tensor;
+    typename InputVector::value_type bolk_stress = 0;
+    for (unsigned int k=0; k<dim; ++k)
+      {
+        bolk_stress += 2.0/3.0 * grad_w[first_velocity_component+k][k];
+      }
+
+    for (unsigned int i=0; i<dim; ++i)
+      {
+        for (unsigned int j=0; j<=i; ++j)
+          {
+            stress_tensor[i][j] = (grad_w[first_velocity_component+i][j] +
+                                   grad_w[first_velocity_component+j][i]);
+            if (j != i)
+              {
+                stress_tensor[j][i] = stress_tensor[i][j];
+              }
+          }
+        stress_tensor[i][i] -= bolk_stress;
+      }
+    // Submit viscosity stress to momentum equations.
+    for (unsigned int d=0; d<dim; ++d)
+      {
+        for (unsigned int e=0; e<dim; ++e)
+          {
+            flux[first_momentum_component+d][e] = stress_tensor[d][e];
+          }
+      }
+
+    // Viscous flux has nothing to do with mass equation, at least for now.
+    for (unsigned int d=0; d<dim; ++d)
+      {
+        flux[density_component][d] = 0.0;
+      }
+
+    // At last deal with energy equation
+    const double prandtlNumber = 0.72;
+    const double heat_conductivity = 1.0/(prandtlNumber * (gas_gamma - 1.0));
+    const typename InputVector::value_type rho_inverse = 1.0/W[density_component];
+    const typename InputVector::value_type p_over_rho_square =
+      W[pressure_component]*rho_inverse*rho_inverse;
+    for (unsigned int d=0; d<dim; ++d)
+      {
+        flux[energy_component][d] = 0.0;
+      }
+    for (unsigned int d=0; d<dim; ++d)
+      {
+        for (unsigned int e=0; e<dim; ++e)
+          {
+            flux[energy_component][d] += W[first_velocity_component+e]*stress_tensor[d][e];
+          }
+        // Calulate gradient of temperature. Notice that T=gamma*p/rho, then wo do
+        // d_T = gamma / rho * d_p - gamma * p/(rho^2) * d_rho on every space dimension.
+        flux[energy_component][d] += heat_conductivity * gas_gamma *
+                                     rho_inverse * grad_w[pressure_component][d];
+        flux[energy_component][d] -= heat_conductivity * gas_gamma *
+                                     p_over_rho_square * grad_w[density_component][d];
+      }
+
   }
 
 
@@ -599,8 +686,8 @@ namespace NSolver
     std_cxx11::array <std_cxx11::array
     <typename InputVector::value_type, dim>,
     EulerEquations<dim>::n_components > iflux, oflux;
-    compute_flux_matrix (Wplus, iflux);
-    compute_flux_matrix (Wminus, oflux);
+    compute_inviscid_flux (Wplus, iflux);
+    compute_inviscid_flux (Wminus, oflux);
 
     for (unsigned int di=0; di<n_components; ++di)
       {
