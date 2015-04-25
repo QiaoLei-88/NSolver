@@ -202,6 +202,12 @@ namespace NSolver
     template <typename InputVector>
     static
     typename InputVector::value_type
+    compute_molecular_viscosity (const InputVector &W);
+
+
+    template <typename InputVector>
+    static
+    typename InputVector::value_type
     compute_sound_speed (const InputVector &W);
 
 
@@ -519,6 +525,17 @@ namespace NSolver
   template <int dim>
   template <typename InputVector>
   typename InputVector::value_type
+  EulerEquations<dim>::compute_molecular_viscosity (const InputVector &W)
+  {
+    const double sutherland_const=110.4/273.15;
+    const typename InputVector::value_type t=compute_temperature (W);
+    return (std::pow (t,1.5) * (1.0+sutherland_const)/ (t+sutherland_const));
+  }
+
+
+  template <int dim>
+  template <typename InputVector>
+  typename InputVector::value_type
   EulerEquations<dim>::compute_sound_speed (const InputVector &W)
   {
     return (std::sqrt (compute_temperature (W)));
@@ -644,7 +661,7 @@ namespace NSolver
 
     // At last deal with energy equation
     const double prandtlNumber = 0.72;
-    const double heat_conductivity = 1.0/(prandtlNumber * (gas_gamma - 1.0));
+    const double heat_conductivity = 1.0 / (prandtlNumber * (gas_gamma - 1.0));
     const typename InputVector::value_type rho_inverse = 1.0/W[density_component];
     const typename InputVector::value_type p_over_rho_square =
       W[pressure_component]*rho_inverse*rho_inverse;
