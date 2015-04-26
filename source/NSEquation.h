@@ -824,7 +824,7 @@ namespace NSolver
               //Presure == 1.0/gas_gamma
               //Sound speed == 1.0
               //velocity magnitude == Mach number.
-              const typename DataVector::value_type pressure_incoming = 1.0/gas_gamma;
+              //const typename DataVector::value_type pressure_incoming = 1.0/gas_gamma;
               const typename DataVector::value_type sound_speed_incoming = 1.0;
 
               typename DataVector::value_type normal_velocity_incoming = 0.0;

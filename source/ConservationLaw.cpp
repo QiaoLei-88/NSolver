@@ -226,7 +226,6 @@ namespace NSolver
               fe_v.reinit (cell);
               fe_v.get_function_values (current_solution, solution_values);
               const double cell_size = fe_v.get_cell()->diameter();
-              double velocity;
               for (unsigned int q=0; q<n_q_points; ++q)
                 {
                   const double sound_speed
@@ -1799,7 +1798,6 @@ namespace NSolver
                   if (cell->is_locally_owned())
                     {
                       fe_v.reinit (cell);
-                      const unsigned int dofs_per_cell = fe_v.dofs_per_cell;
                       const unsigned int n_q_points    = fe_v.n_quadrature_points;
 
                       solution_values.resize (n_q_points,
