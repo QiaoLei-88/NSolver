@@ -11,6 +11,18 @@
 namespace NSolver
 {
 
+  Coeff_2D &Coeff_2D::operator= (const Coeff_2D &r)
+  {
+    this -> c0  = r.c0 ;
+    this -> cx  = r.cx ;
+    this -> cy  = r.cy ;
+    this -> cxy = r.cxy;
+    this -> ax  = r.ax ;
+    this -> ay  = r.ay ;
+    this -> axy = r.axy;
+    return (*this);
+  }
+
   MMS::MMS()
     :initialized (false),
      is_NS (false)
@@ -21,10 +33,9 @@ namespace NSolver
   (std_cxx11::array<Coeff_2D, EulerEquations<dim2>::n_components> &c_in)
   {
     for (unsigned int ic=0; ic<EulerEquations<dim2>::n_components; ++ic)
-      for (int i=0; i<c_in[ic].n_data; ++i)
-        {
-          c[ic].value_list[i] = c_in[ic].value_list[i];
-        }
+      {
+        c[ic] = c_in[ic];
+      }
     initialized = true;
     return;
   }

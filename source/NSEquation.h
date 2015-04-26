@@ -954,15 +954,14 @@ namespace NSolver
 // MMS
   struct Coeff_2D
   {
-    int n_data = 7;
-    std_cxx11::array<double, 7> value_list;
-    double &c0 = value_list[0];
-    double &cx = value_list[1];
-    double &cy = value_list[2];
-    double &cxy = value_list[3];
-    double &ax = value_list[4];
-    double &ay = value_list[5];
-    double &axy = value_list[6];
+    double c0;
+    double cx;
+    double cy;
+    double cxy;
+    double ax;
+    double ay;
+    double axy;
+    Coeff_2D &operator= (const Coeff_2D &r);
   };
 
 #define dim2 2
