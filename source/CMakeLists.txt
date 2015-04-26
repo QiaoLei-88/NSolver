@@ -4,6 +4,7 @@ ADD_EXECUTABLE(${PRJ_NAME}
   NSEquation.cpp
   AllParameters.cpp
   main.cpp
+  MMS.cpp
   )
 
 SET_PROPERTY(TARGET ${PRJ_NAME}

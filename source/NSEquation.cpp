@@ -134,7 +134,7 @@ namespace NSolver
                                      const std::vector<std::vector<Tensor<1,dim> > > &duh,
                                      const std::vector<std::vector<Tensor<2,dim> > > &/*dduh*/,
                                      const std::vector<Point<dim> >                  &/*normals*/,
-                                     const std::vector<Point<dim> >                  &/*evaluation_points*/,
+                                     const std::vector<Point<dim> >                  &points,
                                      std::vector<Vector<double> >                    &computed_quantities) const
   {
     // At the beginning of the function, let us make sure that all variables
@@ -160,12 +160,20 @@ namespace NSolver
     Assert (uh[0].size() == n_components,
             ExcInternalError());
 
+    //MMS: Extra memmory space
     if (do_schlieren_plot == true)
-      Assert (computed_quantities[0].size() == dim+2, ExcInternalError())
+      Assert (computed_quantities[0].size() == dim+2 + 3*n_components, ExcInternalError())
       else
         {
-          Assert (computed_quantities[0].size() == dim+1, ExcInternalError());
+          Assert (computed_quantities[0].size() == dim+1+3*n_components, ExcInternalError());
         }
+
+//    if (do_schlieren_plot == true)
+//      Assert (computed_quantities[0].size() == dim+2, ExcInternalError())
+//      else
+//        {
+//          Assert (computed_quantities[0].size() == dim+1, ExcInternalError());
+//        }
 
     // Then loop over all quadrature points and do our work there. The code
     // should be pretty self-explanatory. The order of output variables is
@@ -187,6 +195,64 @@ namespace NSolver
         if (do_schlieren_plot == true)
           computed_quantities[q] (dim+1) = duh[q][density_component] *
                                            duh[q][density_component];
+
+        //MMS: evaluate exact solution.
+        // Setup coefficients for MMS
+        MMS mms_x;
+        std_cxx11::array<Coeff_2D, n_components> coeffs;
+        // component u:
+        coeffs[0].c0  = 2.0;
+        coeffs[0].cx  = 0.2;
+        coeffs[0].cy  = -0.1;
+        coeffs[0].cxy = 0;
+        coeffs[0].ax  = 1.5;
+        coeffs[0].ay  = 0.6;
+        coeffs[0].axy = 0;
+
+        // component v:
+        coeffs[1].c0  = 2.0;
+        coeffs[1].cx  = -0.25;
+        coeffs[1].cy  = 0.125;
+        coeffs[1].cxy = 0;
+        coeffs[1].ax  = 0.5;
+        coeffs[1].ay  = 2.0/3.0;
+        coeffs[1].axy = 0;
+
+        // component density:
+        coeffs[2].c0  = 1.0;
+        coeffs[2].cx  = 0.15;
+        coeffs[2].cy  = -0.1;
+        coeffs[2].cxy = 0;
+        coeffs[2].ax  = 1.0;
+        coeffs[2].ay  = 0.5;
+        coeffs[2].axy = 0;
+
+        // component pressure:
+        coeffs[3].c0  = 1.0;
+        coeffs[3].cx  = 0.2;
+        coeffs[3].cy  = 0.5;
+        coeffs[3].cxy = 0;
+        coeffs[3].ax  = 2.0;
+        coeffs[3].ay  = 1.0;
+        coeffs[3].axy = 0;
+
+        // Initialize MMS
+        mms_x.reinit (coeffs);
+        std_cxx11::array<double, n_components> sol, src;
+        mms_x.evaluate (points[q],sol,src,true);
+        int i_out = dim + 2;
+        for (unsigned int ic = 0; ic < n_components; ++ic, ++i_out)
+          {
+            computed_quantities[q][i_out] = src[ic];
+          }
+        for (unsigned int ic = 0; ic < n_components; ++ic, ++i_out)
+          {
+            computed_quantities[q][i_out] = sol[ic];
+          }
+        for (unsigned int ic = 0; ic < n_components; ++ic, ++i_out)
+          {
+            computed_quantities[q][i_out] = sol[ic] - uh[q][ic];
+          }
       }
   }
 
@@ -208,6 +274,28 @@ namespace NSolver
         names.push_back ("schlieren_plot");
       }
 
+    //MMS: Exact output
+    for (unsigned int d=0; d<dim; ++d)
+      {
+        names.push_back ("mms_src_momentum");
+      }
+    names.push_back ("mms_src_density");
+    names.push_back ("mms_src_energy");
+    for (unsigned int d=0; d<dim; ++d)
+      {
+        names.push_back ("mms_exact_velocity");
+      }
+    names.push_back ("mms_exact_density");
+    names.push_back ("mms_exact_energy");
+//    for (unsigned int d=0; d<dim; ++d)
+//      {
+    names.push_back ("mms_error_velocity_x");
+    names.push_back ("mms_error_velocity_y");
+//      }
+    names.push_back ("mms_error_density");
+    names.push_back ("mms_error_energy");
+
+    //End MMS: Exact output
     return names;
   }
 
@@ -228,6 +316,37 @@ namespace NSolver
       interpretation.push_back (DataComponentInterpretation::
                                 component_is_scalar);
 
+    // MMS:
+    for (unsigned int d=0; d<dim; ++d)
+      {
+        interpretation.push_back (DataComponentInterpretation::
+                                  component_is_part_of_vector);
+      }
+    interpretation.push_back (DataComponentInterpretation::
+                              component_is_scalar);
+    interpretation.push_back (DataComponentInterpretation::
+                              component_is_scalar);
+
+    for (unsigned int d=0; d<dim; ++d)
+      {
+        interpretation.push_back (DataComponentInterpretation::
+                                  component_is_part_of_vector);
+      }
+    interpretation.push_back (DataComponentInterpretation::
+                              component_is_scalar);
+    interpretation.push_back (DataComponentInterpretation::
+                              component_is_scalar);
+
+    for (unsigned int d=0; d<dim; ++d)
+      {
+        interpretation.push_back (DataComponentInterpretation::
+                                  component_is_scalar);
+      }
+    interpretation.push_back (DataComponentInterpretation::
+                              component_is_scalar);
+    interpretation.push_back (DataComponentInterpretation::
+                              component_is_scalar);
+    // END MMS:
     return interpretation;
   }
 
@@ -238,17 +357,18 @@ namespace NSolver
   EulerEquations<dim>::Postprocessor::
   get_needed_update_flags() const
   {
+    // MMS : update_quadrature_points
     if (do_schlieren_plot == true)
       {
-        return update_values | update_gradients;
+        return update_quadrature_points| update_values | update_gradients;
       }
     else
       {
-        return update_values;
+        return update_quadrature_points| update_values;
       }
   }
 
 
   template struct EulerEquations<2>;
-  template struct EulerEquations<3>;
+//  template struct EulerEquations<3>;
 }

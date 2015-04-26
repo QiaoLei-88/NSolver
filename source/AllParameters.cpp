@@ -212,6 +212,10 @@ namespace NSolver
     void
     AllParameters<dim>::declare_parameters (ParameterHandler &prm)
     {
+      prm.declare_entry ("MMS", "1",
+                         Patterns::Integer(),
+                         "Number of manufactured solution to test aginst");
+
       prm.declare_entry ("mesh", "grid.inp",
                          Patterns::Anything(),
                          "intput file name");
@@ -334,6 +338,7 @@ namespace NSolver
     void
     AllParameters<dim>::parse_parameters (ParameterHandler &prm)
     {
+      n_mms = prm.get_integer ("MMS");
       mesh_filename = prm.get ("mesh");
       time_advance_history_filename = prm.get ("time history");
       iteration_history_filename = prm.get ("iteration history");

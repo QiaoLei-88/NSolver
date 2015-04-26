@@ -82,6 +82,47 @@ namespace NSolver
     parameters.time_step_factor = 1.0;
 
     verbose_cout.set_condition (parameters.output == Parameters::Solver::verbose);
+
+    // Setup coefficients for MMS
+    std_cxx11::array<Coeff_2D, EulerEquations<dim>::n_components> coeffs;
+    // component u:
+    coeffs[0].c0  = 2.0;
+    coeffs[0].cx  = 0.2;
+    coeffs[0].cy  = -0.1;
+    coeffs[0].cxy = 0;
+    coeffs[0].ax  = 1.5;
+    coeffs[0].ay  = 0.6;
+    coeffs[0].axy = 0;
+
+    // component v:
+    coeffs[1].c0  = 2.0;
+    coeffs[1].cx  = -0.25;
+    coeffs[1].cy  = 0.125;
+    coeffs[1].cxy = 0;
+    coeffs[1].ax  = 0.5;
+    coeffs[1].ay  = 2.0/3.0;
+    coeffs[1].axy = 0;
+
+    // component density:
+    coeffs[2].c0  = 1.0;
+    coeffs[2].cx  = 0.15;
+    coeffs[2].cy  = -0.1;
+    coeffs[2].cxy = 0;
+    coeffs[2].ax  = 1.0;
+    coeffs[2].ay  = 0.5;
+    coeffs[2].axy = 0;
+
+    // component pressure:
+    coeffs[3].c0  = 1.0;
+    coeffs[3].cx  = 0.2;
+    coeffs[3].cy  = 0.5;
+    coeffs[3].cxy = 0;
+    coeffs[3].ax  = 2.0;
+    coeffs[3].ay  = 1.0;
+    coeffs[3].axy = 0;
+
+    // Initialize MMS
+    mms.reinit (coeffs);
   }
 
 
@@ -232,14 +273,17 @@ namespace NSolver
     std::vector<types::global_dof_index> dof_indices (dofs_per_cell);
     std::vector<types::global_dof_index> dof_indices_neighbor (dofs_per_cell);
 
+    //MMS: update quadrature points for evaluation of manufactored solution.
     const UpdateFlags update_flags               = update_values
                                                    | update_gradients
                                                    | update_q_points
-                                                   | update_JxW_values;
+                                                   | update_JxW_values
+                                                   | update_quadrature_points;
     const UpdateFlags face_update_flags          = update_values
                                                    | update_q_points
                                                    | update_JxW_values
-                                                   | update_normal_vectors;
+                                                   | update_normal_vectors
+                                                   | update_quadrature_points;
     const UpdateFlags neighbor_face_update_flags = update_values;
 
     FEValues<dim>        fe_v (mapping, fe, quadrature,
@@ -586,6 +630,19 @@ namespace NSolver
 
     std::vector < std_cxx11::array< double, EulerEquations<dim>::n_components> > forcing_old (n_q_points);
 
+    //MMS: evaluate source term
+    std::vector < std_cxx11::array< double, EulerEquations<dim>::n_components> >
+    mms_source (n_q_points), mms_value (n_q_points);
+    if (parameters.n_mms == 1)
+      {
+        for (unsigned int q=0; q<n_q_points; ++q)
+          {
+            mms.evaluate (fe_v.quadrature_point (q), mms_value[q], mms_source[q], /* const bool need_source = */ true);
+          }
+
+      }
+
+
     for (unsigned int q=0; q<n_q_points; ++q)
       {
         EulerEquations<dim>::compute_inviscid_flux (W_old[q], flux_old[q]);
@@ -754,6 +811,13 @@ namespace NSolver
                     (1.0 - parameters.theta) * forcing_old[point][component_i]) *
                    fe_v.shape_value_component (i, point, component_i) *
                    fe_v.JxW (point);
+            if (parameters.n_mms == 1)
+              {
+                //MMS: apply MMS source term
+                R_i -= mms_source[point][component_i] *
+                       fe_v.shape_value_component (i, point, component_i) *
+                       fe_v.JxW (point);
+              }
           }
 
         // At the end of the loop, we have to add the sensitivities to the
@@ -887,21 +951,50 @@ namespace NSolver
         parameters.boundary_conditions[boundary_id]
         .values.vector_value_list (fe_v.get_quadrature_points(),
                                    boundary_values);
-
-        for (unsigned int q = 0; q < n_q_points; q++)
+        if (parameters.n_mms == 1)
+          // MMS: compute w_minus accroding to MS.
           {
-            EulerEquations<dim>::compute_Wminus (parameters.boundary_conditions[boundary_id].kind,
-                                                 fe_v.normal_vector (q),
-                                                 Wplus[q],
-                                                 boundary_values[q],
-                                                 Wminus[q]);
-            // Here we assume that boundary type, boundary normal vector and boundary data values
-            // maintain the same during time advancing.
-            EulerEquations<dim>::compute_Wminus (parameters.boundary_conditions[boundary_id].kind,
-                                                 fe_v.normal_vector (q),
-                                                 Wplus_old[q],
-                                                 boundary_values[q],
-                                                 Wminus_old[q]);
+            for (unsigned int q = 0; q < n_q_points; q++)
+              {
+                const Point<dim> p = fe_v.quadrature_point (q);
+                std_cxx11::array<double, EulerEquations<dim>::n_components> sol, src;
+                mms.evaluate (p,sol,src,false);
+                for (unsigned int ic =0 ; ic < EulerEquations<dim>::n_components; ++ic)
+                  {
+                    Wminus[q][ic] = sol[ic];
+                    Wminus_old[q][ic] = sol[ic];
+                  }
+                double n_dot_v = 0.0;
+                const Point<dim> n = fe_v.normal_vector (q);
+                for (unsigned int id=0; id < dim; ++id)
+                  {
+                    n_dot_v += n[id] * sol[id];
+                  }
+                if (n_dot_v > 0)
+                  for (unsigned int ic =0 ; ic < EulerEquations<dim>::n_components; ++ic)
+                    {
+                      Wminus[q][ic] = Wplus[q][ic];
+                      Wminus_old[q][ic] = Wplus_old[q][ic];
+                    }
+              }
+          }
+        else
+          {
+            for (unsigned int q = 0; q < n_q_points; q++)
+              {
+                EulerEquations<dim>::compute_Wminus (parameters.boundary_conditions[boundary_id].kind,
+                                                     fe_v.normal_vector (q),
+                                                     Wplus[q],
+                                                     boundary_values[q],
+                                                     Wminus[q]);
+                // Here we assume that boundary type, boundary normal vector and boundary data values
+                // maintain the same during time advancing.
+                EulerEquations<dim>::compute_Wminus (parameters.boundary_conditions[boundary_id].kind,
+                                                     fe_v.normal_vector (q),
+                                                     Wplus_old[q],
+                                                     boundary_values[q],
+                                                     Wminus_old[q]);
+              }
           }
       }
 
@@ -1310,26 +1403,34 @@ namespace NSolver
   {
     computing_timer.enter_subsection ("0:Read grid");
     {
-      GridIn<dim> grid_in;
-      grid_in.attach_triangulation (triangulation);
-
-      std::ifstream input_file (parameters.mesh_filename.c_str());
-      Assert (input_file, ExcFileNotOpen (parameters.mesh_filename.c_str()));
-
-      if (parameters.mesh_format == Parameters::AllParameters<dim>::format_ucd)
+      if (parameters.n_mms == 1)
         {
-          grid_in.read_ucd (input_file);
+          //MMS: build mesh directly.
+          std::cerr << " hyper_cube " << std::endl;
+          GridGenerator::hyper_cube (triangulation, 0, 1);
         }
-      if (parameters.mesh_format == Parameters::AllParameters<dim>::format_gmsh)
+      else
         {
-          grid_in.read_msh (input_file);
-        }
+          GridIn<dim> grid_in;
+          grid_in.attach_triangulation (triangulation);
 
-      if (parameters.scale_mesh != 1.0)
-        {
-          GridTools::scale (parameters.scale_mesh,triangulation);
-        }
+          std::ifstream input_file (parameters.mesh_filename.c_str());
+          Assert (input_file, ExcFileNotOpen (parameters.mesh_filename.c_str()));
 
+          if (parameters.mesh_format == Parameters::AllParameters<dim>::format_ucd)
+            {
+              grid_in.read_ucd (input_file);
+            }
+          if (parameters.mesh_format == Parameters::AllParameters<dim>::format_gmsh)
+            {
+              grid_in.read_msh (input_file);
+            }
+
+          if (parameters.scale_mesh != 1.0)
+            {
+              GridTools::scale (parameters.scale_mesh,triangulation);
+            }
+        }
       if (parameters.n_global_refinement > 0)
         {
           triangulation.refine_global (parameters.n_global_refinement);
@@ -1658,15 +1759,83 @@ namespace NSolver
             tmp_vector.sadd (-1.0, locally_owned_solution);
             const double time_advance_l2_norm  = tmp_vector.l2_norm();
             pcout << "  Order of time advancing L_infty norm = "
-                  << std::log (tmp_vector.linfty_norm())/std::log (10.0) << std::endl;
+                  << std::log10 (tmp_vector.linfty_norm())<< std::endl;
             pcout << "  Order of time advancing L_2     norm = "
-                  << std::log (time_advance_l2_norm)/std::log (10.0) << std::endl;
+                  << std::log10 (time_advance_l2_norm) << std::endl;
 
 
             time_advance_history_file
                 << std::setw (15) << time_advance_l2_norm << '\n';
 
             old_solution = current_solution;
+
+            if (parameters.n_mms == 1)
+              // Evaluate MMS error
+              {
+                for (unsigned int ic=0; ic<EulerEquations<dim>::n_components; ++ic)
+                  {
+
+                    mms_error_l2[ic] = 0.0;
+                  }
+                mms_error_linfty = 0.0;
+
+                std::vector<Vector<double> > solution_values;
+                //MMS: update quadrature points for evaluation of manufactored solution.
+                const UpdateFlags update_flags = update_values
+                                                 | update_JxW_values
+                                                 | update_quadrature_points;
+
+                FEValues<dim>  fe_v (mapping, fe, quadrature, update_flags);
+
+
+                // Then loop over all cells, initialize the FEValues object for the
+                // current cell and call the function that assembles the problem on this
+                // cell.
+                typename DoFHandler<dim>::active_cell_iterator
+                cell = dof_handler.begin_active(),
+                endc = dof_handler.end();
+                unsigned int cell_index (0);
+                for (; cell!=endc; ++cell, ++cell_index)
+                  if (cell->is_locally_owned())
+                    {
+                      fe_v.reinit (cell);
+                      const unsigned int dofs_per_cell = fe_v.dofs_per_cell;
+                      const unsigned int n_q_points    = fe_v.n_quadrature_points;
+
+                      solution_values.resize (n_q_points,
+                                              Vector<double> (EulerEquations<dim>::n_components));
+                      fe_v.get_function_values (current_solution, solution_values);
+
+
+                      std::vector < std_cxx11::array< double, EulerEquations<dim>::n_components> >
+                      mms_source (n_q_points), mms_value (n_q_points);
+
+                      for (unsigned int q=0; q<n_q_points; ++q)
+                        {
+                          mms.evaluate (fe_v.quadrature_point (q), mms_value[q], mms_source[q], /* const bool need_source = */ false);
+                        }
+
+                      for (unsigned int ic=0; ic<EulerEquations<dim>::n_components; ++ic)
+                        {
+                          for (unsigned int q=0; q<n_q_points; ++q)
+                            {
+                              mms_error_l2[ic] += (mms_value[q][ic] - solution_values[q][ic]) *
+                                                  (mms_value[q][ic] - solution_values[q][ic]) *
+                                                  fe_v.JxW (q);
+                            }
+                        }
+                    }
+                pcout << "  Error Info:\n";
+                pcout << "    n_dofs    u_err    v_err  rho_err    p_err (log10)\n   ";
+                pcout <<  std::log10 (dof_handler.n_dofs()) << ' ';
+                for (unsigned int ic=0; ic<EulerEquations<dim>::n_components; ++ic)
+                  {
+                    Utilities::MPI::sum (mms_error_l2[ic], mpi_communicator);
+                    pcout << 0.5 * std::log10 (mms_error_l2[ic]) << ' ';
+                  }
+                pcout << std::endl;
+
+              } // End of evaluate MMS error
 
             if (parameters.do_refine == true)
               {
@@ -1733,6 +1902,6 @@ namespace NSolver
   } //End of ConservationLaw<dim>::run ()
 
   template class ConservationLaw<2>;
-  template class ConservationLaw<3>;
+//  template class ConservationLaw<3>;
 }
 

@@ -76,6 +76,15 @@ namespace LA
 #endif
 }
 
+// MMS
+#include <deal.II/base/point.h>
+#include <deal.II/base/numbers.h>
+#include <deal.II/base/std_cxx11/array.h>
+#include <Sacado.hpp>
+#include <cmath>
+
+
+
 // And this again is C++:
 #include <iostream>
 #include <fstream>
@@ -940,6 +949,69 @@ namespace NSolver
           Assert (false, ExcNotImplemented());
         }
   }
+
+
+// MMS
+  struct Coeff_2D
+  {
+    int n_data = 7;
+    std_cxx11::array<double, 7> value_list;
+    double &c0 = value_list[0];
+    double &cx = value_list[1];
+    double &cy = value_list[2];
+    double &cxy = value_list[3];
+    double &ax = value_list[4];
+    double &ay = value_list[5];
+    double &axy = value_list[6];
+  };
+
+#define dim2 2
+  /**
+   * Class for carrying out code verification by the method of manufactured
+   * solutions (MMS). For now, the test function is hard coded and only the
+   * coefficients can be adjustd.
+   *
+   * By default, this class works in Euler mode, i.e., no viscous flux
+   * will be involved.
+   */
+  class MMS
+  {
+  public:
+    MMS();
+    /**
+     * Initialize the object with provided coefficients. This has nothing to
+     * do with whether the calling object will work in Euler or Navier-Stokes
+     * mode.
+     */
+    void reinit
+    (std_cxx11::array<Coeff_2D, EulerEquations<dim2>::n_components> &c_in);
+
+
+    /**
+     * You can control the equation mode of the MMS object by the flowing two
+     * member functions.
+     */
+    void set_eqn_to_NS();
+    void set_eqn_to_Euler();
+
+    /**
+     * Evaluate the exact solution at specified point p and put result into
+     * array value. If need_source is set to true, the corresponding source
+     * term at point p will be evaluated and put into array source.
+     *
+     * The source term is the divergence of the flux of the governing equation.
+     * The divergence is evaluated by automatic differentiation with Sacado::FAD.
+     */
+    void evaluate (const Point<dim2>   &p,
+                   std_cxx11::array<double, EulerEquations<dim2>::n_components> &value,
+                   std_cxx11::array<double, EulerEquations<dim2>::n_components> &source,
+                   const bool need_source = false) const;
+  private:
+    std_cxx11::array<Coeff_2D, EulerEquations<dim2>::n_components> c;
+    bool initialized;
+    bool is_NS;
+  };
+
 
 } /* End of namespace NSolver */
 

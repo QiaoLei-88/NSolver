@@ -238,6 +238,8 @@ namespace NSolver
 
       static void declare_parameters (ParameterHandler &prm);
       void parse_parameters (ParameterHandler &prm);
+
+      int n_mms;
     };
 
   } /* End of namespace Parameters */

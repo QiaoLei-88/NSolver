@@ -76,6 +76,8 @@ namespace LA
 #include <deal.II/lac/trilinos_precondition.h>
 #include <deal.II/lac/trilinos_solver.h>
 
+//MMS
+#include <deal.II/grid/grid_generator.h>
 
 // Sacado is the automatic differentiation package within Trilinos, which is
 // used to find the Jacobian for a fully implicit Newton iteration:
@@ -222,6 +224,11 @@ namespace NSolver
     ConditionalOStream              verbose_cout;
     ConditionalOStream              pcout;
     TimerOutput                     computing_timer;
+
+    //Introduce MMS
+    MMS mms;
+    std_cxx11::array<double, EulerEquations<dim>::n_components> mms_error_l2;
+    double mms_error_linfty;
   };
 
 }
