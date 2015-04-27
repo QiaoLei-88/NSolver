@@ -1148,7 +1148,7 @@ namespace NSolver
 
   template <int dim>
   std::pair<unsigned int, double>
-  ConservationLaw<dim>::solve (LA::MPI::Vector &newton_update)
+  ConservationLaw<dim>::solve (NSVector &newton_update)
   {
     switch (parameters.solver)
       {
@@ -1257,7 +1257,7 @@ namespace NSolver
   ConservationLaw<dim>::
   compute_refinement_indicators (Vector<double>  &refinement_indicators) const
   {
-    LA::MPI::Vector      tmp_vector;
+    NSVector      tmp_vector;
     tmp_vector.reinit (current_solution, true);
     tmp_vector = predictor;
     EulerEquations<dim>::compute_refinement_indicators (dof_handler,
@@ -1310,15 +1310,15 @@ namespace NSolver
     // three lines simply re-set the sizes of some other vectors to the now
     // correct size:
 
-    LA::MPI::Vector      tmp_vector;
+    NSVector      tmp_vector;
     tmp_vector.reinit (old_solution, true);
     tmp_vector = predictor;
     // transfer_in needs vectors with ghost cells.
-    std::vector<const LA::MPI::Vector * > transfer_in;
+    std::vector<const NSVector * > transfer_in;
     transfer_in.push_back (&old_solution);
     transfer_in.push_back (&tmp_vector);
 
-    parallel::distributed::SolutionTransfer<dim, LA::MPI::Vector> soltrans (dof_handler);
+    parallel::distributed::SolutionTransfer<dim, NSVector> soltrans (dof_handler);
 
     triangulation.prepare_coarsening_and_refinement();
     soltrans.prepare_for_coarsening_and_refinement (transfer_in);
@@ -1329,9 +1329,9 @@ namespace NSolver
 
     // Transfer data out
     {
-      std::vector<LA::MPI::Vector * > transfer_out;
-      LA::MPI::Vector interpolated_old_solution (predictor);
-      LA::MPI::Vector interpolated_predictor (predictor);
+      std::vector<NSVector * > transfer_out;
+      NSVector interpolated_old_solution (predictor);
+      NSVector interpolated_predictor (predictor);
       // transfer_out needs vectors without ghost cells.
       transfer_out.push_back (&interpolated_old_solution);
       transfer_out.push_back (&interpolated_predictor);
@@ -1584,7 +1584,7 @@ namespace NSolver
         << "  Newton_update_norm"
         << '\n';
 
-    LA::MPI::Vector      tmp_vector;
+    NSVector      tmp_vector;
 
     computing_timer.leave_subsection ("1:Initialization");
     while (time < parameters.final_time)

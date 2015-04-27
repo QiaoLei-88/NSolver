@@ -106,6 +106,10 @@ namespace NSolver
 {
   using namespace dealii;
 
+#ifndef __NSVector__DEFINED__
+  typedef LA::MPI::Vector NSVector;
+#define __NSVector__DEFINED__
+#endif
   template <int dim>
   class ConservationLaw
   {
@@ -132,7 +136,7 @@ namespace NSolver
                              const unsigned int               boundary_id,
                              const double                     face_diameter);
 
-    std::pair<unsigned int, double> solve (LA::MPI::Vector &solution);
+    std::pair<unsigned int, double> solve (NSVector &solution);
 
     void compute_refinement_indicators (Vector<double> &indicator) const;
     void refine_grid();
@@ -178,16 +182,16 @@ namespace NSolver
     // the solution at the next time step, computed by extrapolating the
     // current and previous solution one time step into the future:
 
-    LA::MPI::Vector       newton_update;
-    LA::MPI::Vector       locally_owned_solution;
+    NSVector       newton_update;
+    NSVector       locally_owned_solution;
 
-    LA::MPI::Vector       old_solution;
+    NSVector       old_solution;
 
-    LA::MPI::Vector       current_solution;
-    LA::MPI::Vector       current_solution_backup;
-    LA::MPI::Vector       predictor;
+    NSVector       current_solution;
+    NSVector       current_solution_backup;
+    NSVector       predictor;
 
-    LA::MPI::Vector       right_hand_side;
+    NSVector       right_hand_side;
     // Cache up the right_hand_side for out put at the first Newton iteration
     // of each time step.
 
@@ -195,7 +199,7 @@ namespace NSolver
     // All output relevant vectors need to have parallel capability and be
     // size to "locally_relevant_dofs" because ghost cell is needed to
     // determine the outmost face values.
-    LA::MPI::Vector      residual_for_output;
+    NSVector      residual_for_output;
 
     Vector<double>       entropy_viscosity;
     Vector<double>       cellSize_viscosity;

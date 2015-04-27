@@ -75,7 +75,7 @@ namespace NSolver
   void
   EulerEquations<dim>::compute_refinement_indicators (const DoFHandler<dim> &dof_handler,
                                                       const Mapping<dim>    &mapping,
-                                                      const LA::MPI::Vector  &solution,
+                                                      const NSVector  &solution,
                                                       Vector<double>        &refinement_indicators)
   {
     const unsigned int dofs_per_cell = dof_handler.get_fe().dofs_per_cell;

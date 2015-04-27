@@ -97,6 +97,10 @@ namespace NSolver
 {
   using namespace dealii;
 
+#ifndef __NSVector__DEFINED__
+  typedef LA::MPI::Vector NSVector;
+#define __NSVector__DEFINED__
+#endif
 
   // @sect3{Euler equation specifics}
 
@@ -379,7 +383,7 @@ namespace NSolver
     void
     compute_refinement_indicators (const DoFHandler<dim> &dof_handler,
                                    const Mapping<dim>    &mapping,
-                                   const LA::MPI::Vector &solution,
+                                   const NSVector &solution,
                                    Vector<double>        &refinement_indicators);
 
     // @sect4{EulerEquations::Postprocessor}
