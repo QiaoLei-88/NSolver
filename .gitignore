@@ -2,4 +2,7 @@
 ######################
 .DS_Store
 .DS_Store?
+NSolver.sublime-project
+NSolver.sublime-workspace
+test_cases.sum
 
