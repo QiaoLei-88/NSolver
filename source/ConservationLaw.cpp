@@ -59,10 +59,10 @@ namespace NSolver
                    (Triangulation<dim>::smoothing_on_refinement |
                     Triangulation<dim>::smoothing_on_coarsening)),
     mapping(),
-    fe (FE_Q<dim> (1), EulerEquations<dim>::n_components),
+    fe (FE_Q<dim> (2), EulerEquations<dim>::n_components),
     dof_handler (triangulation),
-    quadrature (2),
-    face_quadrature (2),
+    quadrature (4),
+    face_quadrature (4),
     I_am_host (Utilities::MPI::this_mpi_process (mpi_communicator) == 0),
     myid (Utilities::MPI::this_mpi_process (mpi_communicator)),
     verbose_cout (std::cout, false),
@@ -86,18 +86,18 @@ namespace NSolver
     // Setup coefficients for MMS
     std_cxx11::array<Coeff_2D, EulerEquations<dim>::n_components> coeffs;
     // component u:
-    coeffs[0].c0  = 2.0;
-    coeffs[0].cx  = 0.2;
-    coeffs[0].cy  = -0.1;
+    coeffs[0].c0  = 0.2;
+    coeffs[0].cx  = 0.01;
+    coeffs[0].cy  = -0.02;
     coeffs[0].cxy = 0;
     coeffs[0].ax  = 1.5;
     coeffs[0].ay  = 0.6;
     coeffs[0].axy = 0;
 
     // component v:
-    coeffs[1].c0  = 2.0;
-    coeffs[1].cx  = -0.25;
-    coeffs[1].cy  = 0.125;
+    coeffs[1].c0  = 0.4;
+    coeffs[1].cx  = -0.01;
+    coeffs[1].cy  = 0.04;
     coeffs[1].cxy = 0;
     coeffs[1].ax  = 0.5;
     coeffs[1].ay  = 2.0/3.0;
@@ -120,6 +120,41 @@ namespace NSolver
     coeffs[3].ax  = 2.0;
     coeffs[3].ay  = 1.0;
     coeffs[3].axy = 0;
+//    // component u:
+//    coeffs[0].c0  = 2.0;
+//    coeffs[0].cx  = 0.2;
+//    coeffs[0].cy  = -0.1;
+//    coeffs[0].cxy = 0;
+//    coeffs[0].ax  = 1.5;
+//    coeffs[0].ay  = 0.6;
+//    coeffs[0].axy = 0;
+//
+//    // component v:
+//    coeffs[1].c0  = 2.0;
+//    coeffs[1].cx  = -0.25;
+//    coeffs[1].cy  = 0.125;
+//    coeffs[1].cxy = 0;
+//    coeffs[1].ax  = 0.5;
+//    coeffs[1].ay  = 2.0/3.0;
+//    coeffs[1].axy = 0;
+//
+//    // component density:
+//    coeffs[2].c0  = 1.0;
+//    coeffs[2].cx  = 0.15;
+//    coeffs[2].cy  = -0.1;
+//    coeffs[2].cxy = 0;
+//    coeffs[2].ax  = 1.0;
+//    coeffs[2].ay  = 0.5;
+//    coeffs[2].axy = 0;
+//
+//    // component pressure:
+//    coeffs[3].c0  = 1.0;
+//    coeffs[3].cx  = 0.2;
+//    coeffs[3].cy  = 0.5;
+//    coeffs[3].cxy = 0;
+//    coeffs[3].ax  = 2.0;
+//    coeffs[3].ay  = 1.0;
+//    coeffs[3].axy = 0;
 
     // Initialize MMS
     mms.reinit (coeffs);
@@ -958,23 +993,52 @@ namespace NSolver
                 const Point<dim> p = fe_v.quadrature_point (q);
                 std_cxx11::array<double, EulerEquations<dim>::n_components> sol, src;
                 mms.evaluate (p,sol,src,false);
-                for (unsigned int ic =0 ; ic < EulerEquations<dim>::n_components; ++ic)
-                  {
-                    Wminus[q][ic] = sol[ic];
-                    Wminus_old[q][ic] = sol[ic];
-                  }
+                const double velocity = EulerEquations<dim>::compute_velocity_magnitude (sol);
+                const double sound_speed = EulerEquations<dim>::compute_sound_speed (sol);
                 double n_dot_v = 0.0;
                 const Point<dim> n = fe_v.normal_vector (q);
                 for (unsigned int id=0; id < dim; ++id)
                   {
                     n_dot_v += n[id] * sol[id];
                   }
-                if (n_dot_v > 0)
-                  for (unsigned int ic =0 ; ic < EulerEquations<dim>::n_components; ++ic)
-                    {
-                      Wminus[q][ic] = Wplus[q][ic];
-                      Wminus_old[q][ic] = Wplus_old[q][ic];
-                    }
+                // First enforce every boundary component
+                for (unsigned int ic =0 ; ic < EulerEquations<dim>::n_components; ++ic)
+                  {
+                    Wminus[q][ic] = sol[ic];
+                    Wminus_old[q][ic] = sol[ic];
+                  }
+                // The modify accordingly
+                if (velocity >= sound_speed)
+                  {
+                    if (n_dot_v > 0.0)
+                      // Supersonic outflow boundary, extrapolate every component
+                      for (unsigned int ic =0 ; ic < EulerEquations<dim>::n_components; ++ic)
+                        {
+                          Wminus[q][ic] = Wplus[q][ic];
+                          Wminus_old[q][ic] = Wplus_old[q][ic];
+                        }
+                  }
+                else
+                  {
+//                    if (n_dot_v > 0)
+//                      // subsonic outflow boundary, enforce presssure and extrapolate velocity and density
+//                      {
+//                        for (unsigned int ic = EulerEquations<dim>::first_velocity_component ;
+//                             ic < EulerEquations<dim>::first_velocity_component + dim; ++ic)
+//                          {
+//                            Wminus[q][ic] = Wplus[q][ic];
+//                            Wminus_old[q][ic] = Wplus_old[q][ic];
+//                          }
+//                        Wminus[q][EulerEquations<dim>::density_component] = Wplus[q][EulerEquations<dim>::density_component];
+//                        Wminus_old[q][EulerEquations<dim>::density_component] = Wplus_old[q][EulerEquations<dim>::density_component];
+//                      }
+//                    else
+//                      // subsonic inflow boundary, extrapolate presssure and enforce velocity and density
+//                      {
+//                        Wminus[q][EulerEquations<dim>::pressure_component] = Wplus[q][EulerEquations<dim>::pressure_component];
+//                        Wminus_old[q][EulerEquations<dim>::pressure_component] = Wplus_old[q][EulerEquations<dim>::pressure_component];
+//                      }
+                  }
               }
           }
         else
@@ -1733,8 +1797,8 @@ namespace NSolver
 
             predictor = current_solution;
 
-            tmp_vector.reinit (predictor);
-            tmp_vector  = old_solution;
+//            tmp_vector.reinit (predictor);
+//            tmp_vector  = old_solution;
             if (parameters.allow_double_time_step && converged_newton_iters%10 == 0)
               {
                 //Since every thing goes so well, let's try a larger time step next.
@@ -1744,47 +1808,46 @@ namespace NSolver
                 pcout << "  We got ten successive converged time steps.\n"
                       << "  Time step size increased to " << parameters.time_step << "\n\n";
 
-                predictor.sadd (1.0+predictor_leap_ratio*2.0, 0.0-predictor_leap_ratio*2.0, tmp_vector);
+//                predictor.sadd (1.0+predictor_leap_ratio*2.0, 0.0-predictor_leap_ratio*2.0, tmp_vector);
               }
             else
               {
-                predictor.sadd (1.0+predictor_leap_ratio,     0.0-predictor_leap_ratio,     tmp_vector);
+//                predictor.sadd (1.0+predictor_leap_ratio,     0.0-predictor_leap_ratio,     tmp_vector);
               }
 
             // old_solution is going to be overwritten immediately.
             // Just use it to calculate the time advancing norms.
-            tmp_vector.reinit (locally_owned_solution);
-            tmp_vector = old_solution;
-            tmp_vector.sadd (-1.0, locally_owned_solution);
-            const double time_advance_l2_norm  = tmp_vector.l2_norm();
-            pcout << "  Order of time advancing L_infty norm = "
-                  << std::log10 (tmp_vector.linfty_norm())<< std::endl;
-            pcout << "  Order of time advancing L_2     norm = "
-                  << std::log10 (time_advance_l2_norm) << std::endl;
+//            tmp_vector.reinit (locally_owned_solution);
+//            tmp_vector = old_solution;
+//            tmp_vector.sadd (-1.0, locally_owned_solution);
+//            const double time_advance_l2_norm  = tmp_vector.l2_norm();
+//            pcout << "  Order of time advancing L_infty norm = "
+//                  << std::log10 (tmp_vector.linfty_norm())<< std::endl;
+//            pcout << "  Order of time advancing L_2     norm = "
+//                  << std::log10 (time_advance_l2_norm) << std::endl;
+//
+//
+//            time_advance_history_file
+//                << std::setw (15) << time_advance_l2_norm << '\n';
 
-
-            time_advance_history_file
-                << std::setw (15) << time_advance_l2_norm << '\n';
-
-            old_solution = current_solution;
-
+            std_cxx11::array<double, EulerEquations<dim>::n_components> time_advance_l2_norm;
             if (parameters.n_mms == 1)
               // Evaluate MMS error
               {
                 for (unsigned int ic=0; ic<EulerEquations<dim>::n_components; ++ic)
                   {
-
                     mms_error_l2[ic] = 0.0;
                   }
                 mms_error_linfty = 0.0;
 
                 std::vector<Vector<double> > solution_values;
+                std::vector<Vector<double> > old_solution_values;
                 //MMS: update quadrature points for evaluation of manufactored solution.
                 const UpdateFlags update_flags = update_values
                                                  | update_JxW_values
                                                  | update_quadrature_points;
-
-                FEValues<dim>  fe_v (mapping, fe, quadrature, update_flags);
+                const QGauss<dim>    quadrature_error (6);
+                FEValues<dim>  fe_v (mapping, fe, quadrature_error, update_flags);
 
 
                 // Then loop over all cells, initialize the FEValues object for the
@@ -1802,8 +1865,10 @@ namespace NSolver
 
                       solution_values.resize (n_q_points,
                                               Vector<double> (EulerEquations<dim>::n_components));
+                      old_solution_values.resize (n_q_points,
+                                                  Vector<double> (EulerEquations<dim>::n_components));
                       fe_v.get_function_values (current_solution, solution_values);
-
+                      fe_v.get_function_values (old_solution, old_solution_values);
 
                       std::vector < std_cxx11::array< double, EulerEquations<dim>::n_components> >
                       mms_source (n_q_points), mms_value (n_q_points);
@@ -1820,6 +1885,9 @@ namespace NSolver
                               mms_error_l2[ic] += (mms_value[q][ic] - solution_values[q][ic]) *
                                                   (mms_value[q][ic] - solution_values[q][ic]) *
                                                   fe_v.JxW (q);
+                              time_advance_l2_norm[ic] += (old_solution_values[q][ic] - solution_values[q][ic]) *
+                                                          (old_solution_values[q][ic] - solution_values[q][ic]) *
+                                                          fe_v.JxW (q);
                             }
                         }
                     }
@@ -1834,7 +1902,16 @@ namespace NSolver
                 pcout << std::endl;
 
               } // End of evaluate MMS error
+            pcout << "  Order of time advancing L_2  norm\n   ";
+            for (unsigned int ic=0; ic<EulerEquations<dim>::n_components; ++ic)
+              {
+                Utilities::MPI::sum (time_advance_l2_norm[ic], mpi_communicator);
+                pcout << 0.5 * std::log10 (time_advance_l2_norm[ic]) << ' ';
+              }
+            pcout << std::endl;
 
+
+            old_solution = current_solution;
             if (parameters.do_refine == true)
               {
                 refine_grid();

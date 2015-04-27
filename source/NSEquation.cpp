@@ -201,18 +201,18 @@ namespace NSolver
         MMS mms_x;
         std_cxx11::array<Coeff_2D, n_components> coeffs;
         // component u:
-        coeffs[0].c0  = 2.0;
-        coeffs[0].cx  = 0.2;
-        coeffs[0].cy  = -0.1;
+        coeffs[0].c0  = 0.2;
+        coeffs[0].cx  = 0.01;
+        coeffs[0].cy  = -0.02;
         coeffs[0].cxy = 0;
         coeffs[0].ax  = 1.5;
         coeffs[0].ay  = 0.6;
         coeffs[0].axy = 0;
 
         // component v:
-        coeffs[1].c0  = 2.0;
-        coeffs[1].cx  = -0.25;
-        coeffs[1].cy  = 0.125;
+        coeffs[1].c0  = 0.4;
+        coeffs[1].cx  = -0.01;
+        coeffs[1].cy  = 0.04;
         coeffs[1].cxy = 0;
         coeffs[1].ax  = 0.5;
         coeffs[1].ay  = 2.0/3.0;
