@@ -1656,7 +1656,7 @@ namespace NSolver
 
             assemble_system (nonlin_iter);
 
-            res_norm = std::fabs (right_hand_side.l2_norm());
+            res_norm = right_hand_side.l2_norm();
             if (nonlin_iter == 0)
               {
                 residual_for_output = right_hand_side;
@@ -1797,8 +1797,8 @@ namespace NSolver
 
             predictor = current_solution;
 
-//            tmp_vector.reinit (predictor);
-//            tmp_vector  = old_solution;
+            tmp_vector.reinit (predictor);
+            tmp_vector  = old_solution;
             if (parameters.allow_double_time_step && converged_newton_iters%10 == 0)
               {
                 //Since every thing goes so well, let's try a larger time step next.
@@ -1808,11 +1808,11 @@ namespace NSolver
                 pcout << "  We got ten successive converged time steps.\n"
                       << "  Time step size increased to " << parameters.time_step << "\n\n";
 
-//                predictor.sadd (1.0+predictor_leap_ratio*2.0, 0.0-predictor_leap_ratio*2.0, tmp_vector);
+                predictor.sadd (1.0+predictor_leap_ratio*2.0, 0.0-predictor_leap_ratio*2.0, tmp_vector);
               }
             else
               {
-//                predictor.sadd (1.0+predictor_leap_ratio,     0.0-predictor_leap_ratio,     tmp_vector);
+                predictor.sadd (1.0+predictor_leap_ratio,     0.0-predictor_leap_ratio,     tmp_vector);
               }
 
             // old_solution is going to be overwritten immediately.
@@ -1837,6 +1837,7 @@ namespace NSolver
                 for (unsigned int ic=0; ic<EulerEquations<dim>::n_components; ++ic)
                   {
                     mms_error_l2[ic] = 0.0;
+                    time_advance_l2_norm[ic] = 0.0;
                   }
                 mms_error_linfty = 0.0;
 
