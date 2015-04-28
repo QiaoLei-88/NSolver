@@ -1903,11 +1903,17 @@ namespace NSolver
                 pcout << std::endl;
 
               } // End of evaluate MMS error
+            bool time_march_converged = true;
             pcout << "  Order of time advancing L_2  norm\n   ";
             for (unsigned int ic=0; ic<EulerEquations<dim>::n_components; ++ic)
               {
                 Utilities::MPI::sum (time_advance_l2_norm[ic], mpi_communicator);
                 pcout << 0.5 * std::log10 (time_advance_l2_norm[ic]) << ' ';
+                time_march_converged = time_march_converged && (time_advance_l2_norm[ic] < 1e-10);
+              }
+            if (time_march_converged)
+              {
+                time = parameters.final_time + 1.0;
               }
             pcout << std::endl;
 
