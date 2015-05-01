@@ -26,7 +26,7 @@
  */
 
 
-#include "ConservationLaw.h"
+#include "NSolver.h"
 #include "NSEquation.h"
 #include "FEParameters.h"
 
@@ -48,12 +48,12 @@ namespace NSolver
   // respectively.
 
 
-  // @sect4{ConservationLaw::ConservationLaw}
+  // @sect4{NSolver::NSolver}
   //
   // There is nothing much to say about the constructor. Essentially, it reads
   // the input file and fills the parameter object with the parsed values:
   template <int dim>
-  ConservationLaw<dim>::ConservationLaw (const char *input_filename,
+  NSolver<dim>::NSolver (const char *input_filename,
                                          const Parameters::FEParameters &fe_para)
     :
     mpi_communicator (MPI_COMM_WORLD),
@@ -166,14 +166,14 @@ namespace NSolver
 
 
 
-  // @sect4{ConservationLaw::setup_system}
+  // @sect4{NSolver::setup_system}
   //
   // The following (easy) function is called each time the mesh is
   // changed. All it does is to resize the Trilinos matrix according to a
   // sparsity pattern that we generate as in all the previous tutorial
   // programs.
   template <int dim>
-  void ConservationLaw<dim>::setup_system()
+  void NSolver<dim>::setup_system()
   {
     dof_handler.clear();
     dof_handler.distribute_dofs (fe);
@@ -215,7 +215,7 @@ namespace NSolver
 
 
   template <int dim>
-  void ConservationLaw<dim>::check_negative_density_pressure() const
+  void NSolver<dim>::check_negative_density_pressure() const
   {
     FEValues<dim> fe_v (mapping, fe, quadrature, update_values);
     const unsigned int   n_q_points = fe_v.n_quadrature_points;
@@ -239,11 +239,11 @@ namespace NSolver
         }
   }
 
-  // @sect4{ConservationLaw::calc_time_step}
+  // @sect4{NSolver::calc_time_step}
   //
   // Determian time step size of next time step.
   template <int dim>
-  void ConservationLaw<dim>::calc_time_step()
+  void NSolver<dim>::calc_time_step()
   {
     if (parameters.is_rigid_timestep_size)
       {
@@ -280,7 +280,7 @@ namespace NSolver
     parameters.time_step *= parameters.time_step_factor;
   }
 
-  // @sect4{ConservationLaw::assemble_system}
+  // @sect4{NSolver::assemble_system}
   //
   // This and the following two functions are the meat of this program: They
   // assemble the linear system that results from applying Newton's method to
@@ -304,7 +304,7 @@ namespace NSolver
   // the normal vectors are known to be the negative of the normal vectors of
   // the current cell.
   template <int dim>
-  void ConservationLaw<dim>::assemble_system (const unsigned int nonlin_iter)
+  void NSolver<dim>::assemble_system (const unsigned int nonlin_iter)
   {
     const unsigned int dofs_per_cell = dof_handler.get_fe().dofs_per_cell;
 
@@ -490,7 +490,7 @@ namespace NSolver
   }
 
 
-  // @sect4{ConservationLaw::assemble_cell_term}
+  // @sect4{NSolver::assemble_cell_term}
   //
   // This function assembles the cell term by computing the cell part of the
   // residual, adding its negative to the right hand side vector, and adding
@@ -550,7 +550,7 @@ namespace NSolver
   // residual:
   template <int dim>
   void
-  ConservationLaw<dim>::
+  NSolver<dim>::
   assemble_cell_term (const FEValues<dim>             &fe_v,
                       const std::vector<types::global_dof_index> &dof_indices,
                       const unsigned int cell_index,
@@ -875,7 +875,7 @@ namespace NSolver
   }
 
 
-  // @sect4{ConservationLaw::assemble_face_term}
+  // @sect4{NSolver::assemble_face_term}
   //
   // Here, we do essentially the same as in the previous function. At the top,
   // we introduce the independent variables. Because the current function is
@@ -884,7 +884,7 @@ namespace NSolver
   // cell but in the case of an interior face also the ones on the neighbor.
   template <int dim>
   void
-  ConservationLaw<dim>::assemble_face_term (const unsigned int           face_no,
+  NSolver<dim>::assemble_face_term (const unsigned int           face_no,
                                             const FEFaceValuesBase<dim> &fe_v,
                                             const FEFaceValuesBase<dim> &fe_v_neighbor,
                                             const std::vector<types::global_dof_index>   &dof_indices,
@@ -1143,7 +1143,7 @@ namespace NSolver
   }
 
 
-  // @sect4{ConservationLaw::solve}
+  // @sect4{NSolver::solve}
   //
   // Here, we actually solve the linear system, using either of Trilinos'
   // Aztec or Amesos linear solvers. The result of the computation will be
@@ -1152,7 +1152,7 @@ namespace NSolver
 
   template <int dim>
   std::pair<unsigned int, double>
-  ConservationLaw<dim>::solve (NSVector &newton_update)
+  NSolver<dim>::solve (NSVector &newton_update)
   {
     switch (parameters.solver)
       {
@@ -1250,7 +1250,7 @@ namespace NSolver
   }
 
 
-  // @sect4{ConservationLaw::compute_refinement_indicators}
+  // @sect4{NSolver::compute_refinement_indicators}
 
   // This function is real simple: We don't pretend that we know here what a
   // good refinement indicator would be. Rather, we assume that the
@@ -1258,7 +1258,7 @@ namespace NSolver
   // defer to the respective function we've implemented there:
   template <int dim>
   void
-  ConservationLaw<dim>::
+  NSolver<dim>::
   compute_refinement_indicators (Vector<double>  &refinement_indicators) const
   {
     NSVector      tmp_vector;
@@ -1272,14 +1272,14 @@ namespace NSolver
 
 
 
-  // @sect4{ConservationLaw::refine_grid}
+  // @sect4{NSolver::refine_grid}
 
   // Here, we use the refinement indicators computed before and refine the
   // mesh. At the beginning, we loop over all cells and mark those that we
   // think should be refined:
   template <int dim>
   void
-  ConservationLaw<dim>::refine_grid()
+  NSolver<dim>::refine_grid()
   {
 
     Vector<double> refinement_indicators (triangulation.n_active_cells());
@@ -1347,7 +1347,7 @@ namespace NSolver
   }
 
 
-  // @sect4{ConservationLaw::output_results}
+  // @sect4{NSolver::output_results}
 
   // This function now is rather straightforward. All the magic, including
   // transforming data from conservative variables to physical ones has been
@@ -1359,7 +1359,7 @@ namespace NSolver
   // time we come to this function and is incremented by one at the end of
   // each invocation.
   template <int dim>
-  void ConservationLaw<dim>::output_results() const
+  void NSolver<dim>::output_results() const
   {
     typename EulerEquations<dim>::Postprocessor
     postprocessor (parameters.schlieren_plot);
@@ -1454,7 +1454,7 @@ namespace NSolver
 
 
 
-  // @sect4{ConservationLaw::run}
+  // @sect4{NSolver::run}
 
   // This function contains the top-level logic of this program:
   // initialization, the time loop, and the inner Newton iteration.
@@ -1466,7 +1466,7 @@ namespace NSolver
   // already well adapted to the starting solution. At the end of this
   // process, we output the initial solution.
   template <int dim>
-  void ConservationLaw<dim>::run()
+  void NSolver<dim>::run()
   {
     computing_timer.enter_subsection ("0:Read grid");
     {
@@ -1985,9 +1985,9 @@ namespace NSolver
     // Timer initialized with TimerOutput::summary will print summery information
     // on its destruction.
     // computing_timer.print_summary();
-  } //End of ConservationLaw<dim>::run ()
+  } //End of NSolver<dim>::run ()
 
-  template class ConservationLaw<2>;
-//  template class ConservationLaw<3>;
+  template class NSolver<2>;
+//  template class NSolver<3>;
 }
 

@@ -1,13 +1,13 @@
 //
-//  ConservationLaw.h
+//  NSolver.h
 //  NSolver
 //
 //  Created by 乔磊 on 15/3/1.
 //  Copyright (c) 2015年 乔磊. All rights reserved.
 //
 
-#ifndef __NSolver__ConservationLaw__
-#define __NSolver__ConservationLaw__
+#ifndef __NSolver__NSolver__
+#define __NSolver__NSolver__
 
 // First a standard set of deal.II includes. Nothing special to comment on
 // here:
@@ -113,10 +113,10 @@ namespace NSolver
 #define __NSVector__DEFINED__
 #endif
   template <int dim>
-  class ConservationLaw
+  class NSolver
   {
   public:
-    ConservationLaw (const char *input_filename,
+    NSolver (const char *input_filename,
                      const Parameters::FEParameters &fe_para);
     void run();
 
@@ -240,4 +240,4 @@ namespace NSolver
   };
 
 }
-#endif /* defined(__NSolver__ConservationLaw__) */
+#endif /* defined(__NSolver__NSolver__) */

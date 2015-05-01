@@ -8,7 +8,7 @@
 
 #include <iostream>
 #include <fstream>
-#include "ConservationLaw.h"
+#include "NSolver.h"
 
 
 int main (int argc, char *argv[])
@@ -35,7 +35,7 @@ int main (int argc, char *argv[])
         fe_parameters.parse_parameters (prm);
       }
 
-      ConservationLaw<2> cons (argv[1], fe_parameters);
+      NSolver<2> cons (argv[1], fe_parameters);
       cons.run();
     }
   catch (std::exception &exc)

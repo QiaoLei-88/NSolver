@@ -367,7 +367,7 @@ namespace NSolver
     // @sect4{EulerEquations::compute_refinement_indicators}
 
     // In this class, we also want to specify how to refine the mesh. The
-    // class <code>ConservationLaw</code> that will use all the information we
+    // class <code>NSolver</code> that will use all the information we
     // provide here in the <code>EulerEquation</code> class is pretty agnostic
     // about the particular conservation law it solves: as doesn't even really
     // care how many components a solution vector has. Consequently, it can't

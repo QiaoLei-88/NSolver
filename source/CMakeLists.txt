@@ -1,6 +1,6 @@
 
 ADD_EXECUTABLE(${PRJ_NAME}
-  ConservationLaw.cpp
+  NSolver.cpp
   NSEquation.cpp
   AllParameters.cpp
   main.cpp
