@@ -27,7 +27,15 @@ int main (int argc, char *argv[])
           std::exit (1);
         }
 
-      ConservationLaw<2> cons (argv[1]);
+      Parameters::FEParameters fe_parameters;
+      {
+        ParameterHandler prm;
+        fe_parameters.declare_parameters (prm);
+        prm.read_input (argv[1]);
+        fe_parameters.parse_parameters (prm);
+      }
+
+      ConservationLaw<2> cons (argv[1], fe_parameters);
       cons.run();
     }
   catch (std::exception &exc)

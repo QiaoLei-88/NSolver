@@ -92,6 +92,8 @@ namespace LA
 #include <memory>
 
 #include "AllParameters.h"
+#include "FEParameters.h"
+
 // Here finally comes the class that actually does something with all the
 // Euler equation and parameter specifics we've defined above. The public
 // interface is pretty much the same as always (the constructor now takes
@@ -114,7 +116,8 @@ namespace NSolver
   class ConservationLaw
   {
   public:
-    ConservationLaw (const char *input_filename);
+    ConservationLaw (const char *input_filename,
+                     const Parameters::FEParameters &fe_para);
     void run();
 
   private:
@@ -225,6 +228,7 @@ namespace NSolver
     const bool I_am_host;
     const unsigned int myid;
     Parameters::AllParameters<dim>  parameters;
+    Parameters::FEParameters        fe_parameters;
     ConditionalOStream              verbose_cout;
     ConditionalOStream              pcout;
     TimerOutput                     computing_timer;

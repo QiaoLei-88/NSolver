@@ -5,6 +5,7 @@ ADD_EXECUTABLE(${PRJ_NAME}
   AllParameters.cpp
   main.cpp
   MMS.cpp
+  FEParameters.cpp
   )
 
 SET_PROPERTY(TARGET ${PRJ_NAME}

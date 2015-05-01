@@ -28,6 +28,8 @@
 
 #include "ConservationLaw.h"
 #include "NSEquation.h"
+#include "FEParameters.h"
+
 
 namespace NSolver
 {
@@ -51,7 +53,8 @@ namespace NSolver
   // There is nothing much to say about the constructor. Essentially, it reads
   // the input file and fills the parameter object with the parsed values:
   template <int dim>
-  ConservationLaw<dim>::ConservationLaw (const char *input_filename)
+  ConservationLaw<dim>::ConservationLaw (const char *input_filename,
+                                         const Parameters::FEParameters &fe_para)
     :
     mpi_communicator (MPI_COMM_WORLD),
     triangulation (mpi_communicator,
@@ -59,12 +62,13 @@ namespace NSolver
                    (Triangulation<dim>::smoothing_on_refinement |
                     Triangulation<dim>::smoothing_on_coarsening)),
     mapping(),
-    fe (FE_Q<dim> (2), EulerEquations<dim>::n_components),
+    fe (FE_Q<dim> (fe_para.fe_degree), EulerEquations<dim>::n_components),
     dof_handler (triangulation),
-    quadrature (4),
-    face_quadrature (4),
+    quadrature (fe_para.quadrature_degree),
+    face_quadrature (fe_para.face_quadrature_degree),
     I_am_host (Utilities::MPI::this_mpi_process (mpi_communicator) == 0),
     myid (Utilities::MPI::this_mpi_process (mpi_communicator)),
+    fe_parameters (fe_para),
     verbose_cout (std::cout, false),
     pcout (std::cout,
            (Utilities::MPI::this_mpi_process (mpi_communicator)
