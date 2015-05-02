@@ -117,7 +117,7 @@ namespace NSolver
   {
   public:
     NSolver (const char *input_filename,
-                     const Parameters::FEParameters &fe_para);
+             const Parameters::FEParameters &fe_para);
     void run();
 
   private:
