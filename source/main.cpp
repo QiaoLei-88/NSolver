@@ -30,8 +30,11 @@ int main (int argc, char *argv[])
       Parameters::FEParameters fe_parameters;
       {
         ParameterHandler prm;
+        const ParameterHandler::ReadInputFlags flags =
+          ParameterHandler::ReadInputFlag_IgnoreUndeclaredEntry
+          | ParameterHandler::ReadInputFlag_InputFileHelp;
         fe_parameters.declare_parameters (prm);
-        prm.read_input (argv[1]);
+        prm.read_input (argv[1], flags);
         fe_parameters.parse_parameters (prm);
       }
 

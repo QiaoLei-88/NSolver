@@ -80,6 +80,7 @@ namespace NSolver
   {
     ParameterHandler prm;
     Parameters::AllParameters<dim>::declare_parameters (prm);
+    prm.set_ignore_undeclared_entry (true);
 
     prm.read_input (input_filename);
     parameters.parse_parameters (prm);
