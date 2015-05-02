@@ -54,7 +54,7 @@ namespace NSolver
   // the input file and fills the parameter object with the parsed values:
   template <int dim>
   NSolver<dim>::NSolver (const char *input_filename,
-                                         const Parameters::FEParameters &fe_para)
+                         const Parameters::FEParameters &fe_para)
     :
     mpi_communicator (MPI_COMM_WORLD),
     triangulation (mpi_communicator,
@@ -886,13 +886,13 @@ namespace NSolver
   template <int dim>
   void
   NSolver<dim>::assemble_face_term (const unsigned int           face_no,
-                                            const FEFaceValuesBase<dim> &fe_v,
-                                            const FEFaceValuesBase<dim> &fe_v_neighbor,
-                                            const std::vector<types::global_dof_index>   &dof_indices,
-                                            const std::vector<types::global_dof_index>   &dof_indices_neighbor,
-                                            const bool                   external_face,
-                                            const unsigned int           boundary_id,
-                                            const double                 face_diameter)
+                                    const FEFaceValuesBase<dim> &fe_v,
+                                    const FEFaceValuesBase<dim> &fe_v_neighbor,
+                                    const std::vector<types::global_dof_index>   &dof_indices,
+                                    const std::vector<types::global_dof_index>   &dof_indices_neighbor,
+                                    const bool                   external_face,
+                                    const unsigned int           boundary_id,
+                                    const double                 face_diameter)
   {
     const unsigned int n_q_points = fe_v.n_quadrature_points;
     const unsigned int dofs_per_cell = fe_v.dofs_per_cell;
@@ -1425,11 +1425,12 @@ namespace NSolver
 
     static unsigned int output_file_number = 0;
 
-    const std::string filename = ("solution-" +
-                                  Utilities::int_to_string (output_file_number, 4) +
-                                  ".slot-" +
-                                  Utilities::int_to_string (myid, 4));
-    std::ofstream output ((filename + ".vtu").c_str());
+    const std::string output_tag = "solution-" +
+                                   Utilities::int_to_string (output_file_number, 4);
+
+    const std::string slot_itag = ".slot-" + Utilities::int_to_string (myid, 4);
+
+    std::ofstream output ((output_tag + slot_itag + ".vtu").c_str());
     data_out.write_vtu (output);
 
     if (I_am_host)
@@ -1439,13 +1440,12 @@ namespace NSolver
              i<Utilities::MPI::n_mpi_processes (mpi_communicator);
              ++i)
           {
-            filenames.push_back ("solution-" +
-                                 Utilities::int_to_string (output_file_number, 4) +
+            filenames.push_back (output_tag +
                                  ".slot-" +
                                  Utilities::int_to_string (i, 4) +
                                  ".vtu");
           }
-        std::ofstream master_output ((filename + ".pvtu").c_str());
+        std::ofstream master_output ((output_tag + ".pvtu").c_str());
         data_out.write_pvtu_record (master_output, filenames);
       }
 
