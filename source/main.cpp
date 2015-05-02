@@ -21,10 +21,16 @@ int main (int argc, char *argv[])
       Utilities::MPI::MPI_InitFinalize mpi_initialization (argc, argv, /* int max_num_threads */ 1);
 
       deallog.depth_console (0);
-      if ((argc != 2) && (Utilities::MPI::this_mpi_process (MPI_COMM_WORLD) == 0))
+
+      char *input_file (0);
+      char default_input_file[10] = "input.prm";
+      if (argc < 2)
         {
-          std::cout << "Usage:" << argv[0] << " input_file" << std::endl;
-          std::exit (1);
+          input_file = default_input_file;
+        }
+      else
+        {
+          input_file = argv[1];
         }
 
       Parameters::FEParameters fe_parameters;
@@ -34,11 +40,11 @@ int main (int argc, char *argv[])
           ParameterHandler::ReadInputFlag_IgnoreUndeclaredEntry
           | ParameterHandler::ReadInputFlag_InputFileHelp;
         fe_parameters.declare_parameters (prm);
-        prm.read_input (argv[1], flags);
+        prm.read_input (input_file, flags);
         fe_parameters.parse_parameters (prm);
       }
 
-      NSolver<2> cons (argv[1], fe_parameters);
+      NSolver<2> cons (input_file, fe_parameters);
       cons.run();
     }
   catch (std::exception &exc)
