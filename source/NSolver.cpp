@@ -1364,7 +1364,7 @@ namespace NSolver
   template <int dim>
   void NSolver<dim>::output_results() const
   {
-    typename EulerEquations<dim>::Postprocessor
+    Postprocessor<dim>
     postprocessor (parameters.schlieren_plot);
 
     DataOut<dim> data_out;

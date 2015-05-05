@@ -93,6 +93,7 @@ namespace LA
 
 #include "AllParameters.h"
 #include "FEParameters.h"
+#include "Postprocessor.h"
 
 // Here finally comes the class that actually does something with all the
 // Euler equation and parameter specifics we've defined above. The public
