@@ -4,6 +4,8 @@
 //
 
 #include "Postprocessor.h"
+#include "MMS.h"
+
 
 namespace NSolver
 {

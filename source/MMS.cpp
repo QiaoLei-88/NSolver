@@ -7,6 +7,7 @@
 //
 
 #include "NSEquation.h"
+#include "MMS.h"
 
 namespace NSolver
 {
