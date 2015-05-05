@@ -164,7 +164,7 @@ namespace NSolver
     // C++). This value of 1.4 is representative of a gas that consists of
     // molecules composed of two atoms, such as air which consists up to small
     // traces almost entirely of $N_2$ and $O_2$.
-    static const double gas_gamma;
+    static double gas_gamma;
 
     // In the following, we will need to compute the kinetic energy and the
     // pressure from a vector of conserved variables. This we can do based on

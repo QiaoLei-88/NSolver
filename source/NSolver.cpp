@@ -78,6 +78,8 @@ namespace NSolver
                      TimerOutput::summary,
                      TimerOutput::cpu_and_wall_times)
   {
+
+    EulerEquations<dim>::gas_gamma = 1.4;
     ParameterHandler prm;
     Parameters::AllParameters<dim>::declare_parameters (prm);
     prm.set_ignore_undeclared_entry (true);

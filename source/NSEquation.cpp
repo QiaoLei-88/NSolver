@@ -106,7 +106,7 @@ namespace NSolver
   }
 
   template <int dim>
-  const double EulerEquations<dim>::gas_gamma = 1.4;
+  double EulerEquations<dim>::gas_gamma = 1.4;
 
 
 
