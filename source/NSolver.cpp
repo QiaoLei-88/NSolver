@@ -1365,7 +1365,7 @@ namespace NSolver
   void NSolver<dim>::output_results() const
   {
     Postprocessor<dim>
-    postprocessor (parameters.schlieren_plot);
+    postprocessor (parameters.schlieren_plot, mms);
 
     DataOut<dim> data_out;
     data_out.attach_dof_handler (dof_handler);

@@ -10,6 +10,7 @@
 #include <deal.II/numerics/data_postprocessor.h>
 #include <deal.II/numerics/data_component_interpretation.h>
 #include "NSEquation.h"
+#include "MMS.h"
 
 namespace NSolver
 {
@@ -59,6 +60,8 @@ namespace NSolver
   {
   public:
     Postprocessor (const bool do_schlieren_plot);
+    Postprocessor (const bool do_schlieren_plot,
+                   const MMS &mms_in);
 
     virtual
     void
@@ -79,6 +82,7 @@ namespace NSolver
 
   private:
     const bool do_schlieren_plot;
+    const MMS mms_x;
   };
 }
 #endif
