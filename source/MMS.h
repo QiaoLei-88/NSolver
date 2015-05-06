@@ -57,7 +57,18 @@ namespace NSolver
   class MMS
   {
   public:
+    /**
+     * Default constructor
+     */
     MMS();
+
+
+    /**
+     * Copy constructor
+     */
+    MMS (const MMS &mms_in);
+
+
     /**
      * Initialize the object with provided coefficients. This has nothing to
      * do with whether the calling object will work in Euler or Navier-Stokes

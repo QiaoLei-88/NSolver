@@ -38,9 +38,24 @@ namespace NSolver
   }
 
   MMS::MMS()
-    :initialized (false),
-     is_NS (false)
+    :
+    initialized (false),
+    is_NS (false)
   {}
+
+
+  MMS::MMS (const MMS &mms_in)
+    :
+    initialized (mms_in.initialized),
+    is_NS (mms_in.is_NS)
+    // TODO: It seems now the deal.II provided std_cxx11::array does not
+    // support copying initialization, so do it by 'for loop'.
+  {
+    for (unsigned int i=0; i<EulerEquations<dim2>::n_components; ++i)
+      {
+        c[i] = mms_in.c[i];
+      }
+  }
 
 
   void MMS::reinit
