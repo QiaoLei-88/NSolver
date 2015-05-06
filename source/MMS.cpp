@@ -11,6 +11,19 @@
 
 namespace NSolver
 {
+  Coeff_2D::Coeff_2D()
+  {}
+
+  Coeff_2D::Coeff_2D (const Coeff_2D &value_in)
+    :
+    c0 (value_in.c0),
+    cx (value_in.cx),
+    cy (value_in.cy),
+    cxy (value_in.cxy),
+    ax (value_in.ax),
+    ay (value_in.ay),
+    axy (value_in.axy)
+  {}
 
   Coeff_2D &Coeff_2D::operator= (const Coeff_2D &r)
   {

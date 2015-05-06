@@ -18,6 +18,24 @@ namespace NSolver
 // MMS
   struct Coeff_2D
   {
+    /**
+     * Default constructor
+     */
+    Coeff_2D();
+
+    /**
+     * Copy constructor
+     */
+    Coeff_2D (const Coeff_2D &value_in);
+
+    /**
+     * Overload assign operator
+     */
+    Coeff_2D &operator= (const Coeff_2D &r);
+
+    /**
+     * Value list
+     */
     double c0;
     double cx;
     double cy;
@@ -25,7 +43,6 @@ namespace NSolver
     double ax;
     double ay;
     double axy;
-    Coeff_2D &operator= (const Coeff_2D &r);
   };
 
 #define dim2 2
