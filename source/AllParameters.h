@@ -22,6 +22,7 @@
 
 #include <deal.II/base/parameter_handler.h>
 #include "NSEquation.h"
+#include "FEParameters.h"
 
 namespace NSolver
 {
@@ -175,10 +176,13 @@ namespace NSolver
     // <code>AllParameters</code> class that at least initializes the other
     // FunctionParser object, i.e. the one describing initial conditions.
     template <int dim>
-    struct AllParameters : public Solver,
+    struct AllParameters
+      :
+      public Solver,
       public Refinement,
       public Flux,
-      public Output
+      public Output,
+      public FEParameters
     {
       static const unsigned int max_n_boundaries = 10;
 

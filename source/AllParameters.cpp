@@ -331,6 +331,7 @@ namespace NSolver
       Parameters::Refinement::declare_parameters (prm);
       Parameters::Flux::declare_parameters (prm);
       Parameters::Output::declare_parameters (prm);
+      Parameters::FEParameters::declare_parameters (prm);
     }
 
 
@@ -479,6 +480,7 @@ namespace NSolver
       Parameters::Refinement::parse_parameters (prm);
       Parameters::Flux::parse_parameters (prm);
       Parameters::Output::parse_parameters (prm);
+      Parameters::FEParameters::parse_parameters (prm);
     }
 
     template struct AllParameters<2>;
