@@ -119,8 +119,7 @@ namespace NSolver
   class NSolver
   {
   public:
-    NSolver (const char *input_filename,
-             const Parameters::FEParameters &fe_para);
+    NSolver (Parameters::AllParameters<dim> *const para_ptr_in);
     void run();
 
   private:
@@ -230,8 +229,8 @@ namespace NSolver
 
     const bool I_am_host;
     const unsigned int myid;
-    Parameters::AllParameters<dim>  parameters;
-    Parameters::FEParameters        fe_parameters;
+    Parameters::AllParameters<dim>  *parameters_pointer;
+    Parameters::AllParameters<dim>  &parameters = *parameters_pointer;
     ConditionalOStream              verbose_cout;
     ConditionalOStream              pcout;
     TimerOutput                     computing_timer;

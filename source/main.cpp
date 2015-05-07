@@ -33,19 +33,19 @@ int main (int argc, char *argv[])
           input_file = argv[1];
         }
 
-      Parameters::FEParameters fe_parameters;
       {
-        ParameterHandler prm;
-        const ParameterHandler::ReadInputFlags flags =
-          ParameterHandler::ReadInputFlag_IgnoreUndeclaredEntry
-          | ParameterHandler::ReadInputFlag_InputFileHelp;
-        fe_parameters.declare_parameters (prm);
-        prm.read_input (input_file, flags);
-        fe_parameters.parse_parameters (prm);
-      }
+        const unsigned int dimension (2);
+        Parameters::AllParameters<dimension> solver_parameters;
+        {
+          ParameterHandler prm;
 
-      NSolver<2> cons (input_file, fe_parameters);
-      cons.run();
+          solver_parameters.declare_parameters (prm);
+          prm.read_input (input_file);
+          solver_parameters.parse_parameters (prm);
+        }
+        NSolver<dimension> cons (&solver_parameters);
+        cons.run();
+      }
     }
   catch (std::exception &exc)
     {

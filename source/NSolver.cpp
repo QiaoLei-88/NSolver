@@ -53,8 +53,7 @@ namespace NSolver
   // There is nothing much to say about the constructor. Essentially, it reads
   // the input file and fills the parameter object with the parsed values:
   template <int dim>
-  NSolver<dim>::NSolver (const char *input_filename,
-                         const Parameters::FEParameters &fe_para)
+  NSolver<dim>::NSolver (Parameters::AllParameters<dim> *const para_ptr_in)
     :
     mpi_communicator (MPI_COMM_WORLD),
     triangulation (mpi_communicator,
@@ -62,13 +61,13 @@ namespace NSolver
                    (Triangulation<dim>::smoothing_on_refinement |
                     Triangulation<dim>::smoothing_on_coarsening)),
     mapping(),
-    fe (FE_Q<dim> (fe_para.fe_degree), EulerEquations<dim>::n_components),
+    fe (FE_Q<dim> (para_ptr_in->fe_degree), EulerEquations<dim>::n_components),
     dof_handler (triangulation),
-    quadrature (fe_para.quadrature_degree),
-    face_quadrature (fe_para.face_quadrature_degree),
+    quadrature (para_ptr_in->quadrature_degree),
+    face_quadrature (para_ptr_in->face_quadrature_degree),
     I_am_host (Utilities::MPI::this_mpi_process (mpi_communicator) == 0),
     myid (Utilities::MPI::this_mpi_process (mpi_communicator)),
-    fe_parameters (fe_para),
+    parameters_pointer (para_ptr_in),
     verbose_cout (std::cout, false),
     pcout (std::cout,
            (Utilities::MPI::this_mpi_process (mpi_communicator)
@@ -78,14 +77,7 @@ namespace NSolver
                      TimerOutput::summary,
                      TimerOutput::cpu_and_wall_times)
   {
-
     EulerEquations<dim>::gas_gamma = 1.4;
-    ParameterHandler prm;
-    Parameters::AllParameters<dim>::declare_parameters (prm);
-    prm.set_ignore_undeclared_entry (true);
-
-    prm.read_input (input_filename);
-    parameters.parse_parameters (prm);
     parameters.time_step_factor = 1.0;
 
     verbose_cout.set_condition (parameters.output == Parameters::Solver::verbose);
