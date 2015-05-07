@@ -212,7 +212,7 @@ namespace NSolver
     void
     AllParameters<dim>::declare_parameters (ParameterHandler &prm)
     {
-      prm.declare_entry ("MMS", "1",
+      prm.declare_entry ("MMS", "0",
                          Patterns::Integer(),
                          "Number of manufactured solution to test aginst");
 

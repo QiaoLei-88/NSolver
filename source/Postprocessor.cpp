@@ -53,32 +53,28 @@ namespace NSolver
     const unsigned int n_quadrature_points = static_cast<const unsigned int> (uh.size());
 
     if (do_schlieren_plot)
-      Assert (duh.size() == n_quadrature_points,
-              ExcInternalError())
-      else
-        Assert (duh.size() == 0,
-                ExcInternalError());
+      {
+        Assert (duh.size() == n_quadrature_points,ExcInternalError());
+      }
+    else
+      {
+        Assert (duh.size() == 0,ExcInternalError());
+      }
 
-    Assert (computed_quantities.size() == n_quadrature_points,
-            ExcInternalError());
-
-    Assert (uh[0].size() == EulerEquations<dim>::n_components,
-            ExcInternalError());
+    Assert (computed_quantities.size() == n_quadrature_points,ExcInternalError());
+    Assert (uh[0].size() == EulerEquations<dim>::n_components,ExcInternalError());
 
     //MMS: Extra memmory space
+    Vector<double>::size_type expected_size = dim+1;
     if (do_schlieren_plot)
-      Assert (computed_quantities[0].size() == dim+2 + 3*EulerEquations<dim>::n_components, ExcInternalError())
-      else
-        {
-          Assert (computed_quantities[0].size() == dim+1+3*EulerEquations<dim>::n_components, ExcInternalError());
-        }
-
-//    if (do_schlieren_plot == true)
-//      Assert (computed_quantities[0].size() == dim+2, ExcInternalError())
-//      else
-//        {
-//          Assert (computed_quantities[0].size() == dim+1, ExcInternalError());
-//        }
+      {
+        expected_size += 1;
+      }
+    if (output_mms)
+      {
+        expected_size += 3*EulerEquations<dim>::n_components;
+      }
+    Assert (computed_quantities[0].size() == expected_size, ExcInternalError());
 
     // Then loop over all quadrature points and do our work there. The code
     // should be pretty self-explanatory. The order of output variables is
@@ -101,21 +97,24 @@ namespace NSolver
           computed_quantities[q] (dim+1) = duh[q][EulerEquations<dim>::density_component] *
                                            duh[q][EulerEquations<dim>::density_component];
 
-        std_cxx11::array<double, EulerEquations<dim>::n_components> sol, src;
-        mms_x.evaluate (points[q],sol,src,true);
-        int i_out = dim + 2;
-        for (unsigned int ic = 0; ic < EulerEquations<dim>::n_components; ++ic, ++i_out)
+        if (output_mms)
           {
-            computed_quantities[q][i_out] = src[ic];
-          }
-        for (unsigned int ic = 0; ic < EulerEquations<dim>::n_components; ++ic, ++i_out)
-          {
-            computed_quantities[q][i_out] = sol[ic];
-          }
-        for (unsigned int ic = 0; ic < EulerEquations<dim>::n_components; ++ic, ++i_out)
-          {
-            computed_quantities[q][i_out] = sol[ic] - uh[q][ic];
-          }
+            std_cxx11::array<double, EulerEquations<dim>::n_components> sol, src;
+            mms_x.evaluate (points[q],sol,src,true);
+            int i_out = dim + 2;
+            for (unsigned int ic = 0; ic < EulerEquations<dim>::n_components; ++ic, ++i_out)
+              {
+                computed_quantities[q][i_out] = src[ic];
+              }
+            for (unsigned int ic = 0; ic < EulerEquations<dim>::n_components; ++ic, ++i_out)
+              {
+                computed_quantities[q][i_out] = sol[ic];
+              }
+            for (unsigned int ic = 0; ic < EulerEquations<dim>::n_components; ++ic, ++i_out)
+              {
+                computed_quantities[q][i_out] = sol[ic] - uh[q][ic];
+              }
+          } // End if (output_mms)
       }
   }
 
@@ -138,27 +137,30 @@ namespace NSolver
       }
 
     //MMS: Exact output
-    for (unsigned int d=0; d<dim; ++d)
+    if (output_mms)
       {
-        names.push_back ("mms_src_momentum");
-      }
-    names.push_back ("mms_src_density");
-    names.push_back ("mms_src_energy");
-    for (unsigned int d=0; d<dim; ++d)
-      {
-        names.push_back ("mms_exact_velocity");
-      }
-    names.push_back ("mms_exact_density");
-    names.push_back ("mms_exact_energy");
+
+        for (unsigned int d=0; d<dim; ++d)
+          {
+            names.push_back ("mms_src_momentum");
+          }
+        names.push_back ("mms_src_density");
+        names.push_back ("mms_src_energy");
+        for (unsigned int d=0; d<dim; ++d)
+          {
+            names.push_back ("mms_exact_velocity");
+          }
+        names.push_back ("mms_exact_density");
+        names.push_back ("mms_exact_energy");
 //    for (unsigned int d=0; d<dim; ++d)
 //      {
-    names.push_back ("mms_error_velocity_x");
-    names.push_back ("mms_error_velocity_y");
+        names.push_back ("mms_error_velocity_x");
+        names.push_back ("mms_error_velocity_y");
 //      }
-    names.push_back ("mms_error_density");
-    names.push_back ("mms_error_energy");
+        names.push_back ("mms_error_density");
+        names.push_back ("mms_error_energy");
+      }// End MMS: Exact output
 
-    //End MMS: Exact output
     return names;
   }
 
@@ -180,36 +182,38 @@ namespace NSolver
                                 component_is_scalar);
 
     // MMS:
-    for (unsigned int d=0; d<dim; ++d)
+    if (output_mms)
       {
-        interpretation.push_back (DataComponentInterpretation::
-                                  component_is_part_of_vector);
-      }
-    interpretation.push_back (DataComponentInterpretation::
-                              component_is_scalar);
-    interpretation.push_back (DataComponentInterpretation::
-                              component_is_scalar);
-
-    for (unsigned int d=0; d<dim; ++d)
-      {
-        interpretation.push_back (DataComponentInterpretation::
-                                  component_is_part_of_vector);
-      }
-    interpretation.push_back (DataComponentInterpretation::
-                              component_is_scalar);
-    interpretation.push_back (DataComponentInterpretation::
-                              component_is_scalar);
-
-    for (unsigned int d=0; d<dim; ++d)
-      {
+        for (unsigned int d=0; d<dim; ++d)
+          {
+            interpretation.push_back (DataComponentInterpretation::
+                                      component_is_part_of_vector);
+          }
         interpretation.push_back (DataComponentInterpretation::
                                   component_is_scalar);
-      }
-    interpretation.push_back (DataComponentInterpretation::
-                              component_is_scalar);
-    interpretation.push_back (DataComponentInterpretation::
-                              component_is_scalar);
-    // END MMS:
+        interpretation.push_back (DataComponentInterpretation::
+                                  component_is_scalar);
+
+        for (unsigned int d=0; d<dim; ++d)
+          {
+            interpretation.push_back (DataComponentInterpretation::
+                                      component_is_part_of_vector);
+          }
+        interpretation.push_back (DataComponentInterpretation::
+                                  component_is_scalar);
+        interpretation.push_back (DataComponentInterpretation::
+                                  component_is_scalar);
+
+        for (unsigned int d=0; d<dim; ++d)
+          {
+            interpretation.push_back (DataComponentInterpretation::
+                                      component_is_scalar);
+          }
+        interpretation.push_back (DataComponentInterpretation::
+                                  component_is_scalar);
+        interpretation.push_back (DataComponentInterpretation::
+                                  component_is_scalar);
+      }// END MMS:
     return interpretation;
   }
 
@@ -220,15 +224,17 @@ namespace NSolver
   Postprocessor<dim>::
   get_needed_update_flags() const
   {
+    UpdateFlags flags = update_values;
     // MMS : update_quadrature_points
     if (do_schlieren_plot)
       {
-        return update_quadrature_points| update_values | update_gradients;
+        flags |= update_gradients;
       }
-    else
+    if (output_mms)
       {
-        return update_quadrature_points| update_values;
+        flags |= update_quadrature_points;
       }
+    return (flags);
   }
 
   template class Postprocessor<2>;
