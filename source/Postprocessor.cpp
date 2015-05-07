@@ -13,18 +13,13 @@ namespace NSolver
 
   template <int dim>
   Postprocessor<dim>::
-  Postprocessor (const bool do_schlieren_plot)
+  Postprocessor (Parameters::AllParameters<dim>const *const para_ptr_in,
+                 MMS const *const mms_ptr_in)
     :
-    do_schlieren_plot (do_schlieren_plot)
-  {}
-
-  template <int dim>
-  Postprocessor<dim>::
-  Postprocessor (const bool do_schlieren_plot,
-                 const MMS &mms_in)
-    :
-    do_schlieren_plot (do_schlieren_plot),
-    mms_x (mms_in)
+    para_ptr (para_ptr_in),
+    mms_ptr (mms_ptr_in),
+    do_schlieren_plot (para_ptr_in->schlieren_plot),
+    output_mms (para_ptr_in->n_mms == 1)
   {}
 
 
@@ -57,7 +52,7 @@ namespace NSolver
     // of the outer vector has the correct inner size:
     const unsigned int n_quadrature_points = static_cast<const unsigned int> (uh.size());
 
-    if (do_schlieren_plot == true)
+    if (do_schlieren_plot)
       Assert (duh.size() == n_quadrature_points,
               ExcInternalError())
       else
@@ -71,7 +66,7 @@ namespace NSolver
             ExcInternalError());
 
     //MMS: Extra memmory space
-    if (do_schlieren_plot == true)
+    if (do_schlieren_plot)
       Assert (computed_quantities[0].size() == dim+2 + 3*EulerEquations<dim>::n_components, ExcInternalError())
       else
         {
@@ -102,7 +97,7 @@ namespace NSolver
 
         computed_quantities[q] (dim) = EulerEquations<dim>::compute_energy_density (uh[q]);
 
-        if (do_schlieren_plot == true)
+        if (do_schlieren_plot)
           computed_quantities[q] (dim+1) = duh[q][EulerEquations<dim>::density_component] *
                                            duh[q][EulerEquations<dim>::density_component];
 
@@ -137,7 +132,7 @@ namespace NSolver
       }
     names.push_back ("energy_density");
 
-    if (do_schlieren_plot == true)
+    if (do_schlieren_plot)
       {
         names.push_back ("schlieren_plot");
       }
@@ -180,7 +175,7 @@ namespace NSolver
     interpretation.push_back (DataComponentInterpretation::
                               component_is_scalar);
 
-    if (do_schlieren_plot == true)
+    if (do_schlieren_plot)
       interpretation.push_back (DataComponentInterpretation::
                                 component_is_scalar);
 
@@ -226,7 +221,7 @@ namespace NSolver
   get_needed_update_flags() const
   {
     // MMS : update_quadrature_points
-    if (do_schlieren_plot == true)
+    if (do_schlieren_plot)
       {
         return update_quadrature_points| update_values | update_gradients;
       }

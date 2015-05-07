@@ -10,6 +10,7 @@
 #include <deal.II/numerics/data_postprocessor.h>
 #include <deal.II/numerics/data_component_interpretation.h>
 #include "NSEquation.h"
+#include "AllParameters.h"
 #include "MMS.h"
 
 namespace NSolver
@@ -59,9 +60,8 @@ namespace NSolver
   class Postprocessor : public DataPostprocessor<dim>
   {
   public:
-    Postprocessor (const bool do_schlieren_plot);
-    Postprocessor (const bool do_schlieren_plot,
-                   const MMS &mms_in);
+    Postprocessor (Parameters::AllParameters<dim> const *const para_ptr_in,
+                   MMS const *const mms_ptr_in);
 
     virtual
     void
@@ -81,8 +81,12 @@ namespace NSolver
     virtual UpdateFlags get_needed_update_flags() const;
 
   private:
-    const bool do_schlieren_plot;
-    const MMS mms_x;
+    Parameters::AllParameters<dim>const *const para_ptr;
+    Parameters::AllParameters<dim>const &parameters = *para_ptr;
+    MMS const *const mms_ptr;
+    MMS const &mms_x = *mms_ptr;
+    bool const do_schlieren_plot;
+    bool const output_mms;
   };
 }
 #endif
