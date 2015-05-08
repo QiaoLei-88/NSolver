@@ -749,99 +749,104 @@ namespace NSolver
                                        const Vector<double> &boundary_values,
                                        const DataVector     &Wminus)
   {
+    typedef typename DataVector::value_type VType;
+
     for (unsigned int c = 0; c < n_components; c++)
       switch (boundary_kind[c])
         {
         case Riemann_boundary:
         {
-          //Riemann boundary condition set values of components once for all.
+          // Riemann boundary condition is a characteristics based boundary condtion.
+          // Riemann boundary condition set values of components once for all.
           if (c == 0)
             {
-              //Calculate incoming Riemann invariant from far field conditions.
-              //Farfield qualities are treated in nondimensinal manner, thus
-              //Density == 1.0
-              //Presure == 1.0/gas_gamma
-              //Sound speed == 1.0
-              //velocity magnitude == Mach number.
-              //const typename DataVector::value_type pressure_incoming = 1.0/gas_gamma;
-              const typename DataVector::value_type sound_speed_incoming = 1.0;
+              // Compute sound speed and normal velocity from demanded boundary values
+              VType const sound_speed_incoming = compute_sound_speed (boundary_values);
 
-              typename DataVector::value_type normal_velocity_incoming = 0.0;
+              VType normal_velocity_incoming = 0.0;
               for (unsigned int d = first_velocity_component; d < first_velocity_component+dim; ++d)
                 {
-                  normal_velocity_incoming += boundary_values (d)*normal_vector[d];
+                  normal_velocity_incoming += boundary_values[d]*normal_vector[d];
                 }
-              typename DataVector::value_type riemann_invariant_incoming = normal_velocity_incoming
-                  - 2.0 * sound_speed_incoming/ (gas_gamma - 1.0);
-              const typename DataVector::value_type
-              mach_incoming = std::fabs (normal_velocity_incoming) / sound_speed_incoming;
 
-              //Calculate outcoming Riemann invariant from interior conditions
-              const typename DataVector::value_type pressure_outcoming
-                = Wplus[pressure_component];
-              //   = compute_pressure<typename DataVector::value_type> (Wplus);
-              const typename DataVector::value_type sound_speed_outcoming
-                = std::sqrt (gas_gamma * pressure_outcoming / Wplus[density_component]);
-
-              typename DataVector::value_type normal_velocity_outcoming = 0.0;
-              for (unsigned int d = first_velocity_component; d < first_velocity_component+dim; ++d)
+              if (normal_velocity_incoming + sound_speed_incoming <= 0.0)
                 {
-                  normal_velocity_outcoming += Wplus[d]*normal_vector[d];
-                }
-              //normal_velocity_outcoming /= Wplus[density_component];
-
-              typename DataVector::value_type riemann_invariant_outcoming = normal_velocity_outcoming
-                  + 2.0 * sound_speed_outcoming/ (gas_gamma - 1.0);
-              const typename DataVector::value_type
-              mach_outcoming = std::fabs (normal_velocity_outcoming) / sound_speed_outcoming;
-              //Adjust Riemann invairant according to local Mach number
-              //First case: inflow boundary with a supersonic speed,  then no out going characteristic
-              //wave exists and the incoming Riemann invariant dominates.
-              if (normal_velocity_incoming < 0.0 && mach_incoming  >= 1.0)
-                {
-                  riemann_invariant_outcoming = riemann_invariant_incoming;
-                }
-              //Second case: outflow boundary with a supersonic speed, then no in going characteristic
-              //wave exists and the outcoming Riemann invariant dominates.
-              if (normal_velocity_incoming > 0.0 && mach_outcoming >= 1.0)
-                {
-                  riemann_invariant_incoming = riemann_invariant_outcoming;
-                }
-              //Calculate boundary values using Riemann invarant
-              const typename DataVector::value_type normal_velocity_boundary =
-                0.5 * (riemann_invariant_outcoming + riemann_invariant_incoming);
-              const typename DataVector::value_type sound_speed_boundary =
-                0.25 * (gas_gamma - 1.0) * (riemann_invariant_outcoming - riemann_invariant_incoming);
-              //Finally, component values of boundary element
-              Assert (sound_speed_boundary > 0.1, ExcLowerRangeType<typename DataVector::value_type> (sound_speed_boundary , 0.1));
-              if (normal_velocity_boundary <= 0.0)
-                {
-                  //For inflow boundary, boundary values are determined by the far field conditions
-                  Wminus[density_component] = boundary_values (density_component) *
-                                              std::pow (sound_speed_boundary/sound_speed_incoming, 2.0/ (gas_gamma-1.0));
-                  const typename DataVector::value_type
-                  deltaV = normal_velocity_boundary - normal_velocity_incoming;
-                  for (unsigned int d = first_velocity_component; d < first_velocity_component+dim; ++d)
+                  // This is a supersonic inflow boundary, enforce all boundary values
+                  // without calculating characteristics values
+                  for (unsigned int ic=0; ic < n_components; ++ic)
                     {
-                      Wminus[d] = boundary_values (d) + deltaV * normal_vector[d];
+                      Wminus[ic] = boundary_values[ic];
+                    }
+                }
+              else if (normal_velocity_incoming - sound_speed_incoming >= 0.0)
+                {
+                  // This is a supersonic outflow boundary, extrapolate all boundary values
+                  // without calculating characteristics values
+                  for (unsigned int ic=0; ic < n_components; ++ic)
+                    {
+                      Wminus[ic] = Wplus[ic];
                     }
                 }
               else
                 {
-                  //For outflow boundary, boundary values are calculated from inteiror value
-                  Wminus[density_component] = Wplus[density_component] *
-                                              std::pow (sound_speed_boundary/sound_speed_outcoming, 2.0/ (gas_gamma-1.0));
-                  const typename DataVector::value_type
-                  deltaV = normal_velocity_boundary - normal_velocity_outcoming;
+                  // This is a subsonic boundary. Evaulate interior normal speed and sound speed.
+                  VType const sound_speed_outcoming = compute_sound_speed (Wplus);
+
+                  VType normal_velocity_outcoming = 0.0;
                   for (unsigned int d = first_velocity_component; d < first_velocity_component+dim; ++d)
                     {
-                      Wminus[d] = Wplus[d] + deltaV * normal_vector[d];
+                      normal_velocity_outcoming += Wplus[d]*normal_vector[d];
                     }
+                  // v_n+c > 0, thus compute v_n + 2*c/(gas_gamma - 1) from interior values.
+                  VType riemann_invariant_outcoming = normal_velocity_outcoming
+                                                      + 2.0 * sound_speed_outcoming/ (gas_gamma - 1.0);
+                  // v_n-c < 0, thus compute v_n - 2*c/(gas_gamma - 1) from demanded boundary values.
+                  VType riemann_invariant_incoming = normal_velocity_incoming
+                                                     - 2.0 * sound_speed_incoming/ (gas_gamma - 1.0);
+
+                  VType entropy_boundary;
+                  std_cxx11::array<VType,dim> tangential_velocity;
+                  if (normal_velocity_incoming <= 0.0)
+                    {
+                      // v_n <= 0
+                      // This is a subsonic inflow boundary.
+                      // Compute tangential velocity and entropy(not exactly) from demanded boundary values.
+                      for (unsigned int d = first_velocity_component, i=0; i < dim; ++d, ++i)
+                        {
+                          tangential_velocity[i] = boundary_values [d] - normal_velocity_incoming * normal_vector[d];
+                        }
+                      entropy_boundary = std::pow (boundary_values[density_component], gas_gamma)/
+                                         boundary_values[pressure_component];
+                    }
+                  else
+                    {
+                      // v_n > 0
+                      // This is a subsonic outflow boundary.
+                      // Compute tangential velocity and entropy(not exactly) from interior values.
+                      for (unsigned int d = first_velocity_component, i=0; i < dim; ++d, ++i)
+                        {
+                          tangential_velocity[i] = Wplus[d] - normal_velocity_outcoming * normal_vector[d];
+                        }
+                      entropy_boundary = std::pow (Wplus[density_component], gas_gamma)/
+                                         Wplus[pressure_component];
+                    }
+                  // Recover primitive variables from characteristics variables.
+                  VType const normal_velocity_boundary =
+                    0.5 * (riemann_invariant_outcoming + riemann_invariant_incoming);
+                  VType const sound_speed_boundary =
+                    0.25 * (gas_gamma - 1.0) * (riemann_invariant_outcoming - riemann_invariant_incoming);
+                  Assert (sound_speed_boundary > 0.0,
+                          ExcLowerRangeType<VType> (sound_speed_boundary, 0.0));
+
+                  for (unsigned int d = first_velocity_component, i=0; i < dim; ++d, ++i)
+                    {
+                      Wminus[d] = tangential_velocity[i] + normal_velocity_boundary * normal_vector[d];
+                    }
+                  Wminus[density_component] = std::pow (sound_speed_boundary * sound_speed_boundary
+                                                        * entropy_boundary / gas_gamma, 1.0/ (gas_gamma-1.0));
+                  Wminus[pressure_component] = Wminus[density_component] * sound_speed_boundary *
+                                               sound_speed_boundary / gas_gamma;
                 }
-              //Calculate boundary pressure then energy in the same pattern.
-              const typename DataVector::value_type pressure_boundary = Wminus[density_component] * sound_speed_boundary *
-                                                                        sound_speed_boundary / gas_gamma;
-              Wminus[pressure_component] = pressure_boundary;
             }
           break;
         }
