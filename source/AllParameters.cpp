@@ -305,8 +305,8 @@ namespace NSolver
                                    // working normally. Because we need to extrapolate the density
                                    // and energy (pressure) values at the no penetration
                                    // boundary just as if there is an outflow boundary.
-                                   Patterns::Selection ("inflow|outflow|pressure|Riemann"),
-                                   "<inflow|outflow|pressure|Riemann>");
+                                   Patterns::Selection ("inflow|outflow|pressure|Riemann|MMS_BC"),
+                                   "<inflow|outflow|pressure|Riemann|MMS_BC>");
 
                 prm.declare_entry ("w_" + Utilities::int_to_string (di) +
                                    " value", "0.0",
@@ -446,6 +446,9 @@ namespace NSolver
                 else if (boundary_type == "Riemann")
                   boundary_conditions[boundary_id].kind[di]
                     = EulerEquations<dim>::Riemann_boundary;
+                else if (boundary_type == "MMS_BC")
+                  boundary_conditions[boundary_id].kind[di]
+                    = EulerEquations<dim>::MMS_BC;
                 else
                   {
                     AssertThrow (false, ExcNotImplemented());

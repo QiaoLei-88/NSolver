@@ -314,7 +314,8 @@ namespace NSolver
       outflow_boundary,
       no_penetration_boundary,
       pressure_boundary,
-      Riemann_boundary
+      Riemann_boundary,
+      MMS_BC,
     };
 
 
@@ -846,6 +847,45 @@ namespace NSolver
                                                         * entropy_boundary / gas_gamma, 1.0/ (gas_gamma-1.0));
                   Wminus[pressure_component] = Wminus[density_component] * sound_speed_boundary *
                                                sound_speed_boundary / gas_gamma;
+                }
+            }
+          break;
+        }
+
+        case MMS_BC:
+        {
+          // MMS_BC boundary condition set values of components once for all.
+          // It is similar to Riemann boundary conditon, but enforce all boundary
+          // values in subsonic case. The reason is the solution is manufactured
+          // and the in enforced, the solution has no degree of freedom. However,
+          // on supersonic out flow boundary, the solution still has to be extrapolated.
+          // This is because in supersonic case the solution depends only on
+          // inflow boundary.
+          if (c == 0)
+            {
+              // Compute sound speed and normal velocity from demanded boundary values
+              VType const sound_speed_incoming = compute_sound_speed (boundary_values);
+              VType normal_velocity_incoming = 0.0;
+              for (unsigned int d = first_velocity_component; d < first_velocity_component+dim; ++d)
+                {
+                  normal_velocity_incoming += boundary_values[d]*normal_vector[d];
+                }
+
+              if (normal_velocity_incoming - sound_speed_incoming >= 0.0)
+                {
+                  // This is a supersonic outflow boundary, extrapolate all boundary values
+                  // without calculating characteristics values
+                  for (unsigned int ic=0; ic < n_components; ++ic)
+                    {
+                      Wminus[ic] = Wplus[ic];
+                    }
+                }
+              else
+                {
+                  for (unsigned int ic=0; ic < n_components; ++ic)
+                    {
+                      Wminus[ic] = boundary_values[ic];
+                    }
                 }
             }
           break;
