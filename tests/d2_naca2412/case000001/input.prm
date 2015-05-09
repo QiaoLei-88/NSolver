@@ -30,7 +30,7 @@ subsection boundary_2
   set w_2 = Riemann
   set w_2 value = 1.0 # Nondimensional density at infty, allways be 1 (rho/rho_inf)
   set w_3 = Riemann
-  set w_3 value = 1.0 # Nondimensional pressure at infty, allways be 1 (p/p_inf)
+  set w_3 value = 1.0/1.4 # Nondimensional pressure at infty, allways be 1/gas_gamm
 end
 
 #subsection boundary_3
@@ -53,7 +53,7 @@ subsection initial condition
   set w_0 value = 0.30
   set w_1 value = 0.00
   set w_2 value = 1.0  #10*(x<-0.7)*(y> 0.3)*(y< 0.45) + (1-(x<-0.7)*(y> 0.3)*(y< 0.45))*1.0
-  set w_3 value = 1.830714 #(1.5-(1.0*1.0*y))/0.4
+  set w_3 value = 1.0/1.4 #(1.5-(1.0*1.0*y))/0.4
 end
 
 # --------------------------------------------------
