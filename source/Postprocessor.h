@@ -13,7 +13,7 @@
 #include "AllParameters.h"
 #include "MMS.h"
 
-namespace NSolver
+namespace NSFEMSolver
 {
   using namespace dealii;
 

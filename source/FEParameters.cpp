@@ -5,7 +5,7 @@
 
 #include "FEParameters.h"
 
-namespace NSolver
+namespace NSFEMSolver
 {
   namespace Parameters
   {

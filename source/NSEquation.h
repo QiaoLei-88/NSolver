@@ -93,7 +93,7 @@ namespace LA
 
 #include <vector>
 
-namespace NSolver
+namespace NSFEMSolver
 {
   using namespace dealii;
 
@@ -933,7 +933,7 @@ namespace NSolver
           Assert (false, ExcNotImplemented());
         }
   }
-} /* End of namespace NSolver */
+} /* End of namespace NSFEMSolver */
 
 
 #endif /* defined(__NSolver__NSEquation__) */

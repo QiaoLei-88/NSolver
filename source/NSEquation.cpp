@@ -8,7 +8,7 @@
 
 #include "NSEquation.h"
 
-namespace NSolver
+namespace NSFEMSolver
 {
   using namespace dealii;
 

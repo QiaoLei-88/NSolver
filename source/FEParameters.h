@@ -8,7 +8,7 @@
 
 #include <deal.II/base/parameter_handler.h>
 
-namespace NSolver
+namespace NSFEMSolver
 {
   namespace Parameters
   {

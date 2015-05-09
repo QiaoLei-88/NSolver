@@ -24,7 +24,7 @@
 #include "NSEquation.h"
 #include "FEParameters.h"
 
-namespace NSolver
+namespace NSFEMSolver
 {
   namespace Parameters
   {
@@ -248,6 +248,6 @@ namespace NSolver
 
   } /* End of namespace Parameters */
 
-} /* End of namespace NSolver */
+} /* End of namespace NSFEMSolver */
 
 #endif /* defined(__NSolver__AllParameters__) */

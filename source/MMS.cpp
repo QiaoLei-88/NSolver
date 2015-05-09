@@ -9,7 +9,7 @@
 #include "NSEquation.h"
 #include "MMS.h"
 
-namespace NSolver
+namespace NSFEMSolver
 {
   Coeff_2D::Coeff_2D()
   {}

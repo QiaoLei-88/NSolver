@@ -8,7 +8,7 @@
 
 #include "AllParameters.h"
 
-namespace NSolver
+namespace NSFEMSolver
 {
   namespace Parameters
   {
@@ -491,4 +491,4 @@ namespace NSolver
 
   } /* End namespace Parameters */
 
-} /* End of namespace NSolver */
+} /* End of namespace NSFEMSolver */

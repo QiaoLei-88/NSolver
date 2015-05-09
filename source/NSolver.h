@@ -107,7 +107,7 @@ namespace LA
 // and that then calls the other two for integrals over cells and faces,
 // respectively.
 
-namespace NSolver
+namespace NSFEMSolver
 {
   using namespace dealii;
 
