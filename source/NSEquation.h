@@ -315,7 +315,7 @@ namespace NSFEMSolver
       no_penetration_boundary,
       pressure_boundary,
       Riemann_boundary,
-      MMS_BC,
+      MMS_BC
     };
 
 
