@@ -39,11 +39,11 @@ namespace NSolver
                            Patterns::Integer(),
                            "Cell quadrature degree");
 
-        prm.declare_entry ("face quadrature_degree", "-1",
+        prm.declare_entry ("face quadrature degree", "-1",
                            Patterns::Integer(),
                            "Face quadrature degree");
 
-        prm.declare_entry ("error quadrature_degree", "-1",
+        prm.declare_entry ("error quadrature degree", "-1",
                            Patterns::Integer(),
                            "Quadrature degree for error evaluation");
       }
@@ -72,13 +72,13 @@ namespace NSolver
             quadrature_degree = fe_degree + 1;
           }
 
-        face_quadrature_degree = prm.get_integer ("face quadrature_degree");
+        face_quadrature_degree = prm.get_integer ("face quadrature degree");
         if (face_quadrature_degree <= 0)
           {
             face_quadrature_degree = quadrature_degree;
           }
 
-        error_quadrature_degree = prm.get_integer ("error quadrature_degree");
+        error_quadrature_degree = prm.get_integer ("error quadrature degree");
         if (error_quadrature_degree <= 0)
           {
             error_quadrature_degree = quadrature_degree + 1;
