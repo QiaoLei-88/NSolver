@@ -67,7 +67,7 @@ namespace NSolver
     face_quadrature (para_ptr_in->face_quadrature_degree),
     I_am_host (Utilities::MPI::this_mpi_process (mpi_communicator) == 0),
     myid (Utilities::MPI::this_mpi_process (mpi_communicator)),
-    parameters_pointer (para_ptr_in),
+    parameters (para_ptr_in),
     verbose_cout (std::cout, false),
     pcout (std::cout,
            (Utilities::MPI::this_mpi_process (mpi_communicator)
@@ -78,11 +78,11 @@ namespace NSolver
                      TimerOutput::cpu_and_wall_times)
   {
     EulerEquations<dim>::gas_gamma = 1.4;
-    parameters.time_step_factor = 1.0;
+    parameters->time_step_factor = 1.0;
 
-    verbose_cout.set_condition (parameters.output == Parameters::Solver::verbose);
+    verbose_cout.set_condition (parameters->output == Parameters::Solver::verbose);
 
-    if (parameters.n_mms == 1)
+    if (parameters->n_mms == 1)
       {
         // Setup coefficients for MMS
         std_cxx11::array<Coeff_2D, EulerEquations<dim>::n_components> coeffs;
@@ -243,9 +243,9 @@ namespace NSolver
   template <int dim>
   void NSolver<dim>::calc_time_step()
   {
-    if (parameters.is_rigid_timestep_size)
+    if (parameters->is_rigid_timestep_size)
       {
-        parameters.time_step = parameters.readin_time_step;
+        parameters->time_step = parameters->readin_time_step;
       }
     else
       {
@@ -253,7 +253,7 @@ namespace NSolver
         const unsigned int   n_q_points = fe_v.n_quadrature_points;
         std::vector<Vector<double> > solution_values (n_q_points,
                                                       Vector<double> (dim+2));
-        double min_time_step = parameters.readin_time_step;
+        double min_time_step = parameters->readin_time_step;
         typename DoFHandler<dim>::active_cell_iterator
         cell = dof_handler.begin_active(),
         endc = dof_handler.end();
@@ -270,12 +270,12 @@ namespace NSolver
                   const double velocity
                   = EulerEquations<dim>::template compute_velocity_magnitude (solution_values[q]);
                   min_time_step = std::min (min_time_step,
-                                            cell_size / (velocity+sound_speed) * parameters.CFL_number);
+                                            cell_size / (velocity+sound_speed) * parameters->CFL_number);
                 }
             }
-        parameters.time_step = Utilities::MPI::min_max_avg (min_time_step, mpi_communicator).min;
+        parameters->time_step = Utilities::MPI::min_max_avg (min_time_step, mpi_communicator).min;
       }
-    parameters.time_step *= parameters.time_step_factor;
+    parameters->time_step *= parameters->time_step_factor;
   }
 
   // @sect4{NSolver::assemble_system}
@@ -669,7 +669,7 @@ namespace NSolver
     //MMS: evaluate source term
     std::vector < std_cxx11::array< double, EulerEquations<dim>::n_components> >
     mms_source (n_q_points), mms_value (n_q_points);
-    if (parameters.n_mms == 1)
+    if (parameters->n_mms == 1)
       {
         for (unsigned int q=0; q<n_q_points; ++q)
           {
@@ -682,10 +682,10 @@ namespace NSolver
     for (unsigned int q=0; q<n_q_points; ++q)
       {
         EulerEquations<dim>::compute_inviscid_flux (W_old[q], flux_old[q]);
-        EulerEquations<dim>::compute_forcing_vector (W_old[q], forcing_old[q], parameters.gravity);
+        EulerEquations<dim>::compute_forcing_vector (W_old[q], forcing_old[q], parameters->gravity);
         EulerEquations<dim>::compute_inviscid_flux (W[q], flux[q]);
         EulerEquations<dim>::compute_viscous_flux (W[q], grad_W[q], visc_flux[q]);
-        EulerEquations<dim>::compute_forcing_vector (W[q], forcing[q], parameters.gravity);
+        EulerEquations<dim>::compute_forcing_vector (W[q], forcing[q], parameters->gravity);
       }
 
     // evaluate entropy viscosity
@@ -708,9 +708,9 @@ namespace NSolver
             const double entroy_old = EulerEquations<dim>::template compute_entropy (W_old[q]);
 
             double D_h1 (0.0),D_h2 (0.0);
-            D_h1 = (entropy.val() - entroy_old)/parameters.time_step;
+            D_h1 = (entropy.val() - entroy_old)/parameters->time_step;
             D_h2 = (W[q][EulerEquations<dim>::density_component].val() - W_old[q][EulerEquations<dim>::density_component])/
-            parameters.time_step;
+            parameters->time_step;
 
             //sum up divergence
             for (unsigned int d=0; d<dim; d++)
@@ -742,7 +742,7 @@ namespace NSolver
         const double entropy_visc = cE * rho_max * std::pow (fe_v.get_cell()->diameter(), 1.5) * D_h_max;
         const double cMax = 0.25;
         const double miu_max = cMax * fe_v.get_cell()->diameter() * rho_max * characteristic_speed_max;
-        //  const double miu_max = 1.0*std::pow(fe_v.get_cell()->diameter(), parameters.diffusion_power);
+        //  const double miu_max = 1.0*std::pow(fe_v.get_cell()->diameter(), parameters->diffusion_power);
 
         entropy_viscosity[cell_index] = std::min (miu_max, entropy_visc);
       }
@@ -750,7 +750,7 @@ namespace NSolver
     // Evaluate the effective viscosity here. In future, every thing about
     // viscosity, like turbulence model will go here.
 
-    cellSize_viscosity[cell_index] = 1.0*std::pow (fe_v.get_cell()->diameter(), parameters.diffusion_power);
+    cellSize_viscosity[cell_index] = 1.0*std::pow (fe_v.get_cell()->diameter(), parameters->diffusion_power);
 
     // TODO:
     // viscosity_old needed here.
@@ -758,17 +758,17 @@ namespace NSolver
     // cellwise, while physical viscosity is per-dof.
 
     double viscos_coeff (0.000);
-    if (parameters.diffusion_type == Parameters::AllParameters<dim>::diffu_entropy)
+    if (parameters->diffusion_type == Parameters::AllParameters<dim>::diffu_entropy)
       {
         viscos_coeff = entropy_viscosity[cell_index];
       }
-    if (parameters.diffusion_type == Parameters::AllParameters<dim>::diffu_cell_size)
+    if (parameters->diffusion_type == Parameters::AllParameters<dim>::diffu_cell_size)
       {
         viscos_coeff = cellSize_viscosity[cell_index];
       }
-    if (parameters.diffusion_type == Parameters::AllParameters<dim>::diffu_const)
+    if (parameters->diffusion_type == Parameters::AllParameters<dim>::diffu_const)
       {
-        viscos_coeff = parameters.diffusion_coefficoent;
+        viscos_coeff = parameters->diffusion_coefficoent;
       }
 
     // We now have all of the pieces in place, so perform the assembly.  We
@@ -827,27 +827,27 @@ namespace NSolver
             EulerEquations<dim>::compute_conservative_vector (W_old[point], w_conservative_old);
 
             // TODO: accumulate R_i fisrt and the multiply with shape_value_component * JxW together.
-            if (parameters.is_stationary == false)
-              R_i += 1.0 / parameters.time_step *
+            if (parameters->is_stationary == false)
+              R_i += 1.0 / parameters->time_step *
                      (w_conservative[component_i] - w_conservative_old[component_i]) *
                      fe_v.shape_value_component (i, point, component_i) *
                      fe_v.JxW (point);
 
             for (unsigned int d=0; d<dim; d++)
               {
-                R_i -= (parameters.theta * flux[point][component_i][d] +
-                        (1.0-parameters.theta) * flux_old[point][component_i][d]) *
+                R_i -= (parameters->theta * flux[point][component_i][d] +
+                        (1.0-parameters->theta) * flux_old[point][component_i][d]) *
                        fe_v.shape_grad_component (i, point, component_i)[d] *
                        fe_v.JxW (point);
                 R_i += visc_flux[point][component_i][d] * viscos_coeff *
                        fe_v.shape_grad_component (i, point, component_i)[d] *
                        fe_v.JxW (point);
               }
-            R_i -= (parameters.theta  * forcing[point][component_i] +
-                    (1.0 - parameters.theta) * forcing_old[point][component_i]) *
+            R_i -= (parameters->theta  * forcing[point][component_i] +
+                    (1.0 - parameters->theta) * forcing_old[point][component_i]) *
                    fe_v.shape_value_component (i, point, component_i) *
                    fe_v.JxW (point);
-            if (parameters.n_mms == 1)
+            if (parameters->n_mms == 1)
               {
                 //MMS: apply MMS source term
                 R_i -= mms_source[point][component_i] *
@@ -985,13 +985,13 @@ namespace NSolver
         std::vector<Vector<double> >
         boundary_values (n_q_points, Vector<double> (EulerEquations<dim>::n_components));
 
-        if (parameters.n_mms != 1)
+        if (parameters->n_mms != 1)
           {
-            parameters.boundary_conditions[boundary_id]
+            parameters->boundary_conditions[boundary_id]
             .values.vector_value_list (fe_v.get_quadrature_points(),
                                        boundary_values);
           }
-        if (parameters.n_mms == 1)
+        if (parameters->n_mms == 1)
           // MMS: compute boundary_values accroding to MS.
           {
             for (unsigned int q = 0; q < n_q_points; q++)
@@ -1008,14 +1008,14 @@ namespace NSolver
 
         for (unsigned int q = 0; q < n_q_points; q++)
           {
-            EulerEquations<dim>::compute_Wminus (parameters.boundary_conditions[boundary_id].kind,
+            EulerEquations<dim>::compute_Wminus (parameters->boundary_conditions[boundary_id].kind,
                                                  fe_v.normal_vector (q),
                                                  Wplus[q],
                                                  boundary_values[q],
                                                  Wminus[q]);
             // Here we assume that boundary type, boundary normal vector and boundary data values
             // maintain the same during time advancing.
-            EulerEquations<dim>::compute_Wminus (parameters.boundary_conditions[boundary_id].kind,
+            EulerEquations<dim>::compute_Wminus (parameters->boundary_conditions[boundary_id].kind,
                                                  fe_v.normal_vector (q),
                                                  Wplus_old[q],
                                                  boundary_values[q],
@@ -1035,13 +1035,13 @@ namespace NSolver
 
     double alpha;
 
-    switch (parameters.stabilization_kind)
+    switch (parameters->stabilization_kind)
       {
       case Parameters::Flux::constant:
-        alpha = parameters.stabilization_value;
+        alpha = parameters->stabilization_value;
         break;
       case Parameters::Flux::mesh_dependent:
-        alpha = face_diameter/ (2.0*parameters.time_step);
+        alpha = face_diameter/ (2.0*parameters->time_step);
         break;
       default:
         Assert (false, ExcNotImplemented());
@@ -1074,8 +1074,8 @@ namespace NSolver
               const unsigned int
               component_i = fe_v.get_fe().system_to_component_index (i).first;
 
-              R_i += (parameters.theta * normal_fluxes[point][component_i] +
-                      (1.0 - parameters.theta) * normal_fluxes_old[point][component_i]) *
+              R_i += (parameters->theta * normal_fluxes[point][component_i] +
+                      (1.0 - parameters->theta) * normal_fluxes_old[point][component_i]) *
                      fe_v.shape_value_component (i, point, component_i) *
                      fe_v.JxW (point);
             }
@@ -1112,7 +1112,7 @@ namespace NSolver
   std::pair<unsigned int, double>
   NSolver<dim>::solve (NSVector &newton_update)
   {
-    switch (parameters.solver)
+    switch (parameters->solver)
       {
       // If the parameter file specified that a direct solver shall be used,
       // then we'll get here. The process is straightforward, since deal.II
@@ -1130,7 +1130,7 @@ namespace NSolver
       {
         SolverControl solver_control (1,0);
         TrilinosWrappers::SolverDirect direct (solver_control,
-                                               parameters.output ==
+                                               parameters->output ==
                                                Parameters::Solver::verbose);
 
         direct.solve (system_matrix, newton_update, right_hand_side);
@@ -1173,7 +1173,7 @@ namespace NSolver
 
         AztecOO solver;
         solver.SetAztecOption (AZ_output,
-                               (parameters.output ==
+                               (parameters->output ==
                                 Parameters::Solver::quiet
                                 ?
                                 AZ_none
@@ -1188,15 +1188,15 @@ namespace NSolver
         solver.SetAztecOption (AZ_overlap,         0);
         solver.SetAztecOption (AZ_reorder,         0);
 
-        solver.SetAztecParam (AZ_drop,      parameters.ilut_drop);
-        solver.SetAztecParam (AZ_ilut_fill, parameters.ilut_fill);
-        solver.SetAztecParam (AZ_athresh,   parameters.ilut_atol);
-        solver.SetAztecParam (AZ_rthresh,   parameters.ilut_rtol);
+        solver.SetAztecParam (AZ_drop,      parameters->ilut_drop);
+        solver.SetAztecParam (AZ_ilut_fill, parameters->ilut_fill);
+        solver.SetAztecParam (AZ_athresh,   parameters->ilut_atol);
+        solver.SetAztecParam (AZ_rthresh,   parameters->ilut_rtol);
 
         solver.SetUserMatrix (const_cast<Epetra_CrsMatrix *>
                               (&system_matrix.trilinos_matrix()));
 
-        solver.Iterate (parameters.max_iterations, parameters.linear_residual);
+        solver.Iterate (parameters->max_iterations, parameters->linear_residual);
 
         return std::pair<unsigned int, double> (solver.NumIters(),
                                                 solver.TrueResidual());
@@ -1253,13 +1253,13 @@ namespace NSolver
           cell->clear_coarsen_flag();
           cell->clear_refine_flag();
 
-          if ((cell->level() < parameters.shock_levels) &&
-              (std::fabs (refinement_indicators (cell_no)) > parameters.shock_val))
+          if ((cell->level() < parameters->shock_levels) &&
+              (std::fabs (refinement_indicators (cell_no)) > parameters->shock_val))
             {
               cell->set_refine_flag();
             }
           else if ((cell->level() > 0) &&
-                   (std::fabs (refinement_indicators (cell_no)) < 0.75*parameters.shock_val))
+                   (std::fabs (refinement_indicators (cell_no)) < 0.75*parameters->shock_val))
             {
               cell->set_coarsen_flag();
             }
@@ -1319,7 +1319,7 @@ namespace NSolver
   template <int dim>
   void NSolver<dim>::output_results() const
   {
-    Postprocessor<dim> postprocessor (&parameters, &mms);
+    Postprocessor<dim> postprocessor (parameters, &mms);
 
     DataOut<dim> data_out;
     data_out.attach_dof_handler (dof_handler);
@@ -1427,7 +1427,7 @@ namespace NSolver
   {
     computing_timer.enter_subsection ("0:Read grid");
     {
-      if (parameters.n_mms == 1)
+      if (parameters->n_mms == 1)
         {
           //MMS: build mesh directly.
           std::cerr << "  *** hyper_cube ***" << std::endl;
@@ -1448,26 +1448,26 @@ namespace NSolver
           GridIn<dim> grid_in;
           grid_in.attach_triangulation (triangulation);
 
-          std::ifstream input_file (parameters.mesh_filename.c_str());
-          Assert (input_file, ExcFileNotOpen (parameters.mesh_filename.c_str()));
+          std::ifstream input_file (parameters->mesh_filename.c_str());
+          Assert (input_file, ExcFileNotOpen (parameters->mesh_filename.c_str()));
 
-          if (parameters.mesh_format == Parameters::AllParameters<dim>::format_ucd)
+          if (parameters->mesh_format == Parameters::AllParameters<dim>::format_ucd)
             {
               grid_in.read_ucd (input_file);
             }
-          if (parameters.mesh_format == Parameters::AllParameters<dim>::format_gmsh)
+          if (parameters->mesh_format == Parameters::AllParameters<dim>::format_gmsh)
             {
               grid_in.read_msh (input_file);
             }
 
-          if (parameters.scale_mesh != 1.0)
+          if (parameters->scale_mesh != 1.0)
             {
-              GridTools::scale (parameters.scale_mesh,triangulation);
+              GridTools::scale (parameters->scale_mesh,triangulation);
             }
         }
-      if (parameters.n_global_refinement > 0)
+      if (parameters->n_global_refinement > 0)
         {
-          triangulation.refine_global (parameters.n_global_refinement);
+          triangulation.refine_global (parameters->n_global_refinement);
         }
     }
     computing_timer.leave_subsection ("0:Read grid");
@@ -1478,17 +1478,17 @@ namespace NSolver
     if (I_am_host)
       {
         time_advance_history_file_std.open (
-          parameters.time_advance_history_filename.c_str());
+          parameters->time_advance_history_filename.c_str());
         Assert (time_advance_history_file_std,
-                ExcFileNotOpen (parameters.time_advance_history_filename.c_str()));
+                ExcFileNotOpen (parameters->time_advance_history_filename.c_str()));
 
         time_advance_history_file_std.setf (std::ios::scientific);
         time_advance_history_file_std.precision (6);
 
         iteration_history_file_std.open (
-          parameters.iteration_history_filename.c_str());
+          parameters->iteration_history_filename.c_str());
         Assert (iteration_history_file_std,
-                ExcFileNotOpen (parameters.iteration_history_filename.c_str()));
+                ExcFileNotOpen (parameters->iteration_history_filename.c_str()));
         iteration_history_file_std.setf (std::ios::scientific);
         iteration_history_file_std.precision (6);
       }
@@ -1501,19 +1501,19 @@ namespace NSolver
     setup_system();
 
     VectorTools::interpolate (dof_handler,
-                              parameters.initial_conditions, locally_owned_solution);
+                              parameters->initial_conditions, locally_owned_solution);
 
     old_solution = locally_owned_solution;
     current_solution = old_solution;
     predictor = old_solution;
 
-    if (parameters.do_refine == true)
-      for (unsigned int i=0; i<parameters.shock_levels; ++i)
+    if (parameters->do_refine == true)
+      for (unsigned int i=0; i<parameters->shock_levels; ++i)
         {
           refine_grid();
 
           VectorTools::interpolate (dof_handler,
-                                    parameters.initial_conditions, locally_owned_solution);
+                                    parameters->initial_conditions, locally_owned_solution);
           old_solution = locally_owned_solution;
           current_solution = old_solution;
           predictor = old_solution;
@@ -1529,7 +1529,7 @@ namespace NSolver
     // progress of the nonlinear inner iteration:
 
     double time = 0;
-    double next_output = time + parameters.output_step;
+    double next_output = time + parameters->output_step;
 
     predictor = old_solution;
 
@@ -1558,7 +1558,7 @@ namespace NSolver
     NSVector      tmp_vector;
 
     computing_timer.leave_subsection ("1:Initialization");
-    while (time < parameters.final_time)
+    while (time < parameters->final_time)
       {
         computing_timer.enter_subsection ("2:Prepare Newton iteration");
         pcout << "T=" << time << std::endl
@@ -1653,7 +1653,7 @@ namespace NSolver
                 std::printf ("   %-13.6e    %-13.6e  %04d        %-5.2e            %7.4g          %7.4g          %7.4g\n",
                              res_norm,newton_update_norm, convergence.first, convergence.second,
                              linear_search_length[index_linear_search_length],
-                             parameters.time_step, parameters.time_step_factor);
+                             parameters->time_step, parameters->time_step_factor);
               }
             linear_solver_diverged = std::isnan (convergence.second);
 
@@ -1672,8 +1672,8 @@ namespace NSolver
                 << std::setw (14) << convergence.first << ' '
                 << std::setw (13) << convergence.second << ' '
                 << std::setw (18) << linear_search_length[index_linear_search_length] << ' '
-                << std::setw (15) << parameters.time_step << ' '
-                << std::setw (17) << parameters.time_step_factor << ' '
+                << std::setw (15) << parameters->time_step << ' '
+                << std::setw (17) << parameters->time_step_factor << ' '
                 << std::setw (19) << newton_update_norm << ' '
                 << '\n';
             // Check result.
@@ -1702,7 +1702,7 @@ namespace NSolver
                 newton_iter_converged = false;
                 // Limit lower bound of time step that can be tried.
                 // 1/1024 < 0.0005 < 1/2048
-                if (parameters.time_step_factor > 0.0005)
+                if (parameters->time_step_factor > 0.0005)
                   {
                     pcout << "  Newton iteration not converge in " << nonlin_iter_threshold << " steps.\n"
                           << "  Recompute with different linear search length or time step...\n\n";
@@ -1735,8 +1735,8 @@ namespace NSolver
                 << std::setw (14) << convergence.first << ' '
                 << std::setw (13) << convergence.second << ' '
                 << std::setw (18) << linear_search_length[index_linear_search_length] << ' '
-                << std::setw (15) << parameters.time_step << ' '
-                << std::setw (17) << parameters.time_step_factor << ' ';
+                << std::setw (15) << parameters->time_step << ' '
+                << std::setw (17) << parameters->time_step_factor << ' ';
 
             // We only get to this point if the Newton iteration has converged, so
             // do various post convergence tasks here:
@@ -1753,31 +1753,31 @@ namespace NSolver
             // this, we then refine the mesh if so desired by the user, and
             // finally continue on with the next time step:
             ++converged_newton_iters;
-            time += parameters.time_step;
+            time += parameters->time_step;
             ++n_time_step;
 
-            if (parameters.output_step < 0)
+            if (parameters->output_step < 0)
               {
                 output_results();
               }
             else if (time >= next_output)
               {
                 output_results();
-                next_output += parameters.output_step;
+                next_output += parameters->output_step;
               }
 
             predictor = current_solution;
 
             tmp_vector.reinit (predictor);
             tmp_vector  = old_solution;
-            if (parameters.allow_double_time_step && converged_newton_iters%10 == 0)
+            if (parameters->allow_double_time_step && converged_newton_iters%10 == 0)
               {
                 //Since every thing goes so well, let's try a larger time step next.
-                parameters.time_step_factor *= 2.0;
+                parameters->time_step_factor *= 2.0;
                 time_step_doubled = true;
                 index_linear_search_length = 0;
                 pcout << "  We got ten successive converged time steps.\n"
-                      << "  Time step size increased to " << parameters.time_step << "\n\n";
+                      << "  Time step size increased to " << parameters->time_step << "\n\n";
 
                 predictor.sadd (1.0+predictor_leap_ratio*2.0, 0.0-predictor_leap_ratio*2.0, tmp_vector);
               }
@@ -1832,7 +1832,7 @@ namespace NSolver
                                                       fe_v.JxW (q);
                         }
                     }
-                  if (parameters.n_mms == 1)
+                  if (parameters->n_mms == 1)
                     {
 
                       for (unsigned int q=0; q<n_q_points; ++q)
@@ -1851,7 +1851,7 @@ namespace NSolver
                         }
                     }
                 }
-            if (parameters.n_mms == 1)
+            if (parameters->n_mms == 1)
               {
                 pcout << "  Error Info:\n";
                 pcout << "    n_dofs    u_err    v_err  rho_err    p_err (log10)\n   ";
@@ -1875,13 +1875,13 @@ namespace NSolver
               }
             if (time_march_converged)
               {
-                time = parameters.final_time + 1.0;
+                time = parameters->final_time + 1.0;
               }
             pcout << std::endl;
 
 
             old_solution = current_solution;
-            if (parameters.do_refine == true)
+            if (parameters->do_refine == true)
               {
                 refine_grid();
               }
@@ -1906,11 +1906,11 @@ namespace NSolver
             else
               {
                 // Reduce time step when linear_search_length has tried out.
-                parameters.time_step *= 0.5;
-                parameters.time_step_factor *= 0.5;
+                parameters->time_step *= 0.5;
+                parameters->time_step_factor *= 0.5;
                 time_step_doubled = false;
                 index_linear_search_length = 0;
-                pcout << "  Time step size reduced to " << parameters.time_step << "\n\n";
+                pcout << "  Time step size reduced to " << parameters->time_step << "\n\n";
               }
 
             current_solution = current_solution_backup;

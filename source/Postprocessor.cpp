@@ -16,8 +16,8 @@ namespace NSolver
   Postprocessor (Parameters::AllParameters<dim>const *const para_ptr_in,
                  MMS const *const mms_ptr_in)
     :
-    para_ptr (para_ptr_in),
-    mms_ptr (mms_ptr_in),
+    parameters (para_ptr_in),
+    mms_x (mms_ptr_in),
     do_schlieren_plot (para_ptr_in->schlieren_plot),
     output_mms (para_ptr_in->n_mms == 1)
   {}
@@ -100,7 +100,7 @@ namespace NSolver
         if (output_mms)
           {
             std_cxx11::array<double, EulerEquations<dim>::n_components> sol, src;
-            mms_x.evaluate (points[q],sol,src,true);
+            mms_x->evaluate (points[q],sol,src,true);
             int i_out = dim + 2;
             for (unsigned int ic = 0; ic < EulerEquations<dim>::n_components; ++ic, ++i_out)
               {

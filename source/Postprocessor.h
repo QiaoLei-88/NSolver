@@ -81,10 +81,8 @@ namespace NSolver
     virtual UpdateFlags get_needed_update_flags() const;
 
   private:
-    Parameters::AllParameters<dim>const *const para_ptr;
-    Parameters::AllParameters<dim>const &parameters = *para_ptr;
-    MMS const *const mms_ptr;
-    MMS const &mms_x = *mms_ptr;
+    Parameters::AllParameters<dim>const *const parameters;
+    MMS const *const mms_x;
     bool const do_schlieren_plot;
     bool const output_mms;
   };

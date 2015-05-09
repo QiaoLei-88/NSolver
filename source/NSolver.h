@@ -229,8 +229,7 @@ namespace NSolver
 
     const bool I_am_host;
     const unsigned int myid;
-    Parameters::AllParameters<dim>  *parameters_pointer;
-    Parameters::AllParameters<dim>  &parameters = *parameters_pointer;
+    Parameters::AllParameters<dim>  *parameters;
     ConditionalOStream              verbose_cout;
     ConditionalOStream              pcout;
     TimerOutput                     computing_timer;
