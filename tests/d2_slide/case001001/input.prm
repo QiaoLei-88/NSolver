@@ -45,7 +45,7 @@ subsection initial condition
   set w_0 value = 0
   set w_1 value = 0
   set w_2 value = 10*(x<-0.7)*(y> 0.3)*(y< 0.45) + (1-(x<-0.7)*(y> 0.3)*(y< 0.45))*1.0
-  set w_3 value = (1.5-(1.0*1.0*y))/0.4
+  set w_3 value = 1.5-(1.0*1.0*y)
 end
 
 # --------------------------------------------------
