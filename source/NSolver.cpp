@@ -1037,10 +1037,10 @@ namespace NSFEMSolver
 
     switch (parameters->stabilization_kind)
       {
-      case Parameters::Flux::constant:
+      case Parameters::Flux<dim>::constant:
         alpha = parameters->stabilization_value;
         break;
-      case Parameters::Flux::mesh_dependent:
+      case Parameters::Flux<dim>::mesh_dependent:
         alpha = face_diameter/ (2.0*parameters->time_step);
         break;
       default:
@@ -1052,10 +1052,12 @@ namespace NSFEMSolver
       {
         EulerEquations<dim>::numerical_normal_flux (fe_v.normal_vector (q),
                                                     Wplus[q], Wminus[q], alpha,
-                                                    normal_fluxes[q]);
+                                                    normal_fluxes[q],
+                                                    parameters->numerical_flux_type);
         EulerEquations<dim>::numerical_normal_flux (fe_v.normal_vector (q),
                                                     Wplus_old[q], Wminus_old[q], alpha,
-                                                    normal_fluxes_old[q]);
+                                                    normal_fluxes_old[q],
+                                                    parameters->numerical_flux_type);
       }
 
     // Now assemble the face term in exactly the same way as for the cell

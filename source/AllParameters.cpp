@@ -126,10 +126,14 @@ namespace NSFEMSolver
 
 
     //Flux
-    void Flux::declare_parameters (ParameterHandler &prm)
+    template<int dim>
+    void Flux<dim>::declare_parameters (ParameterHandler &prm)
     {
       prm.enter_subsection ("flux");
       {
+        prm.declare_entry ("flux type", "LaxFriedrichs",
+                           Patterns::Selection ("LaxFriedrichs|Roe"),
+                           "Numerical flux type");
         prm.declare_entry ("stab", "mesh",
                            Patterns::Selection ("constant|mesh"),
                            "Whether to use a constant stabilization parameter or "
@@ -141,25 +145,41 @@ namespace NSFEMSolver
       prm.leave_subsection();
     }
 
-
-    void Flux::parse_parameters (ParameterHandler &prm)
+    template<int dim>
+    void Flux<dim>::parse_parameters (ParameterHandler &prm)
     {
       prm.enter_subsection ("flux");
       {
-        const std::string stab = prm.get ("stab");
-        if (stab == "constant")
-          {
-            stabilization_kind = constant;
-          }
-        else if (stab == "mesh")
-          {
-            stabilization_kind = mesh_dependent;
-          }
-        else
-          {
-            AssertThrow (false, ExcNotImplemented());
-          }
-
+        {
+          const std::string stab = prm.get ("flux type");
+          if (stab == "LaxFriedrichs")
+            {
+              numerical_flux_type = EulerEquations<dim>::LaxFriedrichs;
+            }
+          else if (stab == "Roe")
+            {
+              numerical_flux_type = EulerEquations<dim>::Roe;
+            }
+          else
+            {
+              AssertThrow (false, ExcNotImplemented());
+            }
+        }
+        {
+          const std::string stab = prm.get ("stab");
+          if (stab == "constant")
+            {
+              stabilization_kind = constant;
+            }
+          else if (stab == "mesh")
+            {
+              stabilization_kind = mesh_dependent;
+            }
+          else
+            {
+              AssertThrow (false, ExcNotImplemented());
+            }
+        }
         stabilization_value = prm.get_double ("stab value");
       }
       prm.leave_subsection();
@@ -329,7 +349,7 @@ namespace NSFEMSolver
 
       Parameters::Solver::declare_parameters (prm);
       Parameters::Refinement::declare_parameters (prm);
-      Parameters::Flux::declare_parameters (prm);
+      Parameters::Flux<dim>::declare_parameters (prm);
       Parameters::Output::declare_parameters (prm);
       Parameters::FEParameters::declare_parameters (prm);
     }
@@ -481,7 +501,7 @@ namespace NSFEMSolver
 
       Parameters::Solver::parse_parameters (prm);
       Parameters::Refinement::parse_parameters (prm);
-      Parameters::Flux::parse_parameters (prm);
+      Parameters::Flux<dim>::parse_parameters (prm);
       Parameters::Output::parse_parameters (prm);
       Parameters::FEParameters::parse_parameters (prm);
     }

@@ -139,6 +139,11 @@ namespace NSFEMSolver
     static const unsigned int pressure_component       = dim+1;
 
 
+    enum NumericalFluxType
+    {
+      LaxFriedrichs,
+      Roe
+    };
 
     // When generating graphical output way down in this program, we need to
     // specify the names of the solution variables as well as how the various
@@ -284,7 +289,8 @@ namespace NSFEMSolver
                                 const InputVector                  &Wminus,
                                 const double                        alpha,
                                 std_cxx11::array < typename InputVector::value_type,
-                                n_components> &normal_flux);
+                                n_components> &normal_flux,
+                                NumericalFluxType const &flux_type);
 
     // @sect4{EulerEquations::compute_forcing_vector}
 
@@ -647,24 +653,146 @@ namespace NSFEMSolver
                                                    const InputVector                  &Wplus,
                                                    const InputVector                  &Wminus,
                                                    const double                        alpha,
-                                                   std_cxx11::array < typename InputVector::value_type, n_components> &normal_flux)
+                                                   std_cxx11::array < typename InputVector::value_type, n_components> &normal_flux,
+                                                   NumericalFluxType const &flux_type)
   {
-    std_cxx11::array <std_cxx11::array
-    <typename InputVector::value_type, dim>,
-    EulerEquations<dim>::n_components > iflux, oflux;
+    typedef typename InputVector::value_type VType;
+
+    std_cxx11::array <std_cxx11::array <VType, dim>, n_components > iflux, oflux;
     compute_inviscid_flux (Wplus, iflux);
     compute_inviscid_flux (Wminus, oflux);
 
-    for (unsigned int di=0; di<n_components; ++di)
+    switch (flux_type)
       {
-        normal_flux[di] = 0;
-        for (unsigned int d=0; d<dim; ++d)
+      case LaxFriedrichs:
+      {
+        for (unsigned int ic=0; ic<n_components; ++ic)
           {
-            normal_flux[di] += 0.5* (iflux[di][d] + oflux[di][d]) * normal[d];
+            normal_flux[ic] = alpha * (Wplus[ic] - Wminus[ic]);
+            for (unsigned int d=0; d<dim; ++d)
+              {
+                normal_flux[ic] += (iflux[ic][d] + oflux[ic][d]) * normal[d];
+              }
+            normal_flux[ic] *= 0.5;
+          }
+        break;
+      }
+      case Roe:
+      {
+        VType const Roe_factor = std::sqrt (Wminus[density_component]/Wplus[density_component]);
+        VType const Roe_factor_plus_1 = Roe_factor + 1.0;
+        // Values in Roe_average is density, velosity[1,..,dim], specified total
+        // enthalpy.
+        std::array<VType, n_components> Roe_average;
+
+        VType velocity_averaged_square = 0.0;
+        VType velocity_averaged_dot_n = 0.0;
+        VType v_dot_n_l = 0.0;
+        VType v_dot_n_r = 0.0;
+        for (unsigned int ic = first_velocity_component;
+             ic < first_velocity_component + dim; ++ic)
+          {
+            Roe_average[ic] = (Wplus[ic] + Wminus[ic] * Roe_factor)/Roe_factor_plus_1;
+            velocity_averaged_square += Roe_average[ic] * Roe_average[ic];
+            velocity_averaged_dot_n += Roe_average[ic] * normal[ic];
+            v_dot_n_l += Wplus[ic] * normal[ic];
+            v_dot_n_r += Wminus[ic] * normal[ic];
+          }
+        Roe_average[density_component] = Roe_factor * Wplus[density_component];
+
+        double const gg = gas_gamma/ (gas_gamma-1);
+
+        VType const enthalpy_l = (gg*Wplus[pressure_component] +
+                                  compute_kinetic_energy (Wplus))/Wplus[density_component];
+        VType const enthalpy_r = (gg*Wminus[pressure_component] +
+                                  compute_kinetic_energy (Wminus))/Wminus[density_component];
+        Roe_average[pressure_component] = (enthalpy_l + enthalpy_r * Roe_factor)/Roe_factor_plus_1;
+
+        VType const sound_speed_averaged_quare = (gas_gamma-1) *
+                                                 (Roe_average[pressure_component] - 0.5 * velocity_averaged_square);
+        VType const sound_speed_averaged = std::sqrt (sound_speed_averaged_quare);
+
+        // Factor for Harten's entropy correction
+        VType const delta = 0.1 * sound_speed_averaged;
+        std::array<VType, n_components> solution_jump;
+        for (unsigned int ic=0; ic<n_components; ++ic)
+          {
+            solution_jump[ic] = Wminus[ic] - Wplus[ic];
+          }
+        VType const normal_velocity_jump = v_dot_n_r - v_dot_n_l;
+
+        VType c1 = std::abs (velocity_averaged_dot_n - sound_speed_averaged);
+        if (c1 < delta)
+          {
+            c1 = 0.5 * (c1*c1/delta + delta);
+          }
+        c1 *= (solution_jump[pressure_component] - Roe_average[density_component]
+               * sound_speed_averaged * normal_velocity_jump) /
+              (2.0 * sound_speed_averaged_quare);
+
+        VType c2 = std::abs (velocity_averaged_dot_n);
+        VType const delta_v = 0.2 * delta;
+        if (c2 < 0.2*delta)
+          {
+            c2 = 0.5 * (c2*c2/delta_v + delta_v);
           }
 
-        normal_flux[di] += 0.5*alpha* (Wplus[di] - Wminus[di]);
+        VType const c3 = c2 * Roe_average[density_component];
+        c2 *= (solution_jump[density_component] - solution_jump[pressure_component]
+               /sound_speed_averaged_quare);
+
+        VType c4 = std::abs (velocity_averaged_dot_n + sound_speed_averaged);
+        if (c4 < delta)
+          {
+            c4 = 0.5 * (c4*c4/delta + delta);
+          }
+        c4 *= (solution_jump[pressure_component] + Roe_average[density_component]
+               * sound_speed_averaged * normal_velocity_jump) /
+              (2.0 * sound_speed_averaged_quare);
+
+        // Assemble Roe jump
+        std::array<VType, n_components> Roe_jump;
+
+        for (unsigned int ic = first_velocity_component, id=0; id < dim; ++ic, ++id)
+          {
+            Roe_jump[ic]  = c1 * (Roe_average[ic] - sound_speed_averaged * normal[id]);
+            Roe_jump[ic] += c2 * Roe_average[ic];
+            Roe_jump[ic] += c3 * (solution_jump[ic] - normal_velocity_jump * normal[id]);
+            Roe_jump[ic] += c4 * (Roe_average[ic] + sound_speed_averaged * normal[id]);
+          }
+        Roe_jump[density_component] = c1 + c2 + c4;
+        {
+          unsigned int const ic = pressure_component;
+          Roe_jump[ic]  = c1 * (Roe_average[ic] - sound_speed_averaged * velocity_averaged_dot_n);
+          Roe_jump[ic] += c2 * 0.5 * velocity_averaged_square;
+          VType uu = -velocity_averaged_dot_n * normal_velocity_jump;
+          for (unsigned int iv = first_velocity_component;
+               iv < first_velocity_component + dim; ++iv)
+            {
+              uu += Roe_average[iv] * solution_jump[iv];
+            }
+          Roe_jump[ic] += c3 * uu;
+          Roe_jump[ic] += c4 * (Roe_average[ic] + sound_speed_averaged * velocity_averaged_dot_n);
+        }
+
+        // Finally, the Roe flux
+        for (unsigned int ic=0; ic<n_components; ++ic)
+          {
+            normal_flux[ic] = -Roe_jump[ic];
+            for (unsigned int d=0; d<dim; ++d)
+              {
+                normal_flux[ic] += (iflux[ic][d] + oflux[ic][d]) * normal[d];
+              }
+            normal_flux[ic] *= 0.5;
+          }
+        break;
       }
+      default:
+        Assert (false, ExcNotImplemented());
+        break;
+      }
+
+
   }
 
   // @sect4{EulerEquations::compute_forcing_vector}
@@ -698,6 +826,7 @@ namespace NSFEMSolver
           break;
         default:
           forcing[c] = 0;
+          break;
         }
   }
 
@@ -931,6 +1060,7 @@ namespace NSFEMSolver
 
         default:
           Assert (false, ExcNotImplemented());
+          break;
         }
   }
 } /* End of namespace NSFEMSolver */

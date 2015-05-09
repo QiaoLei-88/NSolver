@@ -103,11 +103,13 @@ namespace NSFEMSolver
     // case, it is chosen as $\frac{h}{2\delta T}$ with $h$ the diameter of
     // the face to which the flux is applied, and $\delta T$ the current time
     // step.
+    template<int dim>
     struct Flux
     {
       enum StabilizationKind { constant, mesh_dependent };
       StabilizationKind stabilization_kind;
 
+      typename EulerEquations<dim>::NumericalFluxType numerical_flux_type;
       double stabilization_value;
 
       static void declare_parameters (ParameterHandler &prm);
@@ -180,7 +182,7 @@ namespace NSFEMSolver
       :
       public Solver,
       public Refinement,
-      public Flux,
+      public Flux<dim>,
       public Output,
       public FEParameters
     {
