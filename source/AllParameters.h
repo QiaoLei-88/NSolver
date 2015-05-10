@@ -110,7 +110,9 @@ namespace NSFEMSolver
       StabilizationKind stabilization_kind;
 
       typename EulerEquations<dim>::NumericalFluxType numerical_flux_type;
+      typename EulerEquations<dim>::NumericalFluxType flux_type_switch_to;
       double stabilization_value;
+      double tolerance_to_switch_flux;
 
       static void declare_parameters (ParameterHandler &prm);
       void parse_parameters (ParameterHandler &prm);

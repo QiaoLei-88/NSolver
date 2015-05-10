@@ -134,6 +134,10 @@ namespace NSFEMSolver
         prm.declare_entry ("flux type", "LaxFriedrichs",
                            Patterns::Selection ("LaxFriedrichs|Roe"),
                            "Numerical flux type");
+        prm.declare_entry ("flux type switch to", "Roe",
+                           Patterns::Selection ("LaxFriedrichs|Roe"),
+                           "Numerical flux type");
+
         prm.declare_entry ("stab", "mesh",
                            Patterns::Selection ("constant|mesh"),
                            "Whether to use a constant stabilization parameter or "
@@ -141,6 +145,12 @@ namespace NSFEMSolver
         prm.declare_entry ("stab value", "1",
                            Patterns::Double(),
                            "alpha stabilization");
+        prm.declare_entry ("stab value", "1",
+                           Patterns::Double(),
+                           "alpha stabilization");
+        prm.declare_entry ("tolerance to switch flux", "-1000",
+                           Patterns::Double(),
+                           "Switch flux type when log10 of time march tolerance less than this");
       }
       prm.leave_subsection();
     }
@@ -151,14 +161,29 @@ namespace NSFEMSolver
       prm.enter_subsection ("flux");
       {
         {
-          const std::string stab = prm.get ("flux type");
-          if (stab == "LaxFriedrichs")
+          const std::string buff = prm.get ("flux type");
+          if (buff == "LaxFriedrichs")
             {
               numerical_flux_type = EulerEquations<dim>::LaxFriedrichs;
             }
-          else if (stab == "Roe")
+          else if (buff == "Roe")
             {
               numerical_flux_type = EulerEquations<dim>::Roe;
+            }
+          else
+            {
+              AssertThrow (false, ExcNotImplemented());
+            }
+        }
+        {
+          const std::string buff = prm.get ("flux type switch to");
+          if (buff == "LaxFriedrichs")
+            {
+              flux_type_switch_to = EulerEquations<dim>::LaxFriedrichs;
+            }
+          else if (buff == "Roe")
+            {
+              flux_type_switch_to = EulerEquations<dim>::Roe;
             }
           else
             {
@@ -180,7 +205,9 @@ namespace NSFEMSolver
               AssertThrow (false, ExcNotImplemented());
             }
         }
+
         stabilization_value = prm.get_double ("stab value");
+        tolerance_to_switch_flux = prm.get_double ("tolerance to switch flux");
       }
       prm.leave_subsection();
     }

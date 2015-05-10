@@ -1866,7 +1866,17 @@ namespace NSFEMSolver
                 pcout << std::endl;
               }
 
-            bool time_march_converged = true;
+            // Only try to switch flux type when current and target flux
+            // types are different.
+            bool swith_flux =
+              parameters->numerical_flux_type != parameters->flux_type_switch_to;
+            // If switch of flux type is requested and the flux switch tolerance is
+            // larger than time march tolerance, never stop time marching
+            // beforce switching to the target flux type.
+            bool time_march_converged =
+              ! (swith_flux &&
+                 parameters->tolerance_to_switch_flux > parameters->time_march_tolerance);
+
             pcout << "  Order of time advancing L_2  norm\n   ";
             for (unsigned int ic=0; ic<EulerEquations<dim>::n_components; ++ic)
               {
@@ -1875,6 +1885,12 @@ namespace NSFEMSolver
                 pcout << log_norm << ' ';
                 time_march_converged = time_march_converged &&
                                        (log_norm < parameters->time_march_tolerance);
+                swith_flux = swith_flux &&
+                             (log_norm < parameters->tolerance_to_switch_flux);
+              }
+            if (swith_flux)
+              {
+                parameters->numerical_flux_type = parameters->flux_type_switch_to;
               }
             if (time_march_converged)
               {
