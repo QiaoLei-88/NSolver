@@ -297,6 +297,9 @@ namespace NSFEMSolver
         prm.declare_entry ("final time", "10.0",
                            Patterns::Double (0),
                            "simulation end time");
+        prm.declare_entry ("time march tolerance", "-10.0",
+                           Patterns::Double(),
+                           "Terminate time marching when log10 of error L2 norm is less than this value");
         prm.declare_entry ("theta scheme value", "0.5",
                            Patterns::Double (0,1),
                            "value for theta that interpolated between explicit "
@@ -427,6 +430,7 @@ namespace NSFEMSolver
         allow_double_time_step = prm.get_bool ("allow double time step");
 
         final_time = prm.get_double ("final time");
+        time_march_tolerance = prm.get_double ("time march tolerance");
         theta = prm.get_double ("theta scheme value");
       }
       prm.leave_subsection();

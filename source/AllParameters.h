@@ -204,6 +204,7 @@ namespace NSFEMSolver
       double diffusion_power;
 
       double time_step, final_time;
+      double time_march_tolerance;
       double CFL_number;
       double readin_time_step;
       double time_step_factor;

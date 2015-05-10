@@ -1873,7 +1873,8 @@ namespace NSFEMSolver
                 Utilities::MPI::sum (time_advance_l2_norm[ic], mpi_communicator);
                 double const log_norm = 0.5 * std::log10 (time_advance_l2_norm[ic]);
                 pcout << log_norm << ' ';
-                time_march_converged = time_march_converged && (log_norm < -10.0);
+                time_march_converged = time_march_converged &&
+                                       (log_norm < parameters->time_march_tolerance);
               }
             if (time_march_converged)
               {
