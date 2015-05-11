@@ -8,8 +8,6 @@
 
 
 #include "NSolver.h"
-#include "NSEquation.h"
-#include "WallForce.h"
 
 namespace NSFEMSolver
 {
@@ -50,14 +48,14 @@ namespace NSFEMSolver
                     Point<dim> const wall_norm = fe_v_face.normal_vector (q);
                     Point<dim> const wall_position = fe_v_face.quadrature_point (q);
                     double f_ds[3];
-                    double position[3] = {0.,0.,0.};
+                    double moment_arm[3] = {0.,0.,0.};
 
                     for (unsigned int id=0; id<dim; ++id)
                       {
                         f_ds[id] = solution_values[q][EulerEquations<dim>::pressure_component] *
                                    wall_norm[id] * fe_v_face.JxW (q);
                         wall_force.force[id] += f_ds[id];
-                        position[id] = wall_position[id];
+                        moment_arm[id] = wall_position[id] - parameters->moment_center[id];
                       }
 
                     {
@@ -65,19 +63,42 @@ namespace NSFEMSolver
                       unsigned int const y=1;
                       unsigned int const z=2;
 
-                      wall_force.moment[x] -= f_ds[y]*position[z];
-                      wall_force.moment[x] += f_ds[z]*position[y];
+                      wall_force.moment[x] -= f_ds[y]*moment_arm[z];
+                      wall_force.moment[x] += f_ds[z]*moment_arm[y];
 
-                      wall_force.moment[y] -= f_ds[z]*position[x];
-                      wall_force.moment[y] += f_ds[x]*position[z];
+                      wall_force.moment[y] -= f_ds[z]*moment_arm[x];
+                      wall_force.moment[y] += f_ds[x]*moment_arm[z];
 
-                      wall_force.moment[z] -= f_ds[x]*position[y];
-                      wall_force.moment[z] += f_ds[y]*position[x];
+                      wall_force.moment[z] -= f_ds[x]*moment_arm[y];
+                      wall_force.moment[z] += f_ds[y]*moment_arm[x];
                     }
 
                   }
               }
     wall_force.mpi_sum (mpi_communicator);
+    // Turn force into force coefficient
+    double const force_to_coeff = 0.5 * parameters->Mach *
+                                  parameters->Mach * parameters->reference_area;
+    wall_force.force[0] /= force_to_coeff;
+    wall_force.force[1] /= force_to_coeff;
+    wall_force.force[2] /= force_to_coeff;
+
+    // Roll moment coefficient
+    wall_force.moment[0] /= force_to_coeff;
+    wall_force.moment[0] /= parameters->reference_span;
+    // Yaw mement coefficient
+    wall_force.moment[1] /= force_to_coeff;
+    wall_force.moment[1] /= parameters->reference_span;
+
+    // Pitch momernt coefficient
+    wall_force.moment[2] /= force_to_coeff;
+    wall_force.moment[2] /= parameters->reference_chord;
+
+    // Project force coefficient to lift and drag component
+    double const sin_aoa = std::sin (parameters->angle_of_attack);
+    double const cos_aoa = std::cos (parameters->angle_of_attack);
+    wall_force.lift = cos_aoa*wall_force.force[1] - sin_aoa*wall_force.force[0];
+    wall_force.drag = cos_aoa*wall_force.force[0] + sin_aoa*wall_force.force[1];
   }
 
   template

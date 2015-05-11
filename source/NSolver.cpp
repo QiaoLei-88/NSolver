@@ -1729,14 +1729,20 @@ namespace NSFEMSolver
             WallForce wall_force;
             integrate_force (parameters, wall_force);
 
-            pcout << "  Force:" << std::endl
+
+            pcout << "  Lift and drag:" << std::endl
+                  << "  " << wall_force.lift
+                  << "  " << wall_force.drag << std::endl
+                  << std::endl;
+
+            pcout << "  Force_x,y,z:" << std::endl
                   << "  ";
             for (unsigned int id=0; id<3; ++id)
               {
                 pcout << "  " << wall_force.force[id];
               }
             pcout << std::endl
-                  << "  Moment:" << std::endl
+                  << "  Moment,x,y,z:" << std::endl
                   << "  ";
             for (unsigned int id=0; id<3; ++id)
               {
