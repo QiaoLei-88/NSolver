@@ -71,4 +71,8 @@ MACRO(SETUP_TEST_CASE)
     WORKING_DIRECTORY ${_test_directory}
     )
 
+  SET_TESTS_PROPERTIES(${_test_name}
+    PROPERTIES TIMEOUT ${_time_out_time}
+    )
+
 ENDMACRO()
