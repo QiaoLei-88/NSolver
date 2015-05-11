@@ -68,6 +68,7 @@ namespace NSFEMSolver
       double linear_residual;
       int max_iterations;
 
+      int AZ_RCM_reorder;
       double ilut_fill;
       double ilut_atol;
       double ilut_rtol;

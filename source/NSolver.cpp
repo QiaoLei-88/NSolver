@@ -1188,13 +1188,12 @@ namespace NSFEMSolver
         solver.SetAztecOption (AZ_precond,         AZ_dom_decomp);
         solver.SetAztecOption (AZ_subdomain_solve, AZ_ilut);
         solver.SetAztecOption (AZ_overlap,         0);
-        solver.SetAztecOption (AZ_reorder,         0);
+        solver.SetAztecOption (AZ_reorder,  parameters->AZ_RCM_reorder);
 
         solver.SetAztecParam (AZ_drop,      parameters->ilut_drop);
         solver.SetAztecParam (AZ_ilut_fill, parameters->ilut_fill);
         solver.SetAztecParam (AZ_athresh,   parameters->ilut_atol);
         solver.SetAztecParam (AZ_rthresh,   parameters->ilut_rtol);
-
         solver.SetUserMatrix (const_cast<Epetra_CrsMatrix *>
                               (&system_matrix.trilinos_matrix()));
 

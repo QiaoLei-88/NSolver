@@ -33,6 +33,10 @@ namespace NSFEMSolver
         prm.declare_entry ("max iters", "300",
                            Patterns::Integer(),
                            "Maximum solver iterations");
+
+        prm.declare_entry ("RCM reorder", "false",
+                           Patterns::Bool(),
+                           "Do Reverse Cuthill–McKee reordering.");
         prm.declare_entry ("ilut fill", "2",
                            Patterns::Double(),
                            "Ilut preconditioner fill");
@@ -76,6 +80,9 @@ namespace NSFEMSolver
 
         linear_residual = prm.get_double ("residual");
         max_iterations  = prm.get_integer ("max iters");
+
+        // Do not relay ont C++ standard
+        AZ_RCM_reorder  = (prm.get_bool ("RCM reorder")?1:0);
         ilut_fill       = prm.get_double ("ilut fill");
         ilut_atol       = prm.get_double ("ilut absolute tolerance");
         ilut_rtol       = prm.get_double ("ilut relative tolerance");
