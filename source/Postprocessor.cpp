@@ -145,20 +145,20 @@ namespace NSFEMSolver
             names.push_back ("mms_src_momentum");
           }
         names.push_back ("mms_src_density");
-        names.push_back ("mms_src_energy");
+        names.push_back ("mms_src_pressure");
         for (unsigned int d=0; d<dim; ++d)
           {
             names.push_back ("mms_exact_velocity");
           }
         names.push_back ("mms_exact_density");
-        names.push_back ("mms_exact_energy");
+        names.push_back ("mms_exact_pressure");
 //    for (unsigned int d=0; d<dim; ++d)
 //      {
         names.push_back ("mms_error_velocity_x");
         names.push_back ("mms_error_velocity_y");
 //      }
         names.push_back ("mms_error_density");
-        names.push_back ("mms_error_energy");
+        names.push_back ("mms_error_pressure");
       }// End MMS: Exact output
 
     return names;
