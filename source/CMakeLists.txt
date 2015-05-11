@@ -9,6 +9,7 @@ ADD_EXECUTABLE(${PRJ_NAME}
   Postprocessor.cpp
   WallForce.cpp
   NSolver_integrate_force.cpp
+  PhysicalParameters.cpp
   )
 
 SET_PROPERTY(TARGET ${PRJ_NAME}

@@ -23,6 +23,7 @@
 #include <deal.II/base/parameter_handler.h>
 #include "NSEquation.h"
 #include "FEParameters.h"
+#include "PhysicalParameters.h"
 
 namespace NSFEMSolver
 {
@@ -182,6 +183,7 @@ namespace NSFEMSolver
     template <int dim>
     struct AllParameters
       :
+      public PhysicalParameters,
       public Solver,
       public Refinement,
       public Flux<dim>,

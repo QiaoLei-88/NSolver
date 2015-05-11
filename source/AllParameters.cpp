@@ -380,6 +380,7 @@ namespace NSFEMSolver
       }
       prm.leave_subsection();
 
+      Parameters::PhysicalParameters::declare_parameters (prm);
       Parameters::Solver::declare_parameters (prm);
       Parameters::Refinement::declare_parameters (prm);
       Parameters::Flux<dim>::declare_parameters (prm);
@@ -392,6 +393,9 @@ namespace NSFEMSolver
     void
     AllParameters<dim>::parse_parameters (ParameterHandler &prm)
     {
+      // PhysicalParameters contains lots of critical parameters, do it first.
+      Parameters::PhysicalParameters::parse_parameters (prm);
+
       n_mms = prm.get_integer ("MMS");
       mesh_filename = prm.get ("mesh");
       time_advance_history_filename = prm.get ("time history");

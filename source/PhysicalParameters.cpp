@@ -1,0 +1,79 @@
+//
+//  Created by 乔磊 on 15/5/10.
+//  Copyright (c) 2015年 乔磊. All rights reserved.
+//
+
+
+#include "PhysicalParameters.h"
+
+namespace NSFEMSolver
+{
+  namespace Parameters
+  {
+    using namespace dealii;
+
+    void PhysicalParameters::declare_parameters (ParameterHandler &prm)
+    {
+      prm.enter_subsection ("physical parameters");
+      {
+        prm.declare_entry ("Mach", "0.5",
+                           Patterns::Double (0),
+                           "Free stream Mach number");
+        prm.declare_entry ("Reynolds", "10000",
+                           Patterns::Double (0),
+                           "Free stream Reynolds number");
+
+        prm.declare_entry ("reference temperature", "273.15",
+                           Patterns::Double (0),
+                           "Reference temperature for Sutherland's law, in Kelvin");
+        prm.declare_entry ("Sutherland constant", "110.4",
+                           Patterns::Double (0),
+                           "Sutherland constant, in Kelvin");
+
+        prm.declare_entry ("angle of attack", "0.0",
+                           Patterns::Double (-90, +90),
+                           "Angle of attack, in degree");
+        prm.declare_entry ("angle of side slip", "0.0",
+                           Patterns::Double (-90, +90),
+                           "Angle of side slip, in degree");
+
+        prm.declare_entry ("reference chord", "1.0",
+                           Patterns::Double (0),
+                           "Reference chord length");
+        prm.declare_entry ("reference span", "1.0",
+                           Patterns::Double (0),
+                           "Reference span");
+        prm.declare_entry ("reference area", "1.0",
+                           Patterns::Double (0),
+                           "Reference area");
+
+        prm.declare_entry ("gas gamma", "1.4",
+                           Patterns::Double (1),
+                           "Gas heat capacity ratio");
+      }
+      prm.leave_subsection();
+    }
+
+    void PhysicalParameters::parse_parameters (ParameterHandler &prm)
+    {
+      prm.enter_subsection ("physical parameters");
+      {
+        Mach = prm.get_double ("Mach");
+        Reynolds = prm.get_double ("Reynolds");
+
+        reference_temperature = prm.get_double ("reference temperature");
+        Sutherland_constant = prm.get_double ("Sutherland constant");
+
+        angle_of_attack = prm.get_double ("angle of attack");
+        angle_of_side_slip = prm.get_double ("angle of side slip");
+
+        reference_chord = prm.get_double ("reference chord");
+        reference_span = prm.get_double ("reference span");
+        reference_area = prm.get_double ("reference area");
+
+        gas_gamma = prm.get_double ("gas gamma");
+      }
+      prm.leave_subsection();
+    }
+  }
+}
