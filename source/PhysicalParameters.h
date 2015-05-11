@@ -8,6 +8,7 @@
 #define __NSolver__PhysicalParameters__
 
 #include <deal.II/base/parameter_handler.h>
+#include <cmath>
 
 
 namespace NSFEMSolver
@@ -25,9 +26,9 @@ namespace NSFEMSolver
       double reference_temperature;
       double Sutherland_constant;
 
-      // Angle of attack, in degree
+      // Angle of attack, read in degree but store in rad.
       double angle_of_attack;
-      // Angle of slip, in degree
+      // Angle of slip, read in degree but store in rad.
       double angle_of_side_slip;
 
 

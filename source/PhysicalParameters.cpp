@@ -58,14 +58,15 @@ namespace NSFEMSolver
     {
       prm.enter_subsection ("physical parameters");
       {
+        double const deg_to_rad = std::atan(1.0)/45.0;
         Mach = prm.get_double ("Mach");
         Reynolds = prm.get_double ("Reynolds");
 
         reference_temperature = prm.get_double ("reference temperature");
         Sutherland_constant = prm.get_double ("Sutherland constant");
 
-        angle_of_attack = prm.get_double ("angle of attack");
-        angle_of_side_slip = prm.get_double ("angle of side slip");
+        angle_of_attack = deg_to_rad*prm.get_double ("angle of attack");
+        angle_of_side_slip = deg_to_rad*prm.get_double ("angle of side slip");
 
         reference_chord = prm.get_double ("reference chord");
         reference_span = prm.get_double ("reference span");
