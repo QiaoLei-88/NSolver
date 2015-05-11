@@ -1798,7 +1798,11 @@ namespace NSFEMSolver
 
             tmp_vector.reinit (predictor);
             tmp_vector  = old_solution;
-            if (parameters->allow_double_time_step && converged_newton_iters%10 == 0)
+            if (converged_newton_iters%10 == 0 &&
+                (parameters->allow_double_time_step ||
+                 (parameters->time_step_factor < 1.0 && parameters->allow_recover_time_step)
+                )
+               )
               {
                 //Since every thing goes so well, let's try a larger time step next.
                 parameters->time_step_factor *= 2.0;

@@ -221,6 +221,9 @@ namespace NSFEMSolver
       // if <code>allow_double_time_step</code> is ture, time step size will be double while certain
       // iterations are converged. This flag is set to false by default.
       bool allow_double_time_step;
+      // Solver will decrease time step after linear solver diverged, this option
+      // allow recover the time step size to the original specified value.
+      bool allow_recover_time_step;
 
       std::string mesh_filename;
       std::string time_advance_history_filename;

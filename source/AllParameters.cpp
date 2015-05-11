@@ -315,6 +315,10 @@ namespace NSFEMSolver
                            Patterns::Bool(),
                            "allow double time step size when consecutive convenvgence achieved");
 
+        prm.declare_entry ("allow recover time step", "true",
+                           Patterns::Bool(),
+                           "allow recover the reduced time step size when consecutive convenvgence achieved");
+
         prm.declare_entry ("CFL number", "1.0",
                            Patterns::Double (0),
                            "CFL number");
@@ -462,6 +466,7 @@ namespace NSFEMSolver
             is_stationary = false;
           }
         allow_double_time_step = prm.get_bool ("allow double time step");
+        allow_recover_time_step = prm.get_bool ("allow recover time step");
 
         final_time = prm.get_double ("final time");
         time_march_tolerance = prm.get_double ("time march tolerance");
