@@ -1831,7 +1831,7 @@ namespace NSFEMSolver
             const UpdateFlags update_flags = update_values
                                              | update_JxW_values
                                              | update_quadrature_points;
-            const QGauss<dim>    quadrature_error (6);
+            const QGauss<dim> quadrature_error (parameters->error_quadrature_degree);
             FEValues<dim>  fe_v (mapping, fe, quadrature_error, update_flags);
 
             // Then integrate error over all cells,
