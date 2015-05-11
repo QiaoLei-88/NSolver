@@ -8,6 +8,8 @@
 #define __NSolver__PhysicalParameters__
 
 #include <deal.II/base/parameter_handler.h>
+#include <deal.II/base/point.h>
+
 #include <cmath>
 
 
@@ -31,6 +33,7 @@ namespace NSFEMSolver
       // Angle of slip, read in degree but store in rad.
       double angle_of_side_slip;
 
+      Point<3> moment_center;
 
       double reference_chord;
       double reference_span;

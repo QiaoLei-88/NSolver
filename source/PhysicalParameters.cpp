@@ -37,6 +37,16 @@ namespace NSFEMSolver
                            Patterns::Double (-90, +90),
                            "Angle of side slip, in degree");
 
+        prm.declare_entry ("moment center x", "0.0",
+                           Patterns::Double(),
+                           "Coordinate x of moment center");
+        prm.declare_entry ("moment center y", "0.0",
+                           Patterns::Double(),
+                           "Coordinate y of moment center");
+        prm.declare_entry ("moment center z", "0.0",
+                           Patterns::Double(),
+                           "Coordinate z of moment center");
+
         prm.declare_entry ("reference chord", "1.0",
                            Patterns::Double (0),
                            "Reference chord length");
@@ -58,7 +68,7 @@ namespace NSFEMSolver
     {
       prm.enter_subsection ("physical parameters");
       {
-        double const deg_to_rad = std::atan(1.0)/45.0;
+        double const deg_to_rad = std::atan (1.0)/45.0;
         Mach = prm.get_double ("Mach");
         Reynolds = prm.get_double ("Reynolds");
 
@@ -67,6 +77,10 @@ namespace NSFEMSolver
 
         angle_of_attack = deg_to_rad*prm.get_double ("angle of attack");
         angle_of_side_slip = deg_to_rad*prm.get_double ("angle of side slip");
+
+        moment_center[0] = prm.get_double ("moment center x");
+        moment_center[1] = prm.get_double ("moment center y");
+        moment_center[2] = prm.get_double ("moment center z");
 
         reference_chord = prm.get_double ("reference chord");
         reference_span = prm.get_double ("reference span");
