@@ -95,6 +95,7 @@ namespace LA
 #include "FEParameters.h"
 #include "Postprocessor.h"
 #include "MMS.h"
+#include "WallForce.h"
 
 
 // Here finally comes the class that actually does something with all the
@@ -143,6 +144,8 @@ namespace NSFEMSolver
 
     std::pair<unsigned int, double> solve (NSVector &solution);
 
+    void integrate_force (Parameters::AllParameters<dim> const *const parameters,
+                          WallForce &wall_force) const;
     void compute_refinement_indicators (Vector<double> &indicator) const;
     void refine_grid();
 
@@ -229,7 +232,7 @@ namespace NSFEMSolver
 
     const bool I_am_host;
     const unsigned int myid;
-    Parameters::AllParameters<dim>  *parameters;
+    Parameters::AllParameters<dim>  *const parameters;
     ConditionalOStream              verbose_cout;
     ConditionalOStream              pcout;
     TimerOutput                     computing_timer;

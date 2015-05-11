@@ -1725,6 +1725,26 @@ namespace NSFEMSolver
         if (newton_iter_converged)
           {
             computing_timer.enter_subsection ("6:Postprocess time step");
+
+            WallForce wall_force;
+            integrate_force (parameters, wall_force);
+
+            pcout << "  Force:" << std::endl
+                  << "  ";
+            for (unsigned int id=0; id<3; ++id)
+              {
+                pcout << "  " << wall_force.force[id];
+              }
+            pcout << std::endl
+                  << "  Moment:" << std::endl
+                  << "  ";
+            for (unsigned int id=0; id<3; ++id)
+              {
+                pcout << "  " << wall_force.moment[id];
+              }
+            pcout << std::endl;
+
+
             //Output time marching history
             time_advance_history_file
                 << std::setw (7) << n_total_inter << ' '

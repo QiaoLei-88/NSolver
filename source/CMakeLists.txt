@@ -7,6 +7,8 @@ ADD_EXECUTABLE(${PRJ_NAME}
   MMS.cpp
   FEParameters.cpp
   Postprocessor.cpp
+  WallForce.cpp
+  NSolver_integrate_force.cpp
   )
 
 SET_PROPERTY(TARGET ${PRJ_NAME}

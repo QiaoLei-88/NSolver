@@ -363,6 +363,9 @@ namespace NSFEMSolver
                                    Patterns::Anything(),
                                    "expression in x,y,z");
               }
+            prm.declare_entry ("integrate force", "false",
+                               Patterns::Bool(),
+                               "integrate force on this kind of boundary");
           }
           prm.leave_subsection();
         }
@@ -513,6 +516,7 @@ namespace NSFEMSolver
             .initialize (FunctionParser<dim>::default_variable_names(),
                          expressions,
                          std::map<std::string, double>());
+            sum_force[boundary_id] = prm.get_bool ("integrate force");
           }
           prm.leave_subsection();
         }

@@ -244,6 +244,7 @@ namespace NSFEMSolver
 
       FunctionParser<dim> initial_conditions;
       BoundaryConditions  boundary_conditions[max_n_boundaries];
+      bool sum_force[max_n_boundaries];
 
       static void declare_parameters (ParameterHandler &prm);
       void parse_parameters (ParameterHandler &prm);
