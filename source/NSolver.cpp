@@ -1810,9 +1810,12 @@ namespace NSFEMSolver
                 pcout << "  We got ten successive converged time steps.\n"
                       << "  Time step size increased to " << parameters->time_step << "\n\n";
 
-                predictor.sadd (1.0+predictor_leap_ratio*2.0, 0.0-predictor_leap_ratio*2.0, tmp_vector);
+                if (! (parameters->is_stationary))
+                  {
+                    predictor.sadd (1.0+predictor_leap_ratio*2.0, 0.0-predictor_leap_ratio*2.0, tmp_vector);
+                  }
               }
-            else
+            else if (! (parameters->is_stationary))
               {
                 predictor.sadd (1.0+predictor_leap_ratio,     0.0-predictor_leap_ratio,     tmp_vector);
               }
@@ -1964,17 +1967,24 @@ namespace NSFEMSolver
             current_solution = current_solution_backup;
             predictor = current_solution;
 
-            tmp_vector.reinit (predictor);
-            tmp_vector  = old_solution;
-            if (converged_newton_iters > 0)
+            if (! (parameters->is_stationary))
               {
-                // The last good "current_solution" is calculated with a "large" time step,
-                // so we need to make a near extrapolation.
-                predictor.sadd (1.0+predictor_leap_ratio*0.5, 0.0-predictor_leap_ratio*0.5, tmp_vector);
+                predictor = old_solution;
               }
             else
               {
-                predictor.sadd (1.0+predictor_leap_ratio, 0.0-predictor_leap_ratio, tmp_vector);
+                tmp_vector.reinit (predictor);
+                tmp_vector  = old_solution;
+                if (converged_newton_iters > 0)
+                  {
+                    // The last good "current_solution" is calculated with a "large" time step,
+                    // so we need to make a near extrapolation.
+                    predictor.sadd (1.0+predictor_leap_ratio*0.5, 0.0-predictor_leap_ratio*0.5, tmp_vector);
+                  }
+                else
+                  {
+                    predictor.sadd (1.0+predictor_leap_ratio, 0.0-predictor_leap_ratio, tmp_vector);
+                  }
               }
             converged_newton_iters = 0;
             computing_timer.leave_subsection ("6:Rolling back time step");
