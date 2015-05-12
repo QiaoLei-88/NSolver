@@ -152,9 +152,7 @@ namespace NSFEMSolver
         prm.declare_entry ("stab value", "1",
                            Patterns::Double(),
                            "alpha stabilization");
-        prm.declare_entry ("stab value", "1",
-                           Patterns::Double(),
-                           "alpha stabilization");
+
         prm.declare_entry ("tolerance to switch flux", "-1000",
                            Patterns::Double(),
                            "Switch flux type when log10 of time march tolerance less than this");
