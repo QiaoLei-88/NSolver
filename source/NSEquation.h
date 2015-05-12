@@ -668,11 +668,12 @@ namespace NSFEMSolver
       {
         for (unsigned int ic=0; ic<n_components; ++ic)
           {
-            normal_flux[ic] = alpha * (Wplus[ic] - Wminus[ic]);
+            normal_flux[ic] = 0.0;
             for (unsigned int d=0; d<dim; ++d)
               {
                 normal_flux[ic] += (iflux[ic][d] + oflux[ic][d]) * normal[d];
               }
+            normal_flux[ic] += alpha * (Wplus[ic] - Wminus[ic]);
             normal_flux[ic] *= 0.5;
           }
         break;
@@ -778,11 +779,12 @@ namespace NSFEMSolver
         // Finally, the Roe flux
         for (unsigned int ic=0; ic<n_components; ++ic)
           {
-            normal_flux[ic] = -Roe_jump[ic];
+            normal_flux[ic] = 0.0;
             for (unsigned int d=0; d<dim; ++d)
               {
                 normal_flux[ic] += (iflux[ic][d] + oflux[ic][d]) * normal[d];
               }
+            normal_flux[ic] -= Roe_jump[ic];
             normal_flux[ic] *= 0.5;
           }
         break;
