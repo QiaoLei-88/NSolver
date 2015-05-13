@@ -45,6 +45,8 @@ namespace LA
 #include "BoundaryType.h"
 #include "NumericalFlux.h"
 #include "EquationComponents.h"
+#include "AllParameters.h"
+
 
 // And this again is C++:
 #include <cmath>
@@ -281,7 +283,8 @@ namespace NSFEMSolver
     template <typename DataVector>
     static
     void
-    compute_Wminus (const Boundary::Type (&boundary_kind)[n_components],
+    compute_Wminus (const Boundary::Type &boundary_kind,
+                    const Parameters::AllParameters<dim> *const parameters,
                     const Point<dim>     &normal_vector,
                     const DataVector     &Wplus,
                     const Vector<double> &boundary_values,
@@ -791,195 +794,248 @@ namespace NSFEMSolver
   template <int dim>
   template <typename DataVector>
   void
-  EulerEquations<dim>::compute_Wminus (const Boundary::Type (&boundary_kind)[n_components],
+  EulerEquations<dim>::compute_Wminus (const Boundary::Type &boundary_kind,
+                                       const Parameters::AllParameters<dim> *const parameters,
                                        const Point<dim>     &normal_vector,
                                        const DataVector     &Wplus,
                                        const Vector<double> &boundary_values,
                                        const DataVector     &Wminus)
   {
     typedef typename DataVector::value_type VType;
+    std_cxx11::array<VType, n_components> requested_boundary_values;
+    bool need_Riemman_correction = false;
 
-    for (unsigned int c = 0; c < n_components; c++)
-      switch (boundary_kind[c])
-        {
-        case Boundary::Riemann_boundary:
-        {
-          // Riemann boundary condition is a characteristics based boundary condtion.
-          // Riemann boundary condition set values of components once for all.
-          if (c == 0)
-            {
-              // Compute sound speed and normal velocity from demanded boundary values
-              VType const sound_speed_incoming = compute_sound_speed (boundary_values);
+    switch (boundary_kind)
+      {
+      case Boundary::AllPrimitiveValues:
+      {
+        for (unsigned int ic=0; ic< n_components; ++ic)
+          {
+            requested_boundary_values[ic] = boundary_values[ic];
+          }
+        need_Riemman_correction = true;
+        break;
+      }
 
-              VType normal_velocity_incoming = 0.0;
-              for (unsigned int d = first_velocity_component; d < first_velocity_component+dim; ++d)
-                {
-                  normal_velocity_incoming += boundary_values[d]*normal_vector[d];
-                }
+      case Boundary::FarField:
+      {
+        // Here we assume x axis points backward, y axis points upward and
+        // z axis points sideward.
+        int const x=0;
+        int const y=1;
+        int const z=2;
+        std_cxx11::array<double, 3> velocity_infty;
+        velocity_infty[z] = parameters->Mach *
+                            std::sin (parameters->angle_of_side_slip);
+        double const velocity_in_symm = parameters->Mach *
+                                        std::cos (parameters->angle_of_side_slip);
+        velocity_infty[x] =velocity_in_symm *
+                           std::cos (parameters->angle_of_attack);
+        velocity_infty[y] =velocity_in_symm *
+                           std::sin (parameters->angle_of_attack);
 
-              if (normal_velocity_incoming + sound_speed_incoming <= 0.0)
-                {
-                  // This is a supersonic inflow boundary, enforce all boundary values
-                  // without calculating characteristics values
-                  for (unsigned int ic=0; ic < n_components; ++ic)
-                    {
-                      Wminus[ic] = boundary_values[ic];
-                    }
-                }
-              else if (normal_velocity_incoming - sound_speed_incoming >= 0.0)
-                {
-                  // This is a supersonic outflow boundary, extrapolate all boundary values
-                  // without calculating characteristics values
-                  for (unsigned int ic=0; ic < n_components; ++ic)
-                    {
-                      Wminus[ic] = Wplus[ic];
-                    }
-                }
-              else
-                {
-                  // This is a subsonic boundary. Evaulate interior normal speed and sound speed.
-                  VType const sound_speed_outcoming = compute_sound_speed (Wplus);
+        // Extrapolate velocity and density
+        for (unsigned int id=0, ic=first_velocity_component; id<dim; ++ic, ++id)
+          {
+            requested_boundary_values[ic] = velocity_infty[id];
+          }
+        requested_boundary_values[density_component] = 1.0;
+        requested_boundary_values[pressure_component] = 1.0/gas_gamma;
 
-                  VType normal_velocity_outcoming = 0.0;
-                  for (unsigned int d = first_velocity_component; d < first_velocity_component+dim; ++d)
-                    {
-                      normal_velocity_outcoming += Wplus[d]*normal_vector[d];
-                    }
-                  // v_n+c > 0, thus compute v_n + 2*c/(gas_gamma - 1) from interior values.
-                  VType riemann_invariant_outcoming = normal_velocity_outcoming
-                                                      + 2.0 * sound_speed_outcoming/ (gas_gamma - 1.0);
-                  // v_n-c < 0, thus compute v_n - 2*c/(gas_gamma - 1) from demanded boundary values.
-                  VType riemann_invariant_incoming = normal_velocity_incoming
-                                                     - 2.0 * sound_speed_incoming/ (gas_gamma - 1.0);
+        need_Riemman_correction = true;
+        break;
+      }
 
-                  VType entropy_boundary;
-                  std_cxx11::array<VType,dim> tangential_velocity;
-                  if (normal_velocity_incoming <= 0.0)
-                    {
-                      // v_n <= 0
-                      // This is a subsonic inflow boundary.
-                      // Compute tangential velocity and entropy(not exactly) from demanded boundary values.
-                      for (unsigned int d = first_velocity_component, i=0; i < dim; ++d, ++i)
-                        {
-                          tangential_velocity[i] = boundary_values [d] - normal_velocity_incoming * normal_vector[d];
-                        }
-                      entropy_boundary = std::pow (boundary_values[density_component], gas_gamma)/
-                                         boundary_values[pressure_component];
-                    }
-                  else
-                    {
-                      // v_n > 0
-                      // This is a subsonic outflow boundary.
-                      // Compute tangential velocity and entropy(not exactly) from interior values.
-                      for (unsigned int d = first_velocity_component, i=0; i < dim; ++d, ++i)
-                        {
-                          tangential_velocity[i] = Wplus[d] - normal_velocity_outcoming * normal_vector[d];
-                        }
-                      entropy_boundary = std::pow (Wplus[density_component], gas_gamma)/
-                                         Wplus[pressure_component];
-                    }
-                  // Recover primitive variables from characteristics variables.
-                  VType const normal_velocity_boundary =
-                    0.5 * (riemann_invariant_outcoming + riemann_invariant_incoming);
-                  VType const sound_speed_boundary =
-                    0.25 * (gas_gamma - 1.0) * (riemann_invariant_outcoming - riemann_invariant_incoming);
-                  Assert (sound_speed_boundary > 0.0,
-                          ExcLowerRangeType<VType> (sound_speed_boundary, 0.0));
+      case Boundary::PressureOutlet:
+      {
+        // Extrapolate velocity and density
+        for (unsigned int ic = first_velocity_component; ic < first_velocity_component+dim; ++ic)
+          {
+            requested_boundary_values[ic] = Wplus[ic];
+          }
+        requested_boundary_values[density_component] = Wplus[density_component];
 
-                  for (unsigned int d = first_velocity_component, i=0; i < dim; ++d, ++i)
-                    {
-                      Wminus[d] = tangential_velocity[i] + normal_velocity_boundary * normal_vector[d];
-                    }
-                  Wminus[density_component] = std::pow (sound_speed_boundary * sound_speed_boundary
-                                                        * entropy_boundary / gas_gamma, 1.0/ (gas_gamma-1.0));
-                  Wminus[pressure_component] = Wminus[density_component] * sound_speed_boundary *
-                                               sound_speed_boundary / gas_gamma;
-                }
-            }
-          break;
-        }
+        // Enforce pressure
+        requested_boundary_values[pressure_component] = boundary_values[pressure_component];
 
-        case Boundary::MMS_BC:
-        {
-          // MMS_BC boundary condition set values of components once for all.
-          // It is similar to Riemann boundary conditon, but enforce all boundary
-          // values in subsonic case. The reason is the solution is manufactured
-          // and the in enforced, the solution has no degree of freedom. However,
-          // on supersonic out flow boundary, the solution still has to be extrapolated.
-          // This is because in supersonic case the solution depends only on
-          // inflow boundary.
-          if (c == 0)
-            {
-              // Compute sound speed and normal velocity from demanded boundary values
-              VType const sound_speed_incoming = compute_sound_speed (boundary_values);
-              VType normal_velocity_incoming = 0.0;
-              for (unsigned int d = first_velocity_component; d < first_velocity_component+dim; ++d)
-                {
-                  normal_velocity_incoming += boundary_values[d]*normal_vector[d];
-                }
+        need_Riemman_correction = true;
+        break;
+      }
 
-              if (normal_velocity_incoming - sound_speed_incoming >= 0.0)
-                {
-                  // This is a supersonic outflow boundary, extrapolate all boundary values
-                  // without calculating characteristics values
-                  for (unsigned int ic=0; ic < n_components; ++ic)
-                    {
-                      Wminus[ic] = Wplus[ic];
-                    }
-                }
-              else
-                {
-                  for (unsigned int ic=0; ic < n_components; ++ic)
-                    {
-                      Wminus[ic] = boundary_values[ic];
-                    }
-                }
-            }
-          break;
-        }
+      case Boundary::MomentumInlet:
+      {
+        // Enforce velocity and density
+        for (unsigned int ic = first_velocity_component; ic < first_velocity_component+dim; ++ic)
+          {
+            requested_boundary_values[ic] = boundary_values[ic];
+          }
+        requested_boundary_values[density_component] = boundary_values[density_component];
 
-        case Boundary::inflow_boundary:
-        {
-          Wminus[c] = boundary_values (c);
-          break;
-        }
+        // Extrapolate pressure
+        requested_boundary_values[pressure_component] = Wplus[pressure_component];
 
-        case Boundary::outflow_boundary:
-        {
-          Wminus[c] = Wplus[c];
-          break;
-        }
+        need_Riemman_correction = true;
+        break;
+      }
 
-        case Boundary::pressure_boundary:
-        {
-          Wminus[c] = boundary_values (c);
-          break;
-        }
+      case Boundary::MMS_BC:
+      {
+        // MMS_BC boundary condition set values of components once for all.
+        // It is similar to Riemann boundary conditon, but enforce all boundary
+        // values in subsonic case. The reason is the solution is manufactured
+        // and the in enforced, the solution has no degree of freedom. However,
+        // on supersonic out flow boundary, the solution still has to be extrapolated.
+        // This is because in supersonic case the solution depends only on
+        // inflow boundary.
+        // Compute sound speed and normal velocity from demanded boundary values
+        VType const sound_speed_incoming = compute_sound_speed (boundary_values);
+        VType normal_velocity_incoming = 0.0;
+        for (unsigned int ic = first_velocity_component; ic < first_velocity_component+dim; ++ic)
+          {
+            normal_velocity_incoming += boundary_values[ic]*normal_vector[ic];
+          }
 
-        case Boundary::no_penetration_boundary:
-        {
-          Assert (c!=density_component,
-                  ExcMessage ("Can not apply no_penetration_boundary to density."));
-          Assert (c!=energy_component ,
-                  ExcMessage ("Can not apply no_penetration_boundary to energy."));
-          // We prescribe the velocity (we are dealing with a particular
-          // component here so that the average of the velocities is
-          // orthogonal to the surface normal.  This creates sensitivities of
-          // across the velocity components.
-          typename DataVector::value_type vdotn = 0;
-          for (unsigned int d = 0; d < dim; d++)
-            {
-              vdotn += Wplus[d]*normal_vector[d];
-            }
+        if (normal_velocity_incoming - sound_speed_incoming >= 0.0)
+          {
+            // This is a supersonic outflow boundary, extrapolate all boundary values
+            // without calculating characteristics values
+            for (unsigned int ic=0; ic < n_components; ++ic)
+              {
+                Wminus[ic] = Wplus[ic];
+              }
+          }
+        else
+          {
+            for (unsigned int ic=0; ic < n_components; ++ic)
+              {
+                Wminus[ic] = boundary_values[ic];
+              }
+          }
+        break;
+      }
 
-          Wminus[c] = Wplus[c] - 2.0*vdotn*normal_vector[c];
-          break;
-        }
+      case Boundary::Symmetry:
+      {
+        // Project velocity onto boundary This creates sensitivities of
+        // across the velocity components.
+        VType vdotn = 0;
+        for (unsigned int d = 0; d < dim; ++d)
+          {
+            vdotn += Wplus[d]*normal_vector[d];
+          }
+        for (unsigned int ic = first_velocity_component, id=0; id<dim; ++ic, ++id)
+          {
+            requested_boundary_values[ic] = Wplus[ic] - 2.0*vdotn*normal_vector[id];
+          }
+        requested_boundary_values[density_component] = Wplus[density_component];
+        requested_boundary_values[pressure_component] = Wplus[pressure_component];
 
-        default:
-          Assert (false, ExcNotImplemented());
-          break;
-        }
+        for (unsigned int ic=0; ic<n_components; ++ic)
+          {
+            Wminus[ic] = requested_boundary_values[ic];
+          }
+        break;
+      }
+
+      default:
+        Assert (false, ExcNotImplemented());
+        break;
+      }
+
+    if (need_Riemman_correction)
+      {
+        // The required boundary should be applied in characteristics form.
+
+        // Compute sound speed and normal velocity from demanded boundary values
+        VType const sound_speed_incoming = compute_sound_speed (requested_boundary_values);
+
+        VType normal_velocity_incoming = 0.0;
+        for (unsigned int d = first_velocity_component; d < first_velocity_component+dim; ++d)
+          {
+            normal_velocity_incoming += requested_boundary_values[d]*normal_vector[d];
+          }
+
+        if (normal_velocity_incoming + sound_speed_incoming <= 0.0)
+          {
+            // This is a supersonic inflow boundary, enforce all boundary values
+            // without calculating characteristics values
+            for (unsigned int ic=0; ic < n_components; ++ic)
+              {
+                Wminus[ic] = requested_boundary_values[ic];
+              }
+          }
+        else if (normal_velocity_incoming - sound_speed_incoming >= 0.0)
+          {
+            // This is a supersonic outflow boundary, extrapolate all boundary values
+            // without calculating characteristics values
+            for (unsigned int ic=0; ic < n_components; ++ic)
+              {
+                Wminus[ic] = Wplus[ic];
+              }
+          }
+        else
+          {
+            // This is a subsonic boundary. Evaulate interior normal speed and sound speed.
+            VType const sound_speed_outcoming = compute_sound_speed (Wplus);
+
+            VType normal_velocity_outcoming = 0.0;
+            for (unsigned int d = first_velocity_component; d < first_velocity_component+dim; ++d)
+              {
+                normal_velocity_outcoming += Wplus[d]*normal_vector[d];
+              }
+            // v_n+c > 0, thus compute v_n + 2*c/(gas_gamma - 1) from interior values.
+            VType riemann_invariant_outcoming = normal_velocity_outcoming
+                                                + 2.0 * sound_speed_outcoming/ (gas_gamma - 1.0);
+            // v_n-c < 0, thus compute v_n - 2*c/(gas_gamma - 1) from demanded boundary values.
+            VType riemann_invariant_incoming = normal_velocity_incoming
+                                               - 2.0 * sound_speed_incoming/ (gas_gamma - 1.0);
+
+            VType entropy_boundary;
+            std_cxx11::array<VType,dim> tangential_velocity;
+            if (normal_velocity_incoming <= 0.0)
+              {
+                // v_n <= 0
+                // This is a subsonic inflow boundary.
+                // Compute tangential velocity and entropy(not exactly) from demanded boundary values.
+                for (unsigned int d = first_velocity_component, i=0; i < dim; ++d, ++i)
+                  {
+                    tangential_velocity[i] = requested_boundary_values [d] -
+                                             normal_velocity_incoming * normal_vector[d];
+                  }
+                entropy_boundary = std::pow (requested_boundary_values[density_component], gas_gamma)/
+                                   requested_boundary_values[pressure_component];
+              }
+            else
+              {
+                // v_n > 0
+                // This is a subsonic outflow boundary.
+                // Compute tangential velocity and entropy(not exactly) from interior values.
+                for (unsigned int d = first_velocity_component, i=0; i < dim; ++d, ++i)
+                  {
+                    tangential_velocity[i] = Wplus[d] - normal_velocity_outcoming * normal_vector[d];
+                  }
+                entropy_boundary = std::pow (Wplus[density_component], gas_gamma)/
+                                   Wplus[pressure_component];
+              }
+            // Recover primitive variables from characteristics variables.
+            VType const normal_velocity_boundary =
+              0.5 * (riemann_invariant_outcoming + riemann_invariant_incoming);
+            VType const sound_speed_boundary =
+              0.25 * (gas_gamma - 1.0) * (riemann_invariant_outcoming - riemann_invariant_incoming);
+            Assert (sound_speed_boundary > 0.0,
+                    ExcLowerRangeType<VType> (sound_speed_boundary, 0.0));
+
+            for (unsigned int d = first_velocity_component, i=0; i < dim; ++d, ++i)
+              {
+                Wminus[d] = tangential_velocity[i] + normal_velocity_boundary * normal_vector[d];
+              }
+            Wminus[density_component] = std::pow (sound_speed_boundary * sound_speed_boundary
+                                                  * entropy_boundary / gas_gamma, 1.0/ (gas_gamma-1.0));
+            Wminus[pressure_component] = Wminus[density_component] * sound_speed_boundary *
+                                         sound_speed_boundary / gas_gamma;
+          }
+      } // End Riemann correction
+
   }
 } /* End of namespace NSFEMSolver */
 

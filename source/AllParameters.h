@@ -199,9 +199,7 @@ namespace NSFEMSolver
 
       struct BoundaryConditions
       {
-        typename Boundary::Type
-        kind[EquationComponents<dim>::n_components];
-
+        typename Boundary::Type kind;
         FunctionParser<dim> values;
 
         BoundaryConditions();

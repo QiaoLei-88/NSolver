@@ -354,22 +354,19 @@ namespace NSFEMSolver
           prm.enter_subsection ("boundary_" +
                                 Utilities::int_to_string (b));
           {
-            prm.declare_entry ("no penetration", "false",
-                               Patterns::Bool(),
-                               "whether the named boundary allows gas to "
-                               "penetrate or is a rigid wall");
+            prm.declare_entry ("type",
+                               "SlipWall",
+                               // The default boundary condition type must be "out flow"
+                               // to make sure the no penetration boundary condition
+                               // working normally. Because we need to extrapolate the density
+                               // and energy (pressure) values at the no penetration
+                               // boundary just as if there is an outflow boundary.
+
+                               Patterns::Selection ("SlipWall|Symmetry|FarField|PressureOutlet|MomentumInlet|MMS_BC"),
+                               "<SlipWall|Symmetry|FarField|PressureOutlet|MomentumInlet|MMS_BC>");
 
             for (unsigned int di=0; di<EquationComponents<dim>::n_components; ++di)
               {
-                prm.declare_entry ("w_" + Utilities::int_to_string (di),
-                                   "outflow",
-                                   // The default boundary condition type must be "out flow"
-                                   // to make sure the no penetration boundary condition
-                                   // working normally. Because we need to extrapolate the density
-                                   // and energy (pressure) values at the no penetration
-                                   // boundary just as if there is an outflow boundary.
-                                   Patterns::Selection ("inflow|outflow|pressure|Riemann|MMS_BC"),
-                                   "<inflow|outflow|pressure|Riemann|MMS_BC>");
 
                 prm.declare_entry ("w_" + Utilities::int_to_string (di) +
                                    " value", "0.0",
@@ -493,40 +490,36 @@ namespace NSFEMSolver
             std::vector<std::string>
             expressions (EquationComponents<dim>::n_components, "0.0");
 
-            const bool no_penetration = prm.get_bool ("no penetration");
+            const std::string boundary_type
+              = prm.get ("type");
+
+            if (boundary_type == "SlipWall" || boundary_type == "Symmetry")
+              {
+                boundary_conditions[boundary_id].kind = Boundary::Symmetry;
+              }
+            else if (boundary_type == "FarField")
+              {
+                boundary_conditions[boundary_id].kind = Boundary::FarField;
+              }
+            else if (boundary_type == "PressureOutlet")
+              {
+                boundary_conditions[boundary_id].kind = Boundary::PressureOutlet;
+              }
+            else if (boundary_type == "MomentumInlet")
+              {
+                boundary_conditions[boundary_id].kind = Boundary::MomentumInlet;
+              }
+            else if (boundary_type == "MMS_BC")
+              {
+                boundary_conditions[boundary_id].kind = Boundary::MMS_BC;
+              }
+            else
+              {
+                AssertThrow (false, ExcNotImplemented());
+              }
 
             for (unsigned int di=0; di<EquationComponents<dim>::n_components; ++di)
               {
-                const std::string boundary_type
-                  = prm.get ("w_" + Utilities::int_to_string (di));
-
-                if ((di < dim) && (no_penetration == true))
-                  //"(di<dim)" means no_penetration boundary
-                  //condition only effect to momentum components.
-                  //Other components (i.e. density and energy) will get
-                  //wrong values when the default BC type is not "outflow".
-                  boundary_conditions[boundary_id].kind[di]
-                    = Boundary::no_penetration_boundary;
-                else if (boundary_type == "inflow")
-                  boundary_conditions[boundary_id].kind[di]
-                    = Boundary::inflow_boundary;
-                else if (boundary_type == "pressure")
-                  boundary_conditions[boundary_id].kind[di]
-                    = Boundary::pressure_boundary;
-                else if (boundary_type == "outflow")
-                  boundary_conditions[boundary_id].kind[di]
-                    = Boundary::outflow_boundary;
-                else if (boundary_type == "Riemann")
-                  boundary_conditions[boundary_id].kind[di]
-                    = Boundary::Riemann_boundary;
-                else if (boundary_type == "MMS_BC")
-                  boundary_conditions[boundary_id].kind[di]
-                    = Boundary::MMS_BC;
-                else
-                  {
-                    AssertThrow (false, ExcNotImplemented());
-                  }
-
                 expressions[di] = prm.get ("w_" + Utilities::int_to_string (di) +
                                            " value");
               }

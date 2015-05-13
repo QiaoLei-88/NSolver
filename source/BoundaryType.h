@@ -15,17 +15,12 @@ namespace NSFEMSolver
   {
     enum Type
     {
-      inflow_boundary,
-      outflow_boundary,
-      no_penetration_boundary,
-      pressure_boundary,
-      Riemann_boundary,
-      MMS_BC,
-      SlipWall,
-      Symmetry = SlipWall,
+      Symmetry,
       FarField,
+      AllPrimitiveValues,
       PressureOutlet,
-      VelocityInlet,
+      MomentumInlet,
+      MMS_BC
     };
   }
 }
