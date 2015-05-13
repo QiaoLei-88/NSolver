@@ -43,6 +43,7 @@ namespace LA
 #endif
 }
 
+#include "BoundaryType.h"
 // And this again is C++:
 #include <cmath>
 #include <iostream>
@@ -270,15 +271,6 @@ namespace NSFEMSolver
     // Another thing we have to deal with is boundary conditions. To this end,
     // let us first define the kinds of boundary conditions we currently know
     // how to deal with:
-    enum BoundaryKind
-    {
-      inflow_boundary,
-      outflow_boundary,
-      no_penetration_boundary,
-      pressure_boundary,
-      Riemann_boundary,
-      MMS_BC
-    };
 
 
     // The next part is to actually decide what to do at each kind of
@@ -321,7 +313,7 @@ namespace NSFEMSolver
     template <typename DataVector>
     static
     void
-    compute_Wminus (const BoundaryKind (&boundary_kind)[n_components],
+    compute_Wminus (const Boundary::Type (&boundary_kind)[n_components],
                     const Point<dim>     &normal_vector,
                     const DataVector     &Wplus,
                     const Vector<double> &boundary_values,
@@ -830,7 +822,7 @@ namespace NSFEMSolver
   template <int dim>
   template <typename DataVector>
   void
-  EulerEquations<dim>::compute_Wminus (const BoundaryKind (&boundary_kind)[n_components],
+  EulerEquations<dim>::compute_Wminus (const Boundary::Type (&boundary_kind)[n_components],
                                        const Point<dim>     &normal_vector,
                                        const DataVector     &Wplus,
                                        const Vector<double> &boundary_values,
@@ -841,7 +833,7 @@ namespace NSFEMSolver
     for (unsigned int c = 0; c < n_components; c++)
       switch (boundary_kind[c])
         {
-        case Riemann_boundary:
+        case Boundary::Riemann_boundary:
         {
           // Riemann boundary condition is a characteristics based boundary condtion.
           // Riemann boundary condition set values of components once for all.
@@ -938,7 +930,7 @@ namespace NSFEMSolver
           break;
         }
 
-        case MMS_BC:
+        case Boundary::MMS_BC:
         {
           // MMS_BC boundary condition set values of components once for all.
           // It is similar to Riemann boundary conditon, but enforce all boundary
@@ -977,25 +969,25 @@ namespace NSFEMSolver
           break;
         }
 
-        case inflow_boundary:
+        case Boundary::inflow_boundary:
         {
           Wminus[c] = boundary_values (c);
           break;
         }
 
-        case outflow_boundary:
+        case Boundary::outflow_boundary:
         {
           Wminus[c] = Wplus[c];
           break;
         }
 
-        case pressure_boundary:
+        case Boundary::pressure_boundary:
         {
           Wminus[c] = boundary_values (c);
           break;
         }
 
-        case no_penetration_boundary:
+        case Boundary::no_penetration_boundary:
         {
           Assert (c!=density_component,
                   ExcMessage ("Can not apply no_penetration_boundary to density."));

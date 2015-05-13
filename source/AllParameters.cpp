@@ -506,22 +506,22 @@ namespace NSFEMSolver
                   //Other components (i.e. density and energy) will get
                   //wrong values when the default BC type is not "outflow".
                   boundary_conditions[boundary_id].kind[di]
-                    = EulerEquations<dim>::no_penetration_boundary;
+                    = Boundary::no_penetration_boundary;
                 else if (boundary_type == "inflow")
                   boundary_conditions[boundary_id].kind[di]
-                    = EulerEquations<dim>::inflow_boundary;
+                    = Boundary::inflow_boundary;
                 else if (boundary_type == "pressure")
                   boundary_conditions[boundary_id].kind[di]
-                    = EulerEquations<dim>::pressure_boundary;
+                    = Boundary::pressure_boundary;
                 else if (boundary_type == "outflow")
                   boundary_conditions[boundary_id].kind[di]
-                    = EulerEquations<dim>::outflow_boundary;
+                    = Boundary::outflow_boundary;
                 else if (boundary_type == "Riemann")
                   boundary_conditions[boundary_id].kind[di]
-                    = EulerEquations<dim>::Riemann_boundary;
+                    = Boundary::Riemann_boundary;
                 else if (boundary_type == "MMS_BC")
                   boundary_conditions[boundary_id].kind[di]
-                    = EulerEquations<dim>::MMS_BC;
+                    = Boundary::MMS_BC;
                 else
                   {
                     AssertThrow (false, ExcNotImplemented());
