@@ -379,7 +379,7 @@ namespace NSFEMSolver
   typename InputVector::value_type
   EulerEquations<dim>::compute_pressure (const InputVector &W)
   {
-    return (* (W.begin() + pressure_component));
+    return (W[pressure_component]);
   }
 
   template <int dim>
@@ -387,7 +387,7 @@ namespace NSFEMSolver
   typename InputVector::value_type
   EulerEquations<dim>::compute_energy_density (const InputVector &W)
   {
-    return (* (W.begin() + pressure_component)/ (gas_gamma-1.0)
+    return (W[pressure_component]/ (gas_gamma-1.0)
             + compute_kinetic_energy (W)
            );
   }
@@ -514,7 +514,6 @@ namespace NSFEMSolver
     for (unsigned int d=0; d<dim; ++d)
       flux[energy_component][d] = W[first_velocity_component+d] *
                                   (compute_energy_density (W) + pressure);
-
   }
 
   // Compute viscos flux as if viscosity coefficent is 1. Viscosity coefficent
