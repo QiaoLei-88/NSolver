@@ -324,6 +324,10 @@ namespace NSFEMSolver
                            Patterns::Bool(),
                            "allow recover the reduced time step size when consecutive convenvgence achieved");
 
+        prm.declare_entry ("solution extrapolation length", "1.0",
+                           Patterns::Double(),
+                           "relative length of the forward extrapolation for predicting solution of next time step");
+
         prm.declare_entry ("CFL number", "1.0",
                            Patterns::Double (0),
                            "CFL number");
@@ -476,6 +480,7 @@ namespace NSFEMSolver
         final_time = prm.get_double ("final time");
         time_march_tolerance = prm.get_double ("time march tolerance");
         theta = prm.get_double ("theta scheme value");
+        solution_extrapolation_length = prm.get_double ("solution extrapolation length");
       }
       prm.leave_subsection();
 

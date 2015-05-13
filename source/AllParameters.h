@@ -227,6 +227,13 @@ namespace NSFEMSolver
       // allow recover the time step size to the original specified value.
       bool allow_recover_time_step;
 
+      // Predict solution of next time step by making a linear extrapolation from current
+      // and last time step. This parameter controls the relative length of the
+      // forward extrapolation. Specifically,
+      // predicted_solution =  current_solution * (1+solution_extrapolation_length)
+      //                      -old_solution * solution_extrapolation_length;
+      bool solution_extrapolation_length;
+
       std::string mesh_filename;
       std::string time_advance_history_filename;
       std::string iteration_history_filename;

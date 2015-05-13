@@ -1601,9 +1601,6 @@ namespace NSFEMSolver
         // to find out where an error occurred.
 
 
-        // Instead of always extrapolating predictor to the next time step,
-        // we can make the forward extrapolation at an adjustable ratio.
-        double predictor_leap_ratio = 1.0;
         newton_iter_converged = false;
         current_solution_backup = current_solution;
 
@@ -1812,12 +1809,14 @@ namespace NSFEMSolver
 
                 if (! (parameters->is_stationary))
                   {
-                    predictor.sadd (1.0+predictor_leap_ratio*2.0, 0.0-predictor_leap_ratio*2.0, tmp_vector);
+                    predictor.sadd (1.0+parameters->solution_extrapolation_length*2.0,
+                                    - (parameters->solution_extrapolation_length)*2.0, tmp_vector);
                   }
               }
             else if (! (parameters->is_stationary))
               {
-                predictor.sadd (1.0+predictor_leap_ratio,     0.0-predictor_leap_ratio,     tmp_vector);
+                predictor.sadd (1.0+parameters->solution_extrapolation_length,
+                                - (parameters->solution_extrapolation_length), tmp_vector);
               }
 
             std_cxx11::array<double, EulerEquations<dim>::n_components> time_advance_l2_norm;
@@ -1979,11 +1978,13 @@ namespace NSFEMSolver
                   {
                     // The last good "current_solution" is calculated with a "large" time step,
                     // so we need to make a near extrapolation.
-                    predictor.sadd (1.0+predictor_leap_ratio*0.5, 0.0-predictor_leap_ratio*0.5, tmp_vector);
+                    predictor.sadd (1.0+parameters->solution_extrapolation_length*0.5,
+                                    - (parameters->solution_extrapolation_length)*0.5, tmp_vector);
                   }
                 else
                   {
-                    predictor.sadd (1.0+predictor_leap_ratio, 0.0-predictor_leap_ratio, tmp_vector);
+                    predictor.sadd (1.0+parameters->solution_extrapolation_length,
+                                    - (parameters->solution_extrapolation_length), tmp_vector);
                   }
               }
             converged_newton_iters = 0;
