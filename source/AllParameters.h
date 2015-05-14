@@ -22,7 +22,6 @@
 
 #include <deal.II/base/parameter_handler.h>
 #include <deal.II/base/function_parser.h>
-#include "NSEquation.h"
 #include "FEParameters.h"
 #include "PhysicalParameters.h"
 #include "BoundaryType.h"
