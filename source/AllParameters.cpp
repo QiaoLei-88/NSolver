@@ -169,11 +169,11 @@ namespace NSFEMSolver
           const std::string buff = prm.get ("flux type");
           if (buff == "LaxFriedrichs")
             {
-              numerical_flux_type = EulerEquations<dim>::LaxFriedrichs;
+              numerical_flux_type = NumericalFlux::Type::LaxFriedrichs;
             }
           else if (buff == "Roe")
             {
-              numerical_flux_type = EulerEquations<dim>::Roe;
+              numerical_flux_type = NumericalFlux::Type::Roe;
             }
           else
             {
@@ -184,11 +184,11 @@ namespace NSFEMSolver
           const std::string buff = prm.get ("flux type switch to");
           if (buff == "LaxFriedrichs")
             {
-              flux_type_switch_to = EulerEquations<dim>::LaxFriedrichs;
+              flux_type_switch_to = NumericalFlux::Type::LaxFriedrichs;
             }
           else if (buff == "Roe")
             {
-              flux_type_switch_to = EulerEquations<dim>::Roe;
+              flux_type_switch_to = NumericalFlux::Type::Roe;
             }
           else
             {

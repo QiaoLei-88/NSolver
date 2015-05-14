@@ -27,6 +27,8 @@
 #include "PhysicalParameters.h"
 #include "BoundaryType.h"
 #include "EquationComponents.h"
+#include "NumericalFlux.h"
+
 
 namespace NSFEMSolver
 {
@@ -114,8 +116,8 @@ namespace NSFEMSolver
       enum StabilizationKind { constant, mesh_dependent };
       StabilizationKind stabilization_kind;
 
-      typename EulerEquations<dim>::NumericalFluxType numerical_flux_type;
-      typename EulerEquations<dim>::NumericalFluxType flux_type_switch_to;
+      NumericalFlux::Type numerical_flux_type;
+      NumericalFlux::Type flux_type_switch_to;
       double stabilization_value;
       double tolerance_to_switch_flux;
 

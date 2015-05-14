@@ -43,6 +43,7 @@ namespace LA
 }
 
 #include "BoundaryType.h"
+#include "NumericalFlux.h"
 #include "EquationComponents.h"
 
 // And this again is C++:
@@ -83,12 +84,6 @@ namespace NSFEMSolver
     using EquationComponents<dim>::density_component       ;
     using EquationComponents<dim>::energy_component        ;
     using EquationComponents<dim>::pressure_component      ;
-
-    enum NumericalFluxType
-    {
-      LaxFriedrichs,
-      Roe
-    };
 
     // @sect4{Transformations between variables}
 
@@ -220,7 +215,7 @@ namespace NSFEMSolver
                                 const double                        alpha,
                                 std_cxx11::array < typename InputVector::value_type,
                                 n_components> &normal_flux,
-                                NumericalFluxType const &flux_type);
+                                NumericalFlux::Type const &flux_type);
 
     // @sect4{EulerEquations::compute_forcing_vector}
 
@@ -575,7 +570,7 @@ namespace NSFEMSolver
                                                    const InputVector                  &Wminus,
                                                    const double                        alpha,
                                                    std_cxx11::array < typename InputVector::value_type, n_components> &normal_flux,
-                                                   NumericalFluxType const &flux_type)
+                                                   NumericalFlux::Type const &flux_type)
   {
     typedef typename InputVector::value_type VType;
 
@@ -585,7 +580,7 @@ namespace NSFEMSolver
 
     switch (flux_type)
       {
-      case LaxFriedrichs:
+      case NumericalFlux::LaxFriedrichs:
       {
         for (unsigned int ic=0; ic<n_components; ++ic)
           {
@@ -599,7 +594,7 @@ namespace NSFEMSolver
           }
         break;
       }
-      case Roe:
+      case NumericalFlux::Roe:
       {
         VType const Roe_factor = std::sqrt (Wminus[density_component]/Wplus[density_component]);
         VType const Roe_factor_plus_1 = Roe_factor + 1.0;
