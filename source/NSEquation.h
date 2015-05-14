@@ -16,7 +16,6 @@
 #include <deal.II/fe/mapping_q1.h>
 #include <deal.II/fe/fe_values.h>
 #include <deal.II/lac/vector.h>
-#include <deal.II/numerics/data_component_interpretation.h>
 
 
 
@@ -44,6 +43,8 @@ namespace LA
 }
 
 #include "BoundaryType.h"
+#include "EquationComponents.h"
+
 // And this again is C++:
 #include <cmath>
 #include <iostream>
@@ -73,49 +74,21 @@ namespace NSFEMSolver
   // depend on the space dimension, which we in our usual way introduce using
   // a template parameter.
   template <int dim>
-  struct EulerEquations
+  class EulerEquations : public EquationComponents<dim>
   {
-    // @sect4{Component description}
-
-    // First a few variables that describe the various components of our
-    // solution vector in a generic way. This includes the number of
-    // components in the system (Euler's equations have one entry for momenta
-    // in each spatial direction, plus the energy and density components, for
-    // a total of <code>dim+2</code> components), as well as functions that
-    // describe the index within the solution vector of the first momentum
-    // component, the density component, and the energy density
-    // component. Note that all these %numbers depend on the space dimension;
-    // defining them in a generic way (rather than by implicit convention)
-    // makes our code more flexible and makes it easier to later extend it,
-    // for example by adding more components to the equations.
-    static const unsigned int n_components             = dim + 2;
-    static const unsigned int first_momentum_component = 0;
-    static const unsigned int first_velocity_component = 0;
-    static const unsigned int density_component        = dim;
-    static const unsigned int energy_component         = dim+1;
-    static const unsigned int pressure_component       = dim+1;
-
+  public:
+    using EquationComponents<dim>::n_components            ;
+    using EquationComponents<dim>::first_momentum_component;
+    using EquationComponents<dim>::first_velocity_component;
+    using EquationComponents<dim>::density_component       ;
+    using EquationComponents<dim>::energy_component        ;
+    using EquationComponents<dim>::pressure_component      ;
 
     enum NumericalFluxType
     {
       LaxFriedrichs,
       Roe
     };
-
-    // When generating graphical output way down in this program, we need to
-    // specify the names of the solution variables as well as how the various
-    // components group into vector and scalar fields. We could describe this
-    // there, but in order to keep things that have to do with the Euler
-    // equation localized here and the rest of the program as generic as
-    // possible, we provide this sort of information in the following two
-    // functions:
-    static
-    std::vector<std::string>
-    component_names();
-
-    static
-    std::vector<DataComponentInterpretation::DataComponentInterpretation>
-    component_interpretation();
 
     // @sect4{Transformations between variables}
 
@@ -477,12 +450,13 @@ namespace NSFEMSolver
   // use the automatic differentiation type here.  Similarly, we will call
   // the function with different input vector data types, so we templatize
   // on it as well:
+
   template <int dim>
   template <typename InputVector>
   void EulerEquations<dim>::compute_inviscid_flux (const InputVector &W,
                                                    std_cxx11::array <std_cxx11::array
                                                    <typename InputVector::value_type, dim>,
-                                                   EulerEquations<dim>::n_components > &flux)
+                                                   n_components > &flux)
   {
     const typename InputVector::value_type pressure = W[pressure_component];
 
@@ -520,7 +494,7 @@ namespace NSFEMSolver
                                                   const InputMatrix &grad_w,
                                                   std_cxx11::array <std_cxx11::array
                                                   <typename InputVector::value_type, dim>,
-                                                  EulerEquations<dim>::n_components > &flux)
+                                                  n_components> &flux)
   {
     // First evaluate viscous flux's contribution to momentum equations.
 

@@ -26,6 +26,7 @@
 #include "FEParameters.h"
 #include "PhysicalParameters.h"
 #include "BoundaryType.h"
+#include "EquationComponents.h"
 
 namespace NSFEMSolver
 {
@@ -198,7 +199,7 @@ namespace NSFEMSolver
       struct BoundaryConditions
       {
         typename Boundary::Type
-        kind[EulerEquations<dim>::n_components];
+        kind[EquationComponents<dim>::n_components];
 
         FunctionParser<dim> values;
 

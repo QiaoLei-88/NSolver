@@ -10,6 +10,7 @@ ADD_EXECUTABLE(${PRJ_NAME}
   WallForce.cpp
   NSolver_integrate_force.cpp
   PhysicalParameters.cpp
+  EquationComponents.cpp
   )
 
 SET_PROPERTY(TARGET ${PRJ_NAME}

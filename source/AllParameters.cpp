@@ -249,14 +249,14 @@ namespace NSFEMSolver
     template <int dim>
     AllParameters<dim>::BoundaryConditions::BoundaryConditions()
       :
-      values (EulerEquations<dim>::n_components)
+      values (EquationComponents<dim>::n_components)
     {}
 
 
     template <int dim>
     AllParameters<dim>::AllParameters()
       :
-      initial_conditions (EulerEquations<dim>::n_components)
+      initial_conditions (EquationComponents<dim>::n_components)
     {}
 
 
@@ -359,7 +359,7 @@ namespace NSFEMSolver
                                "whether the named boundary allows gas to "
                                "penetrate or is a rigid wall");
 
-            for (unsigned int di=0; di<EulerEquations<dim>::n_components; ++di)
+            for (unsigned int di=0; di<EquationComponents<dim>::n_components; ++di)
               {
                 prm.declare_entry ("w_" + Utilities::int_to_string (di),
                                    "outflow",
@@ -385,7 +385,7 @@ namespace NSFEMSolver
 
       prm.enter_subsection ("initial condition");
       {
-        for (unsigned int di=0; di<EulerEquations<dim>::n_components; ++di)
+        for (unsigned int di=0; di<EquationComponents<dim>::n_components; ++di)
           prm.declare_entry ("w_" + Utilities::int_to_string (di) + " value",
                              "0.0",
                              Patterns::Anything(),
@@ -491,11 +491,11 @@ namespace NSFEMSolver
                                 Utilities::int_to_string (boundary_id));
           {
             std::vector<std::string>
-            expressions (EulerEquations<dim>::n_components, "0.0");
+            expressions (EquationComponents<dim>::n_components, "0.0");
 
             const bool no_penetration = prm.get_bool ("no penetration");
 
-            for (unsigned int di=0; di<EulerEquations<dim>::n_components; ++di)
+            for (unsigned int di=0; di<EquationComponents<dim>::n_components; ++di)
               {
                 const std::string boundary_type
                   = prm.get ("w_" + Utilities::int_to_string (di));
@@ -542,9 +542,9 @@ namespace NSFEMSolver
 
       prm.enter_subsection ("initial condition");
       {
-        std::vector<std::string> expressions (EulerEquations<dim>::n_components,
+        std::vector<std::string> expressions (EquationComponents<dim>::n_components,
                                               "0.0");
-        for (unsigned int di = 0; di < EulerEquations<dim>::n_components; di++)
+        for (unsigned int di = 0; di < EquationComponents<dim>::n_components; di++)
           expressions[di] = prm.get ("w_" + Utilities::int_to_string (di) +
                                      " value");
         initial_conditions.initialize (FunctionParser<dim>::default_variable_names(),
