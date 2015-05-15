@@ -235,6 +235,11 @@ namespace NSFEMSolver
       //                      -old_solution * solution_extrapolation_length;
       bool solution_extrapolation_length;
 
+      unsigned int n_iter_stage1;
+      double step_increasing_ratio_stage1;
+      double minimum_step_increasing_ratio_stage2;
+      double step_increasing_power_stage2;
+
       std::string mesh_filename;
       std::string time_advance_history_filename;
       std::string iteration_history_filename;

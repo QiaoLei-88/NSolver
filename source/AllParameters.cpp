@@ -328,11 +328,24 @@ namespace NSFEMSolver
                            Patterns::Double(),
                            "relative length of the forward extrapolation for predicting solution of next time step");
 
+        prm.declare_entry ("iter in stage1", "5",
+                           Patterns::Integer (0),
+                           "number of interations in stage one for time step increasing in stationary case");
+        prm.declare_entry ("step increasing ratio stage1", "1.0",
+                           Patterns::Double (0),
+                           "step increasing ratio in stage1 one for time step increasing in stationary case");
+        prm.declare_entry ("minimum step increasing ratio stage2", "0.1",
+                           Patterns::Double (0),
+                           "minimum step increasing ratio in stage two for time step increasing in stationary case");
+        prm.declare_entry ("step increasing power stage2", "1.2",
+                           Patterns::Double (0),
+                           "step increasing power in stage two for time step increasing in stationary case");
+
         prm.declare_entry ("CFL number", "1.0",
                            Patterns::Double (0),
                            "CFL number");
         prm.declare_entry ("time step", "0.1",
-                           Patterns::Double (0),
+                           Patterns::Double(),
                            "simulation time step");
         prm.declare_entry ("final time", "10.0",
                            Patterns::Double (0),
@@ -475,6 +488,11 @@ namespace NSFEMSolver
 
         allow_double_time_step = prm.get_bool ("allow double time step");
         allow_recover_time_step = prm.get_bool ("allow recover time step");
+
+        n_iter_stage1 = prm.get_integer ("iter in stage1");
+        step_increasing_ratio_stage1 = prm.get_double ("step increasing ratio stage1");
+        minimum_step_increasing_ratio_stage2 = prm.get_double ("minimum step increasing ratio stage2");
+        step_increasing_power_stage2 = prm.get_double ("step increasing power stage2");
 
         final_time = prm.get_double ("final time");
         time_march_tolerance = prm.get_double ("time march tolerance");

@@ -828,11 +828,10 @@ namespace NSFEMSolver
             EulerEquations<dim>::compute_conservative_vector (W_old[point], w_conservative_old);
 
             // TODO: accumulate R_i fisrt and the multiply with shape_value_component * JxW together.
-            if (parameters->is_stationary == false)
-              R_i += 1.0 / parameters->time_step *
-                     (w_conservative[component_i] - w_conservative_old[component_i]) *
-                     fe_v.shape_value_component (i, point, component_i) *
-                     fe_v.JxW (point);
+            R_i += 1.0 / parameters->time_step *
+                   (w_conservative[component_i] - w_conservative_old[component_i]) *
+                   fe_v.shape_value_component (i, point, component_i) *
+                   fe_v.JxW (point);
 
             for (unsigned int d=0; d<dim; d++)
               {
@@ -1610,7 +1609,11 @@ namespace NSFEMSolver
         unsigned int nonlin_iter = 0;
         current_solution = predictor;
         bool linear_solver_diverged (true);
-        const unsigned int nonlin_iter_threshold (10);
+        unsigned int const nonlin_iter_threshold (10);
+        double const nonlin_iter_tolerance (
+          parameters->is_stationary ? 1.0e+20 : 1.0e-10);
+        double reference_nonlin_residual (1.0);
+        double nonlin_residual_ratio (1.0);
 
 
         double res_norm;
@@ -1648,7 +1651,6 @@ namespace NSFEMSolver
             locally_owned_solution += newton_update;
             current_solution = locally_owned_solution;
             newton_update_norm = newton_update.l2_norm();
-
             if (I_am_host)
               {
                 std::printf ("   %-13.6e    %-13.6e  %04d        %-5.2e            %7.4g          %7.4g          %7.4g\n",
@@ -1660,6 +1662,16 @@ namespace NSFEMSolver
 
             ++nonlin_iter;
             ++n_total_inter;
+
+            if (n_total_inter <= parameters-> n_iter_stage1)
+              {
+                reference_nonlin_residual = newton_update_norm;
+              }
+            else
+              {
+                nonlin_residual_ratio = reference_nonlin_residual/newton_update_norm;
+              }
+
 
             // Out put convergence history
             iteration_history_file
@@ -1678,7 +1690,7 @@ namespace NSFEMSolver
                 << std::setw (19) << newton_update_norm << ' '
                 << '\n';
             // Check result.
-            if (res_norm < 1e-10)
+            if (res_norm < nonlin_iter_tolerance)
               {
                 newton_iter_converged = true;
               }
@@ -1780,7 +1792,10 @@ namespace NSFEMSolver
             // this, we then refine the mesh if so desired by the user, and
             // finally continue on with the next time step:
             ++converged_newton_iters;
-            time += parameters->time_step;
+            if (!parameters->is_stationary)
+              {
+                time += parameters->time_step;
+              }
             ++n_time_step;
 
             if (parameters->output_step < 0)
@@ -1797,11 +1812,25 @@ namespace NSFEMSolver
 
             tmp_vector.reinit (predictor);
             tmp_vector  = old_solution;
-            if (converged_newton_iters%10 == 0 &&
-                (parameters->allow_double_time_step ||
-                 (parameters->time_step_factor < 1.0 && parameters->allow_recover_time_step)
-                )
-               )
+
+            if (parameters-> is_stationary)
+              {
+                if (n_total_inter <= parameters-> n_iter_stage1)
+                  {
+                    parameters->time_step_factor *= parameters->step_increasing_ratio_stage1;
+                  }
+                else
+                  {
+                    double const ratio = std::max (parameters->minimum_step_increasing_ratio_stage2,
+                                                   std::pow (nonlin_residual_ratio, parameters->step_increasing_power_stage2));
+                    parameters->time_step_factor *= ratio;
+                  }
+              }
+            else if ((converged_newton_iters%10 == 0) &&
+                     (parameters->allow_double_time_step ||
+                      (parameters->time_step_factor < 1.0 && parameters->allow_recover_time_step)
+                     )
+                    )
               {
                 //Since every thing goes so well, let's try a larger time step next.
                 parameters->time_step_factor *= 2.0;
