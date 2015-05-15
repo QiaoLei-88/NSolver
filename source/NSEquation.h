@@ -134,7 +134,8 @@ namespace NSFEMSolver
     void
     compute_conservative_vector (const InputVector &W,
                                  std_cxx11::array
-                                 <typename InputVector::value_type, n_components>
+                                 <typename InputVector::value_type,
+                                 EquationComponents<dim>::n_components>
                                  &conservative_vector);
 
 
@@ -187,7 +188,7 @@ namespace NSFEMSolver
     void compute_inviscid_flux (const InputVector &W,
                                 std_cxx11::array <std_cxx11::array
                                 <typename InputVector::value_type, dim>,
-                                n_components > &flux);
+                                EquationComponents<dim>::n_components> &flux);
 
     // Compute viscos flux as if viscosity coefficent is 1. Viscosity coefficent
     // is a linear factor of viscos flux, so you can scale the viscos flux before
@@ -201,7 +202,7 @@ namespace NSFEMSolver
                                const InputMatrix &grad_w,
                                std_cxx11::array <std_cxx11::array
                                <typename InputVector::value_type, dim>,
-                               n_components > &flux);
+                               EquationComponents<dim>::n_components> &flux);
 
     // @sect4{EulerEquations::compute_normal_flux}
 
@@ -216,7 +217,7 @@ namespace NSFEMSolver
                                 const InputVector                  &Wminus,
                                 const double                        alpha,
                                 std_cxx11::array < typename InputVector::value_type,
-                                n_components> &normal_flux,
+                                EquationComponents<dim>::n_components> &normal_flux,
                                 NumericalFlux::Type const &flux_type);
 
     // @sect4{EulerEquations::compute_forcing_vector}
@@ -233,7 +234,7 @@ namespace NSFEMSolver
     static
     void compute_forcing_vector (const InputVector &W,
                                  std_cxx11::array < typename InputVector::value_type,
-                                 n_components> &forcing,
+                                 EquationComponents<dim>::n_components> &forcing,
                                  const double gravity);
 
     // @sect4{Dealing with boundary conditions}
@@ -374,7 +375,8 @@ namespace NSFEMSolver
   void
   EulerEquations<dim>::compute_conservative_vector (const InputVector &W,
                                                     std_cxx11::array
-                                                    <typename InputVector::value_type, n_components>
+                                                    <typename InputVector::value_type,
+                                                    EquationComponents<dim>::n_components>
                                                     &conservative_vector)
   {
     for (unsigned int d = 0; d<dim; ++d)
@@ -454,7 +456,7 @@ namespace NSFEMSolver
   void EulerEquations<dim>::compute_inviscid_flux (const InputVector &W,
                                                    std_cxx11::array <std_cxx11::array
                                                    <typename InputVector::value_type, dim>,
-                                                   n_components > &flux)
+                                                   EquationComponents<dim>::n_components > &flux)
   {
     const typename InputVector::value_type pressure = W[pressure_component];
 
@@ -492,7 +494,7 @@ namespace NSFEMSolver
                                                   const InputMatrix &grad_w,
                                                   std_cxx11::array <std_cxx11::array
                                                   <typename InputVector::value_type, dim>,
-                                                  n_components> &flux)
+                                                  EquationComponents<dim>::n_components> &flux)
   {
     // First evaluate viscous flux's contribution to momentum equations.
 
@@ -572,7 +574,8 @@ namespace NSFEMSolver
                                                    const InputVector                  &Wplus,
                                                    const InputVector                  &Wminus,
                                                    const double                        alpha,
-                                                   std_cxx11::array < typename InputVector::value_type, n_components> &normal_flux,
+                                                   std_cxx11::array < typename InputVector::value_type,
+                                                   EquationComponents<dim>::n_components> &normal_flux,
                                                    NumericalFlux::Type const &flux_type)
   {
     typedef typename InputVector::value_type VType;
@@ -730,7 +733,8 @@ namespace NSFEMSolver
   template <typename InputVector>
   void EulerEquations<dim>::compute_forcing_vector (const InputVector &W,
                                                     std_cxx11::array
-                                                    < typename InputVector::value_type, n_components>
+                                                    < typename InputVector::value_type,
+                                                    EquationComponents<dim>::n_components>
                                                     &forcing,
                                                     const double gravity)
   {
