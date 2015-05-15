@@ -1,6 +1,14 @@
 # Listing of Parameters
 # ---------------------
 
+subsection physical parameters
+  # Free stream Mach number
+  set Mach                  = 0.3
+
+  # Coordinate x of moment center
+  set moment center x       = 0.25
+end
+
 set gravity = 0.0
 
 # The input grid 
@@ -17,20 +25,15 @@ set diffusion coefficient = 0.0008
 # Boundary conditions
 # We may specify boundary conditions for up to MAX_BD boundaries.
 # Your .inp file should have these boundaries designated.
+
 subsection boundary_1
-  set no penetration = true # reflective boundary condition
+  set integrate force = true
+  set type = SlipWall
 end
 
 subsection boundary_2
-  # Riemann boundary
-  set w_0 = Riemann
-  set w_0 value = 0.30 # x Mach
-  set w_1 = Riemann
-  set w_1 value = 0.00 # y Mach
-  set w_2 = Riemann
-  set w_2 value = 1.0 # Nondimensional density at infty, allways be 1 (rho/rho_inf)
-  set w_3 = Riemann
-  set w_3 value = 1.0/1.4 # Nondimensional pressure at infty, allways be 1/gas_gamm
+  set integrate force = false
+  set type = FarField
 end
 
 #subsection boundary_3
@@ -65,6 +68,7 @@ subsection time stepping
   set time step  = 0.02 # simulation time step
   set allow double time step = true
   set theta scheme value = 1.0
+  set solution extrapolation length = 0.0
 end
 
 subsection linear solver
