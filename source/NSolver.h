@@ -101,6 +101,7 @@ DEAL_II_ENABLE_EXTRA_DIAGNOSTICS
 #include "Postprocessor.h"
 #include "MMS.h"
 #include "WallForce.h"
+#include "EquationComponents.h"
 
 
 // Here finally comes the class that actually does something with all the
@@ -244,7 +245,7 @@ namespace NSFEMSolver
 
     //Introduce MMS
     MMS mms;
-    std_cxx11::array<double, EulerEquations<dim>::n_components> mms_error_l2;
+    std_cxx11::array<double, EquationComponents<dim>::n_components> mms_error_l2;
     double mms_error_linfty;
   };
 

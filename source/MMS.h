@@ -75,7 +75,7 @@ namespace NSFEMSolver
      * mode.
      */
     void reinit
-    (std_cxx11::array<Coeff_2D, EulerEquations<dim2>::n_components> &c_in);
+    (std_cxx11::array<Coeff_2D, EquationComponents<dim2>::n_components> &c_in);
 
 
     /**
@@ -94,11 +94,11 @@ namespace NSFEMSolver
      * The divergence is evaluated by automatic differentiation with Sacado::FAD.
      */
     void evaluate (const Point<dim2>   &p,
-                   std_cxx11::array<double, EulerEquations<dim2>::n_components> &value,
-                   std_cxx11::array<double, EulerEquations<dim2>::n_components> &source,
+                   std_cxx11::array<double, EquationComponents<dim2>::n_components> &value,
+                   std_cxx11::array<double, EquationComponents<dim2>::n_components> &source,
                    const bool need_source = false) const;
   private:
-    std_cxx11::array<Coeff_2D, EulerEquations<dim2>::n_components> c;
+    std_cxx11::array<Coeff_2D, EquationComponents<dim2>::n_components> c;
     bool initialized;
     bool is_NS;
   };

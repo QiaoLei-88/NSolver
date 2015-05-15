@@ -61,7 +61,7 @@ namespace NSFEMSolver
                    (Triangulation<dim>::smoothing_on_refinement |
                     Triangulation<dim>::smoothing_on_coarsening)),
     mapping(),
-    fe (FE_Q<dim> (para_ptr_in->fe_degree), EulerEquations<dim>::n_components),
+    fe (FE_Q<dim> (para_ptr_in->fe_degree), EquationComponents<dim>::n_components),
     dof_handler (triangulation),
     quadrature (para_ptr_in->quadrature_degree),
     face_quadrature (para_ptr_in->face_quadrature_degree),
@@ -85,7 +85,7 @@ namespace NSFEMSolver
     if (parameters->n_mms == 1)
       {
         // Setup coefficients for MMS
-        std_cxx11::array<Coeff_2D, EulerEquations<dim>::n_components> coeffs;
+        std_cxx11::array<Coeff_2D, EquationComponents<dim>::n_components> coeffs;
         // // component u:
         coeffs[0].c0  = 0.2;
         coeffs[0].cx  = 0.01;
@@ -229,9 +229,9 @@ namespace NSFEMSolver
           fe_v.get_function_values (current_solution, solution_values);
           for (unsigned int q=0; q<n_q_points; ++q)
             {
-              const double density = solution_values[q] (EulerEquations<dim>::density_component);
+              const double density = solution_values[q] (EquationComponents<dim>::density_component);
               AssertThrow (density > 0.0, ExcMessage ("Negative density encountered!"));
-              const double pressure = solution_values[q] (EulerEquations<dim>::pressure_component);
+              const double pressure = solution_values[q] (EquationComponents<dim>::pressure_component);
               AssertThrow (pressure > 0.0, ExcMessage ("Negative pressure encountered!"));
             }
         }
@@ -558,15 +558,15 @@ namespace NSFEMSolver
     const unsigned int n_q_points    = fe_v.n_quadrature_points;
 
     Table<2,Sacado::Fad::DFad<double> >
-    W (n_q_points, EulerEquations<dim>::n_components);
+    W (n_q_points, EquationComponents<dim>::n_components);
 
     Table<2,double>
-    W_old (n_q_points, EulerEquations<dim>::n_components);
+    W_old (n_q_points, EquationComponents<dim>::n_components);
 
     Table<3,Sacado::Fad::DFad<double> >
-    grad_W (n_q_points, EulerEquations<dim>::n_components, dim);
+    grad_W (n_q_points, EquationComponents<dim>::n_components, dim);
     Table<3,double>
-    grad_W_old (n_q_points, EulerEquations<dim>::n_components, dim);
+    grad_W_old (n_q_points, EquationComponents<dim>::n_components, dim);
 
     std::vector<double> residual_derivatives (dofs_per_cell);
 
@@ -612,7 +612,7 @@ namespace NSFEMSolver
     // above. Before this, we add another loop that initializes all the fad
     // variables to zero:
     for (unsigned int q=0; q<n_q_points; ++q)
-      for (unsigned int c=0; c<EulerEquations<dim>::n_components; ++c)
+      for (unsigned int c=0; c<EquationComponents<dim>::n_components; ++c)
         {
           W[q][c]       = 0;
           W_old[q][c]   = 0;
@@ -651,23 +651,24 @@ namespace NSFEMSolver
     // autodifferentiation variables, so that the Jacobian contributions can
     // later easily be computed from it:
     std::vector <
-    std_cxx11::array <std_cxx11::array <Sacado::Fad::DFad<double>, dim>, EulerEquations<dim>::n_components >
+    std_cxx11::array <std_cxx11::array <Sacado::Fad::DFad<double>, dim>, EquationComponents<dim>::n_components >
     > flux (n_q_points);
 
     std::vector <
-    std_cxx11::array <std_cxx11::array <Sacado::Fad::DFad<double>, dim>, EulerEquations<dim>::n_components >
+    std_cxx11::array <std_cxx11::array <Sacado::Fad::DFad<double>, dim>, EquationComponents<dim>::n_components >
     > visc_flux (n_q_points);
 
     std::vector <
-    std_cxx11::array <std_cxx11::array <double, dim>, EulerEquations<dim>::n_components >
+    std_cxx11::array <std_cxx11::array <double, dim>, EquationComponents<dim>::n_components >
     > flux_old (n_q_points);
 
-    std::vector < std_cxx11::array< Sacado::Fad::DFad<double>, EulerEquations<dim>::n_components> > forcing (n_q_points);
+    std::vector < std_cxx11::array< Sacado::Fad::DFad<double>, EquationComponents<dim>::n_components> > forcing (
+      n_q_points);
 
-    std::vector < std_cxx11::array< double, EulerEquations<dim>::n_components> > forcing_old (n_q_points);
+    std::vector < std_cxx11::array< double, EquationComponents<dim>::n_components> > forcing_old (n_q_points);
 
     //MMS: evaluate source term
-    std::vector < std_cxx11::array< double, EulerEquations<dim>::n_components> >
+    std::vector < std_cxx11::array< double, EquationComponents<dim>::n_components> >
     mms_source (n_q_points), mms_value (n_q_points);
     if (parameters->n_mms == 1)
       {
@@ -697,11 +698,11 @@ namespace NSFEMSolver
           {
             // Here, we need to evaluate the derivatives of entropy flux respect to Euler equation independent variables $w$
             // rather than the unknown vector $W$. So we have to set up a new Sacado::Fad::DFad syetem.
-            std_cxx11::array<Sacado::Fad::DFad<double>, EulerEquations<dim>::n_components> w_for_entropy_flux;
-            for (unsigned int c=0; c<EulerEquations<dim>::n_components; ++c)
+            std_cxx11::array<Sacado::Fad::DFad<double>, EquationComponents<dim>::n_components> w_for_entropy_flux;
+            for (unsigned int c=0; c<EquationComponents<dim>::n_components; ++c)
               {
                 w_for_entropy_flux[c] = W[q][c].val();
-                w_for_entropy_flux[c].diff (c, EulerEquations<dim>::n_components);
+                w_for_entropy_flux[c].diff (c, EquationComponents<dim>::n_components);
               }
 
             const Sacado::Fad::DFad<double> entropy = EulerEquations<dim>::template compute_entropy (w_for_entropy_flux);
@@ -709,28 +710,28 @@ namespace NSFEMSolver
 
             double D_h1 (0.0),D_h2 (0.0);
             D_h1 = (entropy.val() - entroy_old)/parameters->time_step;
-            D_h2 = (W[q][EulerEquations<dim>::density_component].val() - W_old[q][EulerEquations<dim>::density_component])/
+            D_h2 = (W[q][EquationComponents<dim>::density_component].val() - W_old[q][EquationComponents<dim>::density_component])/
             parameters->time_step;
 
             //sum up divergence
             for (unsigned int d=0; d<dim; d++)
               {
                 const Sacado::Fad::DFad<double> entropy_flux = entropy *
-                                                               w_for_entropy_flux[EulerEquations<dim>::first_velocity_component + d];
-                for (unsigned int c=0; c<EulerEquations<dim>::n_components; ++c)
+                                                               w_for_entropy_flux[EquationComponents<dim>::first_velocity_component + d];
+                for (unsigned int c=0; c<EquationComponents<dim>::n_components; ++c)
                   {
                     D_h1 += entropy_flux.fastAccessDx (c) * grad_W[q][c][d].val();
                   }
-                D_h2 += grad_W[q][EulerEquations<dim>::first_velocity_component + d][d].val()
-                        * W[q][EulerEquations<dim>::density_component].val()
-                        + W[q][EulerEquations<dim>::first_velocity_component + d].val()
-                        * grad_W[q][EulerEquations<dim>::density_component][d].val();
+                D_h2 += grad_W[q][EquationComponents<dim>::first_velocity_component + d][d].val()
+                        * W[q][EquationComponents<dim>::density_component].val()
+                        + W[q][EquationComponents<dim>::first_velocity_component + d].val()
+                        * grad_W[q][EquationComponents<dim>::density_component][d].val();
               }
-            D_h2 *= entropy.val()/W[q][EulerEquations<dim>::density_component].val();
+            D_h2 *= entropy.val()/W[q][EquationComponents<dim>::density_component].val();
             D_h_max = std::max (D_h_max, std::abs (D_h1));
             D_h_max = std::max (D_h_max, std::abs (D_h2));
 
-            rho_max = std::max (rho_max, W[q][EulerEquations<dim>::density_component].val());
+            rho_max = std::max (rho_max, W[q][EquationComponents<dim>::density_component].val());
 
             const double sound_speed
               = EulerEquations<dim>::template compute_sound_speed (W[q]).val();
@@ -821,8 +822,8 @@ namespace NSFEMSolver
 
         for (unsigned int point=0; point<fe_v.n_quadrature_points; ++point)
           {
-            std_cxx11::array<Sacado::Fad::DFad<double> , EulerEquations<dim>::n_components> w_conservative;
-            std_cxx11::array<double, EulerEquations<dim>::n_components> w_conservative_old;
+            std_cxx11::array<Sacado::Fad::DFad<double> , EquationComponents<dim>::n_components> w_conservative;
+            std_cxx11::array<double, EquationComponents<dim>::n_components> w_conservative_old;
             EulerEquations<dim>::compute_conservative_vector (W[point], w_conservative);
             EulerEquations<dim>::compute_conservative_vector (W_old[point], w_conservative_old);
 
@@ -929,11 +930,11 @@ namespace NSFEMSolver
     // that the <code>fe_v</code> variable now is of type FEFaceValues or
     // FESubfaceValues:
     Table<2,Sacado::Fad::DFad<double> >
-    Wplus (n_q_points, EulerEquations<dim>::n_components),
-          Wminus (n_q_points, EulerEquations<dim>::n_components);
+    Wplus (n_q_points, EquationComponents<dim>::n_components),
+          Wminus (n_q_points, EquationComponents<dim>::n_components);
     Table<2,double>
-    Wplus_old (n_q_points, EulerEquations<dim>::n_components),
-              Wminus_old (n_q_points, EulerEquations<dim>::n_components);
+    Wplus_old (n_q_points, EquationComponents<dim>::n_components),
+              Wminus_old (n_q_points, EquationComponents<dim>::n_components);
 
     for (unsigned int q=0; q<n_q_points; ++q)
       for (unsigned int i=0; i<dofs_per_cell; ++i)
@@ -983,7 +984,7 @@ namespace NSFEMSolver
                                Parameters::AllParameters<dim>::max_n_boundaries));
 
         std::vector<Vector<double> >
-        boundary_values (n_q_points, Vector<double> (EulerEquations<dim>::n_components));
+        boundary_values (n_q_points, Vector<double> (EquationComponents<dim>::n_components));
 
         if (parameters->n_mms != 1)
           {
@@ -997,9 +998,9 @@ namespace NSFEMSolver
             for (unsigned int q = 0; q < n_q_points; q++)
               {
                 const Point<dim> p = fe_v.quadrature_point (q);
-                std_cxx11::array<double, EulerEquations<dim>::n_components> sol, src;
+                std_cxx11::array<double, EquationComponents<dim>::n_components> sol, src;
                 mms.evaluate (p,sol,src,false);
-                for (unsigned int ic=0; ic < EulerEquations<dim>::n_components; ++ic)
+                for (unsigned int ic=0; ic < EquationComponents<dim>::n_components; ++ic)
                   {
                     boundary_values[q][ic] = sol[ic];
                   }
@@ -1030,9 +1031,9 @@ namespace NSFEMSolver
     // w^-, \mathbf n)$ for each quadrature point. Before calling the function
     // that does so, we also need to determine the Lax-Friedrich's stability
     // parameter:
-    std::vector< std_cxx11::array < Sacado::Fad::DFad<double>, EulerEquations<dim>::n_components> >  normal_fluxes (
+    std::vector< std_cxx11::array < Sacado::Fad::DFad<double>, EquationComponents<dim>::n_components> >  normal_fluxes (
       n_q_points);
-    std::vector< std_cxx11::array < double, EulerEquations<dim>::n_components> >  normal_fluxes_old (n_q_points);
+    std::vector< std_cxx11::array < double, EquationComponents<dim>::n_components> >  normal_fluxes_old (n_q_points);
 
 
     double alpha;
@@ -1328,9 +1329,9 @@ namespace NSFEMSolver
     data_out.attach_dof_handler (dof_handler);
 
     data_out.add_data_vector (current_solution,
-                              EulerEquations<dim>::component_names(),
+                              EquationComponents<dim>::component_names(),
                               DataOut<dim>::type_dof_data,
-                              EulerEquations<dim>::component_interpretation());
+                              EquationComponents<dim>::component_interpretation());
 
     data_out.add_data_vector (current_solution, postprocessor);
 
@@ -1821,8 +1822,8 @@ namespace NSFEMSolver
                                 - (parameters->solution_extrapolation_length), tmp_vector);
               }
 
-            std_cxx11::array<double, EulerEquations<dim>::n_components> time_advance_l2_norm;
-            for (unsigned int ic=0; ic<EulerEquations<dim>::n_components; ++ic)
+            std_cxx11::array<double, EquationComponents<dim>::n_components> time_advance_l2_norm;
+            for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
               {
                 mms_error_l2[ic] = 0.0;
                 time_advance_l2_norm[ic] = 0.0;
@@ -1849,16 +1850,16 @@ namespace NSFEMSolver
                   const unsigned int n_q_points = fe_v.n_quadrature_points;
 
                   solution_values.resize (n_q_points,
-                                          Vector<double> (EulerEquations<dim>::n_components));
+                                          Vector<double> (EquationComponents<dim>::n_components));
                   old_solution_values.resize (n_q_points,
-                                              Vector<double> (EulerEquations<dim>::n_components));
+                                              Vector<double> (EquationComponents<dim>::n_components));
                   fe_v.get_function_values (current_solution, solution_values);
                   fe_v.get_function_values (old_solution, old_solution_values);
 
-                  std::vector < std_cxx11::array< double, EulerEquations<dim>::n_components> >
+                  std::vector < std_cxx11::array< double, EquationComponents<dim>::n_components> >
                   mms_source (n_q_points), mms_value (n_q_points);
 
-                  for (unsigned int ic=0; ic<EulerEquations<dim>::n_components; ++ic)
+                  for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
                     {
                       for (unsigned int q=0; q<n_q_points; ++q)
                         {
@@ -1875,7 +1876,7 @@ namespace NSFEMSolver
                           mms.evaluate (fe_v.quadrature_point (q), mms_value[q], mms_source[q], /* const bool need_source = */ false);
                         }
 
-                      for (unsigned int ic=0; ic<EulerEquations<dim>::n_components; ++ic)
+                      for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
                         {
                           for (unsigned int q=0; q<n_q_points; ++q)
                             {
@@ -1891,7 +1892,7 @@ namespace NSFEMSolver
                 pcout << "  Error Info:\n";
                 pcout << "    n_dofs    u_err    v_err  rho_err    p_err (log10)\n   ";
                 pcout <<  std::log10 (dof_handler.n_dofs()) << ' ';
-                for (unsigned int ic=0; ic<EulerEquations<dim>::n_components; ++ic)
+                for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
                   {
                     Utilities::MPI::sum (mms_error_l2[ic], mpi_communicator);
                     pcout << 0.5 * std::log10 (mms_error_l2[ic]) << ' ';
@@ -1911,7 +1912,7 @@ namespace NSFEMSolver
                  parameters->tolerance_to_switch_flux > parameters->time_march_tolerance);
 
             pcout << "  Order of time advancing L_2  norm\n   ";
-            for (unsigned int ic=0; ic<EulerEquations<dim>::n_components; ++ic)
+            for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
               {
                 Utilities::MPI::sum (time_advance_l2_norm[ic], mpi_communicator);
                 double const log_norm = 0.5 * std::log10 (time_advance_l2_norm[ic]);

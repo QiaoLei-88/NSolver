@@ -40,7 +40,7 @@ namespace NSFEMSolver
                 fe_v_face.reinit (cell, face_no);
                 unsigned int const n_q_points = fe_v_face.n_quadrature_points;
                 solution_values.resize (n_q_points,
-                                        Vector<double> (EulerEquations<dim>::n_components));
+                                        Vector<double> (EquationComponents<dim>::n_components));
                 fe_v_face.get_function_values (current_solution, solution_values);
 
                 for (unsigned int q=0; q<n_q_points; ++q)
@@ -52,7 +52,7 @@ namespace NSFEMSolver
 
                     for (unsigned int id=0; id<dim; ++id)
                       {
-                        f_ds[id] = solution_values[q][EulerEquations<dim>::pressure_component] *
+                        f_ds[id] = solution_values[q][EquationComponents<dim>::pressure_component] *
                                    wall_norm[id] * fe_v_face.JxW (q);
                         wall_force.force[id] += f_ds[id];
                         moment_arm[id] = wall_position[id] - parameters->moment_center[id];

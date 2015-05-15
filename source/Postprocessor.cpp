@@ -62,7 +62,7 @@ namespace NSFEMSolver
       }
 
     Assert (computed_quantities.size() == n_quadrature_points,ExcInternalError());
-    Assert (uh[0].size() == EulerEquations<dim>::n_components,ExcInternalError());
+    Assert (uh[0].size() == EquationComponents<dim>::n_components,ExcInternalError());
 
     //MMS: Extra memmory space
     Vector<double>::size_type expected_size = dim+1;
@@ -72,7 +72,7 @@ namespace NSFEMSolver
       }
     if (output_mms)
       {
-        expected_size += 3*EulerEquations<dim>::n_components;
+        expected_size += 3*EquationComponents<dim>::n_components;
       }
     Assert (computed_quantities[0].size() == expected_size, ExcInternalError());
 
@@ -85,32 +85,32 @@ namespace NSFEMSolver
     // <code>density_component</code> information:
     for (unsigned int q=0; q<n_quadrature_points; ++q)
       {
-        const double density = uh[q] (EulerEquations<dim>::density_component);
+        const double density = uh[q] (EquationComponents<dim>::density_component);
 
         for (unsigned int d=0; d<dim; ++d)
           computed_quantities[q] (d)
-            = uh[q] (EulerEquations<dim>::first_momentum_component+d) * density;
+            = uh[q] (EquationComponents<dim>::first_momentum_component+d) * density;
 
         computed_quantities[q] (dim) = EulerEquations<dim>::compute_energy_density (uh[q]);
 
         if (do_schlieren_plot)
-          computed_quantities[q] (dim+1) = duh[q][EulerEquations<dim>::density_component] *
-                                           duh[q][EulerEquations<dim>::density_component];
+          computed_quantities[q] (dim+1) = duh[q][EquationComponents<dim>::density_component] *
+                                           duh[q][EquationComponents<dim>::density_component];
 
         if (output_mms)
           {
-            std_cxx11::array<double, EulerEquations<dim>::n_components> sol, src;
+            std_cxx11::array<double, EquationComponents<dim>::n_components> sol, src;
             mms_x->evaluate (points[q],sol,src,true);
             int i_out = dim + 2;
-            for (unsigned int ic = 0; ic < EulerEquations<dim>::n_components; ++ic, ++i_out)
+            for (unsigned int ic = 0; ic < EquationComponents<dim>::n_components; ++ic, ++i_out)
               {
                 computed_quantities[q][i_out] = src[ic];
               }
-            for (unsigned int ic = 0; ic < EulerEquations<dim>::n_components; ++ic, ++i_out)
+            for (unsigned int ic = 0; ic < EquationComponents<dim>::n_components; ++ic, ++i_out)
               {
                 computed_quantities[q][i_out] = sol[ic];
               }
-            for (unsigned int ic = 0; ic < EulerEquations<dim>::n_components; ++ic, ++i_out)
+            for (unsigned int ic = 0; ic < EquationComponents<dim>::n_components; ++ic, ++i_out)
               {
                 computed_quantities[q][i_out] = sol[ic] - uh[q][ic];
               }

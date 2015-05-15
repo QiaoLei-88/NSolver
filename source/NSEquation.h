@@ -77,16 +77,16 @@ namespace NSFEMSolver
   // depend on the space dimension, which we in our usual way introduce using
   // a template parameter.
   template <int dim>
-  class EulerEquations : public EquationComponents<dim>
+  class EulerEquations : private EquationComponents<dim>
   {
-  public:
+  private:
     using EquationComponents<dim>::n_components            ;
     using EquationComponents<dim>::first_momentum_component;
     using EquationComponents<dim>::first_velocity_component;
     using EquationComponents<dim>::density_component       ;
     using EquationComponents<dim>::energy_component        ;
     using EquationComponents<dim>::pressure_component      ;
-
+  public:
     // @sect4{Transformations between variables}
 
     // Next, we define the gas constant. We will set it to 1.4 in its
