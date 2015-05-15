@@ -77,15 +77,8 @@ namespace NSFEMSolver
   // depend on the space dimension, which we in our usual way introduce using
   // a template parameter.
   template <int dim>
-  class EulerEquations : private EquationComponents<dim>
+  class EulerEquations
   {
-  private:
-    using EquationComponents<dim>::n_components            ;
-    using EquationComponents<dim>::first_momentum_component;
-    using EquationComponents<dim>::first_velocity_component;
-    using EquationComponents<dim>::density_component       ;
-    using EquationComponents<dim>::energy_component        ;
-    using EquationComponents<dim>::pressure_component      ;
   public:
     // @sect4{Transformations between variables}
 
@@ -312,6 +305,13 @@ namespace NSFEMSolver
                                    const Mapping<dim>    &mapping,
                                    const NSVector &solution,
                                    Vector<double>        &refinement_indicators);
+  private:
+    static unsigned const n_components             = EquationComponents<dim>::n_components            ;
+    static unsigned const first_momentum_component = EquationComponents<dim>::first_momentum_component;
+    static unsigned const first_velocity_component = EquationComponents<dim>::first_velocity_component;
+    static unsigned const density_component        = EquationComponents<dim>::density_component       ;
+    static unsigned const energy_component         = EquationComponents<dim>::energy_component        ;
+    static unsigned const pressure_component       = EquationComponents<dim>::pressure_component      ;
   };
 
   // Put the definition of nested class mememer function templates in header
