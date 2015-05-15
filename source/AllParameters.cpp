@@ -461,16 +461,18 @@ namespace NSFEMSolver
         is_rigid_timestep_size = prm.get_bool ("rigid time step");
         CFL_number = prm.get_double ("CFL number");
         readin_time_step = prm.get_double ("time step");
-        if (readin_time_step == 0)
+        if (readin_time_step <= 0)
           {
             is_stationary = true;
-            readin_time_step = 1.0;
-            final_time = 1.0;
+            readin_time_step = -readin_time_step;
+
           }
         else
           {
             is_stationary = false;
           }
+        AssertThrow (readin_time_step!=0.0, ExcMessage (" Time step size cann't be 0."));
+
         allow_double_time_step = prm.get_bool ("allow double time step");
         allow_recover_time_step = prm.get_bool ("allow recover time step");
 
