@@ -1564,8 +1564,15 @@ namespace NSFEMSolver
     while (time < parameters->final_time)
       {
         computing_timer.enter_subsection ("2:Prepare Newton iteration");
-        pcout << "T=" << time << std::endl
-              << "   Number of active cells:       "
+        if (parameters->is_stationary)
+          {
+            pcout << "Step = " << n_time_step << std::endl;
+          }
+        else
+          {
+            pcout << "T = " << time << std::endl;
+          }
+        pcout << "   Number of active cells:       "
               << triangulation.n_global_active_cells()
               << std::endl
               << "   Number of degrees of freedom: "
