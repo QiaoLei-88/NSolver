@@ -210,23 +210,33 @@ namespace NSFEMSolver
 
       double diffusion_power;
 
-      double time_step, final_time;
+      double final_time;
       double time_march_tolerance;
       double CFL_number;
-      double readin_time_step;
-      double time_step_factor;
+      double reference_time_step;
       double theta;
       double gravity;
       bool is_stationary;
-      // if <code>is_rigid_timestep_size</code> is ture, a time step size specified in the input
-      // file is used, otherwise time step size is calculated according to CFL condition.
-      bool is_rigid_timestep_size;
-      // if <code>allow_double_time_step</code> is ture, time step size will be double while certain
-      // iterations are converged. This flag is set to false by default.
-      bool allow_double_time_step;
-      // Solver will decrease time step after linear solver diverged, this option
-      // allow recover the time step size to the original specified value.
-      bool allow_recover_time_step;
+
+      // if <code>rigid_reference_time_step</code> is ture, reference time step size
+      // is set to the value specified in the input file, otherwise the reference
+      // time step size is calculated according to CFL condition.
+      // This flag is set to true by default.
+      bool rigid_reference_time_step;
+
+      // If <code>auto_CFL_number</code> is ture, for unsteady simulation the
+      // time step size will be halfed while Newton iteration diverged; for
+      // steady simutation, CFL number will be calculated according to Newton
+      // residual.
+      // If <code>auto_CFL_number</code> is false, the solver will insist on the
+      // CFL number specified in input file.
+      // This flag is set to true by default.
+      bool auto_CFL_number;
+
+      // In unsteady simulation, Solver will decrease CFL number after linear
+      // solver diverged, this option allow recover the time step size to the
+      // original specified value.
+      bool allow_recover_CFL_number;
 
       // Predict solution of next time step by making a linear extrapolation from current
       // and last time step. This parameter controls the relative length of the

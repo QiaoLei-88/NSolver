@@ -247,6 +247,10 @@ namespace NSFEMSolver
     MMS mms;
     std_cxx11::array<double, EquationComponents<dim>::n_components> mms_error_l2;
     double mms_error_linfty;
+
+    // Runtime parameters, not specified in input file
+    double time_step;
+    double CFL_number;
   };
 
 }

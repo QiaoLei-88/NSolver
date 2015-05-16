@@ -311,18 +311,18 @@ namespace NSFEMSolver
 
       prm.enter_subsection ("time stepping");
       {
-        prm.declare_entry ("rigid time step", "false",
+        prm.declare_entry ("rigid reference time step", "true",
                            Patterns::Bool(),
-                           "whether use specified time step or"
+                           "whether use specified reference time step or"
                            "calulate according to CFL condition.");
 
-        prm.declare_entry ("allow double time step", "false",
+        prm.declare_entry ("auto CFL number", "true",
                            Patterns::Bool(),
                            "allow double time step size when consecutive convenvgence achieved");
 
-        prm.declare_entry ("allow recover time step", "true",
+        prm.declare_entry ("allow recover CFL number", "true",
                            Patterns::Bool(),
-                           "allow recover the reduced time step size when consecutive convenvgence achieved");
+                           "allow recover the reduced CFL number when consecutive convenvgence achieved");
 
         prm.declare_entry ("solution extrapolation length", "1.0",
                            Patterns::Double(),
@@ -344,7 +344,7 @@ namespace NSFEMSolver
         prm.declare_entry ("CFL number", "1.0",
                            Patterns::Double (0),
                            "CFL number");
-        prm.declare_entry ("time step", "0.1",
+        prm.declare_entry ("reference time step", "0.1",
                            Patterns::Double(),
                            "simulation time step");
         prm.declare_entry ("final time", "10.0",
@@ -471,23 +471,22 @@ namespace NSFEMSolver
 
       prm.enter_subsection ("time stepping");
       {
-        is_rigid_timestep_size = prm.get_bool ("rigid time step");
+        rigid_reference_time_step = prm.get_bool ("rigid reference time step");
         CFL_number = prm.get_double ("CFL number");
-        readin_time_step = prm.get_double ("time step");
-        if (readin_time_step <= 0)
+        reference_time_step = prm.get_double ("reference time step");
+        if (reference_time_step <= 0)
           {
             is_stationary = true;
-            readin_time_step = -readin_time_step;
-
+            reference_time_step = -reference_time_step;
           }
         else
           {
             is_stationary = false;
           }
-        AssertThrow (readin_time_step!=0.0, ExcMessage (" Time step size cann't be 0."));
+        AssertThrow (reference_time_step!=0.0, ExcMessage (" Time step size cann't be 0."));
 
-        allow_double_time_step = prm.get_bool ("allow double time step");
-        allow_recover_time_step = prm.get_bool ("allow recover time step");
+        auto_CFL_number = prm.get_bool ("auto CFL number");
+        allow_recover_CFL_number = prm.get_bool ("allow recover CFL number");
 
         n_iter_stage1 = prm.get_integer ("iter in stage1");
         step_increasing_ratio_stage1 = prm.get_double ("step increasing ratio stage1");

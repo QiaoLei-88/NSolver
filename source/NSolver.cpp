@@ -75,10 +75,10 @@ namespace NSFEMSolver
     computing_timer (MPI_COMM_WORLD,
                      pcout,
                      TimerOutput::summary,
-                     TimerOutput::cpu_and_wall_times)
+                     TimerOutput::cpu_and_wall_times),
+    CFL_number(para_ptr_in->CFL_number)
   {
     EulerEquations<dim>::gas_gamma = 1.4;
-    parameters->time_step_factor = 1.0;
 
     verbose_cout.set_condition (parameters->output == Parameters::Solver::verbose);
 
@@ -243,9 +243,9 @@ namespace NSFEMSolver
   template <int dim>
   void NSolver<dim>::calc_time_step()
   {
-    if (parameters->is_rigid_timestep_size)
+    if (parameters->rigid_reference_time_step)
       {
-        parameters->time_step = parameters->readin_time_step;
+        time_step = parameters->reference_time_step * CFL_number;
       }
     else
       {
@@ -253,7 +253,7 @@ namespace NSFEMSolver
         const unsigned int   n_q_points = fe_v.n_quadrature_points;
         std::vector<Vector<double> > solution_values (n_q_points,
                                                       Vector<double> (dim+2));
-        double min_time_step = parameters->readin_time_step;
+        double min_time_step = parameters->reference_time_step;
         typename DoFHandler<dim>::active_cell_iterator
         cell = dof_handler.begin_active(),
         endc = dof_handler.end();
@@ -270,12 +270,11 @@ namespace NSFEMSolver
                   const double velocity
                   = EulerEquations<dim>::template compute_velocity_magnitude (solution_values[q]);
                   min_time_step = std::min (min_time_step,
-                                            cell_size / (velocity+sound_speed) * parameters->CFL_number);
+                                            cell_size / (velocity+sound_speed) * CFL_number);
                 }
             }
-        parameters->time_step = Utilities::MPI::min_max_avg (min_time_step, mpi_communicator).min;
+        time_step = Utilities::MPI::min_max_avg (min_time_step, mpi_communicator).min;
       }
-    parameters->time_step *= parameters->time_step_factor;
   }
 
   // @sect4{NSolver::assemble_system}
@@ -709,9 +708,9 @@ namespace NSFEMSolver
             const double entroy_old = EulerEquations<dim>::template compute_entropy (W_old[q]);
 
             double D_h1 (0.0),D_h2 (0.0);
-            D_h1 = (entropy.val() - entroy_old)/parameters->time_step;
+            D_h1 = (entropy.val() - entroy_old)/time_step;
             D_h2 = (W[q][EquationComponents<dim>::density_component].val() - W_old[q][EquationComponents<dim>::density_component])/
-            parameters->time_step;
+            time_step;
 
             //sum up divergence
             for (unsigned int d=0; d<dim; d++)
@@ -828,7 +827,7 @@ namespace NSFEMSolver
             EulerEquations<dim>::compute_conservative_vector (W_old[point], w_conservative_old);
 
             // TODO: accumulate R_i fisrt and the multiply with shape_value_component * JxW together.
-            R_i += 1.0 / parameters->time_step *
+            R_i += 1.0 / time_step *
                    (w_conservative[component_i] - w_conservative_old[component_i]) *
                    fe_v.shape_value_component (i, point, component_i) *
                    fe_v.JxW (point);
@@ -1043,7 +1042,7 @@ namespace NSFEMSolver
         alpha = parameters->stabilization_value;
         break;
       case Parameters::Flux<dim>::mesh_dependent:
-        alpha = face_diameter/ (2.0*parameters->time_step);
+        alpha = face_diameter/ (2.0*time_step);
         break;
       default:
         Assert (false, ExcNotImplemented());
@@ -1548,13 +1547,13 @@ namespace NSFEMSolver
     time_advance_history_file
         << "   iter     n_cell     n_dofs          time   i_step"
         << "  i_Newton    Newton_res  n_linear_iter    linear_res"
-        << "  linear_search_len  time_step_size  time_step_factor"
+        << "  linear_search_len  time_step_size  CFL_number"
         << "  time_march_res"
         << '\n';
     iteration_history_file
         << "   iter     n_cell     n_dofs          time   i_step"
         << "  i_Newton    Newton_res  n_linear_iter    linear_res"
-        << "  linear_search_len  time_step_size  time_step_factor"
+        << "  linear_search_len  time_step_size  CFL_number"
         << "  Newton_update_norm"
         << '\n';
 
@@ -1663,7 +1662,7 @@ namespace NSFEMSolver
                 std::printf ("   %-13.6e    %-13.6e  %04d        %-5.2e            %7.4g          %7.4g          %7.4g\n",
                              res_norm,newton_update_norm, convergence.first, convergence.second,
                              linear_search_length[index_linear_search_length],
-                             parameters->time_step, parameters->time_step_factor);
+                             time_step, CFL_number);
               }
             linear_solver_diverged = std::isnan (convergence.second);
 
@@ -1692,8 +1691,8 @@ namespace NSFEMSolver
                 << std::setw (14) << convergence.first << ' '
                 << std::setw (13) << convergence.second << ' '
                 << std::setw (18) << linear_search_length[index_linear_search_length] << ' '
-                << std::setw (15) << parameters->time_step << ' '
-                << std::setw (17) << parameters->time_step_factor << ' '
+                << std::setw (15) << time_step << ' '
+                << std::setw (17) << CFL_number << ' '
                 << std::setw (19) << newton_update_norm << ' '
                 << '\n';
             // Check result.
@@ -1722,7 +1721,7 @@ namespace NSFEMSolver
                 newton_iter_converged = false;
                 // Limit lower bound of time step that can be tried.
                 // 1/1024 < 0.0005 < 1/2048
-                if (parameters->time_step_factor > 0.0005)
+                if (CFL_number > 0.0005)
                   {
                     pcout << "  Newton iteration not converge in " << nonlin_iter_threshold << " steps.\n"
                           << "  Recompute with different linear search length or time step...\n\n";
@@ -1781,8 +1780,8 @@ namespace NSFEMSolver
                 << std::setw (14) << convergence.first << ' '
                 << std::setw (13) << convergence.second << ' '
                 << std::setw (18) << linear_search_length[index_linear_search_length] << ' '
-                << std::setw (15) << parameters->time_step << ' '
-                << std::setw (17) << parameters->time_step_factor << ' ';
+                << std::setw (15) << time_step << ' '
+                << std::setw (17) << CFL_number << ' ';
 
             // We only get to this point if the Newton iteration has converged, so
             // do various post convergence tasks here:
@@ -1801,7 +1800,7 @@ namespace NSFEMSolver
             ++converged_newton_iters;
             if (!parameters->is_stationary)
               {
-                time += parameters->time_step;
+                time += time_step;
               }
             ++n_time_step;
 
@@ -1824,27 +1823,27 @@ namespace NSFEMSolver
               {
                 if (n_total_inter <= parameters-> n_iter_stage1)
                   {
-                    parameters->time_step_factor *= parameters->step_increasing_ratio_stage1;
+                    CFL_number *= parameters->step_increasing_ratio_stage1;
                   }
                 else
                   {
                     double const ratio = std::max (parameters->minimum_step_increasing_ratio_stage2,
                                                    std::pow (nonlin_residual_ratio, parameters->step_increasing_power_stage2));
-                    parameters->time_step_factor *= ratio;
+                    CFL_number *= ratio;
                   }
               }
             else if ((converged_newton_iters%10 == 0) &&
-                     (parameters->allow_double_time_step ||
-                      (parameters->time_step_factor < 1.0 && parameters->allow_recover_time_step)
+                     (parameters->auto_CFL_number ||
+                      (CFL_number < parameters->CFL_number && parameters->allow_recover_CFL_number)
                      )
                     )
               {
                 //Since every thing goes so well, let's try a larger time step next.
-                parameters->time_step_factor *= 2.0;
+                CFL_number *= 2.0;
                 time_step_doubled = true;
                 index_linear_search_length = 0;
                 pcout << "  We got ten successive converged time steps.\n"
-                      << "  Time step size increased to " << parameters->time_step << "\n\n";
+                      << "  Time step size increased to " << time_step << "\n\n";
 
                 if (! (parameters->is_stationary))
                   {
@@ -1995,11 +1994,11 @@ namespace NSFEMSolver
             else
               {
                 // Reduce time step when linear_search_length has tried out.
-                parameters->time_step *= 0.5;
-                parameters->time_step_factor *= 0.5;
+                time_step *= 0.5;
+                CFL_number *= 0.5;
                 time_step_doubled = false;
                 index_linear_search_length = 0;
-                pcout << "  Time step size reduced to " << parameters->time_step << "\n\n";
+                pcout << "  Time step size reduced to " << time_step << "\n\n";
               }
 
             current_solution = current_solution_backup;
