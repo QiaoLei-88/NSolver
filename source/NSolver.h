@@ -199,10 +199,9 @@ namespace NSFEMSolver
     NSVector       newton_update;
     NSVector       locally_owned_solution;
 
-    NSVector       old_solution;
-
     NSVector       current_solution;
-    NSVector       current_solution_backup;
+    NSVector       old_solution;
+    NSVector       old_old_solution;
     NSVector       predictor;
 
     NSVector       right_hand_side;

@@ -76,7 +76,7 @@ namespace NSFEMSolver
                      pcout,
                      TimerOutput::summary,
                      TimerOutput::cpu_and_wall_times),
-    CFL_number(para_ptr_in->CFL_number)
+    CFL_number (para_ptr_in->CFL_number)
   {
     EulerEquations<dim>::gas_gamma = 1.4;
 
@@ -189,7 +189,7 @@ namespace NSFEMSolver
 
     // const bool fast = true means leave its content untouched.
     old_solution.reinit (current_solution, /*const bool fast = */ true);
-    current_solution_backup.reinit (locally_owned_solution, true);
+    old_old_solution.reinit (current_solution, true);
     predictor.reinit (locally_owned_solution, true);
 
     right_hand_side.reinit (locally_owned_solution, true);
@@ -1532,6 +1532,7 @@ namespace NSFEMSolver
 
     double time = 0;
     double next_output = time + parameters->output_step;
+    double old_time_step_size = time_step;
 
     predictor = old_solution;
 
@@ -1610,7 +1611,6 @@ namespace NSFEMSolver
 
 
         newton_iter_converged = false;
-        current_solution_backup = current_solution;
 
         unsigned int nonlin_iter = 0;
         current_solution = predictor;
@@ -1814,11 +1814,6 @@ namespace NSFEMSolver
                 next_output += parameters->output_step;
               }
 
-            predictor = current_solution;
-
-            tmp_vector.reinit (predictor);
-            tmp_vector  = old_solution;
-
             if (parameters-> is_stationary)
               {
                 if (n_total_inter <= parameters-> n_iter_stage1)
@@ -1843,19 +1838,9 @@ namespace NSFEMSolver
                 time_step_doubled = true;
                 index_linear_search_length = 0;
                 pcout << "  We got ten successive converged time steps.\n"
-                      << "  Time step size increased to " << time_step << "\n\n";
+                      << "  CFL number increased to " << CFL_number << "\n\n";
+              }
 
-                if (! (parameters->is_stationary))
-                  {
-                    predictor.sadd (1.0+parameters->solution_extrapolation_length*2.0,
-                                    - (parameters->solution_extrapolation_length)*2.0, tmp_vector);
-                  }
-              }
-            else if (! (parameters->is_stationary))
-              {
-                predictor.sadd (1.0+parameters->solution_extrapolation_length,
-                                - (parameters->solution_extrapolation_length), tmp_vector);
-              }
 
             std_cxx11::array<double, EquationComponents<dim>::n_components> time_advance_l2_norm;
             for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
@@ -1967,15 +1952,14 @@ namespace NSFEMSolver
               }
             pcout << std::endl;
 
-
+            old_old_solution = old_solution;
             old_solution = current_solution;
             if (parameters->do_refine == true)
               {
                 refine_grid();
               }
 
-            current_solution_backup = current_solution;
-
+            old_time_step_size = time_step;
             check_negative_density_pressure();
             calc_time_step();
             // Uncomment the following line if you want reset the linear_search_length immediatly after a converged Newton iter.
@@ -1986,6 +1970,7 @@ namespace NSFEMSolver
           {
             computing_timer.enter_subsection ("6:Rolling back time step");
             // Newton iteration not converge in reasonable steps
+
             if (index_linear_search_length < 8 && (!time_step_doubled))
               {
                 // Try to adjust linear_search_length first
@@ -2000,33 +1985,22 @@ namespace NSFEMSolver
                 index_linear_search_length = 0;
                 pcout << "  Time step size reduced to " << time_step << "\n\n";
               }
-
-            current_solution = current_solution_backup;
-            predictor = current_solution;
-
-            if (! (parameters->is_stationary))
-              {
-                predictor = old_solution;
-              }
-            else
-              {
-                tmp_vector.reinit (predictor);
-                tmp_vector  = old_solution;
-                if (converged_newton_iters > 0)
-                  {
-                    // The last good "current_solution" is calculated with a "large" time step,
-                    // so we need to make a near extrapolation.
-                    predictor.sadd (1.0+parameters->solution_extrapolation_length*0.5,
-                                    - (parameters->solution_extrapolation_length)*0.5, tmp_vector);
-                  }
-                else
-                  {
-                    predictor.sadd (1.0+parameters->solution_extrapolation_length,
-                                    - (parameters->solution_extrapolation_length), tmp_vector);
-                  }
-              }
+            // Reset counter
             converged_newton_iters = 0;
             computing_timer.leave_subsection ("6:Rolling back time step");
+          }
+
+        // Predict solution of next time step
+        predictor = old_solution;
+        if (! (parameters->is_stationary))
+          {
+            // Only extrapolate predictor in unsteady simulation
+            double const predict_ratio = parameters->solution_extrapolation_length *
+                                         time_step / old_time_step_size;
+            tmp_vector.reinit (predictor);
+            tmp_vector  = old_old_solution;
+            predictor.sadd (1.0+predict_ratio,
+                            0.0-predict_ratio, tmp_vector);
           }
 
         time_advance_history_file << std::flush;
