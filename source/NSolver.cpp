@@ -1537,7 +1537,7 @@ namespace NSFEMSolver
     predictor = old_solution;
 
     bool newton_iter_converged (false);
-    bool time_step_doubled (false);
+    bool CFL_number_increased (false);
     int index_linear_search_length (0);
     const double linear_search_length[12] = {1.0, 0.8, 0.6, 0.4, 0.2, 0.1, 0.05, 0.025, 0.0125, 1.2, 1.5, 2.0};
     unsigned int converged_newton_iters (0);
@@ -1824,7 +1824,7 @@ namespace NSFEMSolver
                 //Since every thing goes so well, let's try a larger time step next.
                 CFL_number *= 2.0;
                 CFL_number = std::min (CFL_number, parameters->CFL_number_max);
-                time_step_doubled = true;
+                CFL_number_increased = true;
                 index_linear_search_length = 0;
                 pcout << "  We got ten successive converged time steps.\n"
                       << "  CFL number increased to " << CFL_number << "\n\n";
@@ -1962,7 +1962,7 @@ namespace NSFEMSolver
 
             if ((index_linear_search_length <
                  parameters->newton_linear_search_length_try_limit)
-                && (!time_step_doubled))
+                && (!CFL_number_increased))
               {
                 // Try to adjust linear_search_length first
                 ++index_linear_search_length;
@@ -1976,7 +1976,7 @@ namespace NSFEMSolver
 
                 pcout << "  Recompute with different linear search length or time step...\n\n";
                 time_step *= 0.5;
-                time_step_doubled = false;
+                CFL_number_increased = false;
                 index_linear_search_length = 0;
                 pcout << "  Time step size reduced to " << time_step << "\n\n";
               }
