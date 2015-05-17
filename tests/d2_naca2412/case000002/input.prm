@@ -62,12 +62,13 @@ end
 # --------------------------------------------------
 # Time stepping control
 subsection time stepping
-  set rigid time step = true
-  set CFL number = 1.0
-  set final time = 100 # simulation end time
-  set time step  = 0.02 # simulation time step
-  set allow double time step = false
-  set theta scheme value = 1.0
+  set rigid reference time step     = true
+  set CFL number                    = 1.0
+  set final time                    = 100 # simulation end time
+  set reference time step           = 0.02 # simulation time step
+  set auto CFL number               = true
+  set unsteady CFL number max       = 1.0
+  set theta scheme value            = 1.0
   set solution extrapolation length = 0.0
 end
 
