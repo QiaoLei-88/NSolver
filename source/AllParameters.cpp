@@ -320,10 +320,6 @@ namespace NSFEMSolver
                            Patterns::Bool(),
                            "allow double time step size when consecutive convenvgence achieved");
 
-        prm.declare_entry ("allow recover CFL number", "true",
-                           Patterns::Bool(),
-                           "allow recover the reduced CFL number when consecutive convenvgence achieved");
-
         prm.declare_entry ("solution extrapolation length", "1.0",
                            Patterns::Double(),
                            "relative length of the forward extrapolation for predicting solution of next time step");
@@ -512,7 +508,6 @@ namespace NSFEMSolver
         AssertThrow (reference_time_step!=0.0, ExcMessage (" Time step size cann't be 0."));
 
         auto_CFL_number = prm.get_bool ("auto CFL number");
-        allow_recover_CFL_number = prm.get_bool ("allow recover CFL number");
 
         n_iter_stage1 = prm.get_integer ("iter in stage1");
         step_increasing_ratio_stage1 = prm.get_double ("step increasing ratio stage1");

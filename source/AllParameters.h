@@ -235,11 +235,6 @@ namespace NSFEMSolver
       // This flag is set to true by default.
       bool auto_CFL_number;
 
-      // In unsteady simulation, Solver will decrease CFL number after linear
-      // solver diverged, this option allow recover the time step size to the
-      // original specified value.
-      bool allow_recover_CFL_number;
-
       // Predict solution of next time step by making a linear extrapolation from current
       // and last time step. This parameter controls the relative length of the
       // forward extrapolation. Specifically,

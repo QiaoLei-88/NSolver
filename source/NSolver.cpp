@@ -1816,9 +1816,8 @@ namespace NSFEMSolver
                   }
               }
             else if ((converged_newton_iters%10 == 0) &&
-                     (parameters->auto_CFL_number ||
-                      (CFL_number < parameters->CFL_number_max && parameters->allow_recover_CFL_number)
-                     )
+                     parameters->auto_CFL_number &&
+                     (CFL_number < parameters->CFL_number_max)
                     )
               {
                 //Since every thing goes so well, let's try a larger time step next.
@@ -1967,6 +1966,8 @@ namespace NSFEMSolver
               }
             else
               {
+                AssertThrow (parameters->auto_CFL_number,
+                             ExcMessage ("Nonlinear not convergence and CFL number adjusting is disabled."));
                 // Reduce time step when linear_search_length has tried out.
                 CFL_number *= 0.5;
                 AssertThrow (CFL_number >= parameters->CFL_number_min,
