@@ -1581,7 +1581,7 @@ namespace NSFEMSolver
               << std::endl;
 
         pcout << "   NonLin Res   NewtonUpdateNorm  Lin Iter     Lin Res     "
-              << "Linear Search Len      Time Step Size      Time Step Factor" << std::endl
+              << "Linear Search Len      Time Step Size      CFL number" << std::endl
               << "   __________________________________________"
               << "_____________________________________________" << std::endl;
 
@@ -1826,8 +1826,6 @@ namespace NSFEMSolver
                 CFL_number = std::min (CFL_number, parameters->CFL_number_max);
                 CFL_number_increased = true;
                 index_linear_search_length = 0;
-                pcout << "  We got ten successive converged time steps.\n"
-                      << "  CFL number increased to " << CFL_number << "\n\n";
               }
 
 
@@ -1978,7 +1976,6 @@ namespace NSFEMSolver
                 time_step *= 0.5;
                 CFL_number_increased = false;
                 index_linear_search_length = 0;
-                pcout << "  Time step size reduced to " << time_step << "\n\n";
               }
             // Reset counter
             converged_newton_iters = 0;
