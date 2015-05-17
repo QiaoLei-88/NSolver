@@ -1829,12 +1829,13 @@ namespace NSFEMSolver
               }
             else if ((converged_newton_iters%10 == 0) &&
                      (parameters->auto_CFL_number ||
-                      (CFL_number < parameters->CFL_number && parameters->allow_recover_CFL_number)
+                      (CFL_number < parameters->CFL_number_max && parameters->allow_recover_CFL_number)
                      )
                     )
               {
                 //Since every thing goes so well, let's try a larger time step next.
                 CFL_number *= 2.0;
+                CFL_number = std::min (CFL_number, parameters->CFL_number_max);
                 time_step_doubled = true;
                 index_linear_search_length = 0;
                 pcout << "  We got ten successive converged time steps.\n"

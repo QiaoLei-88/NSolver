@@ -349,6 +349,10 @@ namespace NSFEMSolver
         prm.declare_entry ("CFL number", "1.0",
                            Patterns::Double (0),
                            "CFL number");
+        prm.declare_entry ("unsteady CFL number max", "-1.0",
+                           Patterns::Double(),
+                           "maximum of CFL number for unsteady simulation");
+
         prm.declare_entry ("reference time step", "0.1",
                            Patterns::Double(),
                            "simulation time step");
@@ -478,6 +482,12 @@ namespace NSFEMSolver
       {
         rigid_reference_time_step = prm.get_bool ("rigid reference time step");
         CFL_number = prm.get_double ("CFL number");
+        CFL_number_max = prm.get_double ("unsteady CFL number max");
+        if (CFL_number_max < CFL_number)
+          {
+            CFL_number_max = CFL_number;
+          }
+
         reference_time_step = prm.get_double ("reference time step");
         if (reference_time_step <= 0)
           {
