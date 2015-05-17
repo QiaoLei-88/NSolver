@@ -328,6 +328,11 @@ namespace NSFEMSolver
                            Patterns::Double(),
                            "relative length of the forward extrapolation for predicting solution of next time step");
 
+        prm.declare_entry ("newton linear search length try limit", "0",
+                           Patterns::Integer (0,8),
+                           "largest index of linear search length could try. "
+                           "value of linear search length is defined internally.");
+
         prm.declare_entry ("iter in stage1", "5",
                            Patterns::Integer (0),
                            "number of interations in stage one for time step increasing in stationary case");
@@ -497,6 +502,7 @@ namespace NSFEMSolver
         time_march_tolerance = prm.get_double ("time march tolerance");
         theta = prm.get_double ("theta scheme value");
         solution_extrapolation_length = prm.get_double ("solution extrapolation length");
+        newton_linear_search_length_try_limit = prm.get_integer ("newton linear search length try limit");
       }
       prm.leave_subsection();
 

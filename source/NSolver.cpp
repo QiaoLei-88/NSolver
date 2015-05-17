@@ -1971,7 +1971,9 @@ namespace NSFEMSolver
             computing_timer.enter_subsection ("6:Rolling back time step");
             // Newton iteration not converge in reasonable steps
 
-            if (index_linear_search_length < 8 && (!time_step_doubled))
+            if ((index_linear_search_length <
+                 parameters->newton_linear_search_length_try_limit)
+                && (!time_step_doubled))
               {
                 // Try to adjust linear_search_length first
                 ++index_linear_search_length;

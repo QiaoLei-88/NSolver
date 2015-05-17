@@ -245,6 +245,8 @@ namespace NSFEMSolver
       //                      -old_solution * solution_extrapolation_length;
       bool solution_extrapolation_length;
 
+      int newton_linear_search_length_try_limit;
+
       unsigned int n_iter_stage1;
       double step_increasing_ratio_stage1;
       double minimum_step_increasing_ratio_stage2;
