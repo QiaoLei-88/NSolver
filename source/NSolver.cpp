@@ -1719,19 +1719,7 @@ namespace NSFEMSolver
             if (linear_solver_diverged || nonlin_iter >= nonlin_iter_threshold)
               {
                 newton_iter_converged = false;
-                // Limit lower bound of time step that can be tried.
-                // 1/1024 < 0.0005 < 1/2048
-                if (CFL_number > 0.0005)
-                  {
-                    pcout << "  Newton iteration not converge in " << nonlin_iter_threshold << " steps.\n"
-                          << "  Recompute with different linear search length or time step...\n\n";
-                    newton_iter_converged = false;
-                  }
-                else
-                  {
-                    AssertThrow (false,
-                                 ExcMessage ("No convergence in nonlinear solver after all small time step and linear search length trid out."));
-                  }
+                pcout << "  Newton iteration not converge in " << nonlin_iter_threshold << " steps.\n";
               }
             computing_timer.leave_subsection ("5:Postprocess Newton solution");
           }
@@ -1982,8 +1970,12 @@ namespace NSFEMSolver
             else
               {
                 // Reduce time step when linear_search_length has tried out.
-                time_step *= 0.5;
                 CFL_number *= 0.5;
+                AssertThrow (CFL_number >= parameters->CFL_number_min,
+                             ExcMessage ("No convergence in nonlinear solver after all small time step and linear search length trid out."));
+
+                pcout << "  Recompute with different linear search length or time step...\n\n";
+                time_step *= 0.5;
                 time_step_doubled = false;
                 index_linear_search_length = 0;
                 pcout << "  Time step size reduced to " << time_step << "\n\n";

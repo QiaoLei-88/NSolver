@@ -214,6 +214,7 @@ namespace NSFEMSolver
       double time_march_tolerance;
       double CFL_number;
       double CFL_number_max;
+      double CFL_number_min;
       double reference_time_step;
       double theta;
       double gravity;
