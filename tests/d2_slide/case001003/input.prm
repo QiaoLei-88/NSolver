@@ -53,7 +53,6 @@ subsection time stepping
   set rigid reference time step = true
   set final time                = 10.0 # simulation end time
   set reference time step       = 0.02 # simulation time step
-  set auto CFL number           = true
   set unsteady CFL number max   = 1.0
   set theta scheme value        = 0.5
 end
