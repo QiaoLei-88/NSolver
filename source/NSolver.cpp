@@ -1561,7 +1561,8 @@ namespace NSFEMSolver
     NSVector      tmp_vector;
 
     computing_timer.leave_subsection ("1:Initialization");
-    while (time < parameters->final_time)
+    bool terminate_time_stepping (false);
+    while (!terminate_time_stepping)
       {
         computing_timer.enter_subsection ("2:Prepare Newton iteration");
         if (parameters->is_stationary)
@@ -1791,6 +1792,10 @@ namespace NSFEMSolver
                 time += time_step;
               }
             ++n_time_step;
+            terminate_time_stepping = terminate_time_stepping || time >= parameters->final_time;
+            terminate_time_stepping = terminate_time_stepping ||
+                                      (parameters->is_stationary &&
+                                       n_total_inter >= parameters -> max_Newton_iter);
 
             if (parameters->output_step < 0)
               {
@@ -1928,15 +1933,15 @@ namespace NSFEMSolver
                 swith_flux = swith_flux &&
                              (log_norm < parameters->tolerance_to_switch_flux);
               }
+            pcout << std::endl;
+
             if (swith_flux)
               {
                 parameters->numerical_flux_type = parameters->flux_type_switch_to;
               }
-            if (time_march_converged)
-              {
-                time = parameters->final_time + 1.0;
-              }
-            pcout << std::endl;
+            terminate_time_stepping = terminate_time_stepping ||
+                                      (parameters->is_stationary &&
+                                       time_march_converged);
 
             old_old_solution = old_solution;
             old_solution = current_solution;

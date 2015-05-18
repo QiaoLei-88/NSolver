@@ -22,7 +22,9 @@ namespace NSFEMSolver
       /**
        * Parameters for when to terminate time stepping.
        * Unsteady run only terminates when final time is arrived.
-       * Steady run terminates on max_n_iter
+       * Steady run terminates when nummer of Newton interations reachs
+       * <code>max_Newton_iter</code> or time marching L2 norm is
+       * below <code>time_march_tolerance<code>.
        */
       double final_time;
       unsigned int max_Newton_iter;
