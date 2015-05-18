@@ -11,6 +11,7 @@ ADD_EXECUTABLE(${PRJ_NAME}
   NSolver_integrate_force.cpp
   PhysicalParameters.cpp
   EquationComponents.cpp
+  TimeSteppingParameters.cpp
   )
 
 SET_PROPERTY(TARGET ${PRJ_NAME}

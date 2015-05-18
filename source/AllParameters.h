@@ -27,6 +27,7 @@
 #include "BoundaryType.h"
 #include "EquationComponents.h"
 #include "NumericalFlux.h"
+#include "TimeSteppingParameters.h"
 
 
 namespace NSFEMSolver
@@ -189,6 +190,7 @@ namespace NSFEMSolver
     struct AllParameters
       :
       public PhysicalParameters,
+      public TimeStepping,
       public Solver,
       public Refinement,
       public Flux<dim>,
@@ -210,40 +212,8 @@ namespace NSFEMSolver
 
       double diffusion_power;
 
-      double final_time;
-      double time_march_tolerance;
-      double CFL_number;
-      double CFL_number_max;
-      double CFL_number_min;
-      double reference_time_step;
-      double theta;
       double gravity;
-      bool is_stationary;
 
-      // if <code>rigid_reference_time_step</code> is ture, reference time step size
-      // is set to the value specified in the input file, otherwise the reference
-      // time step size is calculated according to CFL condition.
-      // This flag is set to true by default.
-      bool rigid_reference_time_step;
-
-      // whether allow increase CFL number in unsteady simulation.
-      bool allow_increase_CFL;
-      // whether allow decrease CFL number when newton iteration diverged.
-      bool allow_decrease_CFL;
-
-      // Predict solution of next time step by making a linear extrapolation from current
-      // and last time step. This parameter controls the relative length of the
-      // forward extrapolation. Specifically,
-      // predicted_solution =  current_solution * (1+solution_extrapolation_length)
-      //                      -old_solution * solution_extrapolation_length;
-      bool solution_extrapolation_length;
-
-      int newton_linear_search_length_try_limit;
-
-      unsigned int n_iter_stage1;
-      double step_increasing_ratio_stage1;
-      double minimum_step_increasing_ratio_stage2;
-      double step_increasing_power_stage2;
 
       std::string mesh_filename;
       std::string time_advance_history_filename;
