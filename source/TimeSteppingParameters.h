@@ -20,9 +20,12 @@ namespace NSFEMSolver
     struct TimeStepping
     {
       /**
-       * Parameters for when to terminate time stepping
+       * Parameters for when to terminate time stepping.
+       * Unsteady run only terminates when final time is arrived.
+       * Steady run terminates on max_n_iter
        */
       double final_time;
+      unsigned int max_Newton_iter;
       double time_march_tolerance;
 
       /**
