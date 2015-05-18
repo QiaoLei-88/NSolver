@@ -316,9 +316,12 @@ namespace NSFEMSolver
                            "whether use specified reference time step or"
                            "calulate according to CFL condition.");
 
-        prm.declare_entry ("auto CFL number", "true",
+        prm.declare_entry ("allow increase CFL", "true",
                            Patterns::Bool(),
-                           "allow double time step size when consecutive convenvgence achieved");
+                           "allow increase CFL number for unsteady simulation");
+        prm.declare_entry ("allow decrease CFL", "true",
+                           Patterns::Bool(),
+                           "allow decrease CFL number");
 
         prm.declare_entry ("solution extrapolation length", "1.0",
                            Patterns::Double(),
@@ -507,7 +510,8 @@ namespace NSFEMSolver
           }
         AssertThrow (reference_time_step!=0.0, ExcMessage (" Time step size cann't be 0."));
 
-        auto_CFL_number = prm.get_bool ("auto CFL number");
+        allow_increase_CFL = prm.get_bool ("allow increase CFL");
+        allow_decrease_CFL = prm.get_bool ("allow decrease CFL");
 
         n_iter_stage1 = prm.get_integer ("iter in stage1");
         step_increasing_ratio_stage1 = prm.get_double ("step increasing ratio stage1");

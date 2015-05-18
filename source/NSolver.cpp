@@ -1810,13 +1810,14 @@ namespace NSFEMSolver
                   }
                 else
                   {
-                    double const ratio = std::max (parameters->minimum_step_increasing_ratio_stage2,
-                                                   std::pow (nonlin_residual_ratio, parameters->step_increasing_power_stage2));
+                    double const
+                    ratio = std::max (parameters->minimum_step_increasing_ratio_stage2,
+                                      std::pow (nonlin_residual_ratio, parameters->step_increasing_power_stage2));
                     CFL_number *= ratio;
                   }
               }
             else if ((converged_newton_iters%10 == 0) &&
-                     parameters->auto_CFL_number &&
+                     parameters->allow_increase_CFL &&
                      (CFL_number < parameters->CFL_number_max)
                     )
               {
@@ -1826,7 +1827,6 @@ namespace NSFEMSolver
                 CFL_number_increased = true;
                 index_linear_search_length = 0;
               }
-
 
             std_cxx11::array<double, EquationComponents<dim>::n_components> time_advance_l2_norm;
             for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
@@ -1966,8 +1966,8 @@ namespace NSFEMSolver
               }
             else
               {
-                AssertThrow (parameters->auto_CFL_number,
-                             ExcMessage ("Nonlinear not convergence and CFL number adjusting is disabled."));
+                AssertThrow (parameters->allow_decrease_CFL,
+                             ExcMessage ("Nonlinear not convergence and reduceing CFL number is disabled."));
                 // Reduce time step when linear_search_length has tried out.
                 CFL_number *= 0.5;
                 AssertThrow (CFL_number >= parameters->CFL_number_min,

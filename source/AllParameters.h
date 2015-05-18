@@ -226,14 +226,10 @@ namespace NSFEMSolver
       // This flag is set to true by default.
       bool rigid_reference_time_step;
 
-      // If <code>auto_CFL_number</code> is ture, for unsteady simulation the
-      // time step size will be halfed while Newton iteration diverged; for
-      // steady simutation, CFL number will be calculated according to Newton
-      // residual.
-      // If <code>auto_CFL_number</code> is false, the solver will insist on the
-      // CFL number specified in input file.
-      // This flag is set to true by default.
-      bool auto_CFL_number;
+      // whether allow increase CFL number in unsteady simulation.
+      bool allow_increase_CFL;
+      // whether allow decrease CFL number when newton iteration diverged.
+      bool allow_decrease_CFL;
 
       // Predict solution of next time step by making a linear extrapolation from current
       // and last time step. This parameter controls the relative length of the
