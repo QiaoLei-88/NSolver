@@ -64,16 +64,16 @@ namespace NSFEMSolver
 
         prm.declare_entry ("iter in stage1", "5",
                            Patterns::Integer (0),
-                           "number of interations in stage one for time step increasing in stationary case");
+                           "number of interations in stage one for time step increasing in steady case");
         prm.declare_entry ("step increasing ratio stage1", "1.0",
                            Patterns::Double (0),
-                           "step increasing ratio in stage1 one for time step increasing in stationary case");
+                           "step increasing ratio in stage1 one for time step increasing in steady case");
         prm.declare_entry ("minimum step increasing ratio stage2", "0.1",
                            Patterns::Double (0),
-                           "minimum step increasing ratio in stage two for time step increasing in stationary case");
+                           "minimum step increasing ratio in stage two for time step increasing in steady case");
         prm.declare_entry ("step increasing power stage2", "1.2",
                            Patterns::Double (0),
-                           "step increasing power in stage two for time step increasing in stationary case");
+                           "step increasing power in stage two for time step increasing in steady case");
 
 
         prm.declare_entry ("solution extrapolation length", "1.0",
@@ -103,10 +103,10 @@ namespace NSFEMSolver
         rigid_reference_time_step = prm.get_bool ("rigid reference time step");
         reference_time_step = prm.get_double ("reference time step");
         AssertThrow (reference_time_step!=0.0, ExcMessage (" Time step size cann't be 0."));
-        is_stationary = false;
+        is_steady = false;
         if (reference_time_step <= 0)
           {
-            is_stationary = true;
+            is_steady = true;
             reference_time_step = -reference_time_step;
           }
 

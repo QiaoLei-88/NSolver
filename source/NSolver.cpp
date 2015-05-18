@@ -1565,7 +1565,7 @@ namespace NSFEMSolver
     while (!terminate_time_stepping)
       {
         computing_timer.enter_subsection ("2:Prepare Newton iteration");
-        if (parameters->is_stationary)
+        if (parameters->is_steady)
           {
             pcout << "Step = " << n_time_step << std::endl;
           }
@@ -1618,7 +1618,7 @@ namespace NSFEMSolver
         bool linear_solver_diverged (true);
         unsigned int const nonlin_iter_threshold (10);
         double const nonlin_iter_tolerance (
-          parameters->is_stationary ? 1.0e+20 : 1.0e-10);
+          parameters->is_steady ? 1.0e+20 : 1.0e-10);
         double reference_nonlin_residual (1.0);
         double nonlin_residual_ratio (1.0);
 
@@ -1787,14 +1787,14 @@ namespace NSFEMSolver
             // this, we then refine the mesh if so desired by the user, and
             // finally continue on with the next time step:
             ++converged_newton_iters;
-            if (!parameters->is_stationary)
+            if (!parameters->is_steady)
               {
                 time += time_step;
               }
             ++n_time_step;
             terminate_time_stepping = terminate_time_stepping || time >= parameters->final_time;
             terminate_time_stepping = terminate_time_stepping ||
-                                      (parameters->is_stationary &&
+                                      (parameters->is_steady &&
                                        n_total_inter >= parameters -> max_Newton_iter);
 
             if (parameters->output_step < 0)
@@ -1807,7 +1807,7 @@ namespace NSFEMSolver
                 next_output += parameters->output_step;
               }
 
-            if (parameters-> is_stationary)
+            if (parameters-> is_steady)
               {
                 if (n_total_inter <= parameters-> n_iter_stage1)
                   {
@@ -1940,7 +1940,7 @@ namespace NSFEMSolver
                 parameters->numerical_flux_type = parameters->flux_type_switch_to;
               }
             terminate_time_stepping = terminate_time_stepping ||
-                                      (parameters->is_stationary &&
+                                      (parameters->is_steady &&
                                        time_march_converged);
 
             old_old_solution = old_solution;
@@ -1990,7 +1990,7 @@ namespace NSFEMSolver
 
         // Predict solution of next time step
         predictor = old_solution;
-        if (! (parameters->is_stationary))
+        if (! (parameters->is_steady))
           {
             // Only extrapolate predictor in unsteady simulation
             double const predict_ratio = parameters->solution_extrapolation_length *

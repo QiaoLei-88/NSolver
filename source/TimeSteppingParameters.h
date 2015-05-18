@@ -47,12 +47,12 @@ namespace NSFEMSolver
       bool rigid_reference_time_step;
       /**
        * Negative <code>reference_time_step</code> will be recognized as steady
-       * simulation. For stationary cases, CFL number is evaluated in a special way.
+       * simulation. For steady cases, CFL number is evaluated in a special way.
        *
        * If reference_time_step is provided as zero, an exception will be thrown.
        */
       double reference_time_step;
-      bool is_stationary;
+      bool is_steady;
 
       /**
        * parameters for evaluating CFL number
