@@ -133,8 +133,7 @@ namespace NSFEMSolver
 
 
     //Flux
-    template<int dim>
-    void Flux<dim>::declare_parameters (ParameterHandler &prm)
+    void Flux::declare_parameters (ParameterHandler &prm)
     {
       prm.enter_subsection ("flux");
       {
@@ -160,8 +159,7 @@ namespace NSFEMSolver
       prm.leave_subsection();
     }
 
-    template<int dim>
-    void Flux<dim>::parse_parameters (ParameterHandler &prm)
+    void Flux::parse_parameters (ParameterHandler &prm)
     {
       prm.enter_subsection ("flux");
       {
@@ -354,7 +352,7 @@ namespace NSFEMSolver
       Parameters::PhysicalParameters::declare_parameters (prm);
       Parameters::Solver::declare_parameters (prm);
       Parameters::Refinement::declare_parameters (prm);
-      Parameters::Flux<dim>::declare_parameters (prm);
+      Parameters::Flux::declare_parameters (prm);
       Parameters::Output::declare_parameters (prm);
       Parameters::FEParameters::declare_parameters (prm);
     }
@@ -489,7 +487,7 @@ namespace NSFEMSolver
       Parameters::TimeStepping::parse_parameters (prm);
       Parameters::Solver::parse_parameters (prm);
       Parameters::Refinement::parse_parameters (prm);
-      Parameters::Flux<dim>::parse_parameters (prm);
+      Parameters::Flux::parse_parameters (prm);
       Parameters::Output::parse_parameters (prm);
       Parameters::FEParameters::parse_parameters (prm);
     }

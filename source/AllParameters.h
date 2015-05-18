@@ -110,7 +110,6 @@ namespace NSFEMSolver
     // case, it is chosen as $\frac{h}{2\delta T}$ with $h$ the diameter of
     // the face to which the flux is applied, and $\delta T$ the current time
     // step.
-    template<int dim>
     struct Flux
     {
       enum StabilizationKind { constant, mesh_dependent };
@@ -193,7 +192,7 @@ namespace NSFEMSolver
       public TimeStepping,
       public Solver,
       public Refinement,
-      public Flux<dim>,
+      public Flux,
       public Output,
       public FEParameters
     {

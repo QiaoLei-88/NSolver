@@ -1038,10 +1038,10 @@ namespace NSFEMSolver
 
     switch (parameters->stabilization_kind)
       {
-      case Parameters::Flux<dim>::constant:
+      case Parameters::Flux::constant:
         alpha = parameters->stabilization_value;
         break;
-      case Parameters::Flux<dim>::mesh_dependent:
+      case Parameters::Flux::mesh_dependent:
         alpha = face_diameter/ (2.0*time_step);
         break;
       default:
