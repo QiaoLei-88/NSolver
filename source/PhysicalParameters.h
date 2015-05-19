@@ -41,6 +41,8 @@ namespace NSFEMSolver
 
       double gas_gamma;
 
+      Point<3> gravity;
+
       static void declare_parameters (ParameterHandler &prm);
       void parse_parameters (ParameterHandler &prm);
     };

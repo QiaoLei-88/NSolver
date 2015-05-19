@@ -683,10 +683,10 @@ namespace NSFEMSolver
     for (unsigned int q=0; q<n_q_points; ++q)
       {
         EulerEquations<dim>::compute_inviscid_flux (W_old[q], flux_old[q]);
-        EulerEquations<dim>::compute_forcing_vector (W_old[q], forcing_old[q], parameters->gravity);
+        EulerEquations<dim>::compute_forcing_vector (W_old[q], forcing_old[q]);
         EulerEquations<dim>::compute_inviscid_flux (W[q], flux[q]);
         EulerEquations<dim>::compute_viscous_flux (W[q], grad_W[q], visc_flux[q]);
-        EulerEquations<dim>::compute_forcing_vector (W[q], forcing[q], parameters->gravity);
+        EulerEquations<dim>::compute_forcing_vector (W[q], forcing[q]);
       }
 
     // evaluate entropy viscosity

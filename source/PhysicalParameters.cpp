@@ -60,6 +60,16 @@ namespace NSFEMSolver
         prm.declare_entry ("gas gamma", "1.4",
                            Patterns::Double (1),
                            "Gas heat capacity ratio");
+
+        prm.declare_entry ("gravity x", "0.0",
+                           Patterns::Double(),
+                           "x component of gravity");
+        prm.declare_entry ("gravity y", "0.0",
+                           Patterns::Double(),
+                           "y component of gravity");
+        prm.declare_entry ("gravity z", "0.0",
+                           Patterns::Double(),
+                           "z component of gravity");
       }
       prm.leave_subsection();
     }
@@ -87,6 +97,10 @@ namespace NSFEMSolver
         reference_area = prm.get_double ("reference area");
 
         gas_gamma = prm.get_double ("gas gamma");
+
+        gravity[0] = prm.get_double ("gravity x");
+        gravity[1] = prm.get_double ("gravity y");
+        gravity[2] = prm.get_double ("gravity z");
       }
       prm.leave_subsection();
     }

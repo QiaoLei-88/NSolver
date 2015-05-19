@@ -311,10 +311,6 @@ namespace NSFEMSolver
                              "diffusion factor for component w_" + Utilities::int_to_string (di));
         }
 
-      prm.declare_entry ("gravity", "-1.0",
-                         Patterns::Double(),
-                         "gravity");
-
       for (unsigned int b=0; b<max_n_boundaries; ++b)
         {
           prm.enter_subsection ("boundary_" +
@@ -426,8 +422,6 @@ namespace NSFEMSolver
           diffusion_factor[di] = prm.get_double ("diffusion factor for w_"
                                                  + Utilities::int_to_string (di));
         }
-
-      gravity = prm.get_double ("gravity");
 
       for (unsigned int boundary_id=0; boundary_id<max_n_boundaries;
            ++boundary_id)

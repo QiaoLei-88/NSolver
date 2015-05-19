@@ -211,9 +211,6 @@ namespace NSFEMSolver
 
       double diffusion_power;
 
-      double gravity;
-
-
       std::string mesh_filename;
       std::string time_advance_history_filename;
       std::string iteration_history_filename;

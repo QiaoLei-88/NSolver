@@ -229,9 +229,10 @@ namespace NSFEMSolver
     template <typename InputVector>
     static
     void compute_forcing_vector (const InputVector &W,
-                                 std_cxx11::array < typename InputVector::value_type,
-                                 EquationComponents<dim>::n_components> &forcing,
-                                 const double gravity);
+                                 std_cxx11::array
+                                 <typename InputVector::value_type,
+                                 EquationComponents<dim>::n_components>
+                                 &forcing);
 
     // @sect4{Dealing with boundary conditions}
 
@@ -744,26 +745,26 @@ namespace NSFEMSolver
   template <typename InputVector>
   void EulerEquations<dim>::compute_forcing_vector (const InputVector &W,
                                                     std_cxx11::array
-                                                    < typename InputVector::value_type,
+                                                    <typename InputVector::value_type,
                                                     EquationComponents<dim>::n_components>
-                                                    &forcing,
-                                                    const double gravity)
+                                                    &forcing)
   {
-    for (unsigned int c=0; c<n_components; ++c)
-      switch (c)
-        {
-        case first_momentum_component+dim-1:
-          forcing[c] = gravity * W[density_component];
-          break;
-        case energy_component:
-          forcing[c] = gravity *
-                       W[density_component] *
-                       W[first_velocity_component+dim-1];
-          break;
-        default:
-          forcing[c] = 0;
-          break;
-        }
+    Assert (parameters, ExcMessage ("Null pointer encountered!"));
+    // For momentum equations
+    for (unsigned int ic=first_momentum_component, id=0; id < dim; ++ic, ++id)
+      {
+        forcing[ic] = parameters->gravity[id] * W[density_component];
+      }
+
+    // Nothing for mass equation
+
+
+    // For energy equation, work rate = force \cdot velocity
+    forcing[energy_component] = 0.0;
+    for (unsigned int ic=first_velocity_component, id=0; id < dim; ++ic, ++id)
+      {
+        forcing[energy_component] += forcing[ic] * W[ic];
+      }
   }
 
 
