@@ -15,6 +15,7 @@ namespace NSFEMSolver
   template <int dim>
   void EulerEquations<dim>::set_parameter (const Parameters::AllParameters<dim> *const para_ptr_in)
   {
+    Assert (para_ptr_in, ExcMessage ("Null pointer encountered!"));
     parameters = para_ptr_in;
   }
 

@@ -78,6 +78,7 @@ namespace NSFEMSolver
                      TimerOutput::cpu_and_wall_times),
     CFL_number (para_ptr_in->CFL_number)
   {
+    Assert (parameters, ExcMessage ("Null pointer encountered!"));
     EulerEquations<dim>::gas_gamma = 1.4;
     EulerEquations<dim>::set_parameter (parameters);
 

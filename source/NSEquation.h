@@ -500,6 +500,7 @@ namespace NSFEMSolver
                                                   <typename InputVector::value_type, dim>,
                                                   EquationComponents<dim>::n_components> &flux)
   {
+    Assert (parameters, ExcMessage ("Null pointer encountered!"));
     // First evaluate viscous flux's contribution to momentum equations.
 
     // At the first of first we evaluate shear stress tensor
@@ -814,6 +815,7 @@ namespace NSFEMSolver
                                        const Vector<double> &boundary_values,
                                        const DataVector     &Wminus)
   {
+    Assert (parameters, ExcMessage ("Null pointer encountered!"));
     typedef typename DataVector::value_type VType;
     std_cxx11::array<VType, n_components> requested_boundary_values;
     bool need_Riemman_correction = false;
