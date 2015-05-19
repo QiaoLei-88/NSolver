@@ -1,7 +1,9 @@
 # Listing of Parameters
 # ---------------------
 
-set gravity = -1.0
+subsection physical parameters
+  set gravity y = -1.0
+end
 
 # The input grid 
 set mesh = slide.inp
