@@ -91,6 +91,9 @@ namespace NSFEMSolver
     // traces almost entirely of $N_2$ and $O_2$.
     static double gas_gamma;
 
+
+    static void set_parameter (const Parameters::AllParameters<dim> *const para_ptr_in);
+
     // In the following, we will need to compute the kinetic energy and the
     // pressure from a vector of conserved variables. This we can do based on
     // the energy density and the kinetic energy $\frac 12 \rho |\mathbf v|^2
@@ -278,7 +281,6 @@ namespace NSFEMSolver
     static
     void
     compute_Wminus (const Boundary::Type &boundary_kind,
-                    const Parameters::AllParameters<dim> *const parameters,
                     const Point<dim>     &normal_vector,
                     const DataVector     &Wplus,
                     const Vector<double> &boundary_values,
@@ -312,6 +314,8 @@ namespace NSFEMSolver
     static unsigned const density_component        = EquationComponents<dim>::density_component       ;
     static unsigned const energy_component         = EquationComponents<dim>::energy_component        ;
     static unsigned const pressure_component       = EquationComponents<dim>::pressure_component      ;
+
+    static Parameters::AllParameters<dim> const *parameters;
   };
 
   // Put the definition of nested class mememer function templates in header
@@ -799,7 +803,6 @@ namespace NSFEMSolver
   template <typename DataVector>
   void
   EulerEquations<dim>::compute_Wminus (const Boundary::Type &boundary_kind,
-                                       const Parameters::AllParameters<dim> *const parameters,
                                        const Point<dim>     &normal_vector,
                                        const DataVector     &Wplus,
                                        const Vector<double> &boundary_values,

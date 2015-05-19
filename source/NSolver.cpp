@@ -79,6 +79,7 @@ namespace NSFEMSolver
     CFL_number (para_ptr_in->CFL_number)
   {
     EulerEquations<dim>::gas_gamma = 1.4;
+    EulerEquations<dim>::set_parameter (parameters);
 
     verbose_cout.set_condition (parameters->output == Parameters::Solver::verbose);
 
@@ -1008,7 +1009,6 @@ namespace NSFEMSolver
         for (unsigned int q = 0; q < n_q_points; q++)
           {
             EulerEquations<dim>::compute_Wminus (parameters->boundary_conditions[boundary_id].kind,
-                                                 parameters,
                                                  fe_v.normal_vector (q),
                                                  Wplus[q],
                                                  boundary_values[q],
@@ -1016,7 +1016,6 @@ namespace NSFEMSolver
             // Here we assume that boundary type, boundary normal vector and boundary data values
             // maintain the same during time advancing.
             EulerEquations<dim>::compute_Wminus (parameters->boundary_conditions[boundary_id].kind,
-                                                 parameters,
                                                  fe_v.normal_vector (q),
                                                  Wplus_old[q],
                                                  boundary_values[q],

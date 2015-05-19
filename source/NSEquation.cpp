@@ -12,6 +12,12 @@ namespace NSFEMSolver
 {
   using namespace dealii;
 
+  template <int dim>
+  void EulerEquations<dim>::set_parameter (const Parameters::AllParameters<dim> *const para_ptr_in)
+  {
+    parameters = para_ptr_in;
+  }
+
   // @sect4{EulerEquations::compute_refinement_indicators}
 
   // In this class, we also want to specify how to refine the mesh. The
@@ -63,6 +69,10 @@ namespace NSFEMSolver
 
   template <int dim>
   double EulerEquations<dim>::gas_gamma = 1.4;
+
+  template <int dim>
+  Parameters::AllParameters<dim> const *
+  EulerEquations<dim>::parameters = 0;
 
   template class EulerEquations<2>;
 //  template struct EulerEquations<3>;
