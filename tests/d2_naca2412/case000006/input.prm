@@ -9,8 +9,6 @@ subsection physical parameters
   set moment center x       = 0.25
 end
 
-set gravity = 0.0
-
 # The input grid 
 set mesh = 2412.msh
 set mesh format = gmsh
