@@ -533,10 +533,10 @@ namespace NSFEMSolver
           }
       }
 
-    // Viscous flux has nothing to do with mass equation, at least for now.
+    // Viscous flux for mass equation, just gradient of density
     for (unsigned int d=0; d<dim; ++d)
       {
-        flux[density_component][d] = 0.0;
+        flux[density_component][d] = grad_w[density_component][d];
       }
 
     // At last deal with energy equation
@@ -563,6 +563,12 @@ namespace NSFEMSolver
                                      p_over_rho_square * grad_w[density_component][d];
       }
 
+    // Scale with parameter
+    for (unsigned int ic = 0; ic < n_components; ++ic)
+      for (unsigned int id = 0; id < dim; ++id)
+        {
+          flux[ic][id] *= parameters->diffusion_factor[ic];
+        }
   }
 
 

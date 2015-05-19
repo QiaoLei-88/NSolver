@@ -303,6 +303,14 @@ namespace NSFEMSolver
                          Patterns::Double(),
                          "predefined diffusion coefficient");
 
+      for (unsigned int di=0; di<EquationComponents<dim>::n_components; ++di)
+        {
+          prm.declare_entry ("diffusion factor for w_" + Utilities::int_to_string (di),
+                             "1.0",
+                             Patterns::Double (0),
+                             "diffusion factor for component w_" + Utilities::int_to_string (di));
+        }
+
       prm.declare_entry ("gravity", "-1.0",
                          Patterns::Double(),
                          "gravity");
@@ -412,6 +420,12 @@ namespace NSFEMSolver
 
       diffusion_power = prm.get_double ("diffusion power");
       diffusion_coefficoent = prm.get_double ("diffusion coefficient");
+
+      for (unsigned int di=0; di<EquationComponents<dim>::n_components; ++di)
+        {
+          diffusion_factor[di] = prm.get_double ("diffusion factor for w_"
+                                                 + Utilities::int_to_string (di));
+        }
 
       gravity = prm.get_double ("gravity");
 

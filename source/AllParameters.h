@@ -235,6 +235,7 @@ namespace NSFEMSolver
       };
       DiffusionType diffusion_type;
       double diffusion_coefficoent;
+      double diffusion_factor[EquationComponents<dim>::n_components];
 
       FunctionParser<dim> initial_conditions;
       BoundaryConditions  boundary_conditions[max_n_boundaries];
