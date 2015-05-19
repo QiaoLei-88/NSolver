@@ -1662,13 +1662,13 @@ namespace NSFEMSolver
     time_advance_history_file
         << "   iter     n_cell     n_dofs          time   i_step"
         << "  i_Newton    Newton_res  n_linear_iter    linear_res"
-        << "  linear_search_len  time_step_size  CFL_number"
+        << "  linear_search_len  time_step_size    CFL_number"
         << "  time_march_res"
         << '\n';
     iteration_history_file
         << "   iter     n_cell     n_dofs          time   i_step"
         << "  i_Newton    Newton_res  n_linear_iter    linear_res"
-        << "  linear_search_len  time_step_size  CFL_number"
+        << "  linear_search_len  time_step_size    CFL_number"
         << "  Newton_update_norm"
         << '\n';
 
@@ -1807,8 +1807,8 @@ namespace NSFEMSolver
                 << std::setw (13) << convergence.second << ' '
                 << std::setw (18) << linear_search_length[index_linear_search_length] << ' '
                 << std::setw (15) << time_step << ' '
-                << std::setw (17) << CFL_number << ' '
-                << std::setw (19) << newton_update_norm << ' '
+                << std::setw (13) << CFL_number << ' '
+                << std::setw (19) << newton_update_norm
                 << '\n';
             // Check result.
             if (res_norm < nonlin_iter_tolerance)
@@ -1884,7 +1884,7 @@ namespace NSFEMSolver
                 << std::setw (13) << convergence.second << ' '
                 << std::setw (18) << linear_search_length[index_linear_search_length] << ' '
                 << std::setw (15) << time_step << ' '
-                << std::setw (17) << CFL_number << ' ';
+                << std::setw (13) << CFL_number << ' ';
 
             // We only get to this point if the Newton iteration has converged, so
             // do various post convergence tasks here:
@@ -2042,9 +2042,11 @@ namespace NSFEMSolver
                  parameters->tolerance_to_switch_flux > parameters->time_march_tolerance);
 
             pcout << "  Order of time advancing L_2  norm\n   ";
+            double total_time_march_norm = 0.0;
             for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
               {
                 Utilities::MPI::sum (time_advance_l2_norm[ic], mpi_communicator);
+                total_time_march_norm += time_advance_l2_norm[ic];
                 double const log_norm = 0.5 * std::log10 (time_advance_l2_norm[ic]);
                 pcout << log_norm << ' ';
                 time_march_converged = time_march_converged &&
@@ -2052,6 +2054,8 @@ namespace NSFEMSolver
                 swith_flux = swith_flux &&
                              (log_norm < parameters->tolerance_to_switch_flux);
               }
+            time_advance_history_file << std::setw (15)
+                                      << std::sqrt (total_time_march_norm) << '\n';
             pcout << std::endl;
 
             if (swith_flux)
