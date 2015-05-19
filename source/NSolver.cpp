@@ -273,7 +273,7 @@ namespace NSFEMSolver
                   min_time_step = std::min (min_time_step, cell_size / velocity+sound_speed);
                 }
             }
-        time_step = Utilities::MPI::min_max_avg (min_time_step, mpi_communicator).min * CFL_number;
+        time_step = Utilities::MPI::min (min_time_step, mpi_communicator) * CFL_number;
       }
   }
 
