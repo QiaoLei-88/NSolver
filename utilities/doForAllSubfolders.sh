@@ -6,7 +6,9 @@
 WPATH=`pwd`
 
 for fold in $(ls -d */); do
-  #git rm ${fold}/screen.log.reference
-  #git add ${fold}/iter_history.out.reference
+  pushd .
+  cd $fold
+#  patch input.prm < ../input.patch
+  popd
 done
 
