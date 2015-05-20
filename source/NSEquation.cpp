@@ -36,11 +36,14 @@ namespace NSFEMSolver
   // indicators, but this one does, and it is easy to compute:
   template <int dim>
   void
-  EulerEquations<dim>::compute_refinement_indicators (const DoFHandler<dim> &dof_handler,
-                                                      const Mapping<dim>    &mapping,
-                                                      const NSVector  &solution,
-                                                      Vector<float>        &refinement_indicators)
+  EulerEquations<dim>::compute_refinement_indicators (DoFHandler<dim> const &dof_handler,
+                                                      Mapping<dim>    const &mapping,
+                                                      NSVector        const &solution,
+                                                      Vector<float>         &refinement_indicators,
+                                                      ComponentMask   const &component_mask)
   {
+    Assert (component_mask.size() >= n_components, ExcMessage ("component_mask doesn't have enough elements"));
+
     const unsigned int dofs_per_cell = dof_handler.get_fe().dofs_per_cell;
     std::vector<unsigned int> dofs (dofs_per_cell);
 
@@ -61,9 +64,15 @@ namespace NSFEMSolver
           fe_v.reinit (cell);
           fe_v.get_function_gradients (solution, dU);
 
-          refinement_indicators (cell_no)
-            = static_cast<float> (std::log (1.0+std::sqrt (dU[0][density_component] *
-                                                           dU[0][density_component])));
+          refinement_indicators[cell_no] = 0.0;
+          for (unsigned int ic=0; ic<n_components; ++ic)
+            {
+              if (component_mask[ic])
+                {
+                  refinement_indicators[cell_no] +=
+                    static_cast<float> (std::log (1.0+std::sqrt (dU[0][ic]*dU[0][ic])));
+                }
+            }
         }
   }
 

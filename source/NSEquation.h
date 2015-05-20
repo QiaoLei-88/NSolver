@@ -304,10 +304,11 @@ namespace NSFEMSolver
     // indicators, but this one does, and it is easy to compute:
     static
     void
-    compute_refinement_indicators (const DoFHandler<dim> &dof_handler,
-                                   const Mapping<dim>    &mapping,
-                                   const NSVector        &solution,
-                                   Vector<float>         &refinement_indicators);
+    compute_refinement_indicators (DoFHandler<dim> const &dof_handler,
+                                   Mapping<dim>    const &mapping,
+                                   NSVector        const &solution,
+                                   Vector<float>         &refinement_indicators,
+                                   ComponentMask   const &component_mask);
   private:
     static unsigned const n_components             = EquationComponents<dim>::n_components            ;
     static unsigned const first_momentum_component = EquationComponents<dim>::first_momentum_component;

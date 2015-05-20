@@ -1225,7 +1225,8 @@ namespace NSFEMSolver
     EulerEquations<dim>::compute_refinement_indicators (dof_handler,
                                                         mapping,
                                                         tmp_vector,
-                                                        refinement_indicators);
+                                                        refinement_indicators,
+                                                        parameters->component_mask);
 
     typename DoFHandler<dim>::active_cell_iterator
     cell = dof_handler.begin_active(),
