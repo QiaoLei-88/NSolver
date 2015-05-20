@@ -107,6 +107,9 @@ namespace NSFEMSolver
         prm.declare_entry ("refinement", "true",
                            Patterns::Bool(),
                            "Whether to perform mesh refinement or not");
+        prm.declare_entry ("refinement indicator", "Gradient",
+                           Patterns::Selection ("Gradient|Kelly"),
+                           "type of refinement indicator");
         prm.declare_entry ("refine fraction", "0.1",
                            Patterns::Double(),
                            "Fraction of gird refinement");
@@ -129,6 +132,21 @@ namespace NSFEMSolver
       prm.enter_subsection ("refinement");
       {
         do_refine     = prm.get_bool ("refinement");
+        {
+          const std::string buff = prm.get ("refinement indicator");
+          if (buff == "Gradient")
+            {
+              refinement_indicator = Gradient;
+            }
+          else if (buff == "Kelly")
+            {
+              refinement_indicator = Kelly;
+            }
+          else
+            {
+              AssertThrow (false, ExcNotImplemented());
+            }
+        }
         refine_fraction  = prm.get_double ("refine fraction");
         coarsen_fraction = prm.get_double ("coarsen fraction");
         max_cells        = prm.get_double ("max cells");

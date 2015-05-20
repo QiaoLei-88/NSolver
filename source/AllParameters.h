@@ -93,7 +93,14 @@ namespace NSFEMSolver
     template<int dim>
     struct Refinement
     {
+      enum Indicator
+      {
+        Gradient,
+        Kelly
+      };
+
       bool do_refine;
+      Indicator refinement_indicator;
 
       double refine_fraction;
       double coarsen_fraction;

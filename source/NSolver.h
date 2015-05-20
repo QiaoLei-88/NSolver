@@ -44,6 +44,7 @@
 
 #include <deal.II/numerics/data_out.h>
 #include <deal.II/numerics/vector_tools.h>
+#include <deal.II/numerics/error_estimator.h>
 
 // Header files for MPI parallel computing
 #include <deal.II/base/index_set.h>

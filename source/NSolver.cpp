@@ -1219,14 +1219,37 @@ namespace NSFEMSolver
   {
     Vector<float> refinement_indicators (triangulation.n_active_cells());
     NSVector      tmp_vector;
-
     tmp_vector.reinit (current_solution, true);
     tmp_vector = predictor;
-    EulerEquations<dim>::compute_refinement_indicators (dof_handler,
-                                                        mapping,
-                                                        tmp_vector,
-                                                        refinement_indicators,
-                                                        parameters->component_mask);
+
+    switch (parameters->refinement_indicator)
+      {
+      case Parameters::Refinement<dim>::Gradient:
+      {
+
+        EulerEquations<dim>::compute_refinement_indicators (dof_handler,
+                                                            mapping,
+                                                            tmp_vector,
+                                                            refinement_indicators,
+                                                            parameters->component_mask);
+        break;
+      }
+      case Parameters::Refinement<dim>::Kelly:
+      {
+        KellyErrorEstimator<dim>::estimate (dof_handler,
+                                            QGauss<dim-1> (3),
+                                            typename FunctionMap<dim>::type(),
+                                            tmp_vector,
+                                            refinement_indicators,
+                                            parameters->component_mask);
+        break;
+      }
+      default:
+      {
+        Assert (false, ExcNotImplemented());
+        break;
+      }
+      }
 
     double fraction_to_refine = parameters->refine_fraction;
     double fraction_to_coarsen = parameters->coarsen_fraction;
