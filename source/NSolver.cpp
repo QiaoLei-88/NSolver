@@ -1218,7 +1218,7 @@ namespace NSFEMSolver
   template <int dim>
   void
   NSolver<dim>::
-  compute_refinement_indicators (Vector<double>  &refinement_indicators) const
+  compute_refinement_indicators (Vector<float>  &refinement_indicators) const
   {
     NSVector      tmp_vector;
     tmp_vector.reinit (current_solution, true);
@@ -1241,7 +1241,7 @@ namespace NSFEMSolver
   NSolver<dim>::refine_grid()
   {
 
-    Vector<double> refinement_indicators (triangulation.n_active_cells());
+    Vector<float> refinement_indicators (triangulation.n_active_cells());
     compute_refinement_indicators (refinement_indicators);
 
     typename DoFHandler<dim>::active_cell_iterator

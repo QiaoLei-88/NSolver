@@ -306,8 +306,8 @@ namespace NSFEMSolver
     void
     compute_refinement_indicators (const DoFHandler<dim> &dof_handler,
                                    const Mapping<dim>    &mapping,
-                                   const NSVector &solution,
-                                   Vector<double>        &refinement_indicators);
+                                   const NSVector        &solution,
+                                   Vector<float>         &refinement_indicators);
   private:
     static unsigned const n_components             = EquationComponents<dim>::n_components            ;
     static unsigned const first_momentum_component = EquationComponents<dim>::first_momentum_component;

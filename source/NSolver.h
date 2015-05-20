@@ -152,7 +152,7 @@ namespace NSFEMSolver
 
     void integrate_force (Parameters::AllParameters<dim> const *const parameters,
                           WallForce &wall_force) const;
-    void compute_refinement_indicators (Vector<double> &indicator) const;
+    void compute_refinement_indicators (Vector<float> &indicator) const;
     void refine_grid();
 
     void output_results() const;

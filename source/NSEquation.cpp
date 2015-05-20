@@ -39,7 +39,7 @@ namespace NSFEMSolver
   EulerEquations<dim>::compute_refinement_indicators (const DoFHandler<dim> &dof_handler,
                                                       const Mapping<dim>    &mapping,
                                                       const NSVector  &solution,
-                                                      Vector<double>        &refinement_indicators)
+                                                      Vector<float>        &refinement_indicators)
   {
     const unsigned int dofs_per_cell = dof_handler.get_fe().dofs_per_cell;
     std::vector<unsigned int> dofs (dofs_per_cell);
@@ -62,9 +62,8 @@ namespace NSFEMSolver
           fe_v.get_function_gradients (solution, dU);
 
           refinement_indicators (cell_no)
-            = std::log (1+
-                        std::sqrt (dU[0][density_component] *
-                                   dU[0][density_component]));
+            = static_cast<float> (std::log (1.0+std::sqrt (dU[0][density_component] *
+                                                           dU[0][density_component])));
         }
   }
 
