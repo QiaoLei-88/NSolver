@@ -92,7 +92,14 @@ namespace NSFEMSolver
     }
 
 //Refinement
-    void Refinement::declare_parameters (ParameterHandler &prm)
+    template<int dim>
+    Refinement<dim>::Refinement()
+      :
+      component_mask (EquationComponents<dim>::n_components, true)
+    {}
+
+    template<int dim>
+    void Refinement<dim>::declare_parameters (ParameterHandler &prm)
     {
 
       prm.enter_subsection ("refinement");
@@ -115,18 +122,28 @@ namespace NSFEMSolver
         prm.declare_entry ("shock levels", "3.0",
                            Patterns::Double(),
                            "number of shock refinement levels");
+        prm.declare_entry ("component mask", "65535",
+                           Patterns::Integer (0),
+                           "Equation components want to use in Kelly error estimator");
       }
       prm.leave_subsection();
     }
 
-
-    void Refinement::parse_parameters (ParameterHandler &prm)
+    template<int dim>
+    void Refinement<dim>::parse_parameters (ParameterHandler &prm)
     {
       prm.enter_subsection ("refinement");
       {
         do_refine     = prm.get_bool ("refinement");
         shock_val     = prm.get_double ("shock value");
         shock_levels  = prm.get_double ("shock levels");
+        {
+          unsigned const mask_int = prm.get_integer ("component mask");
+          for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
+            {
+              component_mask.set (ic, mask_int & (1<<ic));
+            }
+        }
       }
       prm.leave_subsection();
     }
@@ -355,7 +372,7 @@ namespace NSFEMSolver
       Parameters::TimeStepping::declare_parameters (prm);
       Parameters::PhysicalParameters::declare_parameters (prm);
       Parameters::Solver::declare_parameters (prm);
-      Parameters::Refinement::declare_parameters (prm);
+      Parameters::Refinement<dim>::declare_parameters (prm);
       Parameters::Flux::declare_parameters (prm);
       Parameters::Output::declare_parameters (prm);
       Parameters::FEParameters::declare_parameters (prm);
@@ -494,7 +511,7 @@ namespace NSFEMSolver
 
       Parameters::TimeStepping::parse_parameters (prm);
       Parameters::Solver::parse_parameters (prm);
-      Parameters::Refinement::parse_parameters (prm);
+      Parameters::Refinement<dim>::parse_parameters (prm);
       Parameters::Flux::parse_parameters (prm);
       Parameters::Output::parse_parameters (prm);
       Parameters::FEParameters::parse_parameters (prm);

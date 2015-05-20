@@ -22,6 +22,8 @@
 
 #include <deal.II/base/parameter_handler.h>
 #include <deal.II/base/function_parser.h>
+#include <deal.II/fe/component_mask.h>
+
 #include "FEParameters.h"
 #include "PhysicalParameters.h"
 #include "BoundaryType.h"
@@ -88,12 +90,16 @@ namespace NSFEMSolver
     // Similarly, here are a few parameters that determine how the mesh is to
     // be refined (and if it is to be refined at all). For what exactly the
     // shock parameters do, see the mesh refinement functions further down.
+    template<int dim>
     struct Refinement
     {
       bool do_refine;
       double shock_val;
       double shock_levels;
 
+      ComponentMask component_mask;
+
+      Refinement();
       static void declare_parameters (ParameterHandler &prm);
       void parse_parameters (ParameterHandler &prm);
     };
@@ -191,7 +197,7 @@ namespace NSFEMSolver
       public PhysicalParameters,
       public TimeStepping,
       public Solver,
-      public Refinement,
+      public Refinement<dim>,
       public Flux,
       public Output,
       public FEParameters
