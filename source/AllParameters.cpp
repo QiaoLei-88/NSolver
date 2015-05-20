@@ -113,9 +113,9 @@ namespace NSFEMSolver
         prm.declare_entry ("coarsen fraction", "0.1",
                            Patterns::Double(),
                            "Fraction of grid coarsening");
-        prm.declare_entry ("max elements", "1000000",
+        prm.declare_entry ("max cells", "-4.0",
                            Patterns::Double(),
-                           "maximum number of elements");
+                           "maximum number (positive value) or maximum number ratio (negative value) of cells");
         prm.declare_entry ("component mask", "65535",
                            Patterns::Integer (0),
                            "Equation components want to use in Kelly error estimator");
@@ -131,6 +131,7 @@ namespace NSFEMSolver
         do_refine     = prm.get_bool ("refinement");
         refine_fraction  = prm.get_double ("refine fraction");
         coarsen_fraction = prm.get_double ("coarsen fraction");
+        max_cells        = prm.get_double ("max cells");
         {
           unsigned const mask_int = prm.get_integer ("component mask");
           for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)

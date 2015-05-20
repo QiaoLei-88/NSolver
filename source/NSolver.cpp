@@ -1231,6 +1231,89 @@ namespace NSFEMSolver
     double fraction_to_refine = parameters->refine_fraction;
     double fraction_to_coarsen = parameters->coarsen_fraction;
 
+    // Adjust refine and coarsen fraction
+    double const max_n_global_cells = parameters->max_cells;
+    double const n_global_cells = triangulation.n_global_active_cells();
+
+    double refine_cells  = fraction_to_refine*n_global_cells;
+    double coarsen_cells = fraction_to_coarsen*n_global_cells;
+    double const max_children_per_cell = GeometryInfo<dim>::max_children_per_cell;
+
+
+    //
+    // TODO: This algorithm will freeze grid adaptation when number of cells reached
+    // its upper limit. However, the real goal of mesh adaptation -- an
+    // equilibrated error distribution -- is still not guaranteed at this point.
+    // Since there is already a function called refine_and_coarsen_optimize
+    // designed for this goal but without maximum cell number limit. Hence,
+    // I prefer to enable maximum cell number limit for
+    // refine_and_coarsen_optimize and make it working in parallel rather than
+    // tune the algorithm for refine_and_coarsen_fixed_number.
+    //
+    // first we have to see whether we
+    // currently already exceed the target
+    // number of cells
+    if (n_global_cells >= max_n_global_cells)
+      {
+        // if yes, then we need to stop
+        // refining cells and instead try to
+        // only coarsen as many as it would
+        // take to get to the target
+
+        // as we have no information on cells
+        // being refined isotropically or
+        // anisotropically, assume isotropic
+        // refinement here, though that may
+        // result in a worse approximation
+        refine_cells  = 0;
+        coarsen_cells = (n_global_cells - max_n_global_cells) *
+                        max_children_per_cell/
+                        (max_children_per_cell - 1);
+      }
+    // otherwise, see if we would exceed the
+    // maximum desired number of cells with the
+    // number of cells that are likely going to
+    // result from refinement. here, each cell
+    // to be refined is replaced by
+    // C=GeometryInfo<dim>::max_children_per_cell
+    // new cells, i.e. there will be C-1 more
+    // cells than before. similarly, C cells
+    // will be replaced by 1
+
+    // again, this is true for isotropically
+    // refined cells. we take this as an
+    // approximation of a mixed refinement.
+    else if (n_global_cells
+             + refine_cells * (max_children_per_cell - 1)
+             - (coarsen_cells * (max_children_per_cell - 1) /
+                max_children_per_cell)
+             >
+             max_n_global_cells)
+      {
+        // we have to adjust the
+        // fractions. assume we want
+        // alpha*refine_fraction and
+        // alpha*coarsen_fraction as new
+        // fractions and the resulting number
+        // of cells to be equal to
+        // max_n_cells. this leads to the
+        // following equation for lambda
+        const double alpha
+          =
+            (max_n_global_cells - n_global_cells)
+            /
+            (refine_cells * (max_children_per_cell - 1)
+             - (coarsen_cells *
+                (max_children_per_cell - 1) /
+                max_children_per_cell));
+        refine_cells  *= alpha;
+        coarsen_cells *= alpha;
+      }
+
+    fraction_to_refine  = refine_cells/n_global_cells;
+    fraction_to_coarsen = coarsen_cells/n_global_cells;
+
+
     parallel::distributed::GridRefinement::
     refine_and_coarsen_fixed_number (triangulation,
                                      refinement_indicators,
@@ -1443,6 +1526,17 @@ namespace NSFEMSolver
     }
     computing_timer.leave_subsection ("0:Read grid");
     computing_timer.enter_subsection ("1:Initialization");
+
+    if (parameters->max_cells < 0.0)
+      {
+        parameters->max_cells = std::max (1.0, - (parameters->max_cells));
+        parameters->max_cells *= triangulation.n_global_active_cells();
+      }
+    else
+      {
+        parameters->max_cells = std::max (parameters->max_cells,
+                                          static_cast<double> (triangulation.n_global_active_cells()));
+      }
 
     std::ofstream iteration_history_file_std;
     std::ofstream time_advance_history_file_std;

@@ -98,6 +98,16 @@ namespace NSFEMSolver
       double refine_fraction;
       double coarsen_fraction;
 
+      /**
+       * upper limit of number of cells during mesh adaptation.
+       * If max_cells is provided with a negative value, its absolute value will
+       * be interpreted as multiplier to calculate the cell number limit.
+       * Note that the initial mesh can not be coarsen. Incompatible input value
+       * of max_cells will be ignored without warning.
+       * By default, number of cell can increase to four times of initial mesh.
+       */
+      double max_cells;
+
       ComponentMask component_mask;
 
       Refinement();
