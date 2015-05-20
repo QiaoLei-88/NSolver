@@ -1208,29 +1208,6 @@ namespace NSFEMSolver
     return std::pair<unsigned int, double> (0,0);
   }
 
-
-  // @sect4{NSolver::compute_refinement_indicators}
-
-  // This function is real simple: We don't pretend that we know here what a
-  // good refinement indicator would be. Rather, we assume that the
-  // <code>EulerEquation</code> class would know about this, and so we simply
-  // defer to the respective function we've implemented there:
-  template <int dim>
-  void
-  NSolver<dim>::
-  compute_refinement_indicators (Vector<float>  &refinement_indicators) const
-  {
-    NSVector      tmp_vector;
-    tmp_vector.reinit (current_solution, true);
-    tmp_vector = predictor;
-    EulerEquations<dim>::compute_refinement_indicators (dof_handler,
-                                                        mapping,
-                                                        tmp_vector,
-                                                        refinement_indicators);
-  }
-
-
-
   // @sect4{NSolver::refine_grid}
 
   // Here, we use the refinement indicators computed before and refine the
@@ -1240,9 +1217,15 @@ namespace NSFEMSolver
   void
   NSolver<dim>::refine_grid()
   {
-
     Vector<float> refinement_indicators (triangulation.n_active_cells());
-    compute_refinement_indicators (refinement_indicators);
+    NSVector      tmp_vector;
+
+    tmp_vector.reinit (current_solution, true);
+    tmp_vector = predictor;
+    EulerEquations<dim>::compute_refinement_indicators (dof_handler,
+                                                        mapping,
+                                                        tmp_vector,
+                                                        refinement_indicators);
 
     typename DoFHandler<dim>::active_cell_iterator
     cell = dof_handler.begin_active(),
@@ -1273,7 +1256,6 @@ namespace NSFEMSolver
     // three lines simply re-set the sizes of some other vectors to the now
     // correct size:
 
-    NSVector      tmp_vector;
     tmp_vector.reinit (old_solution, true);
     tmp_vector = predictor;
     // transfer_in needs vectors with ghost cells.
