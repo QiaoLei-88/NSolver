@@ -94,8 +94,9 @@ namespace NSFEMSolver
     struct Refinement
     {
       bool do_refine;
-      double shock_val;
-      double shock_levels;
+
+      double refine_fraction;
+      double coarsen_fraction;
 
       ComponentMask component_mask;
 

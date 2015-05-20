@@ -107,21 +107,15 @@ namespace NSFEMSolver
         prm.declare_entry ("refinement", "true",
                            Patterns::Bool(),
                            "Whether to perform mesh refinement or not");
-        prm.declare_entry ("refinement fraction", "0.1",
+        prm.declare_entry ("refine fraction", "0.1",
                            Patterns::Double(),
-                           "Fraction of high refinement");
-        prm.declare_entry ("unrefinement fraction", "0.1",
+                           "Fraction of gird refinement");
+        prm.declare_entry ("coarsen fraction", "0.1",
                            Patterns::Double(),
-                           "Fraction of low unrefinement");
+                           "Fraction of grid coarsening");
         prm.declare_entry ("max elements", "1000000",
                            Patterns::Double(),
                            "maximum number of elements");
-        prm.declare_entry ("shock value", "4.0",
-                           Patterns::Double(),
-                           "value for shock indicator");
-        prm.declare_entry ("shock levels", "3.0",
-                           Patterns::Double(),
-                           "number of shock refinement levels");
         prm.declare_entry ("component mask", "65535",
                            Patterns::Integer (0),
                            "Equation components want to use in Kelly error estimator");
@@ -135,8 +129,8 @@ namespace NSFEMSolver
       prm.enter_subsection ("refinement");
       {
         do_refine     = prm.get_bool ("refinement");
-        shock_val     = prm.get_double ("shock value");
-        shock_levels  = prm.get_double ("shock levels");
+        refine_fraction  = prm.get_double ("refine fraction");
+        coarsen_fraction = prm.get_double ("coarsen fraction");
         {
           unsigned const mask_int = prm.get_integer ("component mask");
           for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)

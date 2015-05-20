@@ -1228,27 +1228,14 @@ namespace NSFEMSolver
                                                         refinement_indicators,
                                                         parameters->component_mask);
 
-    typename DoFHandler<dim>::active_cell_iterator
-    cell = dof_handler.begin_active(),
-    endc = dof_handler.end();
+    double fraction_to_refine = parameters->refine_fraction;
+    double fraction_to_coarsen = parameters->coarsen_fraction;
 
-    for (unsigned int cell_no=0; cell!=endc; ++cell, ++cell_no)
-      if (cell->is_locally_owned())
-        {
-          cell->clear_coarsen_flag();
-          cell->clear_refine_flag();
-
-          if ((cell->level() < parameters->shock_levels) &&
-              (std::fabs (refinement_indicators (cell_no)) > parameters->shock_val))
-            {
-              cell->set_refine_flag();
-            }
-          else if ((cell->level() > 0) &&
-                   (std::fabs (refinement_indicators (cell_no)) < 0.75*parameters->shock_val))
-            {
-              cell->set_coarsen_flag();
-            }
-        }
+    parallel::distributed::GridRefinement::
+    refine_and_coarsen_fixed_number (triangulation,
+                                     refinement_indicators,
+                                     fraction_to_refine,
+                                     fraction_to_coarsen);
 
     // Then we need to transfer the various solution vectors from the old to
     // the new grid while we do the refinement. The SolutionTransfer class is
@@ -1491,17 +1478,15 @@ namespace NSFEMSolver
     current_solution = old_solution;
     predictor = old_solution;
 
-    if (parameters->do_refine == true)
-      for (unsigned int i=0; i<parameters->shock_levels; ++i)
-        {
-          refine_grid();
-
-          VectorTools::interpolate (dof_handler,
-                                    parameters->initial_conditions, locally_owned_solution);
-          old_solution = locally_owned_solution;
-          current_solution = old_solution;
-          predictor = old_solution;
-        }
+    if (parameters->do_refine)
+      {
+        refine_grid();
+        VectorTools::interpolate (dof_handler,
+                                  parameters->initial_conditions, locally_owned_solution);
+        old_solution = locally_owned_solution;
+        current_solution = old_solution;
+        predictor = old_solution;
+      }
 
     check_negative_density_pressure();
     calc_time_step();
