@@ -1209,14 +1209,9 @@ namespace NSFEMSolver
     return std::pair<unsigned int, double> (0,0);
   }
 
-  // @sect4{NSolver::refine_grid}
-
-  // Here, we use the refinement indicators computed before and refine the
-  // mesh. At the beginning, we loop over all cells and mark those that we
-  // think should be refined:
   template <int dim>
   void
-  NSolver<dim>::refine_grid()
+  NSolver<dim>::compute_refinement_indicators()
   {
     NSVector      tmp_vector;
     tmp_vector.reinit (current_solution, true);
@@ -1250,7 +1245,16 @@ namespace NSFEMSolver
         break;
       }
       }
+  }
+  // @sect4{NSolver::refine_grid}
 
+  // Here, we use the refinement indicators computed before and refine the
+  // mesh. At the beginning, we loop over all cells and mark those that we
+  // think should be refined:
+  template <int dim>
+  void
+  NSolver<dim>::refine_grid()
+  {
     double fraction_to_refine = parameters->refine_fraction;
     double fraction_to_coarsen = parameters->coarsen_fraction;
 
@@ -1350,6 +1354,7 @@ namespace NSFEMSolver
     // three lines simply re-set the sizes of some other vectors to the now
     // correct size:
 
+    NSVector tmp_vector;
     tmp_vector.reinit (old_solution, true);
     tmp_vector = predictor;
     // transfer_in needs vectors with ghost cells.
@@ -1880,6 +1885,11 @@ namespace NSFEMSolver
             terminate_time_stepping = terminate_time_stepping ||
                                       (parameters->is_steady &&
                                        n_total_inter >= parameters -> max_Newton_iter);
+
+            if (parameters->do_refine == true)
+              {
+                compute_refinement_indicators();
+              }
 
             if (parameters->output_step < 0)
               {
