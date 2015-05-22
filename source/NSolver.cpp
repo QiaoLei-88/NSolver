@@ -1255,97 +1255,79 @@ namespace NSFEMSolver
   void
   NSolver<dim>::refine_grid()
   {
-    double fraction_to_refine = parameters->refine_fraction;
-    double fraction_to_coarsen = parameters->coarsen_fraction;
+    double top_fraction = parameters->refine_fraction;
+    double bottom_fraction = parameters->coarsen_fraction;
+    const double max_cell_number = parameters->max_cells;
+    double const refine_priority = 1.0;
+
+    // Convert variables to double to avoid annoying type casting and round error.
+    const double current_cell_number = static_cast<double> (triangulation.n_global_active_cells());
+    // const double max_cell_number = parameters->max_cells;
+
+    // as we have no information on cells being refined isotropically or
+    // anisotropically, assume isotropic refinement here, though that may
+    // result in a worse approximation
+    const double cell_increase_on_refine  = GeometryInfo<dim>::max_children_per_cell - 1.0;
+    const double cell_decrease_on_coarsen = 1.0 - 1.0/GeometryInfo<dim>::max_children_per_cell;
+
+    // first we estimate the cell number after refinement and coarsening along the
+    // the requested fractions.
+    const double refine_cells_requested  = top_fraction * current_cell_number;
+    const double coarsen_cells_requested = bottom_fraction * current_cell_number;
+    const double n_cell_after_adaptation = current_cell_number +
+                                           refine_cells_requested * cell_increase_on_refine -
+                                           coarsen_cells_requested * cell_decrease_on_coarsen;
 
     // Adjust refine and coarsen fraction
-    double const max_n_global_cells = parameters->max_cells;
-    double const n_global_cells = triangulation.n_global_active_cells();
-
-    double refine_cells  = fraction_to_refine*n_global_cells;
-    double coarsen_cells = fraction_to_coarsen*n_global_cells;
-    double const max_children_per_cell = GeometryInfo<dim>::max_children_per_cell;
-
-
-    //
-    // TODO: This algorithm will freeze grid adaptation when number of cells reached
-    // its upper limit. However, the real goal of mesh adaptation -- an
-    // equilibrated error distribution -- is still not guaranteed at this point.
-    // Since there is already a function called refine_and_coarsen_optimize
-    // designed for this goal but without maximum cell number limit. Hence,
-    // I prefer to enable maximum cell number limit for
-    // refine_and_coarsen_optimize and make it working in parallel rather than
-    // tune the algorithm for refine_and_coarsen_fixed_number.
-    //
-    // first we have to see whether we
-    // currently already exceed the target
-    // number of cells
-    if (n_global_cells >= max_n_global_cells)
+    if (n_cell_after_adaptation > max_cell_number)
       {
-        // if yes, then we need to stop
-        // refining cells and instead try to
-        // only coarsen as many as it would
-        // take to get to the target
+        // Try lower extreme of N_r at minimum N_c, and limit the result from below
+        // with its lower constraint. Limiting the result from above is not necessary
+        // at this point since we are already inside the if block.
+        const double refine_cells_min = std::max (
+                                          (max_cell_number - current_cell_number + coarsen_cells_requested*
+                                           cell_decrease_on_coarsen)/cell_increase_on_refine
+                                          ,
+                                          0.0);
+        // Lower extreme of N_c is explicit.
+        const double coarsen_cells_min = coarsen_cells_requested;
 
-        // as we have no information on cells
-        // being refined isotropically or
-        // anisotropically, assume isotropic
-        // refinement here, though that may
-        // result in a worse approximation
-        refine_cells  = 0;
-        coarsen_cells = (n_global_cells - max_n_global_cells) *
-                        max_children_per_cell/
-                        (max_children_per_cell - 1);
+
+        // Try upper extreme of N_r at maximum N_c = N - N_r, and limit the result
+        // from both above and below.
+        const double refine_cells_max = std::max (
+                                          std::min (
+                                            (max_cell_number - (1.0-cell_decrease_on_coarsen) *
+                                             current_cell_number)/ (cell_increase_on_refine+cell_decrease_on_coarsen)
+                                            ,
+                                            refine_cells_requested)
+                                          ,
+                                          0.0);
+        // Solve equation (1) with N_r = max(N_r) for upper extreme of N_c, and limit the result
+        // from above.
+        const double coarsen_cells_max = std::min (
+                                           (current_cell_number + refine_cells_max * cell_increase_on_refine -
+                                            max_cell_number)/cell_decrease_on_coarsen
+                                           ,
+                                           current_cell_number - refine_cells_max);
+
+        // Interpolate between the two extremes
+        const double refine_cells_actual =
+          (1.0 - refine_priority) * refine_cells_min
+          +      refine_priority  * refine_cells_max;
+        const double coarsen_cells_actual =
+          (1.0 - refine_priority) * coarsen_cells_min
+          +      refine_priority  * coarsen_cells_max;
+
+        top_fraction = refine_cells_actual/current_cell_number;
+        bottom_fraction = coarsen_cells_actual/current_cell_number;
       }
-    // otherwise, see if we would exceed the
-    // maximum desired number of cells with the
-    // number of cells that are likely going to
-    // result from refinement. here, each cell
-    // to be refined is replaced by
-    // C=GeometryInfo<dim>::max_children_per_cell
-    // new cells, i.e. there will be C-1 more
-    // cells than before. similarly, C cells
-    // will be replaced by 1
-
-    // again, this is true for isotropically
-    // refined cells. we take this as an
-    // approximation of a mixed refinement.
-    else if (n_global_cells
-             + refine_cells * (max_children_per_cell - 1)
-             - (coarsen_cells * (max_children_per_cell - 1) /
-                max_children_per_cell)
-             >
-             max_n_global_cells)
-      {
-        // we have to adjust the
-        // fractions. assume we want
-        // alpha*refine_fraction and
-        // alpha*coarsen_fraction as new
-        // fractions and the resulting number
-        // of cells to be equal to
-        // max_n_cells. this leads to the
-        // following equation for lambda
-        const double alpha
-          =
-            (max_n_global_cells - n_global_cells)
-            /
-            (refine_cells * (max_children_per_cell - 1)
-             - (coarsen_cells *
-                (max_children_per_cell - 1) /
-                max_children_per_cell));
-        refine_cells  *= alpha;
-        coarsen_cells *= alpha;
-      }
-
-    fraction_to_refine  = refine_cells/n_global_cells;
-    fraction_to_coarsen = coarsen_cells/n_global_cells;
-
 
     parallel::distributed::GridRefinement::
     refine_and_coarsen_fixed_number (triangulation,
                                      refinement_indicators,
-                                     fraction_to_refine,
-                                     fraction_to_coarsen);
+                                     top_fraction,
+                                     bottom_fraction);
 
     // Then we need to transfer the various solution vectors from the old to
     // the new grid while we do the refinement. The SolutionTransfer class is
