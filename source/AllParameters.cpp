@@ -116,6 +116,12 @@ namespace NSFEMSolver
         prm.declare_entry ("coarsen fraction", "0.1",
                            Patterns::Double(),
                            "Fraction of grid coarsening");
+        prm.declare_entry ("shock value", "4.0",
+                           Patterns::Double(),
+                           "value for shock indicator");
+        prm.declare_entry ("shock levels", "3.0",
+                           Patterns::Double(),
+                           "number of shock refinement levels");
         prm.declare_entry ("max cells", "-4.0",
                            Patterns::Double(),
                            "maximum number (positive value) or maximum number ratio (negative value) of cells");
@@ -157,6 +163,8 @@ namespace NSFEMSolver
               component_mask.set (ic, mask_int & (1<<ic));
             }
         }
+        shock_val     = prm.get_double ("shock value");
+        shock_levels  = prm.get_double ("shock levels");
       }
       prm.leave_subsection();
     }
