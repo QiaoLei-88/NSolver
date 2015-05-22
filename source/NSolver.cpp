@@ -1426,6 +1426,12 @@ namespace NSFEMSolver
                                 DataOut<dim>::type_cell_data);
     }
     {
+      const std::string data_name ("refinement_indicators");
+      data_out.add_data_vector (refinement_indicators,
+                                data_name,
+                                DataOut<dim>::type_cell_data);
+    }
+    {
       AssertThrow (dim <= 3, ExcNotImplemented());
       char prefix[3][4] = {"1st", "2nd", "3rd"};
 
