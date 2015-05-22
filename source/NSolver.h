@@ -216,6 +216,7 @@ namespace NSFEMSolver
 
     Vector<double>       entropy_viscosity;
     Vector<double>       cellSize_viscosity;
+    Vector<float>        refinement_indicators;
 
     // This final set of member variables (except for the object holding all
     // run-time parameters at the very bottom and a screen output stream that

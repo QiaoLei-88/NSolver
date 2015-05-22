@@ -201,6 +201,7 @@ namespace NSFEMSolver
 
     entropy_viscosity.reinit (triangulation.n_active_cells());
     cellSize_viscosity.reinit (triangulation.n_active_cells());
+    refinement_indicators.reinit (triangulation.n_active_cells());
 
     TrilinosWrappers::SparsityPattern sparsity_pattern (locally_owned_dofs,
                                                         mpi_communicator);
@@ -1217,7 +1218,6 @@ namespace NSFEMSolver
   void
   NSolver<dim>::refine_grid()
   {
-    Vector<float> refinement_indicators (triangulation.n_active_cells());
     NSVector      tmp_vector;
     tmp_vector.reinit (current_solution, true);
     tmp_vector = predictor;
