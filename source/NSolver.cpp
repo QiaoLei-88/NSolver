@@ -217,6 +217,35 @@ namespace NSFEMSolver
                                        /* reversed_numbering = */ true);
         break;
       }
+      case Parameters::AllParameters<dim>::RCM_WithStartPoint :
+      {
+        std::vector<types::global_dof_index> dof_indices (fe.dofs_per_cell);
+        Point<dim> target_point;
+        for (unsigned int id=0; id<dim; ++id)
+          {
+            target_point[id] = parameters->renumber_start_point[id];
+          }
+
+        typename DoFHandler<dim>::active_cell_iterator
+        cell = dof_handler.begin_active(),
+        endc = dof_handler.end();
+        unsigned int cell_index (0);
+        for (; cell!=endc; ++cell, ++cell_index)
+          if (cell->is_locally_owned())
+            {
+              if (target_point.distance (cell->center()) < 0.01)
+                {
+                  cell->get_dof_indices (dof_indices);
+                  break;
+                }
+            }
+
+        DoFRenumbering::Cuthill_McKee (dof_handler,
+                                       /* reversed_numbering = */ true,
+                                       /* use_constraints = */    false ,
+                                       /* starting_indices */     dof_indices);
+        break;
+      }
       default:
       {
         Assert (false, ExcNotImplemented());

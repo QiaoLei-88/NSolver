@@ -264,7 +264,8 @@ namespace NSFEMSolver
       enum RenumberDofs
       {
         None,
-        RCM
+        RCM,
+        RCM_WithStartPoint
       };
       RenumberDofs renumber_dofs;
       Point<3> renumber_start_point;

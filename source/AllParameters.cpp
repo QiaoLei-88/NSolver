@@ -343,7 +343,7 @@ namespace NSFEMSolver
 
 
       prm.declare_entry ("renumber dofs", "None",
-                         Patterns::Selection ("None|RCM"),
+                         Patterns::Selection ("None|RCM|RCM_WithStartPoint"),
                          "How to renumber dofs");
 
       prm.declare_entry ("renumber start point x", "0",
@@ -483,6 +483,10 @@ namespace NSFEMSolver
         else if (prm_buf == "RCM")
           {
             renumber_dofs = RCM;
+          }
+        else if (prm_buf == "RCM_WithStartPoint")
+          {
+            renumber_dofs = RCM_WithStartPoint;
           }
         else
           {
