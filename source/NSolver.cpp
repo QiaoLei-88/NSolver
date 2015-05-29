@@ -76,7 +76,8 @@ namespace NSFEMSolver
                      pcout,
                      TimerOutput::summary,
                      TimerOutput::cpu_and_wall_times),
-    CFL_number (para_ptr_in->CFL_number)
+    CFL_number (para_ptr_in->CFL_number),
+    n_sparsity_pattern_out (-1)
   {
     Assert (parameters, ExcMessage ("Null pointer encountered!"));
     EulerEquations<dim>::gas_gamma = 1.4;
@@ -178,6 +179,32 @@ namespace NSFEMSolver
     dof_handler.clear();
     dof_handler.distribute_dofs (fe);
 
+    locally_owned_dofs.clear();
+    locally_owned_dofs = dof_handler.locally_owned_dofs();
+
+    locally_relevant_dofs.clear();
+    DoFTools::extract_locally_relevant_dofs (dof_handler,
+                                             locally_relevant_dofs);
+
+    if (parameters->output_sparsity_pattern)
+      {
+        ++n_sparsity_pattern_out;
+        TrilinosWrappers::SparsityPattern sparsity_pattern (locally_owned_dofs,
+                                                            mpi_communicator);
+        DoFTools::make_sparsity_pattern (dof_handler,
+                                         sparsity_pattern,
+                                         /*const ConstraintMatrix constraints = */ ConstraintMatrix(),
+                                         /*const bool keep_constrained_dofs = */ true,
+                                         Utilities::MPI::this_mpi_process (mpi_communicator));
+        sparsity_pattern.compress();
+
+        const std::string file_name = "sparsity_pattern."
+                                      + Utilities::int_to_string (n_sparsity_pattern_out,4)
+                                      + ".origin";
+        std::ofstream out (file_name.c_str());
+        sparsity_pattern.print_gnuplot (out);
+      }
+
     switch (parameters->renumber_dofs)
       {
       case Parameters::AllParameters<dim>::None :
@@ -197,16 +224,28 @@ namespace NSFEMSolver
       }
       }
 
-    locally_owned_dofs.clear();
-    locally_owned_dofs = dof_handler.locally_owned_dofs();
+    TrilinosWrappers::SparsityPattern sparsity_pattern (locally_owned_dofs,
+                                                        mpi_communicator);
+    DoFTools::make_sparsity_pattern (dof_handler,
+                                     sparsity_pattern,
+                                     /*const ConstraintMatrix constraints = */ ConstraintMatrix(),
+                                     /*const bool keep_constrained_dofs = */ true,
+                                     Utilities::MPI::this_mpi_process (mpi_communicator));
+    sparsity_pattern.compress();
+    if (parameters->output_sparsity_pattern &&
+        parameters->renumber_dofs != Parameters::AllParameters<dim>::None)
+      {
+        const std::string file_name = "sparsity_pattern."
+                                      + Utilities::int_to_string (n_sparsity_pattern_out,4)
+                                      + ".renumbered";
+        std::ofstream out (file_name.c_str());
+        sparsity_pattern.print_gnuplot (out);
+      }
+    system_matrix.reinit (sparsity_pattern);
 
-    locally_relevant_dofs.clear();
-    DoFTools::extract_locally_relevant_dofs (dof_handler,
-                                             locally_relevant_dofs);
-
+    // Initialize vectors
     locally_owned_solution.reinit (locally_owned_dofs, mpi_communicator);
     current_solution.reinit (locally_relevant_dofs, mpi_communicator);
-
 
     // const bool fast = true means leave its content untouched.
     old_solution.reinit (current_solution, /*const bool fast = */ true);
@@ -221,16 +260,6 @@ namespace NSFEMSolver
     entropy_viscosity.reinit (triangulation.n_active_cells());
     cellSize_viscosity.reinit (triangulation.n_active_cells());
     refinement_indicators.reinit (triangulation.n_active_cells());
-
-    TrilinosWrappers::SparsityPattern sparsity_pattern (locally_owned_dofs,
-                                                        mpi_communicator);
-    DoFTools::make_sparsity_pattern (dof_handler,
-                                     sparsity_pattern,
-                                     /*const ConstraintMatrix constraints = */ ConstraintMatrix(),
-                                     /*const bool keep_constrained_dofs = */ true,
-                                     Utilities::MPI::this_mpi_process (mpi_communicator));
-    sparsity_pattern.compress();
-    system_matrix.reinit (sparsity_pattern);
   }
 
 

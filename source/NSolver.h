@@ -254,6 +254,7 @@ namespace NSFEMSolver
     // Runtime parameters, not specified in input file
     double time_step;
     double CFL_number;
+    int n_sparsity_pattern_out;
   };
 
 }
