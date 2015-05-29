@@ -268,6 +268,7 @@ namespace NSFEMSolver
       };
       RenumberDofs renumber_dofs;
       Point<3> renumber_start_point;
+      bool output_sparsity_pattern;
 
       FunctionParser<dim> initial_conditions;
       BoundaryConditions  boundary_conditions[max_n_boundaries];

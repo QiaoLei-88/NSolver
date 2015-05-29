@@ -355,6 +355,9 @@ namespace NSFEMSolver
       prm.declare_entry ("renumber start point z", "0",
                          Patterns::Double(),
                          "z coordinate of renumber start point");
+      prm.declare_entry ("output sparsity pattern", "false",
+                         Patterns::Bool(),
+                         "output sparsity pattern or not");
 
 
       for (unsigned int di=0; di<EquationComponents<dim>::n_components; ++di)
@@ -488,6 +491,8 @@ namespace NSFEMSolver
         renumber_start_point[0] = prm.get_double ("renumber start point x");
         renumber_start_point[1] = prm.get_double ("renumber start point y");
         renumber_start_point[2] = prm.get_double ("renumber start point z");
+
+        output_sparsity_pattern = prm.get_bool ("output sparsity pattern");
       }
 
       for (unsigned int di=0; di<EquationComponents<dim>::n_components; ++di)
