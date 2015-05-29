@@ -178,6 +178,25 @@ namespace NSFEMSolver
     dof_handler.clear();
     dof_handler.distribute_dofs (fe);
 
+    switch (parameters->renumber_dofs)
+      {
+      case Parameters::AllParameters<dim>::None :
+      {
+        break;
+      }
+      case Parameters::AllParameters<dim>::RCM :
+      {
+        DoFRenumbering::Cuthill_McKee (dof_handler,
+                                       /* reversed_numbering = */ true);
+        break;
+      }
+      default:
+      {
+        Assert (false, ExcNotImplemented());
+        break;
+      }
+      }
+
     locally_owned_dofs.clear();
     locally_owned_dofs = dof_handler.locally_owned_dofs();
 
