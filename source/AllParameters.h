@@ -261,6 +261,14 @@ namespace NSFEMSolver
       double diffusion_coefficoent;
       double diffusion_factor[EquationComponents<dim>::n_components];
 
+      enum RenumberDofs
+      {
+        None,
+        RCM
+      };
+      RenumberDofs renumber_dofs;
+      Point<3> renumber_start_point;
+
       FunctionParser<dim> initial_conditions;
       BoundaryConditions  boundary_conditions[max_n_boundaries];
       bool sum_force[max_n_boundaries];

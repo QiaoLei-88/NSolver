@@ -341,6 +341,22 @@ namespace NSFEMSolver
                          Patterns::Double(),
                          "predefined diffusion coefficient");
 
+
+      prm.declare_entry ("renumber dofs", "None",
+                         Patterns::Selection ("None|RCM"),
+                         "How to renumber dofs");
+
+      prm.declare_entry ("renumber start point x", "0",
+                         Patterns::Double(),
+                         "x coordinate of renumber start point");
+      prm.declare_entry ("renumber start point y", "0",
+                         Patterns::Double(),
+                         "y coordinate of renumber start point");
+      prm.declare_entry ("renumber start point z", "0",
+                         Patterns::Double(),
+                         "z coordinate of renumber start point");
+
+
       for (unsigned int di=0; di<EquationComponents<dim>::n_components; ++di)
         {
           prm.declare_entry ("diffusion factor for w_" + Utilities::int_to_string (di),
@@ -454,6 +470,25 @@ namespace NSFEMSolver
 
       diffusion_power = prm.get_double ("diffusion power");
       diffusion_coefficoent = prm.get_double ("diffusion coefficient");
+
+      {
+        const std::string prm_buf = prm.get ("renumber dofs");
+        if (prm_buf == "None")
+          {
+            renumber_dofs = None;
+          }
+        else if (prm_buf == "RCM")
+          {
+            renumber_dofs = RCM;
+          }
+        else
+          {
+            AssertThrow (false, ExcNotImplemented());
+          }
+        renumber_start_point[0] = prm.get_double ("renumber start point x");
+        renumber_start_point[1] = prm.get_double ("renumber start point y");
+        renumber_start_point[2] = prm.get_double ("renumber start point z");
+      }
 
       for (unsigned int di=0; di<EquationComponents<dim>::n_components; ++di)
         {
