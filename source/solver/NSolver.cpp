@@ -1361,79 +1361,12 @@ namespace NSFEMSolver
       }
       case Parameters::Refinement<dim>::Kelly:
       {
-        double top_fraction = parameters->refine_fraction;
-        double bottom_fraction = parameters->coarsen_fraction;
-        const double max_cell_number = parameters->max_cells;
-        double const refine_priority = 1.0;
-
-        // Convert variables to double to avoid annoying type casting and round error.
-        const double current_cell_number = static_cast<double> (triangulation.n_global_active_cells());
-        // const double max_cell_number = parameters->max_cells;
-
-        // as we have no information on cells being refined isotropically or
-        // anisotropically, assume isotropic refinement here, though that may
-        // result in a worse approximation
-        const double cell_increase_on_refine  = GeometryInfo<dim>::max_children_per_cell - 1.0;
-        const double cell_decrease_on_coarsen = 1.0 - 1.0/GeometryInfo<dim>::max_children_per_cell;
-
-        // first we estimate the cell number after refinement and coarsening along the
-        // the requested fractions.
-        const double refine_cells_requested  = top_fraction * current_cell_number;
-        const double coarsen_cells_requested = bottom_fraction * current_cell_number;
-        const double n_cell_after_adaptation = current_cell_number +
-                                               refine_cells_requested * cell_increase_on_refine -
-                                               coarsen_cells_requested * cell_decrease_on_coarsen;
-
-        // Adjust refine and coarsen fraction
-        if (n_cell_after_adaptation > max_cell_number)
-          {
-            // Try lower extreme of N_r at minimum N_c, and limit the result from below
-            // with its lower constraint. Limiting the result from above is not necessary
-            // at this point since we are already inside the if block.
-            const double refine_cells_min = std::max (
-                                              (max_cell_number - current_cell_number + coarsen_cells_requested*
-                                               cell_decrease_on_coarsen)/cell_increase_on_refine
-                                              ,
-                                              0.0);
-            // Lower extreme of N_c is explicit.
-            const double coarsen_cells_min = coarsen_cells_requested;
-
-
-            // Try upper extreme of N_r at maximum N_c = N - N_r, and limit the result
-            // from both above and below.
-            const double refine_cells_max = std::max (
-                                              std::min (
-                                                (max_cell_number - (1.0-cell_decrease_on_coarsen) *
-                                                 current_cell_number)/ (cell_increase_on_refine+cell_decrease_on_coarsen)
-                                                ,
-                                                refine_cells_requested)
-                                              ,
-                                              0.0);
-            // Solve equation (1) with N_r = max(N_r) for upper extreme of N_c, and limit the result
-            // from above.
-            const double coarsen_cells_max = std::min (
-                                               (current_cell_number + refine_cells_max * cell_increase_on_refine -
-                                                max_cell_number)/cell_decrease_on_coarsen
-                                               ,
-                                               current_cell_number - refine_cells_max);
-
-            // Interpolate between the two extremes
-            const double refine_cells_actual =
-              (1.0 - refine_priority) * refine_cells_min
-              +      refine_priority  * refine_cells_max;
-            const double coarsen_cells_actual =
-              (1.0 - refine_priority) * coarsen_cells_min
-              +      refine_priority  * coarsen_cells_max;
-
-            top_fraction = refine_cells_actual/current_cell_number;
-            bottom_fraction = coarsen_cells_actual/current_cell_number;
-          }
-
         parallel::distributed::GridRefinement::
         refine_and_coarsen_fixed_number (triangulation,
                                          refinement_indicators,
-                                         top_fraction,
-                                         bottom_fraction);
+                                         parameters->refine_fraction,
+                                         parameters->coarsen_fraction,
+                                         parameters->max_cells);
         break;
       }
       default:
