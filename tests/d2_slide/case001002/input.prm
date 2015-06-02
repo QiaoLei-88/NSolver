@@ -79,6 +79,8 @@ end
 # Refinement control
 subsection refinement
   set refinement = true # none only other option
+  set refinement indicator = Gradient
+  set component mask   = 4
   set shock value = 1.5
   set shock levels = 1 # how many levels of refinement to allow
 end
