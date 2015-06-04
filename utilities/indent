@@ -28,8 +28,16 @@ fi
 # loop over all directories in which we may have source files;
 # collect a list of files and then spawn a parallel process to
 # indent all of them
-echo "--- Indenting all header and source files"
+echo "--- Indenting all source files"
 for dir in source/* ; do
+  files=`find $dir | egrep '\.(cc|cpp|h)$'` ;
+  if test -n "$files" ; then
+    (astyle --options=utilities/astyle.rc $files ) &
+  fi
+done
+
+echo "--- Indenting all header files"
+for dir in header/* ; do
   files=`find $dir | egrep '\.(cc|cpp|h)$'` ;
   if test -n "$files" ; then
     (astyle --options=utilities/astyle.rc $files ) &
