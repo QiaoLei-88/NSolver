@@ -6,7 +6,7 @@
 //  Copyright (c) 2015年 乔磊. All rights reserved.
 //
 
-#include <NSolver/AllParameters.h>
+#include <NSolver/Parameters/AllParameters.h>
 
 namespace NSFEMSolver
 {

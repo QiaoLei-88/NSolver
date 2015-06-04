@@ -3,7 +3,7 @@
 //  Copyright (c) 2015年 乔磊. All rights reserved.
 //
 
-#include <NSolver/FEParameters.h>
+#include <NSolver/Parameters/FEParameters.h>
 
 namespace NSFEMSolver
 {

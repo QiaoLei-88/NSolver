@@ -98,8 +98,8 @@ DEAL_II_ENABLE_EXTRA_DIAGNOSTICS
 #include <vector>
 #include <memory>
 
-#include <NSolver/AllParameters.h>
-#include <NSolver/FEParameters.h>
+#include <NSolver/Parameters/AllParameters.h>
+#include <NSolver/Parameters/FEParameters.h>
 #include <NSolver/Postprocessor.h>
 #include <NSolver/MMS.h>
 #include <NSolver/WallForce.h>

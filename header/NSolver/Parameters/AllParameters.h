@@ -24,12 +24,12 @@
 #include <deal.II/base/function_parser.h>
 #include <deal.II/fe/component_mask.h>
 
-#include <NSolver/FEParameters.h>
-#include <NSolver/PhysicalParameters.h>
+#include <NSolver/Parameters/FEParameters.h>
+#include <NSolver/Parameters/PhysicalParameters.h>
 #include <NSolver/BoundaryType.h>
 #include <NSolver/EquationComponents.h>
 #include <NSolver/NumericalFlux.h>
-#include <NSolver/TimeSteppingParameters.h>
+#include <NSolver/Parameters/TimeSteppingParameters.h>
 
 
 namespace NSFEMSolver
