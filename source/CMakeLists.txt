@@ -5,15 +5,11 @@ SET (_source_file_list "")
 SET (_static_lib_list "")
 
 LIST(APPEND _source_file_list NSEquation.cpp)
-LIST(APPEND _source_file_list AllParameters.cpp)
 LIST(APPEND _source_file_list main.cpp)
 LIST(APPEND _source_file_list MMS.cpp)
-LIST(APPEND _source_file_list FEParameters.cpp)
 LIST(APPEND _source_file_list Postprocessor.cpp)
 LIST(APPEND _source_file_list WallForce.cpp)
-LIST(APPEND _source_file_list PhysicalParameters.cpp)
 LIST(APPEND _source_file_list EquationComponents.cpp)
-LIST(APPEND _source_file_list TimeSteppingParameters.cpp)
 
 # Pick up all subdirectories for static libraries
 LIST_ALL_SUBDIRECTORIES (_static_lib_list ${CMAKE_CURRENT_SOURCE_DIR})
