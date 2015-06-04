@@ -26,7 +26,7 @@
  */
 
 
-#include <NSolver/NSolver.h>
+#include <NSolver/solver/NSolver.h>
 #include <NSolver/NSEquation.h>
 #include <NSolver/FEParameters.h>
 

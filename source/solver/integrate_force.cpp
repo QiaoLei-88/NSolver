@@ -7,7 +7,7 @@
 //
 
 
-#include <NSolver/NSolver.h>
+#include <NSolver/solver/NSolver.h>
 
 namespace NSFEMSolver
 {
