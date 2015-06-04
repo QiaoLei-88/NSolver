@@ -9,7 +9,7 @@
 #ifndef __NSolver__MMS__
 #define __NSolver__MMS__
 
-#include "NSEquation.h"
+#include <NSolver/NSEquation.h>
 
 namespace NSFEMSolver
 {

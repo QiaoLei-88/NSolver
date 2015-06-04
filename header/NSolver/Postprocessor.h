@@ -9,9 +9,9 @@
 
 #include <deal.II/numerics/data_postprocessor.h>
 #include <deal.II/numerics/data_component_interpretation.h>
-#include "NSEquation.h"
-#include "AllParameters.h"
-#include "MMS.h"
+#include <NSolver/NSEquation.h>
+#include <NSolver/AllParameters.h>
+#include <NSolver/MMS.h>
 
 namespace NSFEMSolver
 {

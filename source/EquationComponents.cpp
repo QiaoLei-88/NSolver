@@ -6,7 +6,7 @@
 //  Copyright (c) 2015年 乔磊. All rights reserved.
 //
 
-#include "EquationComponents.h"
+#include <NSolver/EquationComponents.h>
 
 namespace NSFEMSolver
 {

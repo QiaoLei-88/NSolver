@@ -4,7 +4,7 @@
 //
 
 
-#include "PhysicalParameters.h"
+#include <NSolver/PhysicalParameters.h>
 
 namespace NSFEMSolver
 {

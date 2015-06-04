@@ -42,10 +42,10 @@ namespace LA
 #endif
 }
 
-#include "BoundaryType.h"
-#include "NumericalFlux.h"
-#include "EquationComponents.h"
-#include "AllParameters.h"
+#include <NSolver/BoundaryType.h>
+#include <NSolver/NumericalFlux.h>
+#include <NSolver/EquationComponents.h>
+#include <NSolver/AllParameters.h>
 
 
 // And this again is C++:

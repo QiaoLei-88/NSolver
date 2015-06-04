@@ -7,7 +7,7 @@
 //
 
 
-#include "WallForce.h"
+#include <NSolver/WallForce.h>
 
 namespace NSFEMSolver
 {

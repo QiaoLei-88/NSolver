@@ -6,8 +6,8 @@
 //  Copyright (c) 2015年 乔磊. All rights reserved.
 //
 
-#include "NSEquation.h"
-#include "MMS.h"
+#include <NSolver/NSEquation.h>
+#include <NSolver/MMS.h>
 
 namespace NSFEMSolver
 {

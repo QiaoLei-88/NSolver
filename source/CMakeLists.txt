@@ -1,4 +1,6 @@
 
+INCLUDE_DIRECTORIES(BEFORE ${CMAKE_SOURCE_DIR}/header)
+
 ADD_EXECUTABLE(${PRJ_NAME}
   NSolver.cpp
   NSEquation.cpp

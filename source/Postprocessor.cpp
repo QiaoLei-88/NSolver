@@ -3,7 +3,7 @@
 //  Copyright (c) 2015年 乔磊. All rights reserved.
 //
 
-#include "Postprocessor.h"
+#include <NSolver/Postprocessor.h>
 
 
 namespace NSFEMSolver

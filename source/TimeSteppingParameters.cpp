@@ -6,7 +6,7 @@
 //  Copyright (c) 2015年 乔磊. All rights reserved.
 //
 
-#include "TimeSteppingParameters.h"
+#include <NSolver/TimeSteppingParameters.h>
 
 namespace NSFEMSolver
 {

@@ -8,7 +8,7 @@
 
 #include <iostream>
 #include <fstream>
-#include "NSolver.h"
+#include <NSolver/NSolver.h>
 
 
 int main (int argc, char *argv[])

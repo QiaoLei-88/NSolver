@@ -98,12 +98,12 @@ DEAL_II_ENABLE_EXTRA_DIAGNOSTICS
 #include <vector>
 #include <memory>
 
-#include "AllParameters.h"
-#include "FEParameters.h"
-#include "Postprocessor.h"
-#include "MMS.h"
-#include "WallForce.h"
-#include "EquationComponents.h"
+#include <NSolver/AllParameters.h>
+#include <NSolver/FEParameters.h>
+#include <NSolver/Postprocessor.h>
+#include <NSolver/MMS.h>
+#include <NSolver/WallForce.h>
+#include <NSolver/EquationComponents.h>
 
 
 // Here finally comes the class that actually does something with all the

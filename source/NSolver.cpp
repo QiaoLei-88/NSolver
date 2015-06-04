@@ -26,9 +26,9 @@
  */
 
 
-#include "NSolver.h"
-#include "NSEquation.h"
-#include "FEParameters.h"
+#include <NSolver/NSolver.h>
+#include <NSolver/NSEquation.h>
+#include <NSolver/FEParameters.h>
 
 
 namespace NSFEMSolver
