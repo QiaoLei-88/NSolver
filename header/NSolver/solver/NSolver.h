@@ -241,7 +241,7 @@ namespace NSFEMSolver
 
     const bool I_am_host;
     const unsigned int myid;
-    Parameters::AllParameters<dim>  *const parameters;
+    const SmartPointer<Parameters::AllParameters<dim> >    parameters;
     ConditionalOStream              verbose_cout;
     ConditionalOStream              pcout;
     TimerOutput                     computing_timer;

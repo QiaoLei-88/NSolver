@@ -36,6 +36,7 @@ int main (int argc, char *argv[])
       {
         const unsigned int dimension (2);
         Parameters::AllParameters<dimension> solver_parameters;
+        SmartPointer<Parameters::AllParameters<dimension> > prt_solver_parameters (&solver_parameters);
         {
           ParameterHandler prm;
 
@@ -43,7 +44,7 @@ int main (int argc, char *argv[])
           prm.read_input (input_file);
           solver_parameters.parse_parameters (prm);
         }
-        NSolver<dimension> cons (&solver_parameters);
+        NSolver<dimension> cons (prt_solver_parameters);
         cons.run();
       }
     }
