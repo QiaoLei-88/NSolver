@@ -29,6 +29,8 @@
 #include <NSolver/solver/NSolver.h>
 #include <NSolver/NSEquation.h>
 #include <NSolver/Parameters/FEParameters.h>
+#include <NSolver/linearVelocityPotential/linearVelocityPotential.h>
+
 
 
 namespace NSFEMSolver
@@ -1628,9 +1630,21 @@ namespace NSFEMSolver
 
     setup_system();
 
-    VectorTools::interpolate (dof_handler,
-                              parameters->initial_conditions, locally_owned_solution);
+    const bool init_with_velocity_potential (false);
 
+    if (init_with_velocity_potential)
+      {
+        velocityPotential::LinearVelocityPotential<dim>
+        linear_velocity_potential (&triangulation,&locally_owned_solution,mpi_communicator);
+        linear_velocity_potential.compute();
+        linear_velocity_potential.transfer_solution (fe, dof_handler, locally_owned_solution);
+        linear_velocity_potential.output_results();
+      }
+    else
+      {
+        VectorTools::interpolate (dof_handler,
+                                  parameters->initial_conditions, locally_owned_solution);
+      }
     old_solution = locally_owned_solution;
     current_solution = old_solution;
     predictor = old_solution;
@@ -1638,8 +1652,20 @@ namespace NSFEMSolver
     if (parameters->do_refine)
       {
         refine_grid();
-        VectorTools::interpolate (dof_handler,
-                                  parameters->initial_conditions, locally_owned_solution);
+
+        if (init_with_velocity_potential)
+          {
+            velocityPotential::LinearVelocityPotential<dim>
+            linear_velocity_potential (&triangulation,&locally_owned_solution,mpi_communicator);
+            linear_velocity_potential.compute();
+            linear_velocity_potential.transfer_solution (fe, dof_handler, locally_owned_solution);
+            linear_velocity_potential.output_results();
+          }
+        else
+          {
+            VectorTools::interpolate (dof_handler,
+                                      parameters->initial_conditions, locally_owned_solution);
+          }
         old_solution = locally_owned_solution;
         current_solution = old_solution;
         predictor = old_solution;
