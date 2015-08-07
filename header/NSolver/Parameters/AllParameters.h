@@ -30,7 +30,7 @@
 #include <NSolver/EquationComponents.h>
 #include <NSolver/NumericalFlux.h>
 #include <NSolver/Parameters/TimeSteppingParameters.h>
-
+#include <deal.II/base/subscriptor.h>
 
 namespace NSFEMSolver
 {
@@ -221,7 +221,8 @@ namespace NSFEMSolver
       public Refinement<dim>,
       public Flux,
       public Output,
-      public FEParameters
+      public FEParameters,
+      public Subscriptor
     {
       static const unsigned int max_n_boundaries = 10;
 
