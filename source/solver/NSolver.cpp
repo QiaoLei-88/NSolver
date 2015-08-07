@@ -1634,8 +1634,10 @@ namespace NSFEMSolver
 
     if (init_with_velocity_potential)
       {
+        const SmartPointer<parallel::distributed::Triangulation<dim> const > triangulation_ptr (&triangulation);
+        const SmartPointer<LA::MPI::Vector> locally_owned_solution_ptr (&locally_owned_solution);
         velocityPotential::LinearVelocityPotential<dim>
-        linear_velocity_potential (&triangulation,&locally_owned_solution,mpi_communicator);
+        linear_velocity_potential (triangulation_ptr,locally_owned_solution_ptr,mpi_communicator);
         linear_velocity_potential.compute();
         linear_velocity_potential.transfer_solution (fe, dof_handler, locally_owned_solution);
         linear_velocity_potential.output_results();
@@ -1655,8 +1657,10 @@ namespace NSFEMSolver
 
         if (init_with_velocity_potential)
           {
+            const SmartPointer<parallel::distributed::Triangulation<dim> const > triangulation_ptr (&triangulation);
+            const SmartPointer<LA::MPI::Vector> locally_owned_solution_ptr (&locally_owned_solution);
             velocityPotential::LinearVelocityPotential<dim>
-            linear_velocity_potential (&triangulation,&locally_owned_solution,mpi_communicator);
+            linear_velocity_potential (triangulation_ptr,locally_owned_solution_ptr,mpi_communicator);
             linear_velocity_potential.compute();
             linear_velocity_potential.transfer_solution (fe, dof_handler, locally_owned_solution);
             linear_velocity_potential.output_results();

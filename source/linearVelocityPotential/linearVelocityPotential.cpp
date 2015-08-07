@@ -8,8 +8,8 @@ namespace velocityPotential
 {
   template <int dim>
   LinearVelocityPotential<dim>::LinearVelocityPotential (
-    parallel::distributed::Triangulation<dim> const *const triangulation_in,
-    LA::MPI::Vector *const output_initial_field_ptr,
+    const SmartPointer<parallel::distributed::Triangulation<dim> const > triangulation_in,
+    const SmartPointer<LA::MPI::Vector> output_initial_field_ptr,
     MPI_Comm mpi_communicator_in)
     :
     mpi_communicator (mpi_communicator_in),

@@ -54,6 +54,8 @@ namespace LA
 #include <deal.II/distributed/tria.h>
 #include <deal.II/distributed/grid_refinement.h>
 
+#include <deal.II/base/smartpointer.h>
+
 #include <fstream>
 #include <iostream>
 
@@ -67,9 +69,9 @@ namespace velocityPotential
   {
   public:
     LinearVelocityPotential (
-      parallel::distributed::Triangulation<dim> const *const,
-      LA::MPI::Vector *const,
-      MPI_Comm);
+      const SmartPointer<parallel::distributed::Triangulation<dim> const > triangulation_in,
+      const SmartPointer<LA::MPI::Vector> output_initial_field_ptr,
+      MPI_Comm mpi_communicator_in);
     ~LinearVelocityPotential();
 
     void compute();
@@ -84,7 +86,8 @@ namespace velocityPotential
 
     MPI_Comm                                  mpi_communicator;
 
-    parallel::distributed::Triangulation<dim> const *const triangulation;
+    SmartPointer <
+    parallel::distributed::Triangulation<dim> const> const triangulation;
 
     DoFHandler<dim>                           dof_handler;
     FE_Q<dim>                                 fe;
