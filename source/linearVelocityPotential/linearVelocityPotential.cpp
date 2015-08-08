@@ -17,7 +17,7 @@ namespace velocityPotential
     parameters (parameters_in),
     triangulation (triangulation_in),
     dof_handler (*triangulation_in),
-    fe (2),
+    fe (parameters_in->init_fe_degree),
     pcout (std::cout,
            (Utilities::MPI::this_mpi_process (mpi_communicator)
             == 0)),
