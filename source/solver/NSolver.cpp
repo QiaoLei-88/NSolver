@@ -27,11 +27,6 @@
 
 
 #include <NSolver/solver/NSolver.h>
-#include <NSolver/NSEquation.h>
-#include <NSolver/Parameters/FEParameters.h>
-#include <NSolver/linearVelocityPotential/linearVelocityPotential.h>
-
-
 
 namespace NSFEMSolver
 {
@@ -1630,49 +1625,11 @@ namespace NSFEMSolver
 
     setup_system();
 
-    const bool init_with_velocity_potential (false);
-
-    if (init_with_velocity_potential)
-      {
-        const SmartPointer<parallel::distributed::Triangulation<dim> const > triangulation_ptr (&triangulation);
-        const SmartPointer<LA::MPI::Vector> locally_owned_solution_ptr (&locally_owned_solution);
-        velocityPotential::LinearVelocityPotential<dim>
-        linear_velocity_potential (triangulation_ptr, parameters, locally_owned_solution_ptr, mpi_communicator);
-        linear_velocity_potential.compute();
-        linear_velocity_potential.transfer_solution (fe, dof_handler, locally_owned_solution);
-        linear_velocity_potential.output_results();
-      }
-    else
-      {
-        VectorTools::interpolate (dof_handler,
-                                  parameters->initial_conditions, locally_owned_solution);
-      }
-    old_solution = locally_owned_solution;
-    current_solution = old_solution;
-    predictor = old_solution;
-
+    initialize();
     if (parameters->do_refine)
       {
         refine_grid();
-
-        if (init_with_velocity_potential)
-          {
-            const SmartPointer<parallel::distributed::Triangulation<dim> const > triangulation_ptr (&triangulation);
-            const SmartPointer<LA::MPI::Vector> locally_owned_solution_ptr (&locally_owned_solution);
-            velocityPotential::LinearVelocityPotential<dim>
-            linear_velocity_potential (triangulation_ptr, parameters, locally_owned_solution_ptr, mpi_communicator);
-            linear_velocity_potential.compute();
-            linear_velocity_potential.transfer_solution (fe, dof_handler, locally_owned_solution);
-            linear_velocity_potential.output_results();
-          }
-        else
-          {
-            VectorTools::interpolate (dof_handler,
-                                      parameters->initial_conditions, locally_owned_solution);
-          }
-        old_solution = locally_owned_solution;
-        current_solution = old_solution;
-        predictor = old_solution;
+        initialize();
       }
 
     check_negative_density_pressure();

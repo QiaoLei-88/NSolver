@@ -100,10 +100,12 @@ DEAL_II_ENABLE_EXTRA_DIAGNOSTICS
 
 #include <NSolver/Parameters/AllParameters.h>
 #include <NSolver/Parameters/FEParameters.h>
+#include <NSolver/EquationComponents.h>
+#include <NSolver/NSEquation.h>
 #include <NSolver/Postprocessor.h>
 #include <NSolver/MMS.h>
 #include <NSolver/WallForce.h>
-#include <NSolver/EquationComponents.h>
+#include <NSolver/linearVelocityPotential/linearVelocityPotential.h>
 
 
 // Here finally comes the class that actually does something with all the
@@ -133,6 +135,7 @@ namespace NSFEMSolver
 
   private:
     void setup_system();
+    void initialize();
     void check_negative_density_pressure() const;
 
     void calc_time_step();
