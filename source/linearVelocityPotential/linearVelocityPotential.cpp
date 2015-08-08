@@ -24,9 +24,27 @@ namespace velocityPotential
     computing_timer (mpi_communicator,
                      pcout,
                      TimerOutput::never,
-                     TimerOutput::wall_times),
-    velocity_infty (0.5, 0.0, 0.0)
-  {}
+                     TimerOutput::wall_times)
+  {
+    // Compute free stream condition.
+    // Axi definition:
+    //   X in flow direction
+    //   Y up
+    //   Z size
+    // Linear velocity potential euqation make nonsense in high Mach number
+    const double Mach = std::min (parameters->Mach, 0.8);
+
+    velocity_infty[2] = Mach * std::sin (parameters->angle_of_side_slip);
+
+    const double velocity_in_symm_plan =
+      Mach * std::cos (parameters->angle_of_side_slip);
+
+    velocity_infty[1] = velocity_in_symm_plan *
+                        std::sin (parameters->angle_of_attack);
+
+    velocity_infty[0] = velocity_in_symm_plan *
+                        std::cos (parameters->angle_of_attack);
+  }
 
 
   template <int dim>
