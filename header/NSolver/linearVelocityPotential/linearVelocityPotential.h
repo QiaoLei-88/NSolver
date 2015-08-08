@@ -56,6 +56,9 @@ namespace LA
 
 #include <deal.II/base/smartpointer.h>
 
+
+#include <NSolver/Parameters/AllParameters.h>
+
 #include <fstream>
 #include <iostream>
 
@@ -70,6 +73,7 @@ namespace velocityPotential
   public:
     LinearVelocityPotential (
       const SmartPointer<parallel::distributed::Triangulation<dim> const > triangulation_in,
+      const SmartPointer<NSFEMSolver::Parameters::AllParameters<dim> > parameters,
       const SmartPointer<LA::MPI::Vector> output_initial_field_ptr,
       MPI_Comm mpi_communicator_in);
     ~LinearVelocityPotential();
@@ -85,6 +89,7 @@ namespace velocityPotential
     void solve();
 
     MPI_Comm                                  mpi_communicator;
+    const SmartPointer<NSFEMSolver::Parameters::AllParameters<dim> const>    parameters;
 
     SmartPointer <
     parallel::distributed::Triangulation<dim> const> const triangulation;
