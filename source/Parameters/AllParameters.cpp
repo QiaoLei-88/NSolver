@@ -404,6 +404,8 @@ namespace NSFEMSolver
         prm.declare_entry ("init method", "UserFunction",
                            Patterns::Selection ("UserFunction|FreeStream|LinearVelocityPotential"),
                            "<UserFunction|FreeStream|LinearVelocityPotential>");
+        prm.declare_entry ("init fe degree", "1", Patterns::Integer(),
+                           "FE degree used for solving velocity potential equation");
 
         for (unsigned int di=0; di<EquationComponents<dim>::n_components; ++di)
           prm.declare_entry ("w_" + Utilities::int_to_string (di) + " value",
@@ -586,6 +588,14 @@ namespace NSFEMSolver
               AssertThrow (false, ExcNotImplemented());
             }
         }
+
+        init_fe_degree = prm.get_integer ("init fe degree");
+        AssertThrow (init_fe_degree<9, ExcMessage ("Do not usr element order higher than 8 for potential euqation."));
+        if (init_fe_degree < 1)
+          {
+            init_fe_degree = 1;
+          }
+
         std::vector<std::string> expressions (EquationComponents<dim>::n_components,
                                               "0.0");
         for (unsigned int di = 0; di < EquationComponents<dim>::n_components; di++)

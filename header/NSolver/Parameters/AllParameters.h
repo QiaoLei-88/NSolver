@@ -279,6 +279,13 @@ namespace NSFEMSolver
         LinearVelocityPotential
       };
       InitMethod init_method;
+
+      /**
+       * FE degree used for solving velocity potential euqation.
+       * Degree less than 1 will be reset to 1 without warning;
+       * Degree larger than 8 will cause an exception and abort the program.
+       **/
+      int init_fe_degree;
       FunctionParser<dim> initial_conditions;
 
       BoundaryConditions  boundary_conditions[max_n_boundaries];
