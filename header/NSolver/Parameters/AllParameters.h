@@ -272,7 +272,15 @@ namespace NSFEMSolver
       Point<3> renumber_start_point;
       bool output_sparsity_pattern;
 
+      enum InitMethod
+      {
+        UserFunction,
+        FreeStream,
+        LinearVelocityPotential
+      };
+      InitMethod init_method;
       FunctionParser<dim> initial_conditions;
+
       BoundaryConditions  boundary_conditions[max_n_boundaries];
       bool sum_force[max_n_boundaries];
 

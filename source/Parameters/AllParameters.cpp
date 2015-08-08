@@ -401,6 +401,10 @@ namespace NSFEMSolver
 
       prm.enter_subsection ("initial condition");
       {
+        prm.declare_entry ("init method", "UserFunction",
+                           Patterns::Selection ("UserFunction|FreeStream|LinearVelocityPotential"),
+                           "<UserFunction|FreeStream|LinearVelocityPotential>");
+
         for (unsigned int di=0; di<EquationComponents<dim>::n_components; ++di)
           prm.declare_entry ("w_" + Utilities::int_to_string (di) + " value",
                              "0.0",
@@ -563,6 +567,25 @@ namespace NSFEMSolver
 
       prm.enter_subsection ("initial condition");
       {
+        {
+          const std::string prm_buf = prm.get ("init method");
+          if (prm_buf == "UserFunction")
+            {
+              init_method = UserFunction;
+            }
+          else if (prm_buf == "FreeStream")
+            {
+              init_method = FreeStream;
+            }
+          else if (prm_buf == "LinearVelocityPotential")
+            {
+              init_method = LinearVelocityPotential;
+            }
+          else
+            {
+              AssertThrow (false, ExcNotImplemented());
+            }
+        }
         std::vector<std::string> expressions (EquationComponents<dim>::n_components,
                                               "0.0");
         for (unsigned int di = 0; di < EquationComponents<dim>::n_components; di++)
