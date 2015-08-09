@@ -40,7 +40,6 @@ namespace velocityPotential
     // The two DoFHandlers are initialized from the same triangulation
     typename DoFHandler<dim>::active_cell_iterator
     cell_potential = dof_handler_potential.begin_active(),
-    endc_potential = dof_handler_potential.end(),
     cell_NS = dof_handler_NS.begin_active(),
     endc_NS = dof_handler_NS.end();
     for (; cell_NS!=endc_NS; ++cell_NS, ++cell_potential)
