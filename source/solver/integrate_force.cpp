@@ -101,7 +101,5 @@ namespace NSFEMSolver
     wall_force.drag = cos_aoa*wall_force.force[0] + sin_aoa*wall_force.force[1];
   }
 
-  template
-  void NSolver<2>::integrate_force (Parameters::AllParameters<2> const *const parameters,
-                                    WallForce &wall_force) const;
+#include "NSolver.inst"
 }

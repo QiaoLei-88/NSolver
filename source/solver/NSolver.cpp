@@ -2134,7 +2134,6 @@ namespace NSFEMSolver
     // computing_timer.print_summary();
   } //End of NSolver<dim>::run ()
 
-  template class NSolver<2>;
-//  template class NSolver<3>;
+#include "NSolver.inst"
 }
 

@@ -90,5 +90,5 @@ namespace NSFEMSolver
   }
 
 
-  template class NSolver<2>;
+#include "NSolver.inst"
 }
