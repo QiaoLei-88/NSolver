@@ -101,5 +101,5 @@ namespace velocityPotential
     system_rhs.compress (VectorOperation::add);
   }
 
-#include "linearVelocityPotential.inst.in"
+#include "linearVelocityPotential.inst"
 }

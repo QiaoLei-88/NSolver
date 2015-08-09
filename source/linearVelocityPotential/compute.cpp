@@ -25,5 +25,5 @@ namespace velocityPotential
     pcout << std::endl;
   }
 
-#include "linearVelocityPotential.inst.in"
+#include "linearVelocityPotential.inst"
 }

@@ -39,5 +39,5 @@ namespace velocityPotential
     locally_relevant_solution = locally_owned_solution;
   }
 
-#include "linearVelocityPotential.inst.in"
+#include "linearVelocityPotential.inst"
 }

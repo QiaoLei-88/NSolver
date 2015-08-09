@@ -47,5 +47,5 @@ namespace velocityPotential
       }
   }
 
-#include "linearVelocityPotential.inst.in"
+#include "linearVelocityPotential.inst"
 }

@@ -60,5 +60,5 @@ namespace velocityPotential
     velocity_infty (velocity_infty_in)
   {}
 
-#include "linearVelocityPotential.inst.in"
+#include "linearVelocityPotential.inst"
 }

@@ -82,5 +82,5 @@ namespace velocityPotential
     return (update_values | update_gradients);
   }
 
-#include "linearVelocityPotential.inst.in"
+#include "linearVelocityPotential.inst"
 }

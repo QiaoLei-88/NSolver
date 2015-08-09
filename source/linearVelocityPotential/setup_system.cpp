@@ -45,5 +45,5 @@ namespace velocityPotential
                           mpi_communicator);
   }
 
-#include "linearVelocityPotential.inst.in"
+#include "linearVelocityPotential.inst"
 }
