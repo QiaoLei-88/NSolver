@@ -66,7 +66,7 @@ namespace NSFEMSolver
         free_stream_condition[EquationComponents<dim>::pressure_component] =
           1.0/EulerEquations<dim>::gas_gamma;
 
-        ConstantVectorFunction<dim> free_stream_initial_value (
+        ConstantFunction<dim> free_stream_initial_value (
           &free_stream_condition[0],
           EquationComponents<dim>::n_components);
 
