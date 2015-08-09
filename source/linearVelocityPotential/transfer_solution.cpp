@@ -43,51 +43,55 @@ namespace velocityPotential
     cell_NS = dof_handler_NS.begin_active(),
     endc_NS = dof_handler_NS.end();
     for (; cell_NS!=endc_NS; ++cell_NS, ++cell_potential)
-      if (cell_NS->is_locally_owned())
-        {
-          fe_values_potential.reinit (cell_potential);
+      {
+        Assert (cell_potential != dof_handler_potential.end(),
+                ExcMessage ("Reached end of tria for potential equation before NS equation!"));
+        if (cell_NS->is_locally_owned())
+          {
+            fe_values_potential.reinit (cell_potential);
 
-          fe_values_potential.get_function_gradients (
-            potential_solution,
-            potential_grad_on_cell);
+            fe_values_potential.get_function_gradients (
+              potential_solution,
+              potential_grad_on_cell);
 
-          cell_NS->get_dof_indices (global_indices_of_local_dofs);
-          // Since the quadrature is extracted accroding to the target FE supporting
-          // points, we just have to loop through all the quadrature points.
-          // We assume that the quadrature points and supporting points are
-          // arranged in the same order.
-          for (unsigned int q_point=0; q_point<n_q_points; ++q_point)
-            {
-              double Mach_local = 0.0;
-              for (unsigned d=0; d<dim; ++d)
+            cell_NS->get_dof_indices (global_indices_of_local_dofs);
+            // Since the quadrature is extracted accroding to the target FE supporting
+            // points, we just have to loop through all the quadrature points.
+            // We assume that the quadrature points and supporting points are
+            // arranged in the same order.
+            for (unsigned int q_point=0; q_point<n_q_points; ++q_point)
+              {
+                double Mach_local = 0.0;
+                for (unsigned d=0; d<dim; ++d)
+                  {
+                    const double velocity =
+                      velocity_infty[d] + potential_grad_on_cell[q_point][d];
+
+                    Mach_local += velocity * velocity;
+                    const unsigned int system_index = fe_NS.component_to_system_index (d, q_point);
+                    NS_solution[global_indices_of_local_dofs[system_index]] = velocity;
+                  }
+
+                const double gas_gamma (1.4);
+                const double Mach_infty (velocity_infty.square());
+                const double Mach_ratio =
+                  (1.0 + 0.5* (gas_gamma-1.0) * Mach_infty) /
+                  (1.0 + 0.5* (gas_gamma-1.0) * Mach_local);
                 {
-                  const double velocity =
-                    velocity_infty[d] + potential_grad_on_cell[q_point][d];
-
-                  Mach_local += velocity * velocity;
-                  const unsigned int system_index = fe_NS.component_to_system_index (d, q_point);
-                  NS_solution[global_indices_of_local_dofs[system_index]] = velocity;
+                  // Density component
+                  const unsigned int system_index = fe_NS.component_to_system_index (dim, q_point);
+                  NS_solution[global_indices_of_local_dofs[system_index]] =
+                    std::pow (Mach_ratio, 1.0/ (gas_gamma - 1.0));
                 }
-
-              const double gas_gamma (1.4);
-              const double Mach_infty (velocity_infty.square());
-              const double Mach_ratio =
-                (1.0 + 0.5* (gas_gamma-1.0) * Mach_infty) /
-                (1.0 + 0.5* (gas_gamma-1.0) * Mach_local);
-              {
-                // Density component
-                const unsigned int system_index = fe_NS.component_to_system_index (dim, q_point);
-                NS_solution[global_indices_of_local_dofs[system_index]] =
-                  std::pow (Mach_ratio, 1.0/ (gas_gamma - 1.0));
+                {
+                  //Pressure component
+                  const unsigned int system_index = fe_NS.component_to_system_index (dim+1, q_point);
+                  NS_solution[global_indices_of_local_dofs[system_index]] =
+                    std::pow (Mach_ratio, gas_gamma/ (gas_gamma - 1.0)) / gas_gamma;
+                }
               }
-              {
-                //Pressure component
-                const unsigned int system_index = fe_NS.component_to_system_index (dim+1, q_point);
-                NS_solution[global_indices_of_local_dofs[system_index]] =
-                  std::pow (Mach_ratio, gas_gamma/ (gas_gamma - 1.0)) / gas_gamma;
-              }
-            }
-        }
+          }
+      }
   }
 
 #include "linearVelocityPotential.inst.in"
