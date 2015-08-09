@@ -3,13 +3,8 @@ INCLUDE_DIRECTORIES(BEFORE ${CMAKE_SOURCE_DIR}/header)
 
 SET (_source_file_list "")
 SET (_static_lib_list "")
+FILE(GLOB _source_file_list *.cpp)
 
-LIST(APPEND _source_file_list NSEquation.cpp)
-LIST(APPEND _source_file_list main.cpp)
-LIST(APPEND _source_file_list MMS.cpp)
-LIST(APPEND _source_file_list Postprocessor.cpp)
-LIST(APPEND _source_file_list WallForce.cpp)
-LIST(APPEND _source_file_list EquationComponents.cpp)
 
 # Pick up all subdirectories for static libraries
 LIST_ALL_SUBDIRECTORIES (_static_lib_list ${CMAKE_CURRENT_SOURCE_DIR})
