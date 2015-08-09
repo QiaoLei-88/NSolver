@@ -27,9 +27,8 @@ namespace NSFEMSolver
       case Parameters::AllParameters<dim>::LinearVelocityPotential :
       {
         const SmartPointer<parallel::distributed::Triangulation<dim> const > triangulation_ptr (&triangulation);
-        const SmartPointer<LA::MPI::Vector> locally_owned_solution_ptr (&locally_owned_solution);
         velocityPotential::LinearVelocityPotential<dim>
-        linear_velocity_potential (triangulation_ptr, parameters, locally_owned_solution_ptr, mpi_communicator);
+        linear_velocity_potential (triangulation_ptr, parameters, mpi_communicator);
 
         linear_velocity_potential.compute();
         linear_velocity_potential.transfer_solution (fe, dof_handler, locally_owned_solution);
