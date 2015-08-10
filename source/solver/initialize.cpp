@@ -3,7 +3,7 @@
 //  NSFEMSolver
 //
 //  Created by Lei Qiao on 15/8/8.
-//  A work based on deal.II turorial step-33.
+//  A work based on deal.II tutorial step-33.
 //
 
 #include <NSolver/solver/NSolver.h>

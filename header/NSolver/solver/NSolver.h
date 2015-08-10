@@ -172,7 +172,7 @@ namespace NSFEMSolver
     // nothing fancy, in other words -- but declaring one here and using it
     // throughout the program will make it simpler later on to change it if
     // that should become necessary. This is, in fact, rather pertinent: it is
-    // known that for transsonic simulations with the Euler equations,
+    // known that for transonic simulations with the Euler equations,
     // computations do not converge even as $h\rightarrow 0$ if the boundary
     // approximation is not of sufficiently high order.
 
@@ -217,7 +217,7 @@ namespace NSFEMSolver
 
     // All output relevant vectors need to have parallel capability and be
     // size to "locally_relevant_dofs" because ghost cell is needed to
-    // determine the outmost face values.
+    // determine the out-most face values.
     NSVector      residual_for_output;
 
     Vector<double>       entropy_viscosity;

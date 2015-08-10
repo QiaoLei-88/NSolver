@@ -186,10 +186,10 @@ namespace NSFEMSolver
                                 <typename InputVector::value_type, dim>,
                                 EquationComponents<dim>::n_components> &flux);
 
-    // Compute viscos flux as if viscosity coefficent is 1. Viscosity coefficent
-    // is a linear factor of viscos flux, so you can scale the viscos flux before
+    // Compute viscous flux as if viscosity coefficient is 1. Viscosity coefficient
+    // is a linear factor of viscous flux, so you can scale the viscous flux before
     // add it to system matrix. If you want to bring sensitivity of viscosity
-    // coefficent into Newton matrix, you can declare the viscosity coefficient
+    // coefficient into Newton matrix, you can declare the viscosity coefficient
     // as a Sacado::FAD:DFAD<> type, otherwise you can declare the viscosity
     // as a regular double type.
     template <typename InputVector, typename InputMatrix>
@@ -320,7 +320,7 @@ namespace NSFEMSolver
     static Parameters::AllParameters<dim> const *parameters;
   };
 
-  // Put the definition of nested class mememer function templates in header
+  // Put the definition of nested class member function templates in header
   // file.
 
   // In the following, we will need to compute the kinetic energy and the
@@ -488,10 +488,10 @@ namespace NSFEMSolver
                                   (compute_energy_density (W) + pressure);
   }
 
-  // Compute viscos flux as if viscosity coefficent is 1. Viscosity coefficent
-  // is a linear factor of viscos flux, so you can scale the viscos flux before
+  // Compute viscous flux as if viscosity coefficient is 1. Viscosity coefficient
+  // is a linear factor of viscous flux, so you can scale the viscous flux before
   // add it to system matrix. If you want to bring sensitivity of viscosity
-  // coefficent into Newton matrix, you can declare the viscosity coefficient
+  // coefficient into Newton matrix, you can declare the viscosity coefficient
   // as a Sacado::FAD:DFAD<> type, otherwise you can declare the viscosity
   // as a regular double type.
   template <int dim>
@@ -558,7 +558,7 @@ namespace NSFEMSolver
           {
             flux[energy_component][d] += W[first_velocity_component+e]*stress_tensor[d][e];
           }
-        // Calulate gradient of temperature. Notice that T=gamma*p/rho, then wo do
+        // Calculate gradient of temperature. Notice that T=gamma*p/rho, then wo do
         // d_T = gamma / rho * d_p - gamma * p/(rho^2) * d_rho on every space dimension.
         flux[energy_component][d] += heat_conductivity * gas_gamma *
                                      rho_inverse * grad_w[pressure_component][d];
@@ -617,7 +617,7 @@ namespace NSFEMSolver
       {
         VType const Roe_factor = std::sqrt (Wminus[density_component]/Wplus[density_component]);
         VType const Roe_factor_plus_1 = Roe_factor + 1.0;
-        // Values in Roe_average is density, velosity[1,..,dim], specified total
+        // Values in Roe_average is density, velocity[1,..,dim], specified total
         // enthalpy.
         std::array<VType, n_components> Roe_average;
 
@@ -898,7 +898,7 @@ namespace NSFEMSolver
       case Boundary::MMS_BC:
       {
         // MMS_BC boundary condition set values of components once for all.
-        // It is similar to Riemann boundary conditon, but enforce all boundary
+        // It is similar to Riemann boundary condition, but enforce all boundary
         // values in subsonic case. The reason is the solution is manufactured
         // and the in enforced, the solution has no degree of freedom. However,
         // on supersonic out flow boundary, the solution still has to be extrapolated.
@@ -992,7 +992,7 @@ namespace NSFEMSolver
           }
         else
           {
-            // This is a subsonic boundary. Evaulate interior normal speed and sound speed.
+            // This is a subsonic boundary. Evaluate interior normal speed and sound speed.
             VType const sound_speed_outcoming = compute_sound_speed (Wplus);
 
             VType normal_velocity_outcoming = 0.0;

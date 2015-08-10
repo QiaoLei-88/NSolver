@@ -2,7 +2,7 @@
 //  NSolver::assemble_cell_term.cpp
 //
 //  Created by Lei Qiao on 15/8/9.
-//  A work based on deal.II turorial step-33.
+//  A work based on deal.II tutorial step-33.
 //
 
 #include <NSolver/solver/NSolver.h>
@@ -221,7 +221,7 @@ namespace NSFEMSolver
         for (unsigned int q=0; q<n_q_points; ++q)
           {
             // Here, we need to evaluate the derivatives of entropy flux respect to Euler equation independent variables $w$
-            // rather than the unknown vector $W$. So we have to set up a new Sacado::Fad::DFad syetem.
+            // rather than the unknown vector $W$. So we have to set up a new Sacado::Fad::DFad system.
             std_cxx11::array<Sacado::Fad::DFad<double>, EquationComponents<dim>::n_components> w_for_entropy_flux;
             for (unsigned int c=0; c<EquationComponents<dim>::n_components; ++c)
               {
@@ -351,7 +351,7 @@ namespace NSFEMSolver
             EulerEquations<dim>::compute_conservative_vector (W[point], w_conservative);
             EulerEquations<dim>::compute_conservative_vector (W_old[point], w_conservative_old);
 
-            // TODO: accumulate R_i fisrt and the multiply with shape_value_component * JxW together.
+            // TODO: accumulate R_i first and the multiply with shape_value_component * JxW together.
             R_i += 1.0 / time_step *
                    (w_conservative[component_i] - w_conservative_old[component_i]) *
                    fe_v.shape_value_component (i, point, component_i) *

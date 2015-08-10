@@ -30,7 +30,7 @@ namespace velocityPotential
     //   X in flow direction
     //   Y up
     //   Z size
-    // Linear velocity potential euqation make nonsense in high Mach number
+    // Linear velocity potential equation make nonsense in high Mach number
     const double Mach = std::min (parameters->Mach, 0.8);
 
     velocity_infty[2] = Mach * std::sin (parameters->angle_of_side_slip);

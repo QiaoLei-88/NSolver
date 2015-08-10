@@ -49,7 +49,7 @@ namespace NSFEMSolver
   /**
    * Class for carrying out code verification by the method of manufactured
    * solutions (MMS). For now, the test function is hard coded and only the
-   * coefficients can be adjustd.
+   * coefficients can be adjusted.
    *
    * By default, this class works in Euler mode, i.e., no viscous flux
    * will be involved.

@@ -15,9 +15,9 @@ namespace velocityPotential
     LA::MPI::Vector         &NS_solution) const
   {
     // Set quadrature points on NS FE supporting points.
-    // Then extact desired values on these qudrature points.
+    // Then extract desired values on these quadrature points.
     // If the quadrature points and the supporting points are arranged in
-    // the same order, then we can loop through all the qudrature points and
+    // the same order, then we can loop through all the quadrature points and
     // assign corresponding values the NS solution vector.
 
     const FE_Q<dim> &fe_potential = fe;
@@ -55,7 +55,7 @@ namespace velocityPotential
               potential_grad_on_cell);
 
             cell_NS->get_dof_indices (global_indices_of_local_dofs);
-            // Since the quadrature is extracted accroding to the target FE supporting
+            // Since the quadrature is extracted according to the target FE supporting
             // points, we just have to loop through all the quadrature points.
             // We assume that the quadrature points and supporting points are
             // arranged in the same order.

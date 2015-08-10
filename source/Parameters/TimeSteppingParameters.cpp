@@ -23,7 +23,7 @@ namespace NSFEMSolver
                            "simulation end time");
         prm.declare_entry ("max Newton iter", "10000",
                            Patterns::Integer (0),
-                           "maximum number of Newton interations");
+                           "maximum number of Newton iterations");
         prm.declare_entry ("time march tolerance", "-10.0",
                            Patterns::Double(),
                            "Terminate time marching when log10 of error L2 norm is less than this value");
@@ -39,7 +39,7 @@ namespace NSFEMSolver
         prm.declare_entry ("rigid reference time step", "true",
                            Patterns::Bool(),
                            "whether use specified reference time step or"
-                           "calulate according to CFL condition.");
+                           "calculate according to CFL condition.");
         prm.declare_entry ("reference time step", "0.1",
                            Patterns::Double(),
                            "simulation time step");
@@ -64,7 +64,7 @@ namespace NSFEMSolver
 
         prm.declare_entry ("iter in stage1", "5",
                            Patterns::Integer (0),
-                           "number of interations in stage one for time step increasing in steady case");
+                           "number of iterations in stage one for time step increasing in steady case");
         prm.declare_entry ("step increasing ratio stage1", "1.0",
                            Patterns::Double (0),
                            "step increasing ratio in stage1 one for time step increasing in steady case");
@@ -102,7 +102,7 @@ namespace NSFEMSolver
 
         rigid_reference_time_step = prm.get_bool ("rigid reference time step");
         reference_time_step = prm.get_double ("reference time step");
-        AssertThrow (reference_time_step!=0.0, ExcMessage (" Time step size cann't be 0."));
+        AssertThrow (reference_time_step!=0.0, ExcMessage (" Time step size can't be 0."));
         is_steady = false;
         if (reference_time_step <= 0)
           {

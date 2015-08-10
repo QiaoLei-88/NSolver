@@ -302,7 +302,7 @@ namespace NSFEMSolver
     {
       prm.declare_entry ("MMS", "0",
                          Patterns::Integer(),
-                         "Number of manufactured solution to test aginst");
+                         "Number of manufactured solution to test against");
 
       prm.declare_entry ("mesh", "grid.inp",
                          Patterns::Anything(),
@@ -310,7 +310,7 @@ namespace NSFEMSolver
 
       prm.declare_entry ("mesh format", "gmsh",
                          Patterns::Anything(),
-                         "intput mesh file format");
+                         "input mesh file format");
 
       prm.declare_entry ("scale mesh", "1.0",
                          Patterns::Double(),
@@ -590,7 +590,7 @@ namespace NSFEMSolver
         }
 
         init_fe_degree = prm.get_integer ("init fe degree");
-        AssertThrow (init_fe_degree<9, ExcMessage ("Do not usr element order higher than 8 for potential euqation."));
+        AssertThrow (init_fe_degree<9, ExcMessage ("Do not usr element order higher than 8 for potential equation."));
         if (init_fe_degree < 1)
           {
             init_fe_degree = 1;

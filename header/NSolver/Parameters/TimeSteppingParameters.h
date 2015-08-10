@@ -22,7 +22,7 @@ namespace NSFEMSolver
       /**
        * Parameters for when to terminate time stepping.
        * Unsteady run only terminates when final time is arrived.
-       * Steady run terminates when nummer of Newton interations reachs
+       * Steady run terminates when number of Newton iterations reaches
        * <code>max_Newton_iter</code> or time marching L2 norm is
        * below <code>time_march_tolerance<code>.
        */
@@ -39,7 +39,7 @@ namespace NSFEMSolver
       double theta;
 
       /**
-       * If <code>rigid_reference_time_step</code> is ture, reference time step size
+       * If <code>rigid_reference_time_step</code> is true, reference time step size
        * is set to the value specified in the input file, otherwise the reference
        * time step size is calculated according to CFL condition.
        * This flag is set to true by default.
@@ -59,7 +59,7 @@ namespace NSFEMSolver
        */
       double CFL_number;
       /**
-       * Note: For steady simulation, maximun of CFL number is only limited by
+       * Note: For steady simulation, maximum of CFL number is only limited by
        * range of <code>double</code> type.
        */
       double CFL_number_max;

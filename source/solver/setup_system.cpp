@@ -2,7 +2,7 @@
 //  NSolver::setup_system.cpp
 //
 //  Created by Lei Qiao on 15/8/9.
-//  A work based on deal.II turorial step-33.
+//  A work based on deal.II tutorial step-33.
 //
 
 #include <NSolver/solver/NSolver.h>

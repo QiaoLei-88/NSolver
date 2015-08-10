@@ -2,7 +2,7 @@
 //  NSolver::run.cpp
 //
 //  Created by Lei Qiao on 15/8/9.
-//  A work based on deal.II turorial step-33.
+//  A work based on deal.II tutorial step-33.
 //
 
 #include <NSolver/solver/NSolver.h>
@@ -308,8 +308,8 @@ namespace NSFEMSolver
             // together? I don't think so but not sure.
 
 
-            // If linear solver diverged or Newton interation not converge in
-            // a reasonable interations, we terminate this time step and set
+            // If linear solver diverged or Newton iteration not converge in
+            // a reasonable number of iterations, we terminate this time step and set
             // 'newton_iter_converged' to false. Then further action will be taken
             // to handle this situation.
 
@@ -381,7 +381,7 @@ namespace NSFEMSolver
             // \mathbf w^n - \mathbf w^{n-1}$ to try and make adaptivity work
             // better.  The idea is to try and refine ahead of a front, rather
             // than stepping into a coarse set of elements and smearing the
-            // old_solution.  This simple time extrapolator does the job. With
+            // old_solution.  This simple time extrapolation does the job. With
             // this, we then refine the mesh if so desired by the user, and
             // finally continue on with the next time step:
             ++converged_newton_iters;
@@ -446,7 +446,7 @@ namespace NSFEMSolver
 
             std::vector<Vector<double> > solution_values;
             std::vector<Vector<double> > old_solution_values;
-            //MMS: update quadrature points for evaluation of manufactored solution.
+            //MMS: update quadrature points for evaluation of manufactured solution.
             const UpdateFlags update_flags = update_values
                                              | update_JxW_values
                                              | update_quadrature_points;
@@ -520,7 +520,7 @@ namespace NSFEMSolver
               parameters->numerical_flux_type != parameters->flux_type_switch_to;
             // If switch of flux type is requested and the flux switch tolerance is
             // larger than time march tolerance, never stop time marching
-            // beforce switching to the target flux type.
+            // before switching to the target flux type.
             bool time_march_converged =
               ! (swith_flux &&
                  parameters->tolerance_to_switch_flux > parameters->time_march_tolerance);
@@ -560,7 +560,7 @@ namespace NSFEMSolver
             old_time_step_size = time_step;
             check_negative_density_pressure();
             calc_time_step();
-            // Uncomment the following line if you want reset the linear_search_length immediatly after a converged Newton iter.
+            // Uncomment the following line if you want reset the linear_search_length immediately after a converged Newton iter.
             //index_linear_search_length = 0;
             computing_timer.leave_subsection ("6:Postprocess time step");
           }
@@ -579,11 +579,11 @@ namespace NSFEMSolver
             else
               {
                 AssertThrow (parameters->allow_decrease_CFL,
-                             ExcMessage ("Nonlinear not convergence and reduceing CFL number is disabled."));
+                             ExcMessage ("Nonlinear not convergence and reducing CFL number is disabled."));
                 // Reduce time step when linear_search_length has tried out.
                 CFL_number *= 0.5;
                 AssertThrow (CFL_number >= parameters->CFL_number_min,
-                             ExcMessage ("No convergence in nonlinear solver after all small time step and linear search length trid out."));
+                             ExcMessage ("No convergence in nonlinear solver after all small time step and linear search length tried out."));
 
                 pcout << "  Recompute with different linear search length or time step...\n\n";
                 time_step *= 0.5;

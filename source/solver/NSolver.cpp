@@ -1,9 +1,9 @@
 //
-//  prj01-Newton01.cpp
-//  prj01-Newton2D
+//  NSFEMSolver::NSolver.cpp
+//  NSFEMSolver
 //
 //  Created by Lei Qiao on 15/2/3.
-//  A work based on deal.II turorial step-33.
+//  A work based on deal.II tutorial step-33.
 //
 
 /* ---------------------------------------------------------------------

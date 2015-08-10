@@ -2,7 +2,7 @@
 //  NSolver::assemble_face_term.cpp
 //
 //  Created by Lei Qiao on 15/8/9.
-//  A work based on deal.II turorial step-33.
+//  A work based on deal.II tutorial step-33.
 //
 
 #include <NSolver/solver/NSolver.h>
@@ -131,7 +131,7 @@ namespace NSFEMSolver
                                        boundary_values);
           }
         if (parameters->n_mms == 1)
-          // MMS: compute boundary_values accroding to MS.
+          // MMS: compute boundary_values according to MS.
           {
             for (unsigned int q = 0; q < n_q_points; q++)
               {

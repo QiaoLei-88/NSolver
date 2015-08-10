@@ -281,7 +281,7 @@ namespace NSFEMSolver
       InitMethod init_method;
 
       /**
-       * FE degree used for solving velocity potential euqation.
+       * FE degree used for solving velocity potential equation.
        * Degree less than 1 will be reset to 1 without warning;
        * Degree larger than 8 will cause an exception and abort the program.
        **/
