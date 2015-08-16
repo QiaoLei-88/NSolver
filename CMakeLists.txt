@@ -46,7 +46,7 @@ ENDIF()
 INCLUDE(${CMAKE_SOURCE_DIR}/utilities/cmake/list_all_subdirectories.macro.cmake)
 SET(PRJ_NAME "NSolver")
 
-
+INCLUDE_DIRECTORIES(BEFORE ${CMAKE_SOURCE_DIR}/header)
 DEAL_II_INITIALIZE_CACHED_VARIABLES()
 PROJECT(${PRJ_NAME})
 

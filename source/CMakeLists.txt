@@ -1,6 +1,4 @@
 
-INCLUDE_DIRECTORIES(BEFORE ${CMAKE_SOURCE_DIR}/header)
-
 SET (_source_file_list "")
 SET (_static_lib_list "")
 FILE(GLOB _source_file_list *.cpp)
