@@ -38,4 +38,15 @@ SET (_exec_run ${CMAKE_BINARY_DIR}/bin/${PRJ_NAME})
 
 SET (_time_out_time 18000)
 
+# Set up static library list for module tests needs to build individual executables
+LIST_ALL_SUBDIRECTORIES (_static_lib_list ${CMAKE_SOURCE_DIR}/source)
+
+SET (_static_lib_for_modele_test "")
+FOREACH(__sub_dir ${_static_lib_list})
+  add_library(${__sub_dir}_for_modele_test STATIC IMPORTED)
+  set_property(TARGET ${__sub_dir}_for_modele_test PROPERTY IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/source/${__sub_dir}/lib${__sub_dir}.a)
+  LIST(APPEND _static_lib_for_modele_test ${__sub_dir}_for_modele_test)
+ENDFOREACH()
+UNSET(__sub_dir)
+
 PICKUP_ALL_SUBDIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
