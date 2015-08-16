@@ -1,5 +1,6 @@
 
 INCLUDE(${CMAKE_SOURCE_DIR}/utilities/cmake/setup_test_case.macro.cmake)
+INCLUDE(${CMAKE_SOURCE_DIR}/utilities/cmake/setup_module_test_case.macro.cmake)
 
 SET (_exec_copy ln )
 SET (_para_copy -s )
