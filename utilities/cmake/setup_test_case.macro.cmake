@@ -41,6 +41,7 @@ MACRO(SETUP_TEST_CASE)
       # in parallel testing.
       # Always build the excutable before run cTest.
       # ${PRJ_NAME} 
+      ${_extra_depends_for_output}
     VERBATIM
     )
 
