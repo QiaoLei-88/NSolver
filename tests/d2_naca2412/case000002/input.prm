@@ -64,7 +64,7 @@ subsection time stepping
   set CFL number                    = 1.0
   set final time                    = 20   # simulation end time
   set reference time step           = 0.02 # simulation time step
-  set unsteady CFL number max       = 1.0
+  set CFL number max                = 1.0
   set theta scheme value            = 1.0
   set solution extrapolation length = 0.0
 end

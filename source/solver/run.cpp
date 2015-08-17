@@ -423,6 +423,7 @@ namespace NSFEMSolver
                                       std::pow (nonlin_residual_ratio, parameters->step_increasing_power_stage2));
                     CFL_number *= ratio;
                   }
+                CFL_number = std::min (CFL_number, parameters->CFL_number_max);
               }
             else if ((converged_newton_iters%10 == 0) &&
                      parameters->allow_increase_CFL &&
