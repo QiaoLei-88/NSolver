@@ -316,7 +316,6 @@ void MDFILU::MDF_reordering_and_ILU_factoring()
                     fill_in_level_for_original_entry;
                 }
 
-              const unsigned int fill_in_threshold (3);
               // Make sure that the provided fill_in_threshold consists with
               // the internal definition, i.e., has a offset one. See documentation
               // above for details
