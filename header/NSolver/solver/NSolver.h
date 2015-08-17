@@ -50,17 +50,7 @@
 // Header files for MPI parallel computing
 #include <deal.II/base/index_set.h>
 #include <deal.II/lac/sparsity_tools.h>
-#include <deal.II/lac/generic_linear_algebra.h>
 
-#define USE_TRILINOS_LA
-namespace LA
-{
-#ifdef USE_PETSC_LA
-  using namespace dealii::LinearAlgebraPETSc;
-#else
-  using namespace dealii::LinearAlgebraTrilinos;
-#endif
-}
 #include <deal.II/distributed/tria.h>
 #include <deal.II/distributed/grid_refinement.h>
 #include <deal.II/distributed/solution_transfer.h>
@@ -98,6 +88,7 @@ DEAL_II_ENABLE_EXTRA_DIAGNOSTICS
 #include <vector>
 #include <memory>
 
+#include <NSolver/types.h>
 #include <NSolver/Parameters/AllParameters.h>
 #include <NSolver/Parameters/FEParameters.h>
 #include <NSolver/EquationComponents.h>
@@ -122,10 +113,6 @@ namespace NSFEMSolver
 {
   using namespace dealii;
 
-#ifndef __NSVector__DEFINED__
-  typedef LA::MPI::Vector NSVector;
-#define __NSVector__DEFINED__
-#endif
   template <int dim>
   class NSolver
   {

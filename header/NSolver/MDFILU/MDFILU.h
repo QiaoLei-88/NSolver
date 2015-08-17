@@ -2,7 +2,6 @@
 #ifndef __MDFILU__H__
 #define __MDFILU__H__
 
-#include <deal.II/lac/generic_linear_algebra.h>
 #include <deal.II/lac/sparse_matrix_ez.h>
 #include <deal.II/lac/vector.h>
 #include <deal.II/base/std_cxx11/array.h>
@@ -13,24 +12,13 @@ DEAL_II_ENABLE_EXTRA_DIAGNOSTICS
 
 #include <fstream>
 
+#include <NSolver/types.h>
+
 #define VERBOSE_OUTPUT
 
 using namespace dealii;
+using namespace NSFEMSolver;
 
-#define USE_TRILINOS_LA
-namespace LA
-{
-#ifdef USE_PETSC_LA
-  using namespace dealii::LinearAlgebraPETSc;
-#else
-  using namespace dealii::LinearAlgebraTrilinos;
-#endif
-}
-
-#ifndef __NSVector__DEFINED__
-typedef LA::MPI::Vector NSVector;
-#define __NSVector__DEFINED__
-#endif
 typedef LA::MPI::SparseMatrix SourceMatrix;
 typedef SparseMatrixEZ<double> DynamicMatrix;
 typedef unsigned short local_index_type;

@@ -30,18 +30,7 @@ DEAL_II_DISABLE_EXTRA_DIAGNOSTICS
 // Recover diagnostic checks for the rest of code.
 DEAL_II_ENABLE_EXTRA_DIAGNOSTICS
 
-// Header file for MPI parallel vectors
-#include <deal.II/lac/generic_linear_algebra.h>
-#define USE_TRILINOS_LA
-namespace LA
-{
-#ifdef USE_PETSC_LA
-  using namespace dealii::LinearAlgebraPETSc;
-#else
-  using namespace dealii::LinearAlgebraTrilinos;
-#endif
-}
-
+#include <NSolver/types.h>
 #include <NSolver/BoundaryType.h>
 #include <NSolver/NumericalFlux.h>
 #include <NSolver/EquationComponents.h>
@@ -57,11 +46,6 @@ namespace LA
 namespace NSFEMSolver
 {
   using namespace dealii;
-
-#ifndef __NSVector__DEFINED__
-  typedef LA::MPI::Vector NSVector;
-#define __NSVector__DEFINED__
-#endif
 
   // @sect3{Euler equation specifics}
 
