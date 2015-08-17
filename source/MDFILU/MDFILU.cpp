@@ -423,7 +423,7 @@ int MDFILU::apply_transpose (const data_type *const in, data_type *const out) co
       const global_index_type i = ii - 1;
       const global_index_type i_row = permute_logical_to_storage[i];
 
-      data_type pivot;
+      data_type pivot = 0;
       for (typename DynamicMatrix::const_iterator iter_col = LU.begin (i_row);
            iter_col < LU.end (i_row); ++iter_col)
         {
@@ -444,6 +444,7 @@ int MDFILU::apply_transpose (const data_type *const in, data_type *const out) co
               pivot = iter_col->value();
             }
         }
+      Assert (pivot != 0.0, ExcMessage ("Zero pivot encountered!"));
       out[i_row] *= pivot;
     }
 
