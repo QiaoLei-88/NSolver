@@ -1,0 +1,10 @@
+Test LU(0) on a 10*10 matrix
+
+Tested featured are:
+Ordering,
+apply,
+apply_inverse,
+apply_transpose,
+apply_transpose_inverse,
+use as preconditioner.
+
