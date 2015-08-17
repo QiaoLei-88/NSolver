@@ -150,7 +150,9 @@ void MDFILU::compute_discarded_value (const unsigned int row_to_factor)
                 1 +
                 fill_in_level_for_original_entry;
             }
-          if (new_fill_in_level > fill_in_threshold)
+          if (new_fill_in_level > fill_in_threshold
+              &&
+              i_row != j_col) //Never drop diagonal element
             {
               // Element will be discarded
               const data_type update = pivot_neg_inv *
@@ -323,7 +325,9 @@ void MDFILU::MDF_reordering_and_ILU_factoring()
               // Make sure that the provided fill_in_threshold consists with
               // the internal definition, i.e., has a offset one. See documentation
               // above for details
-              if (new_fill_in_level <= fill_in_threshold)
+              if (new_fill_in_level <= fill_in_threshold
+                  ||
+                  i_row == j_col) //Always keep diagonal element)
                 {
                   // Element accepted
                   const data_type update = -LU.el (row_to_factor,j_col) * LU.el (i_row,row_to_factor);
