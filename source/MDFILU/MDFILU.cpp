@@ -336,8 +336,12 @@ void MDFILU::MDF_reordering_and_ILU_factoring()
                   fill_in_level.set (i_row, j_col, new_fill_in_level);
                 }
             } // For each column need update
-          compute_discarded_value (i_row);
         } // For each row need update
+      for (global_index_type i=0; i<n_row_need_update; ++i)
+        {
+          const global_index_type i_row = incides_need_update[i];
+          compute_discarded_value (i_row);
+        }
     } // For each row in matrix
   return;
 }
