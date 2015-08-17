@@ -25,7 +25,7 @@ MDFILU::MDFILU (const SourceMatrix &matrix,
   operator_range_map (matrix.trilinos_matrix().RangeMap())
 {
   //initialize the LU matrix
-  LU.copy_from (matrix);
+  LU.copy_from (matrix, /*elide_zero_values=*/false);
   MDF_reordering_and_ILU_factoring();
 }
 
@@ -300,7 +300,7 @@ void MDFILU::MDF_reordering_and_ILU_factoring()
           // Update current column, i.e., lower triangle part
           const data_type value = LU.el (i_row, row_to_factor);
 
-          LU.set (i_row,row_to_factor, value*pivot_inv);
+          LU.set (i_row,row_to_factor, value*pivot_inv, /*elide_zero_values=*/ false);
           // Update the remaining matrix
           for (global_index_type j=0; j<n_row_need_update; ++j)
             {
