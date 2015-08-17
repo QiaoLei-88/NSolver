@@ -15,7 +15,7 @@ DEAL_II_ENABLE_EXTRA_DIAGNOSTICS
 
 #include <NSolver/types.h>
 
-#define VERBOSE_OUTPUT
+// #define VERBOSE_OUTPUT
 
 using namespace dealii;
 using namespace NSFEMSolver;

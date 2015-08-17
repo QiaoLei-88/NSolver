@@ -94,19 +94,47 @@ namespace NSFEMSolver
         solver.SetRHS (&b);
         solver.SetLHS (&x);
 
-        solver.SetAztecOption (AZ_precond,         AZ_dom_decomp);
-        solver.SetAztecOption (AZ_subdomain_solve, AZ_ilut);
-        solver.SetAztecOption (AZ_overlap,         0);
-        solver.SetAztecOption (AZ_reorder,  parameters->AZ_RCM_reorder);
+        if (parameters->prec_type == Parameters::Solver::NoPrec)
+          {
+            solver.SetAztecOption (AZ_precond,         AZ_none);
+          }
+        else if (parameters->prec_type == Parameters::Solver::AZ_DD)
+          {
+            solver.SetAztecOption (AZ_precond,         AZ_dom_decomp);
+            solver.SetAztecOption (AZ_subdomain_solve, AZ_ilut);
+            solver.SetAztecOption (AZ_overlap,         0);
+            solver.SetAztecOption (AZ_reorder,  parameters->AZ_RCM_reorder);
 
-        solver.SetAztecParam (AZ_drop,      parameters->ilut_drop);
-        solver.SetAztecParam (AZ_ilut_fill, parameters->ilut_fill);
-        solver.SetAztecParam (AZ_athresh,   parameters->ilut_atol);
-        solver.SetAztecParam (AZ_rthresh,   parameters->ilut_rtol);
+            solver.SetAztecParam (AZ_drop,      parameters->ilut_drop);
+            solver.SetAztecParam (AZ_ilut_fill, parameters->ilut_fill);
+            solver.SetAztecParam (AZ_athresh,   parameters->ilut_atol);
+            solver.SetAztecParam (AZ_rthresh,   parameters->ilut_rtol);
+          }
+
         solver.SetUserMatrix (const_cast<Epetra_CrsMatrix *>
                               (&system_matrix.trilinos_matrix()));
 
-        solver.Iterate (parameters->max_iterations, parameters->linear_residual);
+        if (parameters->prec_type == Parameters::Solver::MDFILU)
+          {
+            std::cerr << "Initialize MDFILU\n";
+            const unsigned estimated_row_length
+              = 2 * system_matrix.n_nonzero_elements()/system_matrix.m();
+            std::cerr << "n_nonzero_elements: " << system_matrix.n_nonzero_elements()
+                      << std::endl;
+            std::cerr << "system_matrix.m(): " << system_matrix.m()
+                      << std::endl;
+            MDFILU mdfilu (system_matrix,
+                           estimated_row_length,
+                           parameters->ILU_level);
+            mdfilu.SetUseTranspose (false);
+            solver.SetPrecOperator (&mdfilu);
+            std::cerr << "Start Iterate\n";
+            solver.Iterate (parameters->max_iterations, parameters->linear_residual);
+          }
+        else
+          {
+            solver.Iterate (parameters->max_iterations, parameters->linear_residual);
+          }
 
         return std::pair<unsigned int, double> (solver.NumIters(),
                                                 solver.TrueResidual());
