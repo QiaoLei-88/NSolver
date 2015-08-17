@@ -68,10 +68,9 @@ void MDFILU::get_indices_of_non_zeros (
   std::vector<global_index_type> &incides_need_update,
   const bool except_pivot) const
 {
-  global_index_type i_col = 0;
   for (typename DynamicMatrix::const_iterator iter_col = LU.begin (row_to_factor);
        iter_col != LU.end (row_to_factor);
-       ++iter_col, ++i_col)
+       ++iter_col)
     {
       const global_index_type i_col = iter_col->column();
       if (i_col == row_to_factor && except_pivot)
