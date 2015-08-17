@@ -137,22 +137,26 @@ void MDFILU::compute_discarded_value (const unsigned int row_to_factor)
         {
           const global_index_type j_col = incides_need_update[j];
           // Check fill-in level
-          const data_type new_fill_in_level = fill_in_level.el (i_row, j_col);
+          data_type new_fill_in_level = fill_in_level.el (i_row, j_col);
           if (new_fill_in_level == 0.0 /* fill in level for new entry*/)
             {
-              ++return_value[prior_n_fill];
-            }
+              ++ (return_value[prior_n_fill]);
 
-          // Make sure that the provided fill_in_threshold consists with
-          // the internal definition, i.e., has a offset one. See documentation
-          // above for details
+              // Make sure that the provided fill_in_threshold consists with
+              // the internal definition, i.e., has an offset.
+              new_fill_in_level =
+                (fill_in_level.el (row_to_factor,j_col) - fill_in_level_for_original_entry) +
+                (fill_in_level.el (i_row,row_to_factor) - fill_in_level_for_original_entry) +
+                1 +
+                fill_in_level_for_original_entry;
+            }
           if (new_fill_in_level > fill_in_threshold)
             {
               // Element will be discarded
               const data_type update = pivot_neg_inv *
                                        LU.el (row_to_factor,j_col) * LU.el (i_row,row_to_factor);
               return_value[prior_discarded_value] += update*update;
-              ++return_value[prior_n_discarded];
+              ++ (return_value[prior_n_discarded]);
             }
         } // For each column need update
     } // For each row need update
