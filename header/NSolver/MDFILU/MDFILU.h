@@ -9,6 +9,7 @@ DEAL_II_DISABLE_EXTRA_DIAGNOSTICS
 #include <Epetra_Operator.h>
 #include <Sacado.hpp>
 DEAL_II_ENABLE_EXTRA_DIAGNOSTICS
+#include <deal.II/base/timer.h>
 
 #include <fstream>
 
@@ -34,6 +35,9 @@ class MDFILU : public Epetra_Operator
 private:
   const global_index_type invalid_index;
   const data_type very_large_number;
+  MPI_Comm              mpi_communicator;
+  ConditionalOStream    pcout;
+  TimerOutput           ILU_timer;
 
 #define N_INDICATOR 3
   class Indicator: public std_cxx11::array<data_type,N_INDICATOR>

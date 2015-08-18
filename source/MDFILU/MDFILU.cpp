@@ -9,6 +9,13 @@ MDFILU::MDFILU (const SourceMatrix &matrix,
   :
   invalid_index (static_cast<global_index_type> (-1)),
   very_large_number (1.988e+211),
+  mpi_communicator (MPI_COMM_WORLD),
+  pcout (std::cout,
+         (Utilities::MPI::this_mpi_process (mpi_communicator) == 0)),
+  ILU_timer (MPI_COMM_WORLD,
+             pcout,
+             TimerOutput::never,
+             TimerOutput::wall_times),
   degree (matrix.m()),
   estimated_row_length (estimated_row_length_in),
   fill_in_threshold (fill_in_threshold_in + fill_in_level_for_original_entry),
@@ -110,6 +117,7 @@ global_index_type MDFILU::get_info_of_non_zeros (
 
 void MDFILU::compute_discarded_value (const unsigned int row_to_factor)
 {
+  ILU_timer.enter_subsection ("Update discarded value");
   Indicator &return_value = indicators[row_to_factor];
 #ifdef VERBOSE_OUTPUT
   if (row_to_factor == 0)
@@ -132,6 +140,7 @@ void MDFILU::compute_discarded_value (const unsigned int row_to_factor)
       return_value[prior_n_fill] = 1<<30;
       return_value[prior_n_discarded] = 1<<30;
       return_value[prior_discarded_value] = 1e+200;
+      ILU_timer.leave_subsection ("Update discarded value");
       return;
     }
 
@@ -148,17 +157,26 @@ void MDFILU::compute_discarded_value (const unsigned int row_to_factor)
     get_info_of_non_zeros (row_to_factor, incides_need_update, except_pivot);
 
   const data_type pivot_inv = 1.0/pivot;
-
+  ILU_timer.leave_subsection ("Update discarded value");
   for (global_index_type i=0; i<n_row_need_update; ++i)
     {
+      ILU_timer.enter_subsection ("Update discarded value");
       const global_index_type i_row = incides_need_update[i].column;
+      ILU_timer.leave_subsection ("Update discarded value");
+      ILU_timer.enter_subsection ("Update discarded value: el()");
       const data_type value_of_row_pivot = LU.el (i_row, row_to_factor) * pivot_inv;
       const level_type fill_level_of_row_pivot = fill_in_level.el (i_row,row_to_factor);
+      ILU_timer.leave_subsection ("Update discarded value: el()");
       for (global_index_type j=0; j<n_row_need_update; ++j)
         {
+          ILU_timer.enter_subsection ("Update discarded value");
           const global_index_type j_col = incides_need_update[j].column;
           // Check fill-in level
+          ILU_timer.leave_subsection ("Update discarded value");
+          ILU_timer.enter_subsection ("Update discarded value: el()");
           data_type new_fill_in_level = fill_in_level.el (i_row, j_col);
+          ILU_timer.leave_subsection ("Update discarded value: el()");
+          ILU_timer.enter_subsection ("Update discarded value");
           if (new_fill_in_level == 0 /* fill in level for new entry*/)
             {
               ++ (return_value[prior_n_fill]);
@@ -180,6 +198,7 @@ void MDFILU::compute_discarded_value (const unsigned int row_to_factor)
               return_value[prior_discarded_value] += update*update;
               ++ (return_value[prior_n_discarded]);
             }
+          ILU_timer.leave_subsection ("Update discarded value");
         } // For each column need update
     } // For each row need update
 
@@ -225,6 +244,8 @@ void MDFILU::MDF_reordering_and_ILU_factoring()
 
   // Initialize::BEGIN
   // Compute Initial fill in level
+  ILU_timer.reset();
+  ILU_timer.enter_subsection ("Compute initial fill in level");
   for (global_index_type i_row=0; i_row<degree; ++i_row)
     {
       for (typename DynamicMatrix::const_iterator iter_col = LU.begin (i_row);
@@ -244,14 +265,15 @@ void MDFILU::MDF_reordering_and_ILU_factoring()
           //   }
         }
     }
-
+  ILU_timer.leave_subsection ("Compute initial fill in level");
   // Compute initial discarded value, must be done after all fill-in level have
   // been set.
+  // ILU_timer.enter_subsection ("Compute initial discarded value");
   for (global_index_type i_row=0; i_row<degree; ++i_row)
     {
       compute_discarded_value (i_row);
     }
-
+  // ILU_timer.leave_subsection ("Compute initial discarded value");
   // Initialize::END
 #ifdef VERBOSE_OUTPUT
   {
@@ -265,9 +287,10 @@ void MDFILU::MDF_reordering_and_ILU_factoring()
   for (global_index_type n_row_factored=0; n_row_factored<degree; ++n_row_factored)
     {
       // Find the row with minimal discarded value
+      ILU_timer.enter_subsection ("Find min discarded value");
       const global_index_type row_to_factor
         = find_min_discarded_value();
-
+      ILU_timer.leave_subsection ("Find min discarded value");
 #ifdef VERBOSE_OUTPUT
       for (global_index_type i=0; i<degree; ++i)
         {
@@ -285,7 +308,7 @@ void MDFILU::MDF_reordering_and_ILU_factoring()
         }
       debugStream << std::endl;
 #endif
-
+      ILU_timer.enter_subsection ("Prepare factorization");
       row_factored[row_to_factor] = true;
       permute_logical_to_storage[n_row_factored] = row_to_factor;
       permuta_storage_to_logical[row_to_factor] = n_row_factored;
@@ -306,24 +329,36 @@ void MDFILU::MDF_reordering_and_ILU_factoring()
       const global_index_type n_row_need_update =
         get_info_of_non_zeros (row_to_factor, incides_need_update, except_pivot);
 
+      ILU_timer.leave_subsection ("Prepare factorization");
       for (global_index_type i=0; i<n_row_need_update; ++i)
         {
+          ILU_timer.enter_subsection ("Factorization:");
           const global_index_type i_row = incides_need_update[i].column;
           // Update current column, i.e., lower triangle part
           // Doing this via iterator is more efficient, but now there is no
           // non-const iterator available.
-
+          ILU_timer.leave_subsection ("Factorization:");
+          ILU_timer.enter_subsection ("Factorization: el()");
           const data_type value_of_row_pivot = LU.el (i_row, row_to_factor) * pivot_inv;
+          ILU_timer.leave_subsection ("Factorization: el()");
+          ILU_timer.enter_subsection ("Factorization: set()");
           LU.set (i_row,row_to_factor, value_of_row_pivot, /*elide_zero_values=*/ false);
-
+          ILU_timer.leave_subsection ("Factorization: set()");
+          ILU_timer.enter_subsection ("Factorization: el()");
           const level_type fill_level_of_row_pivot = fill_in_level.el (i_row,row_to_factor);
+          ILU_timer.leave_subsection ("Factorization: el()");
           // Update the remaining matrix
           for (global_index_type j=0; j<n_row_need_update; ++j)
             {
+              ILU_timer.enter_subsection ("Factorization:");
               const global_index_type j_col = incides_need_update[j].column;
+              ILU_timer.leave_subsection ("Factorization:");
               // Check fill-in level
+              ILU_timer.enter_subsection ("Factorization: el()");
               unsigned int new_fill_in_level
                 = static_cast<level_type> (fill_in_level.el (i_row, j_col));
+              ILU_timer.leave_subsection ("Factorization: el()");
+              ILU_timer.enter_subsection ("Factorization:");
               if (new_fill_in_level == 0 /* fill in level for new entry*/)
                 {
                   new_fill_in_level =
@@ -336,19 +371,26 @@ void MDFILU::MDF_reordering_and_ILU_factoring()
               // Make sure that the provided fill_in_threshold consists with
               // the internal definition, i.e., has a offset one. See documentation
               // above for details
+              ILU_timer.leave_subsection ("Factorization:");
               if (new_fill_in_level <= fill_in_threshold
                   ||
                   i_row == j_col) //Always keep diagonal element)
                 {
                   // Element accepted
-                  const data_type value = LU.el (i_row, j_col);
-                  const data_type update = value - incides_need_update[j].value * value_of_row_pivot;
+                  ILU_timer.enter_subsection ("Factorization: el()");
 
+                  const data_type value = LU.el (i_row, j_col);
+                  ILU_timer.leave_subsection ("Factorization: el()");
+                  ILU_timer.enter_subsection ("Factorization:");
+                  const data_type update = value - incides_need_update[j].value * value_of_row_pivot;
+                  ILU_timer.leave_subsection ("Factorization:");
+                  ILU_timer.enter_subsection ("Factorization: set()");
                   // Have no information of the existence of this value.
                   // A search operation implied.
                   LU.set (i_row, j_col, update, /*elide_zero_values=*/ false);
                   // Update fill-level if this is a new entry
                   fill_in_level.set (i_row, j_col, new_fill_in_level);
+                  ILU_timer.leave_subsection ("Factorization: set()");
                 }
             } // For each column need update
         } // For each row need update
@@ -358,6 +400,8 @@ void MDFILU::MDF_reordering_and_ILU_factoring()
           compute_discarded_value (i_row);
         }
     } // For each row in matrix
+  ILU_timer.print_summary();
+  ILU_timer.reset();
   return;
 }
 
