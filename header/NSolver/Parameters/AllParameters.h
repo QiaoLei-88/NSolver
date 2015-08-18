@@ -72,6 +72,15 @@ namespace NSFEMSolver
       enum  OutputType { quiet, verbose };
       OutputType output;
 
+      enum Preconditioner
+      {
+        NoPrec,
+        AZ_DD,
+        MDFILU
+      };
+      Preconditioner prec_type;
+      int ILU_level;
+
       double linear_residual;
       int max_iterations;
 

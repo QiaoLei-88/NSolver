@@ -27,6 +27,12 @@ namespace NSFEMSolver
                            Patterns::Selection ("gmres|direct"),
                            "The kind of solver for the linear system. "
                            "Choices are <gmres|direct>.");
+        prm.declare_entry ("Preconditioner", "AZ_DD",
+                           Patterns::Selection ("NoPrec|AZ_DD|MDFILU"),
+                           "Preconditioner for iterative solver.");
+        prm.declare_entry ("ILU level", "0",
+                           Patterns::Integer (0),
+                           "Fill in level of ILU preconditioner");
         prm.declare_entry ("residual", "1e-10",
                            Patterns::Double(),
                            "Linear solver residual");
@@ -67,6 +73,26 @@ namespace NSFEMSolver
           {
             output = quiet;
           }
+        {
+          const std::string buff = prm.get ("Preconditioner");
+          if (buff == "NoPrec")
+            {
+              prec_type = NoPrec;
+            }
+          else if (buff == "AZ_DD")
+            {
+              prec_type = AZ_DD;
+            }
+          else if (buff == "MDFILU")
+            {
+              prec_type = MDFILU;
+            }
+          else
+            {
+              AssertThrow (false, ExcNotImplemented());
+            }
+        }
+        ILU_level = prm.get_integer ("ILU level");
 
         const std::string sv = prm.get ("method");
         if (sv == "direct")
