@@ -12,8 +12,8 @@ MDFILU::MDFILU (const SourceMatrix &matrix,
   degree (matrix.m()),
   estimated_row_length (estimated_row_length_in),
   fill_in_threshold (fill_in_threshold_in + fill_in_level_for_original_entry),
-  LU (degree,degree, estimated_row_length),
-  fill_in_level (degree, degree,estimated_row_length),
+  LU (degree, degree, estimated_row_length),
+  fill_in_level (degree, degree, estimated_row_length),
   permute_logical_to_storage (degree, invalid_index),
   permuta_storage_to_logical (degree, invalid_index),
   indicators (degree),
@@ -63,28 +63,48 @@ int MDFILU::Indicator::operator- (const Indicator &op) const
   return (0);
 }
 
-void MDFILU::get_indices_of_non_zeros (
+global_index_type MDFILU::get_info_of_non_zeros (
   const global_index_type row_to_factor,
-  std::vector<global_index_type> &incides_need_update,
+  std::vector<EntryInfo> &incides_need_update,
   const bool except_pivot) const
 {
-  for (typename DynamicMatrix::const_iterator iter_col = LU.begin (row_to_factor);
-       iter_col != LU.end (row_to_factor);
-       ++iter_col)
+  global_index_type n_non_zero = 0;
+  typename DynamicMatrix::const_iterator iter_fill = fill_in_level.begin (row_to_factor);
+  const DynamicMatrix::const_iterator end_fill = fill_in_level.end (row_to_factor);
+
+  typename DynamicMatrix::const_iterator iter_col = LU.begin (row_to_factor);
+  const DynamicMatrix::const_iterator end_col = LU.end (row_to_factor);
+
+  (void)end_fill;
+  Assert (end_fill == end_col,
+          ExcMessage ("Sparsity pattern of LU and fill_level mismatch!"));
+
+  for (; iter_col < end_col; ++iter_col, ++iter_fill)
     {
-      const global_index_type i_col = iter_col->column();
-      if (i_col == row_to_factor && except_pivot)
+      Assert (iter_fill == iter_col,
+              ExcMessage ("Sparsity pattern of LU and fill_level mismatch!"));
+      const global_index_type j_col = iter_col->column();
+      if (j_col == row_to_factor && except_pivot)
         {
           // If we do not want to count on pivot, jump over
           continue;
         }
 
-      if (!row_factored[i_col])
+      if (!row_factored[j_col])
         {
-          incides_need_update.push_back (i_col);
+          const global_index_type vector_size = incides_need_update.size();
+          if (vector_size <= n_non_zero)
+            {
+              incides_need_update.resize (vector_size + estimated_row_length);
+            }
+          incides_need_update[n_non_zero].column = j_col;
+          incides_need_update[n_non_zero].value = iter_col->value();
+          incides_need_update[n_non_zero].fill_level =
+            static_cast<level_type> (iter_fill->value());
+          ++n_non_zero;
         }
     }
-  return;
+  return (n_non_zero);
 }
 
 
@@ -105,7 +125,7 @@ void MDFILU::compute_discarded_value (const unsigned int row_to_factor)
   // const int prior_index(3);
 
   return_value.init();
-  const data_type pivot = LU.el (row_to_factor,row_to_factor);
+  const data_type pivot = LU.el (row_to_factor, row_to_factor);
 
   if (pivot==0.0)
     {
@@ -122,30 +142,32 @@ void MDFILU::compute_discarded_value (const unsigned int row_to_factor)
 
   // Find number of rows need to go through. The value is all non-zero
   // entries except the pivot and factored rows.
-  std::vector<global_index_type> incides_need_update;
+  std::vector<EntryInfo> incides_need_update (estimated_row_length);
   const bool except_pivot (true);
-  get_indices_of_non_zeros (row_to_factor, incides_need_update, except_pivot);
+  const global_index_type n_row_need_update =
+    get_info_of_non_zeros (row_to_factor, incides_need_update, except_pivot);
 
-  const data_type pivot_neg_inv = -1.0/pivot;
-  const global_index_type n_row_need_update = incides_need_update.size();
+  const data_type pivot_inv = 1.0/pivot;
 
   for (global_index_type i=0; i<n_row_need_update; ++i)
     {
-      const global_index_type i_row = incides_need_update[i];
+      const global_index_type i_row = incides_need_update[i].column;
+      const data_type value_of_row_pivot = LU.el (i_row, row_to_factor) * pivot_inv;
+      const level_type fill_level_of_row_pivot = fill_in_level.el (i_row,row_to_factor);
       for (global_index_type j=0; j<n_row_need_update; ++j)
         {
-          const global_index_type j_col = incides_need_update[j];
+          const global_index_type j_col = incides_need_update[j].column;
           // Check fill-in level
           data_type new_fill_in_level = fill_in_level.el (i_row, j_col);
-          if (new_fill_in_level == 0.0 /* fill in level for new entry*/)
+          if (new_fill_in_level == 0 /* fill in level for new entry*/)
             {
               ++ (return_value[prior_n_fill]);
 
               // Make sure that the provided fill_in_threshold consists with
               // the internal definition, i.e., has an offset.
               new_fill_in_level =
-                (fill_in_level.el (row_to_factor,j_col) - fill_in_level_for_original_entry) +
-                (fill_in_level.el (i_row,row_to_factor) - fill_in_level_for_original_entry) +
+                (incides_need_update[j].fill_level - fill_in_level_for_original_entry) +
+                (fill_level_of_row_pivot - fill_in_level_for_original_entry) +
                 1 +
                 fill_in_level_for_original_entry;
             }
@@ -154,8 +176,7 @@ void MDFILU::compute_discarded_value (const unsigned int row_to_factor)
               i_row != j_col) //Never drop diagonal element
             {
               // Element will be discarded
-              const data_type update = pivot_neg_inv *
-                                       LU.el (row_to_factor,j_col) * LU.el (i_row,row_to_factor);
+              const data_type update = incides_need_update[j].value * value_of_row_pivot;
               return_value[prior_discarded_value] += update*update;
               ++ (return_value[prior_n_discarded]);
             }
@@ -206,25 +227,11 @@ void MDFILU::MDF_reordering_and_ILU_factoring()
   // Compute Initial fill in level
   for (global_index_type i_row=0; i_row<degree; ++i_row)
     {
-      // Get indices of non-zero's of the target row
-
-      std::vector<global_index_type> incides_of_non_zeros;
-      get_indices_of_non_zeros (i_row, incides_of_non_zeros, /*except_pivot=*/ false);
-
-      const global_index_type n_non_zero_in_row = incides_of_non_zeros.size();
-      // global_index_type i_col = 0;
-      // for (LA::MPI::SparseMatrix::const_iterator iter_col (system_matrix.begin (i_row));
-      //      iter_col != system_matrix.end (i_row);
-      //      ++iter_col, ++i_col)
-      //   {
-      //     incides_of_non_zeros[i_col] = iter_col->column();
-      //   }
-
-      // Set initial fill in level.
-      for (global_index_type i_nz=0; i_nz<n_non_zero_in_row; ++i_nz)
+      for (typename DynamicMatrix::const_iterator iter_col = LU.begin (i_row);
+           iter_col < LU.end (i_row); ++iter_col)
         {
           fill_in_level.set (i_row,
-                             incides_of_non_zeros[i_nz],
+                             iter_col->column(),
                              fill_in_level_for_original_entry);
           // // a(i,j) exists?
           // if (system_matrix. (i,j) == 0.0)
@@ -289,34 +296,39 @@ void MDFILU::MDF_reordering_and_ILU_factoring()
 
       // Find number of rows need to go through. The value is all non-zero
       // entries except the pivot and factored rows.
-      std::vector<global_index_type> incides_need_update;
-      const data_type pivot = LU.el (row_to_factor,row_to_factor);
-      Assert (pivot != 0.0, ExcMessage ("Zero pivot encountered!"));
-      const bool except_pivot (true);
-      get_indices_of_non_zeros (row_to_factor, incides_need_update, except_pivot);
 
+      const data_type pivot = LU.diagonal (row_to_factor)->value();
       const data_type pivot_inv = 1.0/pivot;
-      const global_index_type n_row_need_update = incides_need_update.size();
+
+      const bool except_pivot (true);
+      std::vector<EntryInfo> incides_need_update (estimated_row_length);
+
+      const global_index_type n_row_need_update =
+        get_info_of_non_zeros (row_to_factor, incides_need_update, except_pivot);
 
       for (global_index_type i=0; i<n_row_need_update; ++i)
         {
-          const global_index_type i_row = incides_need_update[i];
-
+          const global_index_type i_row = incides_need_update[i].column;
           // Update current column, i.e., lower triangle part
-          const data_type value = LU.el (i_row, row_to_factor);
+          // Doing this via iterator is more efficient, but now there is no
+          // non-const iterator available.
 
-          LU.set (i_row,row_to_factor, value*pivot_inv, /*elide_zero_values=*/ false);
+          const data_type value_of_row_pivot = LU.el (i_row, row_to_factor) * pivot_inv;
+          LU.set (i_row,row_to_factor, value_of_row_pivot, /*elide_zero_values=*/ false);
+
+          const level_type fill_level_of_row_pivot = fill_in_level.el (i_row,row_to_factor);
           // Update the remaining matrix
           for (global_index_type j=0; j<n_row_need_update; ++j)
             {
-              const global_index_type j_col = incides_need_update[j];
+              const global_index_type j_col = incides_need_update[j].column;
               // Check fill-in level
-              unsigned int new_fill_in_level = fill_in_level.el (i_row, j_col);
+              unsigned int new_fill_in_level
+                = static_cast<level_type> (fill_in_level.el (i_row, j_col));
               if (new_fill_in_level == 0 /* fill in level for new entry*/)
                 {
                   new_fill_in_level =
-                    (fill_in_level.el (row_to_factor,j_col) - fill_in_level_for_original_entry) +
-                    (fill_in_level.el (i_row,row_to_factor) - fill_in_level_for_original_entry) +
+                    (incides_need_update[j].fill_level - fill_in_level_for_original_entry) +
+                    (fill_level_of_row_pivot - fill_in_level_for_original_entry) +
                     1 +
                     fill_in_level_for_original_entry;
                 }
@@ -329,8 +341,12 @@ void MDFILU::MDF_reordering_and_ILU_factoring()
                   i_row == j_col) //Always keep diagonal element)
                 {
                   // Element accepted
-                  const data_type update = -LU.el (row_to_factor,j_col) * LU.el (i_row,row_to_factor);
-                  LU.add (i_row, j_col, update);
+                  const data_type value = LU.el (i_row, j_col);
+                  const data_type update = value - incides_need_update[j].value * value_of_row_pivot;
+
+                  // Have no information of the existence of this value.
+                  // A search operation implied.
+                  LU.set (i_row, j_col, update, /*elide_zero_values=*/ false);
                   // Update fill-level if this is a new entry
                   fill_in_level.set (i_row, j_col, new_fill_in_level);
                 }
@@ -338,7 +354,7 @@ void MDFILU::MDF_reordering_and_ILU_factoring()
         } // For each row need update
       for (global_index_type i=0; i<n_row_need_update; ++i)
         {
-          const global_index_type i_row = incides_need_update[i];
+          const global_index_type i_row = incides_need_update[i].column;
           compute_discarded_value (i_row);
         }
     } // For each row in matrix

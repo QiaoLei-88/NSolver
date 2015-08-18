@@ -21,6 +21,8 @@ using namespace NSFEMSolver;
 
 typedef LA::MPI::SparseMatrix SourceMatrix;
 typedef SparseMatrixEZ<double> DynamicMatrix;
+typedef unsigned short level_type;
+typedef SparseMatrixEZ<double> LevelMatrix;
 typedef unsigned short local_index_type;
 typedef unsigned long global_index_type;
 typedef double data_type;
@@ -29,6 +31,25 @@ typedef bool flag_type;
 
 class MDFILU : public Epetra_Operator
 {
+private:
+  const global_index_type invalid_index;
+  const data_type very_large_number;
+
+#define N_INDICATOR 3
+  class Indicator: public std_cxx11::array<data_type,N_INDICATOR>
+  {
+  public:
+    void init();
+    int operator- (const Indicator &op) const;
+  };
+
+  struct EntryInfo
+  {
+    global_index_type column;
+    level_type fill_level;
+    data_type value;
+  };
+
 public:
   MDFILU (const SourceMatrix &matrix,
           const global_index_type estimated_row_length_in,
@@ -69,20 +90,9 @@ public:
   virtual int SetUseTranspose (const bool);
 
 private:
-  const global_index_type invalid_index;
-  const data_type very_large_number;
-
-#define N_INDICATOR 3
-  class Indicator: public std_cxx11::array<data_type,N_INDICATOR>
-  {
-  public:
-    void init();
-    int operator- (const Indicator &op) const;
-  };
-
-  void get_indices_of_non_zeros (
+  global_index_type get_info_of_non_zeros (
     const global_index_type row_to_factor,
-    std::vector<global_index_type> &incides_need_update,
+    std::vector<EntryInfo> &incides_need_update,
     const bool except_pivot) const;
 
   void compute_discarded_value (const unsigned int row_to_factor);
@@ -102,14 +112,14 @@ private:
   //    1  :  level 0 in article, original entry
   //    2  :  level 1 fill in
   //    ... so on the same.
-  static const global_index_type fill_in_level_for_original_entry = 1;
+  static const level_type fill_in_level_for_original_entry = 1;
   const global_index_type estimated_row_length;
-  const global_index_type fill_in_threshold;
+  const level_type fill_in_threshold;
   DynamicMatrix LU;
   // Record fill-in level for all non-zero entries, we need this to compute
   // level for new fill-ins.
   // SparseMatrixEZ<double> fill_in_level (degree,degree,degree);
-  DynamicMatrix fill_in_level;
+  LevelMatrix fill_in_level;
 
   // Where is the k-th row and column in LU
   std::vector<global_index_type> permute_logical_to_storage;
