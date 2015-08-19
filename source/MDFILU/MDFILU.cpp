@@ -26,6 +26,7 @@ MDFILU::MDFILU (const SourceMatrix &matrix,
   permute_logical_to_storage (degree, MDFILU::invalid_index),
   permuta_storage_to_logical (degree, MDFILU::invalid_index),
   indicators (degree),
+  sorted_indicators(),
   row_factored (degree, false),
   use_transpose (false),
   has_norm_infty (false),
@@ -42,6 +43,7 @@ MDFILU::~MDFILU()
 {
   row_factored.clear();
   indicators.clear();
+  sorted_indicators.clear();
   permute_logical_to_storage.clear();
   fill_in_level.clear();
   LU.clear();
@@ -122,9 +124,9 @@ MDFILU::global_index_type MDFILU::get_info_of_non_zeros (
 }
 
 
-void MDFILU::compute_discarded_value (const unsigned int row_to_factor)
+void MDFILU::compute_discarded_value (const unsigned int row_to_factor, const bool update)
 {
-  Indicator &return_value = indicators[row_to_factor];
+  Indicator return_value;
 #ifdef VERBOSE_OUTPUT
   if (row_to_factor == 0)
     {
@@ -143,87 +145,80 @@ void MDFILU::compute_discarded_value (const unsigned int row_to_factor)
       return_value.n_fill          = MDFILU::invalid_index;
       return_value.n_discarded     = MDFILU::invalid_index;
       return_value.discarded_value = MDFILU::very_large_number;
-      return;
     }
-
-  // compute discarded value for i_row := row_to_factor.
-  // During this procedure, we need to go through all un-factored entries that connected
-  // with this row, i.e., for all k that a(i_row, k) \ne 0 and a(k, i_row) \ne 0.
-  // That's why we need the flag array row_factored.
-
-  // Find number of rows need to go through. The value is all non-zero
-  // entries except the pivot and factored rows.
-  std::vector<EntryInfo> incides_need_update (estimated_row_length);
-  const bool except_pivot (true);
-  const global_index_type n_row_need_update =
-    get_info_of_non_zeros (row_to_factor, incides_need_update, except_pivot);
-
-  const data_type pivot_inv = 1.0/pivot;
-
-  for (global_index_type i=0; i<n_row_need_update; ++i)
+  else
     {
-      const global_index_type i_row = incides_need_update[i].column;
-      const data_type value_of_row_pivot = LU.el (i_row, row_to_factor) * pivot_inv;
-      const level_type fill_level_of_row_pivot = fill_in_level.el (i_row,row_to_factor);
-      for (global_index_type j=0; j<n_row_need_update; ++j)
+
+      // compute discarded value for i_row := row_to_factor.
+      // During this procedure, we need to go through all un-factored entries that connected
+      // with this row, i.e., for all k that a(i_row, k) \ne 0 and a(k, i_row) \ne 0.
+      // That's why we need the flag array row_factored.
+
+      // Find number of rows need to go through. The value is all non-zero
+      // entries except the pivot and factored rows.
+      std::vector<EntryInfo> incides_need_update (estimated_row_length);
+      const bool except_pivot (true);
+      const global_index_type n_row_need_update =
+        get_info_of_non_zeros (row_to_factor, incides_need_update, except_pivot);
+
+      const data_type pivot_inv = 1.0/pivot;
+
+      for (global_index_type i=0; i<n_row_need_update; ++i)
         {
-          const global_index_type j_col = incides_need_update[j].column;
-          // Check fill-in level
-          data_type new_fill_in_level = fill_in_level.el (i_row, j_col);
-          if (new_fill_in_level == 0 /* fill in level for new entry*/)
+          const global_index_type i_row = incides_need_update[i].column;
+          const data_type value_of_row_pivot = LU.el (i_row, row_to_factor) * pivot_inv;
+          const level_type fill_level_of_row_pivot = fill_in_level.el (i_row,row_to_factor);
+          for (global_index_type j=0; j<n_row_need_update; ++j)
             {
-              ++ return_value.n_fill;
+              const global_index_type j_col = incides_need_update[j].column;
+              // Check fill-in level
+              data_type new_fill_in_level = fill_in_level.el (i_row, j_col);
+              if (new_fill_in_level == 0 /* fill in level for new entry*/)
+                {
+                  ++ return_value.n_fill;
 
-              // Make sure that the provided fill_in_threshold consists with
-              // the internal definition, i.e., has an offset.
-              new_fill_in_level =
-                (incides_need_update[j].fill_level - fill_in_level_for_original_entry) +
-                (fill_level_of_row_pivot - fill_in_level_for_original_entry) +
-                1 +
-                fill_in_level_for_original_entry;
-            }
-          if (new_fill_in_level > fill_in_threshold
-              &&
-              i_row != j_col) //Never drop diagonal element
-            {
-              // Element will be discarded
-              const data_type update = incides_need_update[j].value * value_of_row_pivot;
-              return_value.discarded_value += update*update;
-              ++ return_value.n_discarded;
-            }
-        } // For each column need update
-    } // For each row need update
-
+                  // Make sure that the provided fill_in_threshold consists with
+                  // the internal definition, i.e., has an offset.
+                  new_fill_in_level =
+                    (incides_need_update[j].fill_level - fill_in_level_for_original_entry) +
+                    (fill_level_of_row_pivot - fill_in_level_for_original_entry) +
+                    1 +
+                    fill_in_level_for_original_entry;
+                }
+              if (new_fill_in_level > fill_in_threshold
+                  &&
+                  i_row != j_col) //Never drop diagonal element
+                {
+                  // Element will be discarded
+                  const data_type update = incides_need_update[j].value * value_of_row_pivot;
+                  return_value.discarded_value += update*update;
+                  ++ return_value.n_discarded;
+                }
+            } // For each column need update
+        } // For each row need update
+    }
+  if (update)
+    {
+      if (! (indicators[row_to_factor] < return_value)
+          &&
+          ! (return_value < indicators[row_to_factor]))
+        {
+          // If the new value id equal to the current one,
+          // Then no update is needed.
+          return;
+        }
+      const std::set<Indicator>::iterator it
+        = sorted_indicators.find (indicators[row_to_factor]);
+      Assert (it != sorted_indicators.end(),
+              ExcMessage ("The Indicator want to be erased doesn't exist!"));
+      sorted_indicators.erase (it);
+    }
+  std::pair<std::set<Indicator>::iterator,bool> ret;
+  ret = sorted_indicators.insert (return_value);
+  Assert (ret.second, ExcMessage ("Insert new Indicator failed!"));
+  indicators[row_to_factor] = return_value;
   return;
 }
-
-// Determine the next row to be factored by finding out the one with minimum
-// indicator form rows that have not been factored.
-MDFILU::global_index_type MDFILU::find_min_discarded_value() const
-{
-  global_index_type candidate (0);
-  bool need_init_candidate (true);
-  for (global_index_type i=0; i<indicators.size(); ++i)
-    {
-      if (row_factored[i])
-        {
-          continue;
-        }
-      // Set first un-factored row as candidate if it is not initialized
-      if (need_init_candidate)
-        {
-          candidate = i;
-          need_init_candidate = false;
-        }
-
-      if (indicators[i] < indicators[candidate])
-        {
-          candidate = i;
-        }
-    }
-  return (candidate);
-}
-
 
 void MDFILU::MDF_reordering_and_ILU_factoring()
 {
@@ -260,7 +255,7 @@ void MDFILU::MDF_reordering_and_ILU_factoring()
   ILU_timer.enter_subsection ("Compute initial discarded value");
   for (global_index_type i_row=0; i_row<degree; ++i_row)
     {
-      compute_discarded_value (i_row);
+      compute_discarded_value (i_row, /*const bool update = */ false);
     }
   ILU_timer.leave_subsection ("Compute initial discarded value");
   // Initialize::END
@@ -278,7 +273,8 @@ void MDFILU::MDF_reordering_and_ILU_factoring()
       // Find the row with minimal discarded value
       ILU_timer.enter_subsection ("Find min discarded value");
       const global_index_type row_to_factor
-        = find_min_discarded_value();
+        = sorted_indicators.begin()->index;
+      sorted_indicators.erase (sorted_indicators.begin());
       ILU_timer.leave_subsection ("Find min discarded value");
 #ifdef VERBOSE_OUTPUT
       for (global_index_type i=0; i<degree; ++i)
@@ -371,7 +367,7 @@ void MDFILU::MDF_reordering_and_ILU_factoring()
       for (global_index_type i=0; i<n_row_need_update; ++i)
         {
           const global_index_type i_row = incides_need_update[i].column;
-          compute_discarded_value (i_row);
+          compute_discarded_value (i_row, /*const bool update = */ true);
         }
       ILU_timer.leave_subsection ("Update discarded value");
     } // For each row in matrix

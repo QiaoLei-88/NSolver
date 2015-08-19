@@ -103,9 +103,8 @@ private:
     std::vector<EntryInfo> &incides_need_update,
     const bool except_pivot) const;
 
-  void compute_discarded_value (const unsigned int row_to_factor);
+  void compute_discarded_value (const unsigned int row_to_factor, const bool update);
 
-  global_index_type find_min_discarded_value() const;
   void MDF_reordering_and_ILU_factoring();
 
 
@@ -135,6 +134,7 @@ private:
   std::vector<global_index_type> permuta_storage_to_logical;
 
   std::vector<Indicator> indicators;
+  std::set<Indicator> sorted_indicators;
 
   // During factoring procedure, we need to go through all un-factored entries that connected
   // with this row, i.e., for all k that a(i_row, k) \ne 0 and a(k, i_row) \ne 0.
