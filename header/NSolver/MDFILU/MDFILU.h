@@ -39,12 +39,14 @@ private:
   ConditionalOStream    pcout;
   TimerOutput           ILU_timer;
 
-#define N_INDICATOR 3
-  class Indicator: public std_cxx11::array<data_type,N_INDICATOR>
+  class Indicator
   {
   public:
+    data_type discarded_value;
+    global_index_type n_discarded;
+    global_index_type n_fill;
     void init();
-    int operator- (const Indicator &op) const;
+    bool operator< (const Indicator &op) const;
   };
 
   struct EntryInfo

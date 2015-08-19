@@ -47,27 +47,26 @@ MDFILU::~MDFILU()
 
 void MDFILU::Indicator::init()
 {
-  for (unsigned int i=0; i<N_INDICATOR; ++i)
-    {
-      (*this)[i] = 0.0;
-    }
+  discarded_value = 0.0;
+  n_discarded     = 0;
+  n_fill          = 0;
   return;
 }
 
-int MDFILU::Indicator::operator- (const Indicator &op) const
+bool MDFILU::Indicator::operator< (const Indicator &op) const
 {
-  for (unsigned int i=0; i<N_INDICATOR; ++i)
+  if (discarded_value != op.discarded_value)
     {
-      if ((*this)[i] < op[i])
-        {
-          return (-1);
-        }
-      if ((*this)[i] > op[i])
-        {
-          return (1);
-        }
+      return (discarded_value < op.discarded_value);
     }
-  return (0);
+
+  if (n_discarded     != op.n_discarded)
+    {
+      return (n_discarded < op.n_discarded);
+    }
+
+  // We must make decision on the last element
+  return (n_fill < op.n_fill);
 }
 
 global_index_type MDFILU::get_info_of_non_zeros (
@@ -126,19 +125,15 @@ void MDFILU::compute_discarded_value (const unsigned int row_to_factor)
       f_level.close();
     }
 #endif
-  const int prior_discarded_value (0);
-  const int prior_n_discarded (1);
-  const int prior_n_fill (2);
-  // const int prior_index(3);
 
   return_value.init();
   const data_type pivot = LU.el (row_to_factor, row_to_factor);
 
   if (pivot==0.0)
     {
-      return_value[prior_n_fill] = 1<<30;
-      return_value[prior_n_discarded] = 1<<30;
-      return_value[prior_discarded_value] = 1e+200;
+      return_value.n_fill          = invalid_index;
+      return_value.n_discarded     = invalid_index;
+      return_value.discarded_value = very_large_number;
       return;
     }
 
@@ -168,7 +163,7 @@ void MDFILU::compute_discarded_value (const unsigned int row_to_factor)
           data_type new_fill_in_level = fill_in_level.el (i_row, j_col);
           if (new_fill_in_level == 0 /* fill in level for new entry*/)
             {
-              ++ (return_value[prior_n_fill]);
+              ++ return_value.n_fill;
 
               // Make sure that the provided fill_in_threshold consists with
               // the internal definition, i.e., has an offset.
@@ -184,8 +179,8 @@ void MDFILU::compute_discarded_value (const unsigned int row_to_factor)
             {
               // Element will be discarded
               const data_type update = incides_need_update[j].value * value_of_row_pivot;
-              return_value[prior_discarded_value] += update*update;
-              ++ (return_value[prior_n_discarded]);
+              return_value.discarded_value += update*update;
+              ++ return_value.n_discarded;
             }
         } // For each column need update
     } // For each row need update
@@ -212,10 +207,7 @@ global_index_type MDFILU::find_min_discarded_value() const
           need_init_candidate = false;
         }
 
-      // This means will not update selected row when indicators is equal,
-      // which means small index is with higher priority in tie situation.
-      // One can switch to large index first by using " <=0 ".
-      if ((indicators[i] - indicators[candidate]) < 0)
+      if (indicators[i] < indicators[candidate])
         {
           candidate = i;
         }
