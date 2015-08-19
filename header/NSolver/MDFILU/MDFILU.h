@@ -49,6 +49,7 @@ private:
     global_index_type index;
     void init();
     bool operator< (const Indicator &op) const;
+    bool operator== (const Indicator &op) const;
   };
 
   struct EntryInfo

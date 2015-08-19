@@ -79,6 +79,28 @@ bool MDFILU::Indicator::operator< (const Indicator &op) const
   return (index < op.index);
 }
 
+bool MDFILU::Indicator::operator== (const Indicator &op) const
+{
+  if (discarded_value != op.discarded_value)
+    {
+      return (false);
+    }
+
+  if (n_discarded     != op.n_discarded)
+    {
+      return (false);
+    }
+
+  if (n_fill          != op.n_fill)
+    {
+      return (false);
+    }
+
+  // We must make decision on the last element
+  return (index == op.index);
+}
+
+
 MDFILU::global_index_type MDFILU::get_info_of_non_zeros (
   const global_index_type row_to_factor,
   std::vector<EntryInfo> &incides_need_update,
@@ -199,9 +221,7 @@ void MDFILU::compute_discarded_value (const unsigned int row_to_factor, const bo
     }
   if (update)
     {
-      if (! (indicators[row_to_factor] < return_value)
-          &&
-          ! (return_value < indicators[row_to_factor]))
+      if (indicators[row_to_factor] == return_value)
         {
           // If the new value id equal to the current one,
           // Then no update is needed.
