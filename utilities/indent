@@ -48,6 +48,14 @@ for dir in header/* ; do
   fi
 done
 
+echo "--- Indenting all tests source and header files"
+for dir in tests/* ; do
+  files=`find $dir | egrep '\.(cc|cpp|h)$'` ;
+  if test -n "$files" ; then
+    (astyle --options=utilities/astyle.rc $files ) &
+  fi
+done
+
 # now wait for all of these processes to finish
 wait
 
