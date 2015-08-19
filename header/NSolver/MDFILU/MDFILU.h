@@ -46,6 +46,7 @@ private:
     data_type discarded_value;
     global_index_type n_discarded;
     global_index_type n_fill;
+    global_index_type index;
     void init();
     bool operator< (const Indicator &op) const;
   };

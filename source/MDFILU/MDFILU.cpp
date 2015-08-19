@@ -52,6 +52,7 @@ void MDFILU::Indicator::init()
   discarded_value = 0.0;
   n_discarded     = 0;
   n_fill          = 0;
+  index           = MDFILU::invalid_index;
   return;
 }
 
@@ -67,8 +68,13 @@ bool MDFILU::Indicator::operator< (const Indicator &op) const
       return (n_discarded < op.n_discarded);
     }
 
+  if (n_fill          != op.n_fill)
+    {
+      return (n_fill < op.n_fill);
+    }
+
   // We must make decision on the last element
-  return (n_fill < op.n_fill);
+  return (index < op.index);
 }
 
 MDFILU::global_index_type MDFILU::get_info_of_non_zeros (
@@ -129,6 +135,7 @@ void MDFILU::compute_discarded_value (const unsigned int row_to_factor)
 #endif
 
   return_value.init();
+  return_value.index = row_to_factor;
   const data_type pivot = LU.el (row_to_factor, row_to_factor);
 
   if (pivot==0.0)
