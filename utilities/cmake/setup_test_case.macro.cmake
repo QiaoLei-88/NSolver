@@ -39,13 +39,13 @@ MACRO(SETUP_TEST_CASE)
       ${_input_file_list_full}
       # Remove dependency on the project main target to avoid race condition
       # in parallel testing.
-      # Always build the excutable before run cTest.
+      # Always build the executable before run cTest.
       # ${PRJ_NAME} 
       ${_extra_depends_for_output}
     VERBATIM
     )
 
-  # Bring ${_comparison_file} into ${_test_directory} for possible manuel comparision.
+  # Bring ${_comparison_file} into ${_test_directory} for possible manual comparison.
     ADD_CUSTOM_COMMAND(OUTPUT ${_test_directory}/${_comparison_file}
     COMMAND  ${_exec_copy}  ${_para_copy} ${_test_src_directory}/${_comparison_file} ${_test_directory}/${_comparison_file}
     WORKING_DIRECTORY
@@ -66,7 +66,7 @@ MACRO(SETUP_TEST_CASE)
 
   # Finally add test target. This will be invoked by the ctest command.
   ADD_TEST(NAME ${_test_name}
-    # The next command is equavalent to run 'make diff_${_test_name}' inside
+    # The next command is equivalent to run 'make diff_${_test_name}' inside
     # ${CMAKE_BINARY_DIR}.
     COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target diff_${_test_name}
     WORKING_DIRECTORY ${_test_directory}
