@@ -33,8 +33,9 @@ private:
   typedef Vector<data_type> MDFVector;
   typedef bool flag_type;
 
-  const global_index_type invalid_index;
-  const data_type very_large_number;
+  static const global_index_type invalid_index;
+  static const data_type very_large_number;
+
   MPI_Comm              mpi_communicator;
   ConditionalOStream    pcout;
   TimerOutput           ILU_timer;

@@ -2,13 +2,15 @@
 #include <NSolver/MDFILU/MDFILU.h>
 
 const char MDFILU::label[] = "Epetra_Operator_MDFILU";
+const MDFILU::data_type MDFILU::very_large_number
+  = std::numeric_limits<MDFILU::data_type>::max();
+const MDFILU::global_index_type MDFILU::invalid_index
+  = std::numeric_limits<MDFILU::global_index_type>::max();
 
 MDFILU::MDFILU (const SourceMatrix &matrix,
                 const global_index_type estimated_row_length_in,
                 const global_index_type fill_in_threshold_in)
   :
-  invalid_index (static_cast<global_index_type> (-1)),
-  very_large_number (1.988e+211),
   mpi_communicator (MPI_COMM_WORLD),
   pcout (std::cout,
          (Utilities::MPI::this_mpi_process (mpi_communicator) == 0)),
@@ -21,8 +23,8 @@ MDFILU::MDFILU (const SourceMatrix &matrix,
   fill_in_threshold (fill_in_threshold_in + fill_in_level_for_original_entry),
   LU (degree, degree, estimated_row_length),
   fill_in_level (degree, degree, estimated_row_length),
-  permute_logical_to_storage (degree, invalid_index),
-  permuta_storage_to_logical (degree, invalid_index),
+  permute_logical_to_storage (degree, MDFILU::invalid_index),
+  permuta_storage_to_logical (degree, MDFILU::invalid_index),
   indicators (degree),
   row_factored (degree, false),
   use_transpose (false),
@@ -131,9 +133,9 @@ void MDFILU::compute_discarded_value (const unsigned int row_to_factor)
 
   if (pivot==0.0)
     {
-      return_value.n_fill          = invalid_index;
-      return_value.n_discarded     = invalid_index;
-      return_value.discarded_value = very_large_number;
+      return_value.n_fill          = MDFILU::invalid_index;
+      return_value.n_discarded     = MDFILU::invalid_index;
+      return_value.discarded_value = MDFILU::very_large_number;
       return;
     }
 
@@ -720,7 +722,7 @@ int MDFILU::ApplyInverse (const Epetra_MultiVector &in, Epetra_MultiVector &out)
 
 double MDFILU::NormInf() const
 {
-  return (very_large_number);
+  return (MDFILU::very_large_number);
 }
 
 bool MDFILU::HasNormInf() const
