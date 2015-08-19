@@ -69,7 +69,7 @@ bool MDFILU::Indicator::operator< (const Indicator &op) const
   return (n_fill < op.n_fill);
 }
 
-global_index_type MDFILU::get_info_of_non_zeros (
+MDFILU::global_index_type MDFILU::get_info_of_non_zeros (
   const global_index_type row_to_factor,
   std::vector<EntryInfo> &incides_need_update,
   const bool except_pivot) const
@@ -190,7 +190,7 @@ void MDFILU::compute_discarded_value (const unsigned int row_to_factor)
 
 // Determine the next row to be factored by finding out the one with minimum
 // indicator form rows that have not been factored.
-global_index_type MDFILU::find_min_discarded_value() const
+MDFILU::global_index_type MDFILU::find_min_discarded_value() const
 {
   global_index_type candidate (0);
   bool need_init_candidate (true);
@@ -657,11 +657,11 @@ int MDFILU::apply_inverse (const NSVector &in, NSVector &out) const
 }
 //------------------------------//------------------------------
 
-const std::vector<global_index_type> &MDFILU::get_permutation() const
+const std::vector<MDFILU::global_index_type> &MDFILU::get_permutation() const
 {
   return (permute_logical_to_storage);
 }
-const DynamicMatrix &MDFILU::get_LU() const
+const MDFILU::DynamicMatrix &MDFILU::get_LU() const
 {
   return (LU);
 }

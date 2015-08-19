@@ -20,19 +20,19 @@ DEAL_II_ENABLE_EXTRA_DIAGNOSTICS
 using namespace dealii;
 using namespace NSFEMSolver;
 
-typedef LA::MPI::SparseMatrix SourceMatrix;
-typedef SparseMatrixEZ<double> DynamicMatrix;
-typedef unsigned short level_type;
-typedef SparseMatrixEZ<double> LevelMatrix;
-typedef unsigned short local_index_type;
-typedef unsigned long global_index_type;
-typedef double data_type;
-typedef Vector<data_type> MDFVector;
-typedef bool flag_type;
-
 class MDFILU : public Epetra_Operator
 {
 private:
+  typedef LA::MPI::SparseMatrix SourceMatrix;
+  typedef SparseMatrixEZ<double> DynamicMatrix;
+  typedef unsigned short level_type;
+  typedef SparseMatrixEZ<double> LevelMatrix;
+  typedef unsigned short local_index_type;
+  typedef unsigned long global_index_type;
+  typedef double data_type;
+  typedef Vector<data_type> MDFVector;
+  typedef bool flag_type;
+
   const global_index_type invalid_index;
   const data_type very_large_number;
   MPI_Comm              mpi_communicator;
