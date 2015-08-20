@@ -9,7 +9,7 @@
 #include <iostream>
 #include <fstream>
 #include <NSolver/solver/NSolver.h>
-
+#include <NSolver/print_version.h>
 
 int main (int argc, char *argv[])
 {
@@ -19,7 +19,7 @@ int main (int argc, char *argv[])
   try
     {
       Utilities::MPI::MPI_InitFinalize mpi_initialization (argc, argv, /* int max_num_threads */ 1);
-
+      print_version (std::cout);
       deallog.depth_console (0);
 
       char *input_file (0);
