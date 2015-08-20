@@ -160,5 +160,75 @@ private:
   const static char label[];
 };
 
+// in-line member functions
+inline
+const std::vector<MDFILU::global_index_type> &MDFILU::get_permutation() const
+{
+  return (permute_logical_to_storage);
+}
+
+inline
+const MDFILU::DynamicMatrix &MDFILU::get_LU() const
+{
+  return (LU);
+}
+
+inline
+MDFILU::global_index_type MDFILU::number_of_new_fill_ins() const
+{
+  return (n_total_fill_in);
+}
+
+// Interfaces for Epetra_Operator
+
+inline
+double MDFILU::NormInf() const
+{
+  return (MDFILU::very_large_number);
+}
+
+inline
+bool MDFILU::HasNormInf() const
+{
+  return (has_norm_infty);
+}
+
+inline
+bool MDFILU::UseTranspose() const
+{
+  return (use_transpose);
+}
+
+inline
+const char *MDFILU::Label() const
+{
+  return (label);
+}
+
+inline
+int MDFILU::SetUseTranspose (const bool in)
+{
+  use_transpose = in;
+  return (0);
+}
+
+inline
+const Epetra_Comm &MDFILU::Comm() const
+{
+  return (* (epetra_comm));
+}
+
+inline
+const Epetra_Map &MDFILU::OperatorDomainMap() const
+{
+  return (operator_domain_map);
+}
+
+inline
+const Epetra_Map &MDFILU::OperatorRangeMap() const
+{
+  return (operator_range_map);
+}
+
 #endif
 //     of #ifndef __MDFILU__H__

@@ -405,10 +405,6 @@ void MDFILU::MDF_reordering_and_ILU_factoring()
   return;
 }
 
-MDFILU::global_index_type MDFILU::number_of_new_fill_ins() const
-{
-  return (n_total_fill_in);
-}
 // This function is safe even @p in and @out is the same vector.
 // Because we only multiply the vector with upper and lower triangle
 // matrix in order, the passed vector value is never used again.
@@ -697,15 +693,6 @@ int MDFILU::apply_inverse (const NSVector &in, NSVector &out) const
 }
 //------------------------------//------------------------------
 
-const std::vector<MDFILU::global_index_type> &MDFILU::get_permutation() const
-{
-  return (permute_logical_to_storage);
-}
-const MDFILU::DynamicMatrix &MDFILU::get_LU() const
-{
-  return (LU);
-}
-
 // Virtual functions from Epetra_Operator
 
 int MDFILU::Apply (const Epetra_MultiVector &in, Epetra_MultiVector &out) const
@@ -756,45 +743,4 @@ int MDFILU::ApplyInverse (const Epetra_MultiVector &in, Epetra_MultiVector &out)
     }
 
   return (0);
-}
-
-double MDFILU::NormInf() const
-{
-  return (MDFILU::very_large_number);
-}
-
-bool MDFILU::HasNormInf() const
-{
-  return (has_norm_infty);
-}
-
-bool MDFILU::UseTranspose() const
-{
-  return (use_transpose);
-}
-
-const char *MDFILU::Label() const
-{
-  return (label);
-}
-
-int MDFILU::SetUseTranspose (const bool in)
-{
-  use_transpose = in;
-  return (0);
-}
-
-const Epetra_Comm &MDFILU::Comm() const
-{
-  return (* (epetra_comm));
-}
-
-const Epetra_Map &MDFILU::OperatorDomainMap() const
-{
-  return (operator_domain_map);
-}
-
-const Epetra_Map &MDFILU::OperatorRangeMap() const
-{
-  return (operator_range_map);
 }
