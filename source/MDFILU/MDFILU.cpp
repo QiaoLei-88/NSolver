@@ -7,6 +7,35 @@ const MDFILU::data_type MDFILU::very_large_number
 const MDFILU::global_index_type MDFILU::invalid_index
   = std::numeric_limits<MDFILU::global_index_type>::max();
 
+MDFILU::MDFILU (const SourceMatrix &matrix)
+  :
+  mpi_communicator (MPI_COMM_WORLD),
+  pcout (std::cout,
+         (Utilities::MPI::this_mpi_process (mpi_communicator) == 0)),
+  ILU_timer (MPI_COMM_WORLD,
+             pcout,
+             TimerOutput::never,
+             TimerOutput::wall_times),
+  timer_ptr (&ILU_timer),
+  metrix_factored (false),
+  degree (matrix.m()),
+  estimated_row_length (0),
+  fill_in_threshold (fill_in_level_for_original_entry),
+  n_total_fill_in (0),
+  LU(),
+  fill_in_level(),
+  permute_logical_to_storage(),
+  permuta_storage_to_logical(),
+  indicators(),
+  sorted_indicators(),
+  row_factored(),
+  use_transpose (false),
+  has_norm_infty (false),
+  epetra_comm (& (matrix.trilinos_matrix().Comm())),
+  operator_domain_map (matrix.trilinos_matrix().DomainMap()),
+  operator_range_map (matrix.trilinos_matrix().RangeMap())
+{}
+
 MDFILU::MDFILU (const SourceMatrix &matrix,
                 const global_index_type estimated_row_length_in,
                 const global_index_type fill_in_threshold_in)
@@ -19,6 +48,7 @@ MDFILU::MDFILU (const SourceMatrix &matrix,
              TimerOutput::never,
              TimerOutput::wall_times),
   timer_ptr (&ILU_timer),
+  metrix_factored (false),
   degree (matrix.m()),
   estimated_row_length (estimated_row_length_in),
   fill_in_threshold (fill_in_threshold_in + fill_in_level_for_original_entry),
@@ -39,6 +69,7 @@ MDFILU::MDFILU (const SourceMatrix &matrix,
   //initialize the LU matrix
   LU.copy_from (matrix, /*elide_zero_values=*/false);
   MDF_reordering_and_ILU_factoring();
+  metrix_factored = true;
 }
 
 MDFILU::~MDFILU()
@@ -410,6 +441,7 @@ void MDFILU::MDF_reordering_and_ILU_factoring()
 // matrix in order, the passed vector value is never used again.
 int MDFILU::apply (const data_type *const in, data_type *const out) const
 {
+  Assert (metrix_factored, ExcMessage ("Call factor_matrix() before using it!"));
   timer_ptr->enter_subsection ("Apply ILU operator");
   // Apply U to in
   for (global_index_type i=0; i<degree; ++i)
@@ -458,6 +490,7 @@ int MDFILU::apply (const data_type *const in, data_type *const out) const
 
 int MDFILU::apply_transpose (const data_type *const in, data_type *const out) const
 {
+  Assert (metrix_factored, ExcMessage ("Call factor_matrix() before using it!"));
   timer_ptr->enter_subsection ("Apply transpose ILU operator");
   // Apply L^T to in
   for (global_index_type i=0; i<degree; ++i)
@@ -523,6 +556,7 @@ int MDFILU::apply_transpose (const data_type *const in, data_type *const out) co
 
 int MDFILU::apply_inverse_transpose (const data_type *const in, data_type *const out) const
 {
+  Assert (metrix_factored, ExcMessage ("Call factor_matrix() before using it!"));
   timer_ptr->enter_subsection ("Apply transpose inverse ILU operator");
   // Apply (U^T)^-1 to in
   for (global_index_type i=0; i<degree; ++i)
@@ -583,6 +617,7 @@ int MDFILU::apply_inverse_transpose (const data_type *const in, data_type *const
 
 int MDFILU::apply_inverse (const data_type *const in, data_type *const out) const
 {
+  Assert (metrix_factored, ExcMessage ("Call factor_matrix() before using it!"));
   timer_ptr->enter_subsection ("Apply inverse ILU operator");
   // Apply L^-1 to in
   for (global_index_type i=0; i<degree; ++i)

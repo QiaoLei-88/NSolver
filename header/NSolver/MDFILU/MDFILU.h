@@ -44,6 +44,7 @@ private:
   // so, use timer in these functions
   // with this "const" pointer.
   TimerOutput *const    timer_ptr;
+  bool metrix_factored;
   class Indicator
   {
   public:
@@ -64,6 +65,11 @@ private:
   };
 
 public:
+  // A cheap constructor. Cheap means it doesn't allocate large amount
+  // memory or do massive data copy. It just set some scalar member
+  // variables. Note that the object is unusable after declared with
+  // this constructor.
+  MDFILU (const SourceMatrix &matrix);
   MDFILU (const SourceMatrix &matrix,
           const global_index_type estimated_row_length_in,
           const global_index_type fill_in_threshold_in);
