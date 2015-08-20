@@ -64,11 +64,15 @@ public:
   // A cheap constructor. Cheap means it doesn't allocate large amount
   // memory or do massive data copy. It just set some scalar member
   // variables. Note that the object is unusable after declared with
-  // this constructor.
+  // this constructor. You can initialize the object with reinit() at
+  // any time before you want to apply the preconditioner.
   MDFILU (const SourceMatrix &matrix);
   MDFILU (const SourceMatrix &matrix,
           const global_index_type estimated_row_length_in,
           const global_index_type fill_in_threshold_in);
+
+  void reinit (const global_index_type estimated_row_length_in,
+               const global_index_type fill_in_threshold_in);
 
   global_index_type number_of_new_fill_ins() const;
 
@@ -134,8 +138,8 @@ private:
   //    2  :  level 1 fill in
   //    ... so on the same.
 
-  const global_index_type estimated_row_length;
-  const level_type fill_in_threshold;
+  global_index_type estimated_row_length;
+  level_type fill_in_threshold;
   global_index_type n_total_fill_in;
   DynamicMatrix LU;
   // Record fill-in level for all non-zero entries, we need this to compute

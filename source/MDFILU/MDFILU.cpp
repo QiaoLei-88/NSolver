@@ -76,6 +76,41 @@ MDFILU::MDFILU (const SourceMatrix &matrix,
   metrix_factored = true;
 }
 
+void MDFILU::reinit (const MDFILU::global_index_type estimated_row_length_in,
+                     const MDFILU::global_index_type fill_in_threshold_in)
+{
+  Assert (source_matrix->m() == degree,
+          ExcMessage ("Dimension of source matrix has changed!"));
+
+  estimated_row_length = estimated_row_length_in;
+  fill_in_threshold    = fill_in_threshold_in + fill_in_level_for_original_entry;
+
+  row_factored.clear();
+  indicators.clear();
+  sorted_indicators.clear();
+  permute_logical_to_storage.clear();
+  fill_in_level.clear();
+  LU.clear();
+
+  n_total_fill_in = 0;
+
+  LU.reinit (degree, degree, estimated_row_length);
+  fill_in_level.reinit (degree, degree, estimated_row_length);
+
+  permute_logical_to_storage.resize (degree, MDFILU::invalid_index);
+  permuta_storage_to_logical.resize (degree, MDFILU::invalid_index);
+  indicators.resize (degree);
+  row_factored.resize (degree, false);
+
+  ILU_timer.reset();
+
+  LU.copy_from (*source_matrix, /*elide_zero_values=*/false);
+  MDF_reordering_and_ILU_factoring();
+  metrix_factored = true;
+
+  return;
+}
+
 MDFILU::~MDFILU()
 {
   ILU_timer.print_summary();
