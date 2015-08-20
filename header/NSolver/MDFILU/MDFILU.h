@@ -39,7 +39,11 @@ private:
   MPI_Comm              mpi_communicator;
   ConditionalOStream    pcout;
   TimerOutput           ILU_timer;
-
+  // As required by Epetra_Operator,
+  // all apply* functions must be const,
+  // so, use timer in these functions
+  // with this "const" pointer.
+  TimerOutput *const    timer_ptr;
   class Indicator
   {
   public:

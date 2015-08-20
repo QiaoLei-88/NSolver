@@ -18,6 +18,7 @@ MDFILU::MDFILU (const SourceMatrix &matrix,
              pcout,
              TimerOutput::never,
              TimerOutput::wall_times),
+  timer_ptr (&ILU_timer),
   degree (matrix.m()),
   estimated_row_length (estimated_row_length_in),
   fill_in_threshold (fill_in_threshold_in + fill_in_level_for_original_entry),
@@ -41,6 +42,7 @@ MDFILU::MDFILU (const SourceMatrix &matrix,
 
 MDFILU::~MDFILU()
 {
+  ILU_timer.print_summary();
   row_factored.clear();
   indicators.clear();
   sorted_indicators.clear();
@@ -402,6 +404,7 @@ void MDFILU::MDF_reordering_and_ILU_factoring()
 // matrix in order, the passed vector value is never used again.
 int MDFILU::apply (const data_type *const in, data_type *const out) const
 {
+  timer_ptr->enter_subsection ("Apply ILU operator");
   // Apply U to in
   for (global_index_type i=0; i<degree; ++i)
     {
@@ -443,13 +446,13 @@ int MDFILU::apply (const data_type *const in, data_type *const out) const
             }
         }
     }
-
+  timer_ptr->leave_subsection ("Apply ILU operator");
   return (0);
 }
 
 int MDFILU::apply_transpose (const data_type *const in, data_type *const out) const
 {
-
+  timer_ptr->enter_subsection ("Apply transpose ILU operator");
   // Apply L^T to in
   for (global_index_type i=0; i<degree; ++i)
     {
@@ -508,12 +511,13 @@ int MDFILU::apply_transpose (const data_type *const in, data_type *const out) co
       Assert (pivot != 0.0, ExcMessage ("Zero pivot encountered!"));
       out[i_row] *= pivot;
     }
-
+  timer_ptr->leave_subsection ("Apply transpose ILU operator");
   return (0);
 }
 
 int MDFILU::apply_inverse_transpose (const data_type *const in, data_type *const out) const
 {
+  timer_ptr->enter_subsection ("Apply transpose inverse ILU operator");
   // Apply (U^T)^-1 to in
   for (global_index_type i=0; i<degree; ++i)
     {
@@ -567,12 +571,13 @@ int MDFILU::apply_inverse_transpose (const data_type *const in, data_type *const
             }
         }
     }
-
+  timer_ptr->leave_subsection ("Apply transpose inverse ILU operator");
   return (0);
 }
 
 int MDFILU::apply_inverse (const data_type *const in, data_type *const out) const
 {
+  timer_ptr->enter_subsection ("Apply inverse ILU operator");
   // Apply L^-1 to in
   for (global_index_type i=0; i<degree; ++i)
     {
@@ -622,7 +627,7 @@ int MDFILU::apply_inverse (const data_type *const in, data_type *const out) cons
       Assert (pivot != 0.0, ExcMessage ("Zero pivot encountered!"));
       out[i_row] /= pivot;
     }
-
+  timer_ptr->leave_subsection ("Apply inverse ILU operator");
   return (0);
 }
 
