@@ -1,0 +1,8 @@
+test reinit() with fill in level 0,1,2 for features
+
+Ordering,
+apply,
+apply_inverse,
+apply_transpose,
+apply_transpose_inverse,
+use as preconditioner.
