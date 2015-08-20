@@ -63,7 +63,7 @@ int main (int argc, char *argv[])
                     << "  Aborting!" << std::endl;
           return (7);
         }
-
+      print_version (error_info);
       error_info << std::endl << std::endl
                  << "----------------------------------------------------"
                  << std::endl;
@@ -90,7 +90,7 @@ int main (int argc, char *argv[])
                     << "  Aborting!" << std::endl;
           return (7);
         }
-
+      print_version (error_info);
       error_info << std::endl << std::endl
                  << "----------------------------------------------------"
                  << std::endl;
@@ -103,6 +103,7 @@ int main (int argc, char *argv[])
     };
 
   std::ofstream run_info ("run.success");
+  print_version (run_info);
   run_info << "Task finished successfully." << std::endl;
   run_info.close();
   return (0);
