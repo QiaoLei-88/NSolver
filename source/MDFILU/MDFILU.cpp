@@ -554,6 +554,63 @@ int MDFILU::apply_transpose (const data_type *const in, data_type *const out) co
   return (0);
 }
 
+int MDFILU::apply_inverse (const data_type *const in, data_type *const out) const
+{
+  Assert (metrix_factored, ExcMessage ("Call factor_matrix() before using it!"));
+  timer_ptr->enter_subsection ("Apply inverse ILU operator");
+  // Apply L^-1 to in
+  for (global_index_type i=0; i<degree; ++i)
+    {
+      // Forward substitution
+      const global_index_type i_row = permute_logical_to_storage[i];
+
+      // Diagonal value of L is alway 1, so we can just accumulate on out[i_row].
+      out[i_row] = in[i_row];
+
+      for (typename DynamicMatrix::const_iterator iter_col = LU.begin (i_row);
+           iter_col < LU.end (i_row); ++iter_col)
+        {
+          const global_index_type j_col = iter_col->column();
+          const global_index_type j = permuta_storage_to_logical[j_col];
+          if (j < i)
+            {
+              // Upper triangle only
+              out[i_row] -= iter_col->value() * out[j_col];
+            }
+        }
+    }
+
+  // Apply U^-1 to the result of U*in
+  for (global_index_type ii=degree; ii>0; --ii)
+    {
+      // Backward substitution; be careful on "ii-1" because ii is unsigned
+      const global_index_type i = ii - 1;
+      const global_index_type i_row = permute_logical_to_storage[i];
+
+      data_type pivot = 0.0;
+
+      for (typename DynamicMatrix::const_iterator iter_col = LU.begin (i_row);
+           iter_col < LU.end (i_row); ++iter_col)
+        {
+          const global_index_type j_col = iter_col->column();
+          const global_index_type j = permuta_storage_to_logical[j_col];
+          if (j > i)
+            {
+              // Lower triangle only
+              out[i_row] -= iter_col->value() * out[j_col];
+            }
+          else if (j == i)
+            {
+              pivot = iter_col->value();
+            }
+        }
+      Assert (pivot != 0.0, ExcMessage ("Zero pivot encountered!"));
+      out[i_row] /= pivot;
+    }
+  timer_ptr->leave_subsection ("Apply inverse ILU operator");
+  return (0);
+}
+
 int MDFILU::apply_inverse_transpose (const data_type *const in, data_type *const out) const
 {
   Assert (metrix_factored, ExcMessage ("Call factor_matrix() before using it!"));
@@ -612,63 +669,6 @@ int MDFILU::apply_inverse_transpose (const data_type *const in, data_type *const
         }
     }
   timer_ptr->leave_subsection ("Apply transpose inverse ILU operator");
-  return (0);
-}
-
-int MDFILU::apply_inverse (const data_type *const in, data_type *const out) const
-{
-  Assert (metrix_factored, ExcMessage ("Call factor_matrix() before using it!"));
-  timer_ptr->enter_subsection ("Apply inverse ILU operator");
-  // Apply L^-1 to in
-  for (global_index_type i=0; i<degree; ++i)
-    {
-      // Forward substitution
-      const global_index_type i_row = permute_logical_to_storage[i];
-
-      // Diagonal value of L is alway 1, so we can just accumulate on out[i_row].
-      out[i_row] = in[i_row];
-
-      for (typename DynamicMatrix::const_iterator iter_col = LU.begin (i_row);
-           iter_col < LU.end (i_row); ++iter_col)
-        {
-          const global_index_type j_col = iter_col->column();
-          const global_index_type j = permuta_storage_to_logical[j_col];
-          if (j < i)
-            {
-              // Upper triangle only
-              out[i_row] -= iter_col->value() * out[j_col];
-            }
-        }
-    }
-
-  // Apply U^-1 to the result of U*in
-  for (global_index_type ii=degree; ii>0; --ii)
-    {
-      // Backward substitution; be careful on "ii-1" because ii is unsigned
-      const global_index_type i = ii - 1;
-      const global_index_type i_row = permute_logical_to_storage[i];
-
-      data_type pivot = 0.0;
-
-      for (typename DynamicMatrix::const_iterator iter_col = LU.begin (i_row);
-           iter_col < LU.end (i_row); ++iter_col)
-        {
-          const global_index_type j_col = iter_col->column();
-          const global_index_type j = permuta_storage_to_logical[j_col];
-          if (j > i)
-            {
-              // Lower triangle only
-              out[i_row] -= iter_col->value() * out[j_col];
-            }
-          else if (j == i)
-            {
-              pivot = iter_col->value();
-            }
-        }
-      Assert (pivot != 0.0, ExcMessage ("Zero pivot encountered!"));
-      out[i_row] /= pivot;
-    }
-  timer_ptr->leave_subsection ("Apply inverse ILU operator");
   return (0);
 }
 

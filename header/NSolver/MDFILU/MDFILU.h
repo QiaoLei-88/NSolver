@@ -22,6 +22,8 @@ using namespace NSFEMSolver;
 
 class MDFILU : public Epetra_Operator
 {
+//
+// private types and static variables
 private:
   typedef LA::MPI::SparseMatrix SourceMatrix;
   typedef SparseMatrixEZ<double> DynamicMatrix;
@@ -34,17 +36,9 @@ private:
   typedef bool flag_type;
 
   static const global_index_type invalid_index;
+  static const level_type fill_in_level_for_original_entry = 1;
   static const data_type very_large_number;
 
-  MPI_Comm              mpi_communicator;
-  ConditionalOStream    pcout;
-  TimerOutput           ILU_timer;
-  // As required by Epetra_Operator,
-  // all apply* functions must be const,
-  // so, use timer in these functions
-  // with this "const" pointer.
-  TimerOutput *const    timer_ptr;
-  bool metrix_factored;
   class Indicator
   {
   public:
@@ -64,6 +58,8 @@ private:
     data_type value;
   };
 
+//
+// Public function interfaces
 public:
   // A cheap constructor. Cheap means it doesn't allocate large amount
   // memory or do massive data copy. It just set some scalar member
@@ -110,16 +106,18 @@ public:
 
   virtual int SetUseTranspose (const bool);
 
+//
+// private data and function members
 private:
-  global_index_type get_info_of_non_zeros (
-    const global_index_type row_to_factor,
-    std::vector<EntryInfo> &incides_need_update,
-    const bool except_pivot) const;
-
-  void compute_discarded_value (const unsigned int row_to_factor, const bool update);
-
-  void MDF_reordering_and_ILU_factoring();
-
+  MPI_Comm              mpi_communicator;
+  ConditionalOStream    pcout;
+  TimerOutput           ILU_timer;
+  // As required by Epetra_Operator,
+  // all apply* functions must be const,
+  // so, use timer in these functions
+  // with this "const" pointer.
+  TimerOutput *const    timer_ptr;
+  bool metrix_factored;
 
   const global_index_type degree;
 
@@ -132,7 +130,7 @@ private:
   //    1  :  level 0 in article, original entry
   //    2  :  level 1 fill in
   //    ... so on the same.
-  static const level_type fill_in_level_for_original_entry = 1;
+
   const global_index_type estimated_row_length;
   const level_type fill_in_threshold;
   global_index_type n_total_fill_in;
@@ -164,6 +162,16 @@ private:
   const Epetra_Map operator_range_map;
 
   const static char label[];
+
+  // private member functions
+  global_index_type get_info_of_non_zeros (
+    const global_index_type row_to_factor,
+    std::vector<EntryInfo> &incides_need_update,
+    const bool except_pivot) const;
+
+  void compute_discarded_value (const unsigned int row_to_factor, const bool update);
+
+  void MDF_reordering_and_ILU_factoring();
 };
 
 // in-line member functions
