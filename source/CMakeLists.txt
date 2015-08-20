@@ -33,4 +33,16 @@ SET_PROPERTY(TARGET ${PRJ_NAME}
   APPEND PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
   )
 
+ADD_CUSTOM_TARGET(
+    VERSION_STAMP
+    ${CMAKE_COMMAND} -D SRC=${CMAKE_SOURCE_DIR}/header/NSolver/version.info.in
+                     -D DST=${CMAKE_BINARY_DIR}/version.info
+                     -D GIT_EXEC=git
+                     -D GIT_DIR=${CMAKE_SOURCE_DIR}
+                     -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+                     -P ${CMAKE_SOURCE_DIR}/utilities/cmake/version_stamp.cmake
+)
+INCLUDE_DIRECTORIES(AFTER ${CMAKE_BINARY_DIR})
+ADD_DEPENDENCIES(${PRJ_NAME} VERSION_STAMP)
+
 DEAL_II_SETUP_TARGET(${PRJ_NAME})
