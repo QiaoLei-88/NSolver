@@ -22,6 +22,7 @@ MDFILU::MDFILU (const SourceMatrix &matrix,
   degree (matrix.m()),
   estimated_row_length (estimated_row_length_in),
   fill_in_threshold (fill_in_threshold_in + fill_in_level_for_original_entry),
+  n_total_fill_in (0),
   LU (degree, degree, estimated_row_length),
   fill_in_level (degree, degree, estimated_row_length),
   permute_logical_to_storage (degree, MDFILU::invalid_index),
@@ -356,7 +357,9 @@ void MDFILU::MDF_reordering_and_ILU_factoring()
               // Check fill-in level
               unsigned int new_fill_in_level
                 = static_cast<level_type> (fill_in_level.el (i_row, j_col));
-              if (new_fill_in_level == 0 /* fill in level for new entry*/)
+              const bool is_new_fill_in =
+                (new_fill_in_level == 0 /* fill in level for new entry*/);
+              if (is_new_fill_in)
                 {
                   new_fill_in_level =
                     (incides_need_update[j].fill_level - fill_in_level_for_original_entry) +
@@ -372,6 +375,10 @@ void MDFILU::MDF_reordering_and_ILU_factoring()
                   ||
                   i_row == j_col) //Always keep diagonal element)
                 {
+                  if (is_new_fill_in)
+                    {
+                      ++n_total_fill_in;
+                    }
                   // Element accepted
                   const data_type value = LU.el (i_row, j_col);
                   const data_type update = value - incides_need_update[j].value * value_of_row_pivot;
@@ -398,7 +405,10 @@ void MDFILU::MDF_reordering_and_ILU_factoring()
   return;
 }
 
-
+MDFILU::global_index_type MDFILU::number_of_new_fill_ins() const
+{
+  return (n_total_fill_in);
+}
 // This function is safe even @p in and @out is the same vector.
 // Because we only multiply the vector with upper and lower triangle
 // matrix in order, the passed vector value is never used again.

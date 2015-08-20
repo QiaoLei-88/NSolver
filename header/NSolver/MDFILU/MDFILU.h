@@ -68,6 +68,8 @@ public:
           const global_index_type estimated_row_length_in,
           const global_index_type fill_in_threshold_in);
 
+  global_index_type number_of_new_fill_ins() const;
+
   int apply (const data_type *const in, data_type *const out) const;
   int apply_transpose (const data_type *const in, data_type *const out) const;
 
@@ -127,6 +129,7 @@ private:
   static const level_type fill_in_level_for_original_entry = 1;
   const global_index_type estimated_row_length;
   const level_type fill_in_threshold;
+  global_index_type n_total_fill_in;
   DynamicMatrix LU;
   // Record fill-in level for all non-zero entries, we need this to compute
   // level for new fill-ins.
