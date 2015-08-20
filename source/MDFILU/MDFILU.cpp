@@ -32,10 +32,7 @@ MDFILU::MDFILU (const SourceMatrix &matrix)
   sorted_indicators(),
   row_factored(),
   use_transpose (false),
-  has_norm_infty (false),
-  epetra_comm (& (matrix.trilinos_matrix().Comm())),
-  operator_domain_map (matrix.trilinos_matrix().DomainMap()),
-  operator_range_map (matrix.trilinos_matrix().RangeMap())
+  has_norm_infty (false)
 {}
 
 MDFILU::MDFILU (const SourceMatrix &matrix,
@@ -65,10 +62,7 @@ MDFILU::MDFILU (const SourceMatrix &matrix,
   sorted_indicators(),
   row_factored (degree, false),
   use_transpose (false),
-  has_norm_infty (false),
-  epetra_comm (& (matrix.trilinos_matrix().Comm())),
-  operator_domain_map (matrix.trilinos_matrix().DomainMap()),
-  operator_range_map (matrix.trilinos_matrix().RangeMap())
+  has_norm_infty (false)
 {
   //initialize the LU matrix
   LU.copy_from (matrix, /*elide_zero_values=*/false);

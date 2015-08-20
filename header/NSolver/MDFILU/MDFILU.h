@@ -164,10 +164,6 @@ private:
   // Data for Epetra_Operator interface
   bool use_transpose;
   const bool has_norm_infty;
-  const Epetra_Comm *epetra_comm;
-  const Epetra_Map operator_domain_map;
-  const Epetra_Map operator_range_map;
-
   const static char label[];
 
   // private member functions
@@ -236,19 +232,33 @@ int MDFILU::SetUseTranspose (const bool in)
 inline
 const Epetra_Comm &MDFILU::Comm() const
 {
-  return (* (epetra_comm));
+  return (epetra_matrix->Comm());
 }
 
 inline
 const Epetra_Map &MDFILU::OperatorDomainMap() const
 {
-  return (operator_domain_map);
+  if (epetra_matrix->UseTranspose() == this->use_transpose)
+    {
+      return (epetra_matrix->OperatorDomainMap());
+    }
+  else
+    {
+      return (epetra_matrix->OperatorRangeMap());
+    }
 }
 
 inline
 const Epetra_Map &MDFILU::OperatorRangeMap() const
 {
-  return (operator_range_map);
+  if (epetra_matrix->UseTranspose() == this->use_transpose)
+    {
+      return (epetra_matrix->OperatorRangeMap());
+    }
+  else
+    {
+      return (epetra_matrix->OperatorDomainMap());
+    }
 }
 
 #endif
