@@ -99,6 +99,15 @@ int main (int argc, char *argv[])
     fout.close();
   }
 
+  //Report number of new fill-ins
+  {
+    std::ofstream fout ("apply.out");
+    fout << "\nNumber of new fill-ins: "
+         << mdfilu.number_of_new_fill_ins()
+         << std::endl << std::endl;
+    fout.close();
+  }
+
   // Apply LU and (LU)^-1 to a vector
   MDFVector v (degree);
   {
@@ -117,7 +126,7 @@ int main (int argc, char *argv[])
   {
     MDFVector o (v);
     mdfilu.apply (o,o);
-    std::ofstream fout ("apply.out");
+    std::ofstream fout ("apply.out", std::fstream::app);;
     fout << "Vector v:" << std::endl;
     fout << v;
     fout << "Vector (LU)*v:" << std::endl;
