@@ -117,8 +117,11 @@ private:
   // so, use timer in these functions
   // with this "const" pointer.
   TimerOutput *const    timer_ptr;
+
   bool metrix_factored;
 
+  SourceMatrix const *const source_matrix;
+  Epetra_CrsMatrix const *const epetra_matrix;
   const global_index_type degree;
 
   // Because the Sparse matrix usually returns a zero when element (i,j)
