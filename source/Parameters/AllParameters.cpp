@@ -329,6 +329,9 @@ namespace NSFEMSolver
       prm.declare_entry ("MMS", "0",
                          Patterns::Integer(),
                          "Number of manufactured solution to test against");
+      prm.declare_entry ("ManifoldCircle", "0",
+                         Patterns::Integer(),
+                         "Activate C1Circle test case.");
 
       prm.declare_entry ("mesh", "grid.inp",
                          Patterns::Anything(),
@@ -459,6 +462,8 @@ namespace NSFEMSolver
       Parameters::PhysicalParameters::parse_parameters (prm);
 
       n_mms = prm.get_integer ("MMS");
+      manifold_circle = prm.get_integer ("ManifoldCircle");
+
       mesh_filename = prm.get ("mesh");
       time_advance_history_filename = prm.get ("time history");
       iteration_history_filename = prm.get ("iteration history");

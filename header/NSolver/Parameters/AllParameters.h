@@ -304,6 +304,7 @@ namespace NSFEMSolver
       void parse_parameters (ParameterHandler &prm);
 
       int n_mms;
+      int manifold_circle;
     };
 
   } /* End of namespace Parameters */
