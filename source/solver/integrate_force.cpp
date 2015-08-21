@@ -22,7 +22,7 @@ namespace NSFEMSolver
                                           | update_JxW_values
                                           | update_normal_vectors;
 
-    FEFaceValues<dim> fe_v_face (mapping, fe, face_quadrature,face_update_flags);
+    FEFaceValues<dim> fe_v_face (*mapping_ptr, fe, face_quadrature,face_update_flags);
     wall_force.clear();
 
     std::vector<Vector<double> > solution_values;

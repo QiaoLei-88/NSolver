@@ -452,7 +452,7 @@ namespace NSFEMSolver
                                              | update_JxW_values
                                              | update_quadrature_points;
             const QGauss<dim> quadrature_error (parameters->error_quadrature_degree);
-            FEValues<dim>  fe_v (mapping, fe, quadrature_error, update_flags);
+            FEValues<dim>  fe_v (*mapping_ptr, fe, quadrature_error, update_flags);
 
             // Then integrate error over all cells,
             typename DoFHandler<dim>::active_cell_iterator

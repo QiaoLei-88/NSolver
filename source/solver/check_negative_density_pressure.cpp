@@ -14,7 +14,7 @@ namespace NSFEMSolver
   template <int dim>
   void NSolver<dim>::check_negative_density_pressure() const
   {
-    FEValues<dim> fe_v (mapping, fe, quadrature, update_values);
+    FEValues<dim> fe_v (*mapping_ptr, fe, quadrature, update_values);
     const unsigned int   n_q_points = fe_v.n_quadrature_points;
     std::vector<Vector<double> > solution_values (n_q_points,
                                                   Vector<double> (dim+2));

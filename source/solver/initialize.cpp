@@ -19,7 +19,7 @@ namespace NSFEMSolver
       {
       case Parameters::AllParameters<dim>::UserFunction :
       {
-        VectorTools::interpolate (mapping, dof_handler,
+        VectorTools::interpolate (*mapping_ptr, dof_handler,
                                   parameters->initial_conditions, locally_owned_solution);
         break;
       }
@@ -70,7 +70,7 @@ namespace NSFEMSolver
           &free_stream_condition[0],
           EquationComponents<dim>::n_components);
 
-        VectorTools::interpolate (mapping, dof_handler,
+        VectorTools::interpolate (*mapping_ptr, dof_handler,
                                   free_stream_initial_value, locally_owned_solution);
         break;
       }

@@ -26,7 +26,7 @@ namespace NSFEMSolver
       {
 
         EulerEquations<dim>::compute_refinement_indicators (dof_handler,
-                                                            mapping,
+                                                            *mapping_ptr,
                                                             tmp_vector,
                                                             refinement_indicators,
                                                             parameters->component_mask);

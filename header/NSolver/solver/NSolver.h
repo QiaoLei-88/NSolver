@@ -119,6 +119,7 @@ namespace NSFEMSolver
   {
   public:
     NSolver (Parameters::AllParameters<dim> *const para_ptr_in);
+    ~NSolver();
     void run();
 
   private:
@@ -173,7 +174,7 @@ namespace NSFEMSolver
 
     // TimerOutput                               computing_timer;
 
-    const MappingQ1<dim> mapping;
+    const Mapping<dim>   *mapping_ptr;
 
     const FESystem<dim>  fe;
     DoFHandler<dim>      dof_handler;

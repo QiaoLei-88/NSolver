@@ -57,7 +57,7 @@ namespace NSFEMSolver
                    typename Triangulation<dim>::MeshSmoothing
                    (Triangulation<dim>::smoothing_on_refinement |
                     Triangulation<dim>::smoothing_on_coarsening)),
-    mapping(),
+    mapping_ptr (0),
     fe (FE_Q<dim> (para_ptr_in->fe_degree), EquationComponents<dim>::n_components),
     dof_handler (triangulation),
     quadrature (para_ptr_in->quadrature_degree),
@@ -77,6 +77,33 @@ namespace NSFEMSolver
     n_sparsity_pattern_out (-1)
   {
     Assert (parameters, ExcMessage ("Null pointer encountered!"));
+
+    switch (parameters->mapping_type)
+      {
+      case Parameters::FEParameters::MappingQ:
+      {
+        if (parameters->mapping_degree == 1)
+          {
+            mapping_ptr = new MappingQ1<dim>();
+          }
+        else
+          {
+            mapping_ptr = new MappingQ<dim> (parameters->mapping_degree);
+          }
+        break;
+      }
+      case Parameters::FEParameters::MappingC1:
+      {
+        mapping_ptr = new MappingC1<dim>();
+        break;
+      }
+      default:
+      {
+        AssertThrow (false, ExcNotImplemented());
+        break;
+      }
+      }
+
     EulerEquations<dim>::gas_gamma = 1.4;
     EulerEquations<dim>::set_parameter (parameters);
 
@@ -160,6 +187,12 @@ namespace NSFEMSolver
         // Initialize MMS
         mms.reinit (coeffs);
       }
+  }
+
+  template <int dim>
+  NSolver<dim>::~NSolver()
+  {
+    delete mapping_ptr;
   }
 
 #include "NSolver.inst"

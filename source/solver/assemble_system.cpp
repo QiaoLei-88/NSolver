@@ -56,15 +56,15 @@ namespace NSFEMSolver
                                                    | update_quadrature_points;
     const UpdateFlags neighbor_face_update_flags = update_values;
 
-    FEValues<dim>        fe_v (mapping, fe, quadrature,
+    FEValues<dim>        fe_v (*mapping_ptr, fe, quadrature,
                                update_flags);
-    FEFaceValues<dim>    fe_v_face (mapping, fe, face_quadrature,
+    FEFaceValues<dim>    fe_v_face (*mapping_ptr, fe, face_quadrature,
                                     face_update_flags);
-    FESubfaceValues<dim> fe_v_subface (mapping, fe, face_quadrature,
+    FESubfaceValues<dim> fe_v_subface (*mapping_ptr, fe, face_quadrature,
                                        face_update_flags);
-    FEFaceValues<dim>    fe_v_face_neighbor (mapping, fe, face_quadrature,
+    FEFaceValues<dim>    fe_v_face_neighbor (*mapping_ptr, fe, face_quadrature,
                                              neighbor_face_update_flags);
-    FESubfaceValues<dim> fe_v_subface_neighbor (mapping, fe, face_quadrature,
+    FESubfaceValues<dim> fe_v_subface_neighbor (*mapping_ptr, fe, face_quadrature,
                                                 neighbor_face_update_flags);
 
     // Then loop over all cells, initialize the FEValues object for the
