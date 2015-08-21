@@ -42,7 +42,6 @@ namespace NSFEMSolver
                 {
                   cell->face (f)->set_boundary_id (5);
                 }
-
         }
       else
         {
@@ -130,7 +129,6 @@ namespace NSFEMSolver
                                                I_am_host);
     ConditionalOStream time_advance_history_file (time_advance_history_file_std,
                                                   I_am_host);
-
 
     setup_system();
 
