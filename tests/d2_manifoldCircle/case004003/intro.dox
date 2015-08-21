@@ -1,0 +1,4 @@
+Flow around a 2D circle.
+The circle boundary geometry is described with a circle manifold.
+And the boundary mapping is Q1.
+change solver to gmres with MDFILU(0) preconditioner.
