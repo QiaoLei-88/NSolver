@@ -32,6 +32,8 @@
 #include <deal.II/grid/tria_accessor.h>
 #include <deal.II/grid/tria_iterator.h>
 #include <deal.II/grid/grid_in.h>
+#include <deal.II/grid/manifold_lib.h>
+#include <deal.II/grid/tria_boundary_lib.h>
 
 #include <deal.II/dofs/dof_handler.h>
 #include <deal.II/dofs/dof_accessor.h>
@@ -42,6 +44,7 @@
 #include <deal.II/fe/fe_system.h>
 #include <deal.II/fe/mapping_q1.h>
 #include <deal.II/fe/fe_q.h>
+#include <deal.II/fe/mapping_c1.h>
 
 #include <deal.II/numerics/data_out.h>
 #include <deal.II/numerics/vector_tools.h>
@@ -167,6 +170,10 @@ namespace NSFEMSolver
 
 
     MPI_Comm                                  mpi_communicator;
+    // Must appear before Triangulation to make it initialized before triangulation
+    // and destroyed after triangulation.
+    const HyperBallBoundary<dim> spherical_boundary;
+
     parallel::distributed::Triangulation<dim> triangulation;
 
     IndexSet                                  locally_owned_dofs;

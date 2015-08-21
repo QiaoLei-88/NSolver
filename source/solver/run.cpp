@@ -66,6 +66,28 @@ namespace NSFEMSolver
               GridTools::scale (parameters->scale_mesh,triangulation);
             }
         }
+
+      if (parameters->manifold_circle == 1)
+        {
+          // Hard coded test case: ManifoldCircle
+          Assert (parameters->n_mms != 1,
+                  ExcMessage ("MMS and C1Circle case can't play together!!!"));
+
+          for (typename Triangulation<dim>::active_cell_iterator
+               cell = triangulation.begin_active();
+               cell != triangulation.end();
+               ++cell)
+            for (unsigned int f=0; f<GeometryInfo<dim>::faces_per_cell; ++f)
+              if (cell->face (f)->at_boundary())
+                {
+                  if (cell->face (f)->boundary_id() == 2)
+                    {
+                      cell->face (f)->set_manifold_id (2);
+                    }
+                }
+          triangulation.set_boundary (2, spherical_boundary);
+        }
+
       if (parameters->n_global_refinement > 0)
         {
           triangulation.refine_global (parameters->n_global_refinement);
@@ -555,7 +577,11 @@ namespace NSFEMSolver
             old_solution = current_solution;
             if (parameters->do_refine == true)
               {
-                refine_grid();
+                if (! (parameters->manifold_circle == 1 && n_time_step >= 14))
+                  {
+                    // Hard coded test case: ManifoldCircle
+                    refine_grid();
+                  }
               }
 
             old_time_step_size = time_step;

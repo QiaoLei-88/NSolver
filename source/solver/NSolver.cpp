@@ -53,6 +53,7 @@ namespace NSFEMSolver
   NSolver<dim>::NSolver (Parameters::AllParameters<dim> *const para_ptr_in)
     :
     mpi_communicator (MPI_COMM_WORLD),
+    spherical_boundary (Point<dim>()/*=(0,0,...)*/,/*radius=*/0.5),
     triangulation (mpi_communicator,
                    typename Triangulation<dim>::MeshSmoothing
                    (Triangulation<dim>::smoothing_on_refinement |
