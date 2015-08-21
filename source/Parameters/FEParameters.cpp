@@ -26,6 +26,9 @@ namespace NSFEMSolver
     {
       prm.enter_subsection ("FE Parameters");
       {
+        prm.declare_entry ("mapping type", "MappingQ",
+                           Patterns::Selection ("MappingQ|MappingC1"),
+                           "Select mapping type from <MappingQ|MappingC1>");
 
         prm.declare_entry ("fe degree", "1",
                            Patterns::Integer(),
@@ -55,6 +58,22 @@ namespace NSFEMSolver
     {
       prm.enter_subsection ("FE Parameters");
       {
+        {
+          const std::string buff = prm.get ("mapping type");
+          if (buff == "MappingQ")
+            {
+              mapping_type = MappingQ;
+            }
+          else if (buff == "MappingC1")
+            {
+              mapping_type = MappingC1;
+            }
+          else
+            {
+              AssertThrow (false, ExcNotImplemented());
+            }
+        }
+
         fe_degree = prm.get_integer ("fe degree");
         if (fe_degree <= 0)
           {

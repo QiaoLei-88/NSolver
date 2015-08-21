@@ -21,6 +21,13 @@ namespace NSFEMSolver
       static void declare_parameters (ParameterHandler &prm);
       void parse_parameters (ParameterHandler &prm);
 
+      enum MappingType
+      {
+        MappingQ,
+        MappingC1
+      };
+      MappingType mapping_type;
+
       int fe_degree;
       int mapping_degree;
       int quadrature_degree;
