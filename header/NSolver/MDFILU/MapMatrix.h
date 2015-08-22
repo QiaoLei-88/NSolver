@@ -15,7 +15,7 @@ template<typename Number>
 class MapMatrix
 {
 public:
-  typedef unsigned int size_type;
+  typedef unsigned long size_type;
 
 private:
   typedef LA::MPI::SparseMatrix SourceMatrix;
