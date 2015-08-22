@@ -76,6 +76,17 @@ public:
   Number el (const size_type i, const size_type j) const;
   void set (const size_type i, const size_type j, const Number value, bool fake=true);
 
+  /*
+   * Query element (@p i, @p j) in the map data structure.
+   * Use this function when you know the row is not compressed to avoid if evaluation.
+   */
+  Number map_el (const size_type i, const size_type j) const;
+  /*
+   * Set @p value to element (@p i, @p j) n the map data structure.
+   * Use this function when you know the row is not compressed to avoid if evaluation.
+   */
+  void map_set (const size_type i, const size_type j, const Number value);
+
   const Iterator begin (const size_type row) const;
   const Iterator end (const size_type row) const;
   const Iterator diagonal (const size_type row) const;
@@ -189,15 +200,7 @@ MapMatrix<Number>::el (const size_type i, const size_type j) const
     }
   else
     {
-      typename Row::const_iterator ps = data[i].find (j);
-      if (ps == data[i].end())
-        {
-          return (0.0);
-        }
-      else
-        {
-          return (ps->second);
-        }
+      return (map_el (i,j));
     }
 }
 
@@ -225,6 +228,30 @@ MapMatrix<Number>::set (const size_type i, const size_type j, const Number value
     }
 }
 
+template<typename Number>
+inline
+Number
+MapMatrix<Number>::map_el (const size_type i, const size_type j) const
+{
+  typename Row::const_iterator ps = data[i].find (j);
+  if (ps == data[i].end())
+    {
+      return (0.0);
+    }
+  else
+    {
+      return (ps->second);
+    }
+}
+
+template<typename Number>
+inline
+void
+MapMatrix<Number>::map_set (const size_type i, const size_type j, const Number value)
+{
+  data[i][j] = value;
+  return;
+}
 
 template<typename Number>
 inline
