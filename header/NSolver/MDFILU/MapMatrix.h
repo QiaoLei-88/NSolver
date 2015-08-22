@@ -8,6 +8,7 @@
 #include <map>
 #include <vector>
 #include <boost/container/map.hpp>
+#include <deal.II/base/utilities.h>
 
 using namespace dealii;
 
@@ -170,14 +171,33 @@ inline
 Number
 MapMatrix<Number>::el (const size_type i, const size_type j) const
 {
-  typename Row::const_iterator ps = data[i].find (j);
-  if (ps == data[i].end())
+  if (compressed_data[i].size() > 0)
     {
-      return (0.0);
+      // Then look into compressed data
+      std::vector<size_type>::const_iterator
+      it = Utilities::lower_bound (compressed_pattern[i].begin(),
+                                   compressed_pattern[i].end(),
+                                   j);
+      if (it != compressed_pattern[i].end() && *it == j)
+        {
+          return (compressed_data[i][std::distance (compressed_pattern[i].begin(), it)]);
+        }
+      else
+        {
+          return (0.0);
+        }
     }
   else
     {
-      return (ps->second);
+      typename Row::const_iterator ps = data[i].find (j);
+      if (ps == data[i].end())
+        {
+          return (0.0);
+        }
+      else
+        {
+          return (ps->second);
+        }
     }
 }
 
@@ -186,8 +206,23 @@ inline
 void
 MapMatrix<Number>::set (const size_type i, const size_type j, const Number value, bool)
 {
-  data[i][j] = value;
-  return;
+  if (compressed_data[i].size() > 0)
+    {
+      // Then look into compressed data
+      std::vector<size_type>::iterator
+      it = Utilities::lower_bound (compressed_pattern[i].begin(),
+                                   compressed_pattern[i].end(),
+                                   j);
+      Assert (it != compressed_pattern[i].end(),
+              ExcMessage ("Can not insert new entry after compress!"));
+
+      compressed_data[i][std::distance (compressed_pattern[i].begin(), it)] = value;
+    }
+  else
+    {
+      data[i][j] = value;
+      return;
+    }
 }
 
 
