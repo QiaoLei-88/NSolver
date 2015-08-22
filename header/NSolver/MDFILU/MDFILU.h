@@ -14,6 +14,8 @@ DEAL_II_ENABLE_EXTRA_DIAGNOSTICS
 #include <fstream>
 
 #include <NSolver/types.h>
+#include <NSolver/MDFILU/MapMatrix.h>
+
 
 // #define VERBOSE_OUTPUT
 
@@ -26,9 +28,11 @@ class MDFILU : public Epetra_Operator
 // private types and static variables
 private:
   typedef LA::MPI::SparseMatrix SourceMatrix;
-  typedef SparseMatrixEZ<double> DynamicMatrix;
+  // typedef SparseMatrixEZ<double> DynamicMatrix;
+  typedef MapMatrix<double> DynamicMatrix;
   typedef unsigned short level_type;
-  typedef SparseMatrixEZ<double> LevelMatrix;
+  // typedef SparseMatrixEZ<double> LevelMatrix;
+  typedef MapMatrix<double> LevelMatrix;
   typedef unsigned short local_index_type;
   typedef unsigned long global_index_type;
   typedef double data_type;
