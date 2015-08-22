@@ -21,6 +21,8 @@ private:
   typedef LA::MPI::SparseMatrix SourceMatrix;
   typedef std::pair<const size_type, Number> Entry;
   typedef boost::container::map<size_type, Number> Row;
+  typedef std::vector<size_type> CompressedRowPattern;
+  typedef std::vector<Number> CompressedRowData;
 
 public:
   class Accessor
@@ -77,10 +79,18 @@ public:
   const Iterator end (const size_type row) const;
   const Iterator diagonal (const size_type row) const;
 
+  void compress (const size_type row);
+  const size_type *begin_compressed_pattern (const size_type row) const;
+  const Number *begin_compressed_data (const size_type row) const;
+  const size_type *end_compressed_pattern (const size_type row) const;
+  const Number *end_compressed_data (const size_type row) const;
+
   void print (std::ostream &out) const;
 
 private:
   std::vector<Row> data;
+  std::vector<CompressedRowPattern> compressed_pattern;
+  std::vector<CompressedRowData> compressed_data;
 };
 
 //----------------------------------------------------------------------------//
@@ -94,6 +104,8 @@ MapMatrix<Number>::MapMatrix (const size_type row_szie,
                               const size_type)
 {
   data.resize (row_szie, Row());
+  compressed_pattern.resize (row_szie, CompressedRowPattern());
+  compressed_data.resize (row_szie, CompressedRowData());
 }
 
 template<typename Number>
@@ -118,11 +130,7 @@ MapMatrix<Number>::copy_from (const SourceMatrix &M, bool)
 template<typename Number>
 MapMatrix<Number>::~MapMatrix()
 {
-  for (size_type row = 0; row < data.size(); ++row)
-    {
-      data[row].clear();
-    }
-  data.clear();
+  this->clear();
 }
 //
 // Member function for MapMatrix<Number>
@@ -135,8 +143,12 @@ MapMatrix<Number>::clear()
   for (size_type i=0; i<data.size(); ++i)
     {
       data[i].clear();
+      compressed_pattern[i].clear();
+      compressed_data[i].clear();
     }
   data.clear();
+  compressed_pattern.clear();
+  compressed_data.clear();
   return;
 }
 
@@ -148,6 +160,8 @@ MapMatrix<Number>::reinit (const size_type row_szie,
                            const size_type)
 {
   data.resize (row_szie, Row());
+  compressed_pattern.resize (row_szie, CompressedRowPattern());
+  compressed_data.resize (row_szie, CompressedRowData());
   return;
 }
 
@@ -209,16 +223,88 @@ MapMatrix<Number>::diagonal (const size_type row) const
 
 template<typename Number>
 inline
+void MapMatrix<Number>::compress (const size_type row)
+{
+  typename Row::const_iterator it = data[row].begin();
+  const typename Row::const_iterator it_end
+    = data[row].end();
+  const size_type size = data[row].size();
+  compressed_data[row].resize (size);
+  compressed_pattern[row].resize (size);
+
+  Number *p_value = & (compressed_data[row][0]);
+  size_type *p_column = & (compressed_pattern[row][0]);
+
+  for (; it != it_end; ++it, ++p_value, ++p_column)
+    {
+      *p_column = it->first;
+      *p_value  = it->second;
+    }
+  data[row].clear();
+  return;
+}
+
+template<typename Number>
+inline
+const typename MapMatrix<Number>::size_type *
+MapMatrix<Number>::begin_compressed_pattern (const size_type row) const
+{
+  return (& (compressed_pattern[row][0]));
+}
+
+template<typename Number>
+inline
+const Number *
+MapMatrix<Number>::begin_compressed_data (const size_type row) const
+{
+  return (& (compressed_data[row][0]));
+}
+
+template<typename Number>
+inline
+const typename MapMatrix<Number>::size_type *
+MapMatrix<Number>::end_compressed_pattern (const size_type row) const
+{
+  return (& (compressed_pattern[row][0])+compressed_pattern[row].size());
+}
+
+template<typename Number>
+inline
+const Number *
+MapMatrix<Number>::end_compressed_data (const size_type row) const
+{
+  return (& (compressed_data[row][0])+compressed_data[row].size());
+}
+
+
+template<typename Number>
+inline
 void MapMatrix<Number>::print (std::ostream &out) const
 {
   for (size_type i=0; i<data.size(); ++i)
     {
-      for (typename Row::const_iterator it = data[i].begin();
-           it!=data[i].end(); ++it)
+      if (compressed_data[i].size() != 0)
         {
-          out << i << '\t'
-              << it->first << '\t'
-              << it->second << '\n';
+          typename CompressedRowData::const_iterator it_data
+            = compressed_data[i].begin();
+          typename CompressedRowPattern::const_iterator it_pattern
+            = compressed_pattern[i].begin();
+          for (; it_data!=compressed_data[i].end(); ++it_data, ++it_pattern)
+            {
+              out << i << '\t'
+                  << *it_pattern << '\t'
+                  << *it_data << '\n';
+            }
+        }
+      else
+        {
+          for (typename Row::const_iterator it = data[i].begin();
+               it!=data[i].end(); ++it)
+            {
+              out << i << '\t'
+                  << it->first << '\t'
+                  << it->second << '\n';
+            }
         }
     }
   return;
