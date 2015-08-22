@@ -7,6 +7,7 @@
 #include <NSolver/types.h>
 #include <map>
 #include <vector>
+#include <boost/container/map.hpp>
 
 using namespace dealii;
 
@@ -19,7 +20,7 @@ public:
 private:
   typedef LA::MPI::SparseMatrix SourceMatrix;
   typedef std::pair<const size_type, Number> Entry;
-  typedef std::map<size_type, Number> Row;
+  typedef boost::container::map<size_type, Number> Row;
 
 public:
   class Accessor
