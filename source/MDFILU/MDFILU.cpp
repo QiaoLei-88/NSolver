@@ -174,19 +174,13 @@ MDFILU::global_index_type MDFILU::get_info_of_non_zeros (
   const bool except_pivot) const
 {
   global_index_type n_non_zero = 0;
-  typename DynamicMatrix::const_iterator iter_fill = fill_in_level.begin (row_to_factor);
-  const DynamicMatrix::const_iterator end_fill = fill_in_level.end (row_to_factor);
 
+  typename DynamicMatrix::const_iterator iter_fill = fill_in_level.begin (row_to_factor);
   typename DynamicMatrix::const_iterator iter_col = LU.begin (row_to_factor);
   const DynamicMatrix::const_iterator end_col = LU.end (row_to_factor);
-
-  (void)end_fill;
-  Assert (end_fill == end_col,
-          ExcMessage ("Sparsity pattern of LU and fill_level mismatch!"));
-
   for (; iter_col < end_col; ++iter_col, ++iter_fill)
     {
-      Assert (iter_fill == iter_col,
+      Assert (iter_fill->column() == iter_col->column(),
               ExcMessage ("Sparsity pattern of LU and fill_level mismatch!"));
       const global_index_type j_col = iter_col->column();
       if (j_col == row_to_factor && except_pivot)
@@ -463,6 +457,7 @@ void MDFILU::MDF_reordering_and_ILU_factoring()
           compute_discarded_value (i_row, /*const bool update = */ true);
         }
       ILU_timer.leave_subsection ("Update discarded value");
+      LU.compress (row_to_factor);
     } // For each row in matrix
   ILU_timer.print_summary();
   ILU_timer.reset();
@@ -483,15 +478,18 @@ int MDFILU::apply (const data_type *const in, data_type *const out) const
       const global_index_type i_row = permute_logical_to_storage[i];
 
       data_type value = 0;
-      for (typename DynamicMatrix::const_iterator iter_col = LU.begin (i_row);
-           iter_col < LU.end (i_row); ++iter_col)
+
+      data_type const *p_data = LU.begin_compressed_data (i_row);
+      global_index_type const *p_pattern = LU.begin_compressed_pattern (i_row);
+      data_type const *const p_end = LU.end_compressed_data (i_row);
+      for (; p_data < p_end; ++p_data, ++p_pattern)
         {
-          const global_index_type j_col = iter_col->column();
+          const global_index_type j_col = *p_pattern;
           const global_index_type j = permuta_storage_to_logical[j_col];
           if (j >= i)
             {
               // Upper triangle only
-              value += iter_col->value() * in[j_col];
+              value += (*p_data) * in[j_col];
             }
         }
       out[i_row] = value;
@@ -505,15 +503,17 @@ int MDFILU::apply (const data_type *const in, data_type *const out) const
       const global_index_type i_row = permute_logical_to_storage[i];
 
       // Diagonal value of L is alway 1, so we can just accumulate on out[i].
-      for (typename DynamicMatrix::const_iterator iter_col = LU.begin (i_row);
-           iter_col < LU.end (i_row); ++iter_col)
+      data_type const *p_data = LU.begin_compressed_data (i_row);
+      global_index_type const *p_pattern = LU.begin_compressed_pattern (i_row);
+      data_type const *const p_end = LU.end_compressed_data (i_row);
+      for (; p_data < p_end; ++p_data, ++p_pattern)
         {
-          const global_index_type j_col = iter_col->column();
+          const global_index_type j_col = *p_pattern;
           const global_index_type j = permuta_storage_to_logical[j_col];
           if (j < i)
             {
               // Lower triangle only
-              out[i_row] += iter_col->value() * out[j_col];
+              out[i_row] += (*p_data) * out[j_col];
             }
         }
     }
@@ -532,10 +532,12 @@ int MDFILU::apply_transpose (const data_type *const in, data_type *const out) co
       const global_index_type i_row = permute_logical_to_storage[i];
 
       // Diagonal value of L is alway 1, so we can just accumulate on out[i].
-      for (typename DynamicMatrix::const_iterator iter_col = LU.begin (i_row);
-           iter_col < LU.end (i_row); ++iter_col)
+      data_type const *p_data = LU.begin_compressed_data (i_row);
+      global_index_type const *p_pattern = LU.begin_compressed_pattern (i_row);
+      data_type const *const p_end = LU.end_compressed_data (i_row);
+      for (; p_data < p_end; ++p_data, ++p_pattern)
         {
-          const global_index_type j_col = iter_col->column();
+          const global_index_type j_col = *p_pattern;
           const global_index_type j = permuta_storage_to_logical[j_col];
           if (j < i)
             {
@@ -543,7 +545,7 @@ int MDFILU::apply_transpose (const data_type *const in, data_type *const out) co
               // Because the i-loop goes up from i=0, all j<i must have experienced
               // j==i in previous i-loop, with the assumption that diagonal entry
               // exists in all rows. So it is save to use += here.
-              out[j_col] += iter_col->value() * in[i_row];
+              out[j_col] += (*p_data) * in[i_row];
             }
           else if (j == i)
             {
@@ -560,10 +562,12 @@ int MDFILU::apply_transpose (const data_type *const in, data_type *const out) co
       const global_index_type i_row = permute_logical_to_storage[i];
 
       data_type pivot = 0;
-      for (typename DynamicMatrix::const_iterator iter_col = LU.begin (i_row);
-           iter_col < LU.end (i_row); ++iter_col)
+      data_type const *p_data = LU.begin_compressed_data (i_row);
+      global_index_type const *p_pattern = LU.begin_compressed_pattern (i_row);
+      data_type const *const p_end = LU.end_compressed_data (i_row);
+      for (; p_data < p_end; ++p_data, ++p_pattern)
         {
-          const global_index_type j_col = iter_col->column();
+          const global_index_type j_col = *p_pattern;
           const global_index_type j = permuta_storage_to_logical[j_col];
           if (j > i)
             {
@@ -571,13 +575,13 @@ int MDFILU::apply_transpose (const data_type *const in, data_type *const out) co
               // Because the i-loop goes down from top, all j>i must have experienced
               // j==i in previous i-loop, with the assumption that diagonal entry
               // exists in all rows. So it is save to use += here.
-              out[j_col] += iter_col->value() * out[i_row];
+              out[j_col] += (*p_data) * out[i_row];
             }
           else if (j == i)
             {
               // We cannot overwrite out[i_row] immediately because it is used above
               // and our matrix is permuted. We don't know which if branch comes first.
-              pivot = iter_col->value();
+              pivot = (*p_data);
             }
         }
       Assert (pivot != 0.0, ExcMessage ("Zero pivot encountered!"));
@@ -600,15 +604,17 @@ int MDFILU::apply_inverse (const data_type *const in, data_type *const out) cons
       // Diagonal value of L is alway 1, so we can just accumulate on out[i_row].
       out[i_row] = in[i_row];
 
-      for (typename DynamicMatrix::const_iterator iter_col = LU.begin (i_row);
-           iter_col < LU.end (i_row); ++iter_col)
+      data_type const *p_data = LU.begin_compressed_data (i_row);
+      global_index_type const *p_pattern = LU.begin_compressed_pattern (i_row);
+      data_type const *const p_end = LU.end_compressed_data (i_row);
+      for (; p_data < p_end; ++p_data, ++p_pattern)
         {
-          const global_index_type j_col = iter_col->column();
+          const global_index_type j_col = *p_pattern;
           const global_index_type j = permuta_storage_to_logical[j_col];
           if (j < i)
             {
               // Upper triangle only
-              out[i_row] -= iter_col->value() * out[j_col];
+              out[i_row] -= (*p_data) * out[j_col];
             }
         }
     }
@@ -622,19 +628,21 @@ int MDFILU::apply_inverse (const data_type *const in, data_type *const out) cons
 
       data_type pivot = 0.0;
 
-      for (typename DynamicMatrix::const_iterator iter_col = LU.begin (i_row);
-           iter_col < LU.end (i_row); ++iter_col)
+      data_type const *p_data = LU.begin_compressed_data (i_row);
+      global_index_type const *p_pattern = LU.begin_compressed_pattern (i_row);
+      data_type const *const p_end = LU.end_compressed_data (i_row);
+      for (; p_data < p_end; ++p_data, ++p_pattern)
         {
-          const global_index_type j_col = iter_col->column();
+          const global_index_type j_col = *p_pattern;
           const global_index_type j = permuta_storage_to_logical[j_col];
           if (j > i)
             {
               // Lower triangle only
-              out[i_row] -= iter_col->value() * out[j_col];
+              out[i_row] -= (*p_data) * out[j_col];
             }
           else if (j == i)
             {
-              pivot = iter_col->value();
+              pivot = (*p_data);
             }
         }
       Assert (pivot != 0.0, ExcMessage ("Zero pivot encountered!"));
@@ -655,29 +663,32 @@ int MDFILU::apply_inverse_transpose (const data_type *const in, data_type *const
       const global_index_type i_row = permute_logical_to_storage[i];
 
       // Update vector value of current row for using below
-      for (typename DynamicMatrix::const_iterator iter_col = LU.begin (i_row);
-           iter_col < LU.end (i_row); ++iter_col)
+      data_type const *p_data = LU.begin_compressed_data (i_row);
+      global_index_type const *p_pattern = LU.begin_compressed_pattern (i_row);
+      data_type const *const p_end = LU.end_compressed_data (i_row);
+      for (; p_data < p_end; ++p_data, ++p_pattern)
         {
-          const global_index_type j_col = iter_col->column();
+          const global_index_type j_col = *p_pattern;
           const global_index_type j = permuta_storage_to_logical[j_col];
           if (j == i)
             {
-              Assert (iter_col->value() != 0.0,
+              Assert ((*p_data) != 0.0,
                       ExcMessage ("Zero pivot encountered!"));
-              out[i_row] = in[i_row]/iter_col->value();
+              out[i_row] = in[i_row]/ (*p_data);
               break;
             }
         }
 
-      for (typename DynamicMatrix::const_iterator iter_col = LU.begin (i_row);
-           iter_col < LU.end (i_row); ++iter_col)
+      p_data = LU.begin_compressed_data (i_row);
+      p_pattern = LU.begin_compressed_pattern (i_row);
+      for (; p_data < p_end; ++p_data, ++p_pattern)
         {
-          const global_index_type j_col = iter_col->column();
+          const global_index_type j_col = *p_pattern;
           const global_index_type j = permuta_storage_to_logical[j_col];
           if (j > i)
             {
               // Lower triangle only
-              out[j_col] -= iter_col->value() * out[i_row];
+              out[j_col] -= (*p_data) * out[i_row];
             }
         }
     }
@@ -689,15 +700,17 @@ int MDFILU::apply_inverse_transpose (const data_type *const in, data_type *const
       const global_index_type i = ii - 1;
       const global_index_type i_row = permute_logical_to_storage[i];
 
-      for (typename DynamicMatrix::const_iterator iter_col = LU.begin (i_row);
-           iter_col < LU.end (i_row); ++iter_col)
+      data_type const *p_data = LU.begin_compressed_data (i_row);
+      global_index_type const *p_pattern = LU.begin_compressed_pattern (i_row);
+      data_type const *const p_end = LU.end_compressed_data (i_row);
+      for (; p_data < p_end; ++p_data, ++p_pattern)
         {
-          const global_index_type j_col = iter_col->column();
+          const global_index_type j_col = *p_pattern;
           const global_index_type j = permuta_storage_to_logical[j_col];
           if (j < i)
             {
               // Upper triangle only
-              out[j_col] -= iter_col->value() * out[i_row];
+              out[j_col] -= (*p_data) * out[i_row];
             }
         }
     }
