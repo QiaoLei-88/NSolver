@@ -99,6 +99,7 @@ public:
 
 
   size_type n_nonzero_elements() const;
+  size_type m() const;
   void print (std::ostream &out) const;
 
 private:
@@ -353,6 +354,14 @@ MapMatrix<Number>::n_nonzero_elements() const
       n_nonzero += data[i].size();
     }
   return (n_nonzero);
+}
+
+template<typename Number>
+inline
+typename MapMatrix<Number>::size_type
+MapMatrix<Number>::m() const
+{
+  return (data.size());
 }
 
 template<typename Number>
