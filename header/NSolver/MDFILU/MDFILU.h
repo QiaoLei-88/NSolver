@@ -65,6 +65,7 @@ private:
 //
 // Public function interfaces
 public:
+  typedef global_index_type size_type;
   // A cheap constructor. Cheap means it doesn't allocate large amount
   // memory or do massive data copy. It just set some scalar member
   // variables. Note that the object is unusable after declared with
