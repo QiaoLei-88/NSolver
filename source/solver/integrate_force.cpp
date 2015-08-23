@@ -45,7 +45,7 @@ namespace NSFEMSolver
 
                 for (unsigned int q=0; q<n_q_points; ++q)
                   {
-                    Point<dim> const wall_norm = fe_v_face.normal_vector (q);
+                    Tensor<1,dim> const wall_norm  = fe_v_face.normal_vector (q);
                     Point<dim> const wall_position = fe_v_face.quadrature_point (q);
                     double f_ds[3];
                     double moment_arm[3] = {0.,0.,0.};

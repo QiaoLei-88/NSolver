@@ -192,7 +192,7 @@ namespace NSFEMSolver
     // $\alpha$. It's form has also been given already in the introduction:
     template <typename InputVector>
     static
-    void numerical_normal_flux (const Point<dim>                   &normal,
+    void numerical_normal_flux (const Tensor<1,dim>                &normal,
                                 const InputVector                  &Wplus,
                                 const InputVector                  &Wminus,
                                 const double                        alpha,
@@ -266,7 +266,7 @@ namespace NSFEMSolver
     static
     void
     compute_Wminus (const Boundary::Type &boundary_kind,
-                    const Point<dim>     &normal_vector,
+                    const Tensor<1,dim>  &normal_vector,
                     const DataVector     &Wplus,
                     const Vector<double> &boundary_values,
                     const DataVector     &Wminus);
@@ -567,7 +567,7 @@ namespace NSFEMSolver
   // $\alpha$. It's form has also been given already in the introduction:
   template <int dim>
   template <typename InputVector>
-  void EulerEquations<dim>::numerical_normal_flux (const Point<dim>                   &normal,
+  void EulerEquations<dim>::numerical_normal_flux (const Tensor<1,dim>                &normal,
                                                    const InputVector                  &Wplus,
                                                    const InputVector                  &Wminus,
                                                    const double                        alpha,
@@ -796,7 +796,7 @@ namespace NSFEMSolver
   template <typename DataVector>
   void
   EulerEquations<dim>::compute_Wminus (const Boundary::Type &boundary_kind,
-                                       const Point<dim>     &normal_vector,
+                                       const Tensor<1,dim>  &normal_vector,
                                        const DataVector     &Wplus,
                                        const Vector<double> &boundary_values,
                                        const DataVector     &Wminus)
