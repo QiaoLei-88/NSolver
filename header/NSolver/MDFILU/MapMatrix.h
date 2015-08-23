@@ -97,6 +97,8 @@ public:
   const size_type *end_compressed_pattern (const size_type row) const;
   const Number *end_compressed_data (const size_type row) const;
 
+
+  size_type n_nonzero_elements() const;
   void print (std::ostream &out) const;
 
 private:
@@ -338,6 +340,20 @@ MapMatrix<Number>::end_compressed_data (const size_type row) const
   return (& (compressed_data[row][0])+compressed_data[row].size());
 }
 
+
+template<typename Number>
+inline
+typename MapMatrix<Number>::size_type
+MapMatrix<Number>::n_nonzero_elements() const
+{
+  size_type n_nonzero (0);
+  for (size_type i=0; i<data.size(); ++i)
+    {
+      n_nonzero += compressed_data[i].size();
+      n_nonzero += data[i].size();
+    }
+  return (n_nonzero);
+}
 
 template<typename Number>
 inline
