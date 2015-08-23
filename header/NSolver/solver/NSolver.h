@@ -232,11 +232,8 @@ namespace NSFEMSolver
     // with Trilinos data structures, though), we don't have to think about
     // anything else like distributing the degrees of freedom.
 
-    // The following statement is equivalent to
-    // TrilinosWrappers::SparseMatrix system_matrix. It is defined by
-    // typedef TrilinosWrappers::SparseMatrix SparseMatrix inside namespace
-    // MPI in generic_linear_algebra.h
-    LA::MPI::SparseMatrix system_matrix;
+    // NSMatrix is defined in <NSolver/types.h>
+    NSMatrix system_matrix;
 
     const bool I_am_host;
     const unsigned int myid;

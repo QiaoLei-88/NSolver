@@ -27,6 +27,7 @@ namespace NSFEMSolver
   using namespace dealii;
 
   typedef LA::MPI::Vector NSVector;
+  typedef LA::MPI::SparseMatrix NSMatrix;
 }
 
 #endif
