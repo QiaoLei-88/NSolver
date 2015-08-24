@@ -387,6 +387,9 @@ namespace NSFEMSolver
       prm.declare_entry ("output sparsity pattern", "false",
                          Patterns::Bool(),
                          "output sparsity pattern or not");
+      prm.declare_entry ("output system matrix", "false",
+                         Patterns::Bool(),
+                         "output system matrix or not");
 
 
       for (unsigned int di=0; di<EquationComponents<dim>::n_components; ++di)
@@ -534,6 +537,7 @@ namespace NSFEMSolver
         renumber_start_point[2] = prm.get_double ("renumber start point z");
 
         output_sparsity_pattern = prm.get_bool ("output sparsity pattern");
+        output_system_matrix    = prm.get_bool ("output system matrix");
       }
 
       for (unsigned int di=0; di<EquationComponents<dim>::n_components; ++di)
