@@ -128,6 +128,8 @@ namespace NSFEMSolver
             MDFILU mdfilu (system_matrix,
                            estimated_row_length,
                            parameters->ILU_level);
+            std::cerr << "number of new fill in: " << mdfilu.number_of_new_fill_ins()
+                      << std::endl;
             mdfilu.SetUseTranspose (false);
             solver.SetPrecOperator (&mdfilu);
             std::cerr << "Start Iterate\n";
