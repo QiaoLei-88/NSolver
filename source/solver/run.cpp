@@ -256,6 +256,18 @@ namespace NSFEMSolver
 
             assemble_system (nonlin_iter);
 
+            if (parameters->output_system_matrix)
+              {
+                const std::string file_name = "system_matrix.step_"
+                                              + Utilities::int_to_string (n_time_step,4)
+                                              + ".iter_"
+                                              + Utilities::int_to_string (nonlin_iter,4)
+                                              + ".MTX";
+                std::ofstream out (file_name.c_str());
+                Tools::write_matrix_MTX (out, system_matrix);
+                out.close();
+              }
+
             res_norm = right_hand_side.l2_norm();
             if (nonlin_iter == 0)
               {
