@@ -114,7 +114,9 @@ namespace NSFEMSolver
         solver.SetUserMatrix (const_cast<Epetra_CrsMatrix *>
                               (&system_matrix.trilinos_matrix()));
 
-        if (parameters->prec_type == Parameters::Solver::MDFILU)
+        switch (parameters->prec_type)
+          {
+          case Parameters::Solver::MDFILU:
           {
             std::cerr << "Initialize MDFILU\n";
             const unsigned estimated_row_length
@@ -130,10 +132,18 @@ namespace NSFEMSolver
             solver.SetPrecOperator (&mdfilu);
             std::cerr << "Start Iterate\n";
             solver.Iterate (parameters->max_iterations, parameters->linear_residual);
+            break;
           }
-        else
+          case Parameters::Solver::AZ_DD:
           {
             solver.Iterate (parameters->max_iterations, parameters->linear_residual);
+            break;
+          }
+          default:
+          {
+            AssertThrow (false, ExcNotImplemented());
+            break;
+          }
           }
 
         return std::pair<unsigned int, double> (solver.NumIters(),
