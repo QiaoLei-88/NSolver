@@ -23,6 +23,7 @@ MDFILU::MDFILU (const SourceMatrix &matrix)
   degree (matrix.m()),
   estimated_row_length (0),
   fill_in_threshold (fill_in_level_for_original_entry),
+  fill_in_tolerance (1e-6),
   n_total_fill_in (0),
   LU(),
   fill_in_level(),
@@ -53,6 +54,7 @@ MDFILU::MDFILU (const SourceMatrix &matrix,
   degree (matrix.m()),
   estimated_row_length (estimated_row_length_in),
   fill_in_threshold (fill_in_threshold_in + fill_in_level_for_original_entry),
+  fill_in_tolerance (1e-6),
   n_total_fill_in (0),
   LU (degree, degree, estimated_row_length),
   fill_in_level (degree, degree, estimated_row_length),
@@ -268,12 +270,14 @@ void MDFILU::compute_discarded_value (const unsigned int row_to_factor, const bo
                     1 +
                     fill_in_level_for_original_entry;
                 }
+              const data_type update = std::abs (incides_need_update[j].value * value_of_row_pivot);
               if (new_fill_in_level > fill_in_threshold
+                  &&
+                  update < fill_in_tolerance
                   &&
                   i_row != j_col) //Never drop diagonal element
                 {
                   // Element will be discarded
-                  const data_type update = incides_need_update[j].value * value_of_row_pivot;
                   return_value.discarded_value += update*update;
                   ++ return_value.n_discarded;
                 }
@@ -429,7 +433,10 @@ void MDFILU::MDF_reordering_and_ILU_factoring()
               // Make sure that the provided fill_in_threshold consists with
               // the internal definition, i.e., has a offset one. See documentation
               // above for details
+              const data_type update = incides_need_update[j].value * value_of_row_pivot;
               if (new_fill_in_level <= fill_in_threshold
+                  ||
+                  std::abs (update) >= fill_in_tolerance
                   ||
                   i_row == j_col) //Always keep diagonal element)
                 {
@@ -439,11 +446,9 @@ void MDFILU::MDF_reordering_and_ILU_factoring()
                     }
                   // Element accepted
                   const data_type value = LU.el (i_row, j_col);
-                  const data_type update = value - incides_need_update[j].value * value_of_row_pivot;
-
                   // Have no information of the existence of this value.
                   // A search operation implied.
-                  LU.set (i_row, j_col, update, /*elide_zero_values=*/ false);
+                  LU.set (i_row, j_col, value - update , /*elide_zero_values=*/ false);
                   // Update fill-level if this is a new entry
                   fill_in_level.set (i_row, j_col, new_fill_in_level);
                 }

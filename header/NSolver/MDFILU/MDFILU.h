@@ -145,6 +145,7 @@ private:
 
   global_index_type estimated_row_length;
   level_type fill_in_threshold;
+  data_type fill_in_tolerance;
   global_index_type n_total_fill_in;
   DynamicMatrix LU;
   // Record fill-in level for all non-zero entries, we need this to compute
