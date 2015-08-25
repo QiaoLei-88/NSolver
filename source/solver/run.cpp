@@ -264,6 +264,10 @@ namespace NSFEMSolver
               }
 
             res_norm = right_hand_side.l2_norm();
+            if (n_time_step == 0)
+              {
+                init_res_norm = res_norm;
+              }
             if (nonlin_iter == 0)
               {
                 residual_for_output = right_hand_side;

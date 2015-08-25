@@ -295,6 +295,15 @@ namespace NSFEMSolver
       {
         viscos_coeff = parameters->diffusion_coefficoent;
       }
+    if (parameters->diffusion_type == Parameters::AllParameters<dim>::diffu_res)
+      {
+        const double visc_min = parameters->Mach / parameters->Reynolds;
+        const double ratio = (std::log10 (init_res_norm) - std::log10 (res_norm))/
+                             (std::log10 (init_res_norm) - parameters->time_march_tolerance);
+        viscos_coeff = ratio * visc_min +
+                       (1.0 - ratio) * parameters->diffusion_coefficoent;
+        viscos_coeff = std::max (visc_min, viscos_coeff);
+      }
 
     // We now have all of the pieces in place, so perform the assembly.  We
     // have an outer loop through the components of the system, and an inner
