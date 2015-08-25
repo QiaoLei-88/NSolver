@@ -80,7 +80,8 @@ namespace NSFEMSolver
     n_sparsity_pattern_out (-1),
     field_output_counter (0),
     init_res_norm (1.0e-2),
-    res_norm (1.0e-2)
+    res_norm (1.0e-2),
+    last_viscosity_coeff (1e+42)
   {
     Assert (parameters, ExcMessage ("Null pointer encountered!"));
 
