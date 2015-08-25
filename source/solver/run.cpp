@@ -235,11 +235,8 @@ namespace NSFEMSolver
         current_solution = predictor;
         bool linear_solver_diverged (true);
         unsigned int const nonlin_iter_threshold (10);
-        double const nonlin_iter_tolerance (
-          parameters->is_steady ? 1.0e+20 : 1.0e-10);
         double reference_nonlin_residual (1.0);
         double nonlin_residual_ratio (1.0);
-
 
         double res_norm;
         double newton_update_norm;
@@ -327,10 +324,8 @@ namespace NSFEMSolver
                 << std::setw (19) << newton_update_norm
                 << '\n';
             // Check result.
-            if (res_norm < nonlin_iter_tolerance)
-              {
-                newton_iter_converged = true;
-              }
+            newton_iter_converged
+              = (std::log10 (res_norm) < parameters->nonlinear_tolerance);
 
             if (linear_solver_diverged)
               {
