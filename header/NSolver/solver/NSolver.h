@@ -269,6 +269,10 @@ namespace NSFEMSolver
     unsigned int n_time_step;
     unsigned int n_total_iter;
     unsigned int nonlin_iter;
+
+    // Residual based viscosity continuation
+    double res_norm;
+    double newton_update_norm;
   };
 
 }

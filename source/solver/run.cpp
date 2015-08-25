@@ -275,9 +275,7 @@ namespace NSFEMSolver
         bool linear_solver_diverged (true);
         unsigned int const nonlin_iter_threshold (parameters->max_Newton_iter);
 
-        double res_norm;
         double res_norm_infty;
-        double newton_update_norm;
         std::pair<unsigned int, double> convergence;
 
         locally_owned_solution = current_solution;
