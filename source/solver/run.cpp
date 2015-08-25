@@ -76,14 +76,17 @@ namespace NSFEMSolver
                cell = triangulation.begin_active();
                cell != triangulation.end();
                ++cell)
-            for (unsigned int f=0; f<GeometryInfo<dim>::faces_per_cell; ++f)
-              if (cell->face (f)->at_boundary())
-                {
-                  if (cell->face (f)->boundary_id() == 2)
+            if (cell -> is_locally_owned())
+              {
+                for (unsigned int f=0; f<GeometryInfo<dim>::faces_per_cell; ++f)
+                  if (cell->face (f)->at_boundary())
                     {
-                      cell->face (f)->set_manifold_id (2);
+                      if (cell->face (f)->boundary_id() == 2)
+                        {
+                          cell->face (f)->set_manifold_id (2);
+                        }
                     }
-                }
+              }
           triangulation.set_boundary (2, spherical_boundary);
         }
 
