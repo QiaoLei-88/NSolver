@@ -292,7 +292,8 @@ namespace NSFEMSolver
       {
         diffu_entropy,
         diffu_cell_size,
-        diffu_const
+        diffu_const,
+        diffu_res
       };
       DiffusionType diffusion_type;
       double diffusion_coefficoent;
