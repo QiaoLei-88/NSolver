@@ -16,10 +16,13 @@ int main (int argc, char *argv[])
   using namespace dealii;
   using namespace NSFEMSolver;
 
+  Utilities::MPI::MPI_InitFinalize mpi_initialization (argc, argv, /* int max_num_threads */ 1);
   try
     {
-      Utilities::MPI::MPI_InitFinalize mpi_initialization (argc, argv, /* int max_num_threads */ 1);
-      print_version (std::cout);
+      if (Utilities::MPI::this_mpi_process (MPI_COMM_WORLD) == 0)
+        {
+          print_version (std::cout);
+        }
       deallog.depth_console (0);
 
       char *input_file (0);
@@ -101,10 +104,12 @@ int main (int argc, char *argv[])
       error_info.close();
       return (-1);
     };
-
-  std::ofstream run_info ("run.success");
-  print_version (run_info);
-  run_info << "Task finished successfully." << std::endl;
-  run_info.close();
+  if (Utilities::MPI::this_mpi_process (MPI_COMM_WORLD) == 0)
+    {
+      std::ofstream run_info ("run.success");
+      print_version (run_info);
+      run_info << "Task finished successfully." << std::endl;
+      run_info.close();
+    }
   return (0);
 }
