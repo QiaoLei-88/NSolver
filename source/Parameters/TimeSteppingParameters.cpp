@@ -27,6 +27,9 @@ namespace NSFEMSolver
         prm.declare_entry ("time march tolerance", "-10.0",
                            Patterns::Double(),
                            "Terminate time marching when log10 of error L2 norm is less than this value");
+        prm.declare_entry ("nonlinear tolerance", "-6.0",
+                           Patterns::Double(),
+                           "Terminate Newton iteration log10 of error L2 norm is less than this value");
 
 
         prm.declare_entry ("theta scheme value", "0.5",
@@ -97,6 +100,7 @@ namespace NSFEMSolver
         final_time = prm.get_double ("final time");
         max_Newton_iter = prm.get_integer ("max Newton iter");
         time_march_tolerance = prm.get_double ("time march tolerance");
+        nonlinear_tolerance = prm.get_double ("nonlinear tolerance");
 
         theta = prm.get_double ("theta scheme value");
 

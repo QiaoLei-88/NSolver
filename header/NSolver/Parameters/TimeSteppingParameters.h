@@ -29,6 +29,7 @@ namespace NSFEMSolver
       double final_time;
       unsigned int max_Newton_iter;
       double time_march_tolerance;
+      double nonlinear_tolerance;
 
       /**
        * Parameter for residual blending of current and last time step.
