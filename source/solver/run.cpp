@@ -238,8 +238,6 @@ namespace NSFEMSolver
         double reference_nonlin_residual (1.0);
         double nonlin_residual_ratio (1.0);
 
-        double res_norm;
-        double newton_update_norm;
         std::pair<unsigned int, double> convergence;
 
         locally_owned_solution = current_solution;

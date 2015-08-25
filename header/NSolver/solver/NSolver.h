@@ -252,6 +252,8 @@ namespace NSFEMSolver
     double time_step;
     double CFL_number;
     int n_sparsity_pattern_out;
+    double res_norm;
+    double newton_update_norm;
   };
 
 }
