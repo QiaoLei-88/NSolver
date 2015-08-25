@@ -505,6 +505,10 @@ namespace NSFEMSolver
           {
             diffusion_type = diffu_const;
           }
+        else if (prm_buf == "residual")
+          {
+            diffusion_type = diffu_res;
+          }
         else
           {
             AssertThrow (false, ExcNotImplemented());
