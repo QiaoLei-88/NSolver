@@ -271,6 +271,7 @@ namespace NSFEMSolver
     unsigned int nonlin_iter;
 
     // Residual based viscosity continuation
+    double init_res_norm;
     double res_norm;
     double newton_update_norm;
   };

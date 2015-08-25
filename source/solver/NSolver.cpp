@@ -79,6 +79,7 @@ namespace NSFEMSolver
     CFL_number (para_ptr_in->CFL_number),
     n_sparsity_pattern_out (-1),
     field_output_counter (0),
+    init_res_norm (1.0e-2),
     res_norm (1.0e-2)
   {
     Assert (parameters, ExcMessage ("Null pointer encountered!"));

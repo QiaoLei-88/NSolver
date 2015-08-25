@@ -315,6 +315,10 @@ namespace NSFEMSolver
 
             res_norm_infty = right_hand_side.linfty_norm();
             res_norm_infty_total += res_norm_infty;
+            if (n_time_step == 0)
+              {
+                init_res_norm = res_norm;
+              }
             if (nonlin_iter == 0)
               {
                 residual_for_output = right_hand_side;
