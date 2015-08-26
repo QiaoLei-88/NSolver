@@ -68,6 +68,7 @@ subsection time stepping
   set CFL number max                = 1.0e100
   set theta scheme value            = 1.0
   set solution extrapolation length = 0.0
+  set nonlinear tolerance           = 10
 end
 
 subsection linear solver

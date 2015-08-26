@@ -74,6 +74,7 @@ subsection time stepping
   set solution extrapolation length = 0.0
   set theta scheme value            = 1.0
   set max Newton iter               = 10000
+  set nonlinear tolerance           = 10
 end
 
 subsection linear solver
