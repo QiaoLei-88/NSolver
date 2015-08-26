@@ -17,6 +17,7 @@ namespace NSFEMSolver
     {
       Symmetry,
       FarField,
+      NonSlipWall,
       AllPrimitiveValues,
       PressureOutlet,
       MomentumInlet,

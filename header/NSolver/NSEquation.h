@@ -818,6 +818,22 @@ namespace NSFEMSolver
         break;
       }
 
+      case Boundary::NonSlipWall:
+      {
+        for (unsigned int ic = first_velocity_component, id=0; id<dim; ++ic, ++id)
+          {
+            // This have almost same effect as Wminus[ic] = -Wplus[ic]. But
+            // residual is a little bit small. I think this may be more stable
+            // because Wminus has no dependency on internal value and always
+            // has the desired value.
+            Wminus[ic] = 0.0;
+          }
+        Wminus[density_component] = Wplus[density_component];
+        Wminus[pressure_component] = Wplus[pressure_component];
+
+        break;
+      }
+
       case Boundary::FarField:
       {
         // Here we assume x axis points backward, y axis points upward and
