@@ -413,8 +413,8 @@ namespace NSFEMSolver
                                // and energy (pressure) values at the no penetration
                                // boundary just as if there is an outflow boundary.
 
-                               Patterns::Selection ("SlipWall|Symmetry|FarField|PressureOutlet|MomentumInlet|AllPrimitiveValues|MMS_BC"),
-                               "<SlipWall|Symmetry|FarField|PressureOutlet|MomentumInlet|AllPrimitiveValues|MMS_BC>");
+                               Patterns::Selection ("SlipWall|Symmetry|FarField|NonSlipWall|PressureOutlet|MomentumInlet|AllPrimitiveValues|MMS_BC"),
+                               "<SlipWall|Symmetry|FarField|NonSlipWall|PressureOutlet|MomentumInlet|AllPrimitiveValues|MMS_BC>");
 
             for (unsigned int di=0; di<EquationComponents<dim>::n_components; ++di)
               {
@@ -565,6 +565,10 @@ namespace NSFEMSolver
             else if (boundary_type == "FarField")
               {
                 boundary_conditions[boundary_id].kind = Boundary::FarField;
+              }
+            else if (boundary_type == "NonSlipWall")
+              {
+                boundary_conditions[boundary_id].kind = Boundary::NonSlipWall;
               }
             else if (boundary_type == "PressureOutlet")
               {
