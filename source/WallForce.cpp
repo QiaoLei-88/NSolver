@@ -36,12 +36,17 @@ namespace NSFEMSolver
 
   void WallForce::mpi_sum (MPI_Comm const &mpi_communicator)
   {
-    Utilities::MPI::sum (lift, mpi_communicator);
-    Utilities::MPI::sum (drag, mpi_communicator);
+    double receive_sum;
+    receive_sum = Utilities::MPI::sum (lift, mpi_communicator);
+    lift = receive_sum;
+    receive_sum = Utilities::MPI::sum (drag, mpi_communicator);
+    drag = receive_sum;
     for (unsigned int d=0; d<3; ++d)
       {
-        Utilities::MPI::sum (force[d], mpi_communicator);
-        Utilities::MPI::sum (moment[d], mpi_communicator);
+        receive_sum = Utilities::MPI::sum (force[d], mpi_communicator);
+        force[d] = receive_sum;
+        receive_sum = Utilities::MPI::sum (moment[d], mpi_communicator);
+        moment[d] = receive_sum;
       }
   }
 
