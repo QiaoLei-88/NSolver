@@ -23,13 +23,6 @@ namespace NSFEMSolver
     dof_handler.clear();
     dof_handler.distribute_dofs (fe);
 
-    locally_owned_dofs.clear();
-    locally_owned_dofs = dof_handler.locally_owned_dofs();
-
-    locally_relevant_dofs.clear();
-    DoFTools::extract_locally_relevant_dofs (dof_handler,
-                                             locally_relevant_dofs);
-
     if (parameters->output_sparsity_pattern)
       {
         ++n_sparsity_pattern_out;
@@ -96,6 +89,13 @@ namespace NSFEMSolver
         break;
       }
       }
+
+    locally_owned_dofs.clear();
+    locally_owned_dofs = dof_handler.locally_owned_dofs();
+
+    locally_relevant_dofs.clear();
+    DoFTools::extract_locally_relevant_dofs (dof_handler,
+                                             locally_relevant_dofs);
 
     TrilinosWrappers::SparsityPattern sparsity_pattern (locally_owned_dofs,
                                                         mpi_communicator);
