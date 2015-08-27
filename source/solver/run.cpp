@@ -250,8 +250,10 @@ namespace NSFEMSolver
             computing_timer.enter_subsection ("3:Assemble Newton system");
             system_matrix = 0;
             right_hand_side = 0;
+            newton_update = 0;
 
             assemble_system (nonlin_iter);
+            apply_strong_boundary_condtions();
 
             if (parameters->output_system_matrix)
               {
@@ -270,8 +272,6 @@ namespace NSFEMSolver
               {
                 residual_for_output = right_hand_side;
               }
-
-            newton_update = 0;
 
             computing_timer.leave_subsection ("3:Assemble Newton system");
 
