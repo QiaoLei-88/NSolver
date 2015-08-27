@@ -145,6 +145,7 @@ namespace NSFEMSolver
                              const bool                       external_face,
                              const unsigned int               boundary_id,
                              const double                     face_diameter);
+    void apply_strong_boundary_condtions();
 
     std::pair<unsigned int, double> solve (NSVector &solution);
 
