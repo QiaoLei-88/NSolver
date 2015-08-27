@@ -358,7 +358,7 @@ namespace NSFEMSolver
             computing_timer.enter_subsection ("6:Postprocess time step");
 
             WallForce wall_force;
-            integrate_force (parameters, wall_force);
+            integrate_force (wall_force);
 
 
             pcout << "  Lift and drag:" << std::endl

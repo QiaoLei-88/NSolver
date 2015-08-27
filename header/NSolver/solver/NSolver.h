@@ -148,8 +148,7 @@ namespace NSFEMSolver
 
     std::pair<unsigned int, double> solve (NSVector &solution);
 
-    void integrate_force (Parameters::AllParameters<dim> const *const parameters,
-                          WallForce &wall_force) const;
+    void integrate_force (WallForce &wall_force) const;
 
     void compute_refinement_indicators();
     void refine_grid();

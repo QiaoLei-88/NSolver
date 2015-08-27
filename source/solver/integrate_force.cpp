@@ -14,8 +14,7 @@ namespace NSFEMSolver
   using namespace dealii;
 
   template <int dim>
-  void NSolver<dim>::integrate_force (Parameters::AllParameters<dim> const *const parameters,
-                                      WallForce &wall_force) const
+  void NSolver<dim>::integrate_force (WallForce &wall_force) const
   {
     const UpdateFlags face_update_flags = update_values
                                           | update_quadrature_points
