@@ -557,7 +557,9 @@ namespace NSFEMSolver
             double total_time_march_norm = 0.0;
             for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
               {
-                Utilities::MPI::sum (time_advance_l2_norm[ic], mpi_communicator);
+                double receive_sum;
+                receive_sum = Utilities::MPI::sum (time_advance_l2_norm[ic], mpi_communicator);
+                time_advance_l2_norm[ic] = receive_sum;
                 total_time_march_norm += time_advance_l2_norm[ic];
                 double const log_norm = 0.5 * std::log10 (time_advance_l2_norm[ic]);
                 pcout << log_norm << ' ';
