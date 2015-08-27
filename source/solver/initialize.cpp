@@ -82,6 +82,43 @@ namespace NSFEMSolver
       }
       }
 
+    // Restrict strong boundary conditions
+    {
+      const unsigned int dofs_per_cell = fe.dofs_per_cell;
+
+      std::vector<types::global_dof_index> dof_indices (dofs_per_cell);
+      typename DoFHandler<dim>::active_cell_iterator
+      cell = dof_handler.begin_active(),
+      endc = dof_handler.end();
+      unsigned int cell_index (0);
+      for (; cell!=endc; ++cell, ++cell_index)
+        if (cell->is_locally_owned())
+          {
+            cell->get_dof_indices (dof_indices);
+            for (unsigned int face_no=0; face_no<GeometryInfo<dim>::faces_per_cell;
+                 ++face_no)
+              if (cell->at_boundary (face_no))
+                {
+                  const typename types::boundary_id boundary_id = cell->face (face_no)->boundary_id();
+                  if (parameters->boundary_conditions[boundary_id].kind == Boundary::NonSlipWall)
+                    {
+                      for (unsigned int i=0; i<dofs_per_cell; ++i)
+                        if (fe.has_support_on_face (i, face_no) == true)
+                          {
+                            const unsigned int component_i = fe.system_to_component_index (i).first;
+                            if (component_i != EquationComponents<dim>::density_component
+                                &&
+                                component_i != EquationComponents<dim>::pressure_component)
+                              {
+                                locally_owned_solution[dof_indices[i]] = 0.0;
+                              }
+                          }
+                    }
+                } // for .. face at_boundary
+          } // for .. cell is_locally_owned
+    }
+    locally_owned_solution.compress (VectorOperation::insert);
+
     old_solution = locally_owned_solution;
     current_solution = old_solution;
     predictor = old_solution;
