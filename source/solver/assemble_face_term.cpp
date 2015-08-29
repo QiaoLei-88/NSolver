@@ -221,6 +221,8 @@ namespace NSFEMSolver
                      fe_v.JxW (point);
             }
 
+          // TODO:[QL] may be it's not necessary to store the derivatives into a
+          // temporary array.
           for (unsigned int k=0; k<dofs_per_cell; ++k)
             {
               residual_derivatives[k] = R_i.fastAccessDx (k);
