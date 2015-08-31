@@ -1,0 +1,4 @@
+Run in parallel with 4 slots
+Fix CFL number;
+Set viscosity coefficient to 0.0003
+Set final time to 1.0
