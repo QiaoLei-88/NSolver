@@ -107,7 +107,7 @@ namespace NSFEMSolver
         linear_residual = prm.get_double ("residual");
         max_iterations  = prm.get_integer ("max iters");
 
-        // Do not relay ont C++ standard
+        // Do not relay on C++ standard to determine value of boolean
         AZ_RCM_reorder  = (prm.get_bool ("RCM reorder")?1:0);
         ilut_fill       = prm.get_double ("ilut fill");
         ilut_atol       = prm.get_double ("ilut absolute tolerance");
@@ -335,7 +335,7 @@ namespace NSFEMSolver
 
       prm.declare_entry ("mesh", "grid.inp",
                          Patterns::Anything(),
-                         "intput file name");
+                         "input file name");
 
       prm.declare_entry ("mesh format", "gmsh",
                          Patterns::Anything(),
@@ -625,7 +625,7 @@ namespace NSFEMSolver
         }
 
         init_fe_degree = prm.get_integer ("init fe degree");
-        AssertThrow (init_fe_degree<9, ExcMessage ("Do not usr element order higher than 8 for potential equation."));
+        AssertThrow (init_fe_degree<9, ExcMessage ("Do not use element order higher than 8 for potential equation."));
         if (init_fe_degree < 1)
           {
             init_fe_degree = 1;
