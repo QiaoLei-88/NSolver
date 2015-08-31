@@ -37,7 +37,7 @@ namespace NSFEMSolver
             {
               fe_v.reinit (cell);
               fe_v.get_function_values (current_solution, solution_values);
-              const double cell_size = fe_v.get_cell()->diameter();
+              const double cell_size = fe_v.get_cell()->minimum_vertex_distance();
               for (unsigned int q=0; q<n_q_points; ++q)
                 {
                   const double sound_speed
