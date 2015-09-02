@@ -34,8 +34,10 @@ namespace NSFEMSolver
     const unsigned int dofs_per_cell = fe_v.dofs_per_cell;
 
     std::vector<Sacado::Fad::DFad<double> >
-    independent_local_dof_values (dofs_per_cell),
-                                 independent_neighbor_dof_values (external_face == false ?
+    independent_local_dof_values (dofs_per_cell);
+
+    std::vector<Sacado::Fad::DFad<double> >
+    independent_neighbor_dof_values (external_face == false ?
                                      dofs_per_cell :
                                      0);
 
@@ -68,11 +70,13 @@ namespace NSFEMSolver
     // that the <code>fe_v</code> variable now is of type FEFaceValues or
     // FESubfaceValues:
     Table<2,Sacado::Fad::DFad<double> >
-    Wplus (n_q_points, EquationComponents<dim>::n_components),
-          Wminus (n_q_points, EquationComponents<dim>::n_components);
+    Wplus (n_q_points, EquationComponents<dim>::n_components);
+    Table<2,Sacado::Fad::DFad<double> >
+    Wminus (n_q_points, EquationComponents<dim>::n_components);
     Table<2,double>
-    Wplus_old (n_q_points, EquationComponents<dim>::n_components),
-              Wminus_old (n_q_points, EquationComponents<dim>::n_components);
+    Wplus_old (n_q_points, EquationComponents<dim>::n_components);
+    Table<2,double>
+    Wminus_old (n_q_points, EquationComponents<dim>::n_components);
 
     for (unsigned int q=0; q<n_q_points; ++q)
       for (unsigned int i=0; i<dofs_per_cell; ++i)
