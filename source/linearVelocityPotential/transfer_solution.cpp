@@ -33,9 +33,9 @@ namespace velocityPotential
 
     const unsigned int n_q_points = quadrature_on_NS_support_points.size();
 
-    const unsigned int   dofs_per_cell = fe_NS.dofs_per_cell;
+    const unsigned int dofs_per_cell = fe_NS.dofs_per_cell;
     std::vector<types::global_dof_index> global_indices_of_local_dofs (dofs_per_cell);
-    std::vector< Tensor<1,dim,double> > potential_grad_on_cell (n_q_points);
+    std::vector<Tensor<1,dim,double> > potential_grad_on_cell (n_q_points);
 
     // The two DoFHandlers are initialized from the same triangulation
     typename DoFHandler<dim>::active_cell_iterator
