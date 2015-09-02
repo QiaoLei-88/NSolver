@@ -33,17 +33,21 @@ namespace NSFEMSolver
     const unsigned int n_q_points = fe_v.n_quadrature_points;
     const unsigned int dofs_per_cell = fe_v.dofs_per_cell;
 
-    std::vector<Sacado::Fad::DFad<double> >
-    independent_local_dof_values (dofs_per_cell);
+    const unsigned int n_independent_variables_this = dofs_per_cell;
+    unsigned int n_independent_variables_neighbor = 0;
+    if (external_face == false)
+      {
+        n_independent_variables_neighbor = fe_v_neighbor.dofs_per_cell;
+      }
 
     std::vector<Sacado::Fad::DFad<double> >
-    independent_neighbor_dof_values (external_face == false ?
-                                     dofs_per_cell :
-                                     0);
+    independent_local_dof_values (n_independent_variables_this);
 
-    const unsigned int n_independent_variables = (external_face == false ?
-                                                  2 * dofs_per_cell :
-                                                  dofs_per_cell);
+    std::vector<Sacado::Fad::DFad<double> >
+    independent_neighbor_dof_values (n_independent_variables_neighbor);
+
+    const unsigned int n_independent_variables =
+      n_independent_variables_this + n_independent_variables_neighbor;
 
     for (unsigned int i = 0; i < dofs_per_cell; i++)
       {
@@ -51,15 +55,13 @@ namespace NSFEMSolver
         independent_local_dof_values[i].diff (i, n_independent_variables);
       }
 
-    if (external_face == false)
-      for (unsigned int i = 0; i < dofs_per_cell; i++)
-        {
-          independent_neighbor_dof_values[i]
-            = current_solution (dof_indices_neighbor[i]);
-          independent_neighbor_dof_values[i]
-          .diff (i+dofs_per_cell, n_independent_variables);
-        }
-
+    for (unsigned int i = 0; i < n_independent_variables_neighbor; ++i)
+      {
+        independent_neighbor_dof_values[i]
+          = current_solution (dof_indices_neighbor[i]);
+        independent_neighbor_dof_values[i]
+        .diff (i+dofs_per_cell, n_independent_variables);
+      }
 
     // Next, we need to define the values of the conservative variables
     // ${\mathbf W}$ on this side of the face ($ {\mathbf W}^+$)
