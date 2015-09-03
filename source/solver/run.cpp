@@ -180,6 +180,8 @@ namespace NSFEMSolver
 
     computing_timer.leave_subsection ("1:Initialization");
     bool terminate_time_stepping (false);
+    double res_norm_total (0.0);
+    double res_norm_total_previous (0.0);
     while (!terminate_time_stepping)
       {
         computing_timer.enter_subsection ("2:Prepare Newton iteration");
@@ -235,8 +237,6 @@ namespace NSFEMSolver
         current_solution = predictor;
         bool linear_solver_diverged (true);
         unsigned int const nonlin_iter_threshold (10);
-        double reference_nonlin_residual (1.0);
-        double nonlin_residual_ratio (1.0);
 
         double res_norm;
         double newton_update_norm;
@@ -245,6 +245,9 @@ namespace NSFEMSolver
         locally_owned_solution = current_solution;
 
         computing_timer.leave_subsection ("2:Prepare Newton iteration");
+
+        res_norm_total_previous = res_norm_total;
+        res_norm_total = 0.0;
         do // Newton iteration
           {
             computing_timer.enter_subsection ("3:Assemble Newton system");
@@ -268,6 +271,7 @@ namespace NSFEMSolver
               }
 
             res_norm = right_hand_side.l2_norm();
+            res_norm_total += res_norm;
             if (nonlin_iter == 0)
               {
                 residual_for_output = right_hand_side;
@@ -296,16 +300,6 @@ namespace NSFEMSolver
 
             ++nonlin_iter;
             ++n_total_inter;
-
-            if (n_total_inter <= parameters-> n_iter_stage1)
-              {
-                reference_nonlin_residual = newton_update_norm;
-              }
-            else
-              {
-                nonlin_residual_ratio = reference_nonlin_residual/newton_update_norm;
-              }
-
 
             // Out put convergence history
             iteration_history_file
@@ -447,7 +441,7 @@ namespace NSFEMSolver
                   {
                     double const
                     ratio = std::max (parameters->minimum_step_increasing_ratio_stage2,
-                                      std::pow (nonlin_residual_ratio, parameters->step_increasing_power_stage2));
+                                      std::pow (res_norm_total_previous/res_norm_total, parameters->step_increasing_power_stage2));
                     CFL_number *= ratio;
                   }
                 CFL_number = std::min (CFL_number, parameters->CFL_number_max);
