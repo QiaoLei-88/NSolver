@@ -142,7 +142,7 @@ end
 # --------------------------------------------------
 # Output frequency and kind
 subsection output
-  set step           = -1
+  set step           = 0.0
   set schlieren plot = true
 end
 

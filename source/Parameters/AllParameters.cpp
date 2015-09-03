@@ -287,8 +287,8 @@ namespace NSFEMSolver
         prm.declare_entry ("schlieren plot", "true",
                            Patterns::Bool(),
                            "Whether or not to produce schlieren plots");
-        prm.declare_entry ("step", "-1",
-                           Patterns::Double(),
+        prm.declare_entry ("step", "0.0",
+                           Patterns::Double (0.0),
                            "Output once per this period");
       }
       prm.leave_subsection();

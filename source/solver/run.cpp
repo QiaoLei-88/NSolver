@@ -421,11 +421,7 @@ namespace NSFEMSolver
                 compute_refinement_indicators();
               }
 
-            if (parameters->output_step < 0)
-              {
-                output_results();
-              }
-            else if (time >= next_output)
+            if (time >= next_output)
               {
                 output_results();
                 next_output += parameters->output_step;
