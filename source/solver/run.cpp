@@ -161,6 +161,8 @@ namespace NSFEMSolver
     unsigned int converged_newton_iters (0);
 
     unsigned int n_time_step (0);
+    const unsigned int int_output_step = static_cast<unsigned int> (parameters->output_step);
+    unsigned int next_output_time_step (n_time_step + int_output_step);
     unsigned int n_total_inter (0);
 
     time_advance_history_file
@@ -421,10 +423,21 @@ namespace NSFEMSolver
                 compute_refinement_indicators();
               }
 
-            if (time >= next_output)
+            if (parameters->is_steady)
               {
-                output_results();
-                next_output += parameters->output_step;
+                if (n_time_step >= next_output_time_step)
+                  {
+                    output_results();
+                    next_output_time_step += int_output_step;
+                  }
+              }
+            else
+              {
+                if (time >= next_output)
+                  {
+                    output_results();
+                    next_output += parameters->output_step;
+                  }
               }
 
             if (parameters-> is_steady)
