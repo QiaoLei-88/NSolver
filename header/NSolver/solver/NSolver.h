@@ -132,6 +132,7 @@ namespace NSFEMSolver
     void check_negative_density_pressure() const;
 
     void calc_time_step();
+    void calc_artificial_viscosity();
     void assemble_system (const unsigned int nonlin_iter);
     void assemble_cell_term (const FEValues<dim>             &fe_v,
                              const std::vector<types::global_dof_index> &dofs,
