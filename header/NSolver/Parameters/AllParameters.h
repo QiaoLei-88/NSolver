@@ -269,6 +269,8 @@ namespace NSFEMSolver
       };
       DiffusionType diffusion_type;
       double diffusion_coefficoent;
+      double entropy_visc_cE;
+      double entropy_visc_cLinear;
       double diffusion_factor[EquationComponents<dim>::n_components];
 
       enum RenumberDofs

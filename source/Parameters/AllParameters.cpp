@@ -369,7 +369,12 @@ namespace NSFEMSolver
       prm.declare_entry ("diffusion coefficient", "0.001",
                          Patterns::Double(),
                          "predefined diffusion coefficient");
-
+      prm.declare_entry ("entropy visc cE", "1.0",
+                         Patterns::Double (0.0),
+                         "Scale factor on entropy viscosity");
+      prm.declare_entry ("entropy visc cLinear", "0.25",
+                         Patterns::Double (0.0),
+                         "Scale factor on linear limit of entropy viscosity");
 
       prm.declare_entry ("renumber dofs", "None",
                          Patterns::Selection ("None|RCM|RCM_WithStartPoint"),
@@ -513,6 +518,8 @@ namespace NSFEMSolver
 
       diffusion_power = prm.get_double ("diffusion power");
       diffusion_coefficoent = prm.get_double ("diffusion coefficient");
+      entropy_visc_cE = prm.get_double ("entropy visc cE");
+      entropy_visc_cLinear = prm.get_double ("entropy visc cLinear");
 
       {
         const std::string prm_buf = prm.get ("renumber dofs");
