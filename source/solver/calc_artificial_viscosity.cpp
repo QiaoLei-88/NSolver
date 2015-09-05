@@ -93,10 +93,13 @@ namespace NSFEMSolver
                 = EulerEquations<dim>::template compute_velocity_magnitude (W[q]);
                 characteristic_speed_max = std::max (characteristic_speed_max, velocity + sound_speed);
               }
-            const double cE = 1.0;
-            const double entropy_visc = cE * rho_max * std::pow (fe_values.get_cell()->diameter(), 1.5) * D_h_max;
-            const double cMax = 0.25;
-            const double miu_max = cMax * fe_values.get_cell()->diameter() * rho_max * characteristic_speed_max;
+            const double entropy_visc
+            = parameters->entropy_visc_cE * rho_max
+            * std::pow (fe_values.get_cell()->diameter(), 1.5) * D_h_max;
+            const double miu_max
+            = parameters->entropy_visc_cLinear
+            * fe_values.get_cell()->diameter()
+            * rho_max * characteristic_speed_max;
 
             entropy_viscosity[cell_index] = std::min (miu_max, entropy_visc);
 
