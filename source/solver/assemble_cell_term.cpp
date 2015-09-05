@@ -213,6 +213,8 @@ namespace NSFEMSolver
         EulerEquations<dim>::compute_forcing_vector (W[q], forcing[q]);
       }
 
+    // Avoid waring on unused parameter
+    (void)nonlin_iter;
     // TODO:
     // viscosity_old needed here.
     // Vector for viscosity should be sized to n_dof rather than n_active_cell, only entropy viscosity is
