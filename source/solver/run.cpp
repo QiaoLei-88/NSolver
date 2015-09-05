@@ -250,6 +250,7 @@ namespace NSFEMSolver
 
         res_norm_total_previous = res_norm_total;
         res_norm_total = 0.0;
+        calc_artificial_viscosity();
         do // Newton iteration
           {
             computing_timer.enter_subsection ("3:Assemble Newton system");
