@@ -188,6 +188,9 @@ namespace NSFEMSolver
     const FESystem<dim>  fe;
     DoFHandler<dim>      dof_handler;
 
+    const FE_Q<dim>      fe_visc;
+    DoFHandler<dim>      dof_handler_visc;
+
     const QGauss<dim>    quadrature;
     const QGauss<dim-1>  face_quadrature;
 
@@ -217,6 +220,10 @@ namespace NSFEMSolver
     // size to "locally_relevant_dofs" because ghost cell is needed to
     // determine the out-most face values.
     NSVector      residual_for_output;
+
+    NSVector      viscosity_coeff;
+    IndexSet      locally_owned_visc_index;
+    IndexSet      locally_relevant_visc_index;
 
     Vector<double>       entropy_viscosity;
     Vector<double>       cellSize_viscosity;

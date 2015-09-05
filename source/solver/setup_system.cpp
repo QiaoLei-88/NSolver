@@ -23,6 +23,9 @@ namespace NSFEMSolver
     dof_handler.clear();
     dof_handler.distribute_dofs (fe);
 
+    dof_handler_visc.clear();
+    dof_handler_visc.distribute_dofs (fe_visc);
+
     if (parameters->output_sparsity_pattern)
       {
         ++n_sparsity_pattern_out;
@@ -93,9 +96,16 @@ namespace NSFEMSolver
     locally_owned_dofs.clear();
     locally_owned_dofs = dof_handler.locally_owned_dofs();
 
+    locally_owned_visc_index.clear();
+    locally_owned_visc_index = dof_handler_visc.locally_owned_dofs();
+
     locally_relevant_dofs.clear();
     DoFTools::extract_locally_relevant_dofs (dof_handler,
                                              locally_relevant_dofs);
+
+    locally_relevant_visc_index.clear();
+    DoFTools::extract_locally_relevant_dofs (dof_handler_visc,
+                                             locally_relevant_visc_index);
 
     TrilinosWrappers::SparsityPattern sparsity_pattern (locally_owned_dofs,
                                                         mpi_communicator);
@@ -133,6 +143,8 @@ namespace NSFEMSolver
     entropy_viscosity.reinit (triangulation.n_active_cells());
     cellSize_viscosity.reinit (triangulation.n_active_cells());
     refinement_indicators.reinit (triangulation.n_active_cells());
+
+    viscosity_coeff.reinit (locally_relevant_visc_index, mpi_communicator);
   }
 
 #include "NSolver.inst"

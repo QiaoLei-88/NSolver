@@ -61,6 +61,8 @@ namespace NSFEMSolver
     mapping_ptr (0),
     fe (FE_Q<dim> (para_ptr_in->fe_degree), EquationComponents<dim>::n_components),
     dof_handler (triangulation),
+    fe_visc (para_ptr_in->fe_degree),
+    dof_handler_visc (triangulation),
     quadrature (para_ptr_in->quadrature_degree),
     face_quadrature (para_ptr_in->face_quadrature_degree),
     I_am_host (Utilities::MPI::this_mpi_process (mpi_communicator) == 0),
