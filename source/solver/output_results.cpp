@@ -39,14 +39,8 @@ namespace NSFEMSolver
     data_out.add_data_vector (current_solution, postprocessor);
 
     {
-      const std::string data_name ("entropy_viscosity");
-      data_out.add_data_vector (entropy_viscosity,
-                                data_name,
-                                DataOut<dim>::type_cell_data);
-    }
-    {
-      const std::string data_name ("cellSize_viscosity");
-      data_out.add_data_vector (cellSize_viscosity,
+      const std::string data_name ("artificial_viscosity");
+      data_out.add_data_vector (artificial_viscosity,
                                 data_name,
                                 DataOut<dim>::type_cell_data);
     }

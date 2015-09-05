@@ -220,19 +220,8 @@ namespace NSFEMSolver
     // Vector for viscosity should be sized to n_dof rather than n_active_cell, only entropy viscosity is
     // cellwise, while physical viscosity is per-dof.
 
-    double viscos_coeff (0.000);
-    if (parameters->diffusion_type == Parameters::AllParameters<dim>::diffu_entropy)
-      {
-        viscos_coeff = entropy_viscosity[cell_index];
-      }
-    if (parameters->diffusion_type == Parameters::AllParameters<dim>::diffu_cell_size)
-      {
-        viscos_coeff = cellSize_viscosity[cell_index];
-      }
-    if (parameters->diffusion_type == Parameters::AllParameters<dim>::diffu_const)
-      {
-        viscos_coeff = parameters->diffusion_coefficoent;
-      }
+    const double viscos_coeff =
+      artificial_viscosity[cell_index];
 
     // We now have all of the pieces in place, so perform the assembly.  We
     // have an outer loop through the components of the system, and an inner

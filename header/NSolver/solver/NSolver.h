@@ -218,8 +218,7 @@ namespace NSFEMSolver
     // determine the out-most face values.
     NSVector      residual_for_output;
 
-    Vector<double>       entropy_viscosity;
-    Vector<double>       cellSize_viscosity;
+    Vector<double>       artificial_viscosity;
     Vector<float>        refinement_indicators;
 
     // This final set of member variables (except for the object holding all
