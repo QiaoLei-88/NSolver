@@ -1,12 +1,12 @@
 #!/bin/bash
 #
 #  This script run regression test for the untested latest local and
-#  remote revison inside directory ${WORK_DIR}.
+#  remote revision inside directory ${WORK_DIR}.
 #
 #  PATH needs to be setup manually for running by crontab.
 #
 
-WORK_DIR=/u/qiaolei/devel/NSolver/regTest
+WORK_DIR=/w/qiaolei/devel/NSolver/regTest
 PATH=/u/qiaolei/Library/mpi/bin:/u/qiaolei/Library/cmake-3.0.2/bin:/u/qiaolei/.bin:/usr/NX/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/u/qiaolei/Library/cgnslib/bin
 
 function bdie () {
@@ -17,7 +17,7 @@ function bdie () {
 
 function run_tests() {
 	echo -e '\n'
-	echo "${LAST_LOCAL_VER}" >> /u/qiaolei/.regressionTestList
+	echo "${HOSTNAME} : ${LAST_LOCAL_VER}" >> /u/qiaolei/.regressionTestList
 	cmake ${SRC_DIR} || bdie "$LINENO" "cmake failed."
 	make -j16 || bdie "$LINENO" "make failed."
 	(
@@ -27,7 +27,7 @@ function run_tests() {
 		rm ${TEST_RUNNING}
 		echo ${START_TIME} > ${TEST_FINISHED}
 		echo `date` >> ${TEST_FINISHED}
-		) & # let the test run in backgroud.
+		) & # let the test run in background.
 }
 
 PRJNAME=NSolver
@@ -39,6 +39,16 @@ TEST_DIR=${WORK_DIR}/regressionTests
 
 # main()
 source /u/qiaolei/.bashrc
+
+N_CPU_ALL=`qusage | grep $HOSTNAME | awk '{ print $3 }'`
+N_CPU_BUSSY=`qusage | grep $HOSTNAME | awk '{ print $2 }'`
+N_CPU_IDLE=`echo "$N_CPU_ALL - $N_CPU_BUSSY" | bc`
+N_CPU_IDLE=`printf "%.0f" $N_CPU_IDLE`
+
+if [ ${N_CPU_IDLE} -lt 16 ]; then
+  bdie "$LINENO" "Not enough idle CPUs!"
+fi
+
 
 cd ${WORK_DIR} || bdie "$LINENO" "${WORK_DIR} doesn't accessible!"
 
@@ -53,14 +63,14 @@ if [ ! -d ${TEST_DIR} ]; then
 	mkdir ${TEST_DIR}
 fi
 
-# Get the latest revision of locat repository
+# Get the latest revision of local repository
 pushd . >> /dev/null
 cd ${SRC_DIR}
 git checkout master -q
 LAST_LOCAL_VER=`git log -1 --format=format:%H`
 popd >> /dev/null
 
-# Check whether the latest local revison tested.
+# Check whether the latest local revision tested.
 pushd . >> /dev/null
 
 cd ${TEST_DIR}
@@ -101,9 +111,9 @@ if [ ${LAST_LOCAL_VER_TESTED} == 'false' ]; then
 fi
 popd >> /dev/null
 
-# Now we assume the latest local revison is tested.
-# Check whether the latest version is also the latest remote revison
-# If it is not identical to the latest remote resvion then update and test, else
+# Now we assume the latest local revision is tested.
+# Check whether the latest version is also the latest remote revision
+# If it is not identical to the latest remote revision then update and test, else
 # just say something.
 
 pushd . >> /dev/null
