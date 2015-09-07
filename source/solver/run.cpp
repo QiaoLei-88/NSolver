@@ -160,10 +160,10 @@ namespace NSFEMSolver
     const double linear_search_length[12] = {1.0, 0.8, 0.6, 0.4, 0.2, 0.1, 0.05, 0.025, 0.0125, 1.2, 1.5, 2.0};
     unsigned int converged_newton_iters (0);
 
-    unsigned int n_time_step (0);
+    n_time_step = 0;
     const unsigned int int_output_step = static_cast<unsigned int> (parameters->output_step);
     unsigned int next_output_time_step (n_time_step + int_output_step);
-    unsigned int n_total_inter (0);
+    n_total_inter = 0;
 
     time_advance_history_file
         << "   iter     n_cell     n_dofs          time   i_step"
@@ -235,7 +235,7 @@ namespace NSFEMSolver
 
         newton_iter_converged = false;
 
-        unsigned int nonlin_iter = 0;
+        nonlin_iter = 0;
         current_solution = predictor;
         bool linear_solver_diverged (true);
         unsigned int const nonlin_iter_threshold (10);

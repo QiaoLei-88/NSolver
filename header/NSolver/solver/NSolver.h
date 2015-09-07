@@ -252,6 +252,10 @@ namespace NSFEMSolver
     double time_step;
     double CFL_number;
     int n_sparsity_pattern_out;
+    // iteration counter
+    unsigned int n_time_step;
+    unsigned int n_total_inter;
+    unsigned int nonlin_iter;
   };
 
 }
