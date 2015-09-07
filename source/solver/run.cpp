@@ -258,7 +258,7 @@ namespace NSFEMSolver
             right_hand_side = 0;
             newton_update = 0;
 
-            assemble_system (nonlin_iter);
+            assemble_system();
             apply_strong_boundary_condtions();
 
             if (parameters->output_system_matrix)

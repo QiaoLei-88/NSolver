@@ -75,8 +75,7 @@ namespace NSFEMSolver
   NSolver<dim>::
   assemble_cell_term (const FEValues<dim>             &fe_v,
                       const std::vector<types::global_dof_index> &dof_indices,
-                      const unsigned int cell_index,
-                      const unsigned int nonlin_iter)
+                      const unsigned int cell_index)
   {
     const unsigned int dofs_per_cell = fe_v.dofs_per_cell;
     const unsigned int n_q_points    = fe_v.n_quadrature_points;

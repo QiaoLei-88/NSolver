@@ -36,7 +36,7 @@ namespace NSFEMSolver
   // the normal vectors are known to be the negative of the normal vectors of
   // the current cell.
   template <int dim>
-  void NSolver<dim>::assemble_system (const unsigned int nonlin_iter)
+  void NSolver<dim>::assemble_system()
   {
     const unsigned int dofs_per_cell = dof_handler.get_fe().dofs_per_cell;
 
@@ -80,7 +80,7 @@ namespace NSFEMSolver
           fe_v.reinit (cell);
           cell->get_dof_indices (dof_indices);
 
-          assemble_cell_term (fe_v, dof_indices, cell_index, nonlin_iter);
+          assemble_cell_term (fe_v, dof_indices, cell_index);
 
           // Then loop over all the faces of this cell.  If a face is part of
           // the external boundary, then assemble boundary conditions there (the
