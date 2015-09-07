@@ -73,14 +73,13 @@ namespace NSFEMSolver
     typename DoFHandler<dim>::active_cell_iterator
     cell = dof_handler.begin_active(),
     endc = dof_handler.end();
-    unsigned int cell_index (0);
-    for (; cell!=endc; ++cell, ++cell_index)
+    for (; cell!=endc; ++cell)
       if (cell->is_locally_owned())
         {
           fe_v.reinit (cell);
           cell->get_dof_indices (dof_indices);
 
-          assemble_cell_term (fe_v, dof_indices, cell_index);
+          assemble_cell_term (fe_v, dof_indices);
 
           // Then loop over all the faces of this cell.  If a face is part of
           // the external boundary, then assemble boundary conditions there (the

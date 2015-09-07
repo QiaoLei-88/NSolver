@@ -74,8 +74,7 @@ namespace NSFEMSolver
   void
   NSolver<dim>::
   assemble_cell_term (const FEValues<dim>             &fe_v,
-                      const std::vector<types::global_dof_index> &dof_indices,
-                      const unsigned int cell_index)
+                      const std::vector<types::global_dof_index> &dof_indices)
   {
     const unsigned int dofs_per_cell = fe_v.dofs_per_cell;
     const unsigned int n_q_points    = fe_v.n_quadrature_points;
@@ -220,7 +219,7 @@ namespace NSFEMSolver
     // cellwise, while physical viscosity is per-dof.
 
     const double viscos_coeff =
-      artificial_viscosity[cell_index];
+      artificial_viscosity[fe_v.get_cell()->active_cell_index()];
 
     // We now have all of the pieces in place, so perform the assembly.  We
     // have an outer loop through the components of the system, and an inner
