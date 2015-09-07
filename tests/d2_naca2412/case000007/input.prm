@@ -62,6 +62,7 @@ end
 subsection time stepping
   set rigid reference time step     = true
   set CFL number                    = 1.0
+  set minimum step increasing ratio stage2 = 1.0
   set final time                    = 100 # simulation end time
   set reference time step           = -0.02 # simulation time step
   set CFL number max                = 1.0e100
