@@ -163,7 +163,7 @@ namespace NSFEMSolver
     n_time_step = 0;
     const unsigned int int_output_step = static_cast<unsigned int> (parameters->output_step);
     unsigned int next_output_time_step (n_time_step + int_output_step);
-    n_total_inter = 0;
+    n_total_iter = 0;
 
     time_advance_history_file
         << "   iter     n_cell     n_dofs          time   i_step"
@@ -302,11 +302,11 @@ namespace NSFEMSolver
             linear_solver_diverged = std::isnan (convergence.second);
 
             ++nonlin_iter;
-            ++n_total_inter;
+            ++n_total_iter;
 
             // Out put convergence history
             iteration_history_file
-                << std::setw (7) << n_total_inter << ' '
+                << std::setw (7) << n_total_iter << ' '
                 << std::setw (10) << triangulation.n_global_active_cells() << ' '
                 << std::setw (10) << dof_handler.n_dofs() << ' '
                 << std::setw (13) << time << ' '
@@ -381,7 +381,7 @@ namespace NSFEMSolver
 
             //Output time marching history
             time_advance_history_file
-                << std::setw (7) << n_total_inter << ' '
+                << std::setw (7) << n_total_iter << ' '
                 << std::setw (10) << triangulation.n_global_active_cells() << ' '
                 << std::setw (10) << dof_handler.n_dofs() << ' '
                 << std::setw (13) << time << ' '
@@ -417,7 +417,7 @@ namespace NSFEMSolver
             terminate_time_stepping = terminate_time_stepping || time >= parameters->final_time;
             terminate_time_stepping = terminate_time_stepping ||
                                       (parameters->is_steady &&
-                                       n_total_inter >= parameters -> max_Newton_iter);
+                                       n_total_iter >= parameters -> max_Newton_iter);
 
             if (parameters->do_refine == true)
               {
@@ -443,7 +443,7 @@ namespace NSFEMSolver
 
             if (parameters-> is_steady)
               {
-                if (n_total_inter <= parameters-> n_iter_stage1)
+                if (n_total_iter <= parameters-> n_iter_stage1)
                   {
                     CFL_number *= parameters->step_increasing_ratio_stage1;
                   }

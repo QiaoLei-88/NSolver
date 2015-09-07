@@ -253,7 +253,7 @@ namespace NSFEMSolver
     int n_sparsity_pattern_out;
     // iteration counter
     unsigned int n_time_step;
-    unsigned int n_total_inter;
+    unsigned int n_total_iter;
     unsigned int nonlin_iter;
   };
 
