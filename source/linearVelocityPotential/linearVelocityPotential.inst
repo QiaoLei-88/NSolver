@@ -1,1 +1,2 @@
   template class LinearVelocityPotential<2>;
+  template class LinearVelocityPotential<3>;
