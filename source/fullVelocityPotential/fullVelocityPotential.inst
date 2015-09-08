@@ -1,0 +1,3 @@
+  template class FullVelocityPotential<2>;
+  template class FullVelocityPotential<3>;
+ 
