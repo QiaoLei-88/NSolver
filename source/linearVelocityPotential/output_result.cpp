@@ -3,7 +3,7 @@
 //  Copyright (c) 2015年 乔磊. All rights reserved.
 //
 
-#include <NSolver/linearVelocityPotential/linearVelocityPotential.h>
+#include <NSolver/velocityPotential/linearVelocityPotential.h>
 
 namespace velocityPotential
 {

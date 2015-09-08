@@ -99,7 +99,7 @@ DEAL_II_ENABLE_EXTRA_DIAGNOSTICS
 #include <NSolver/Postprocessor.h>
 #include <NSolver/MMS.h>
 #include <NSolver/WallForce.h>
-#include <NSolver/linearVelocityPotential/linearVelocityPotential.h>
+#include <NSolver/velocityPotential/linearVelocityPotential.h>
 #include <NSolver/MDFILU/MDFILU.h>
 #include <NSolver/Tools.h>
 
