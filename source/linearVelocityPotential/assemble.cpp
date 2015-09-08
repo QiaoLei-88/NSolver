@@ -69,24 +69,35 @@ namespace velocityPotential
             }
           // Aplly Neumann boundary condition
           for (unsigned int f=0; f<GeometryInfo<dim>::faces_per_cell; ++f)
-            if (cell->face (f)->at_boundary() &&
-                cell->face (f)-> boundary_id() == 1)
+            if (cell->face (f)->at_boundary())
               {
-                fe_face_values.reinit (cell, f);
-                for (unsigned int q_point=0; q_point<n_face_q_points; ++q_point)
+                switch (parameters->boundary_conditions[cell->face (f)-> boundary_id()].kind)
                   {
-                    for (unsigned int i=0; i<dofs_per_cell; ++i)
+                  case NSFEMSolver::Boundary::NonSlipWall:
+                  case NSFEMSolver::Boundary::Symmetry: // i.e. SlipWall
+                  {
+                    fe_face_values.reinit (cell, f);
+                    for (unsigned int q_point=0; q_point<n_face_q_points; ++q_point)
                       {
-                        double inner_product = 0.0;
-                        for (unsigned int d=0; d<dim; ++d)
+                        for (unsigned int i=0; i<dofs_per_cell; ++i)
                           {
-                            inner_product -= velocity_infty[d] *
-                                             fe_face_values.normal_vector (q_point)[d];
+                            double inner_product = 0.0;
+                            for (unsigned int d=0; d<dim; ++d)
+                              {
+                                inner_product -= velocity_infty[d] *
+                                                 fe_face_values.normal_vector (q_point)[d];
+                              }
+                            inner_product -= velocity_infty.square() * fe_face_values.normal_vector (q_point)[0];
+                            inner_product *= fe_face_values.shape_value (i,q_point);
+                            cell_rhs (i) += inner_product * fe_face_values.JxW (q_point);
                           }
-                        inner_product -= velocity_infty.square() * fe_face_values.normal_vector (q_point)[0];
-                        inner_product *= fe_face_values.shape_value (i,q_point);
-                        cell_rhs (i) += inner_product * fe_face_values.JxW (q_point);
                       }
+                    break;
+                  }
+                  default:
+                  {
+                    break;
+                  }
                   }
               }
           cell->get_dof_indices (local_dof_indices);

@@ -24,10 +24,19 @@ namespace velocityPotential
     constraints.clear();
     constraints.reinit (locally_relevant_dofs);
     DoFTools::make_hanging_node_constraints (dof_handler, constraints);
-    VectorTools::interpolate_boundary_values (dof_handler,
-                                              2,
-                                              ZeroFunction<dim>(),
-                                              constraints);
+    for (unsigned int boundary_id = 0;
+         boundary_id < NSFEMSolver::Parameters::AllParameters<dim>::max_n_boundaries;
+         ++boundary_id)
+      {
+        if (parameters->boundary_conditions[boundary_id].kind
+            == NSFEMSolver::Boundary::FarField)
+          {
+            VectorTools::interpolate_boundary_values (dof_handler,
+                                                      boundary_id,
+                                                      ZeroFunction<dim>(),
+                                                      constraints);
+          }
+      }
     constraints.close();
 
     DynamicSparsityPattern dsp (locally_relevant_dofs);
