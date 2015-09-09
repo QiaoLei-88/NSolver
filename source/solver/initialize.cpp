@@ -37,6 +37,19 @@ namespace NSFEMSolver
         break;
       }
 
+      case Parameters::AllParameters<dim>::FullVelocityPotential :
+      {
+        const SmartPointer<parallel::distributed::Triangulation<dim> const > triangulation_ptr (&triangulation);
+        velocityPotential::FullVelocityPotential<dim>
+        full_velocity_potential (triangulation_ptr, parameters, mpi_communicator);
+
+        full_velocity_potential.compute();
+        full_velocity_potential.transfer_solution (fe, dof_handler, locally_owned_solution);
+        full_velocity_potential.output_results();
+
+        break;
+      }
+
       case Parameters::AllParameters<dim>::FreeStream :
       {
         std_cxx11::array<double, EquationComponents<dim>::n_components> free_stream_condition;

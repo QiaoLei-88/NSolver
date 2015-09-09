@@ -288,7 +288,8 @@ namespace NSFEMSolver
       {
         UserFunction,
         FreeStream,
-        LinearVelocityPotential
+        LinearVelocityPotential,
+        FullVelocityPotential
       };
       InitMethod init_method;
 

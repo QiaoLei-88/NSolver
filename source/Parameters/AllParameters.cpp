@@ -439,8 +439,8 @@ namespace NSFEMSolver
       prm.enter_subsection ("initial condition");
       {
         prm.declare_entry ("init method", "UserFunction",
-                           Patterns::Selection ("UserFunction|FreeStream|LinearVelocityPotential"),
-                           "<UserFunction|FreeStream|LinearVelocityPotential>");
+                           Patterns::Selection ("UserFunction|FreeStream|LinearVelocityPotential|FullVelocityPotential"),
+                           "<UserFunction|FreeStream|LinearVelocityPotential|FullVelocityPotential>");
         prm.declare_entry ("init fe degree", "1", Patterns::Integer(),
                            "FE degree used for solving velocity potential equation");
 
@@ -628,6 +628,10 @@ namespace NSFEMSolver
           else if (prm_buf == "LinearVelocityPotential")
             {
               init_method = LinearVelocityPotential;
+            }
+          else if (prm_buf == "FullVelocityPotential")
+            {
+              init_method = FullVelocityPotential;
             }
           else
             {
