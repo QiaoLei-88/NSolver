@@ -257,6 +257,10 @@ namespace NSFEMSolver
     // sense, so that we don't need to negative the Jacobian entries.  Then,
     // when we sum into the <code>right_hand_side</code> vector, we negate
     // this residual.
+    const double dt = parameters->use_local_time_step_size ?
+                      local_time_step_size[fe_v.get_cell()->active_cell_index()]
+                      :
+                      global_time_step_size;
     for (unsigned int i=0; i<fe_v.dofs_per_cell; ++i)
       {
         Sacado::Fad::DFad<double> R_i = 0;
@@ -277,7 +281,7 @@ namespace NSFEMSolver
             EulerEquations<dim>::compute_conservative_vector (W_old[point], w_conservative_old);
 
             // TODO: accumulate R_i first and the multiply with shape_value_component * JxW together.
-            R_i += 1.0 / global_time_step_size *
+            R_i += 1.0 / dt *
                    (w_conservative[component_i] - w_conservative_old[component_i]) *
                    fe_v.shape_value_component (i, point, component_i) *
                    fe_v.JxW (point);

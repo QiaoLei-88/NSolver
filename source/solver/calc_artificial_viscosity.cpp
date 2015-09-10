@@ -45,6 +45,10 @@ namespace NSFEMSolver
                 fe_values.get_function_values (current_solution, W);
                 fe_values.get_function_gradients (current_solution, grad_W);
                 fe_values.get_function_values (old_solution, W_old);
+                const double dt = parameters->use_local_time_step_size ?
+                                  local_time_step_size[cell->active_cell_index()]
+                                  :
+                                  global_time_step_size;
 
                 cell->get_dof_indices (global_indices_of_local_dofs);
 
@@ -65,9 +69,8 @@ namespace NSFEMSolver
                     const double entroy_old = EulerEquations<dim>::template compute_entropy (W_old[q]);
 
                     double D_h1 (0.0),D_h2 (0.0);
-                    D_h1 = (entropy.val() - entroy_old)/global_time_step_size;
-                    D_h2 = (W[q][EquationComponents<dim>::density_component] - W_old[q][EquationComponents<dim>::density_component])/
-                    global_time_step_size;
+                    D_h1 = (entropy.val() - entroy_old)/dt;
+                    D_h2 = (W[q][EquationComponents<dim>::density_component] - W_old[q][EquationComponents<dim>::density_component])/dt;
 
                     //sum up divergence
                     for (unsigned int d=0; d<dim; d++)

@@ -47,6 +47,9 @@ namespace NSFEMSolver
                            Patterns::Double(),
                            "simulation time step");
 
+        prm.declare_entry ("local time step", "false",
+                           Patterns::Bool(),
+                           "use local time step size, only effective in steady case");
 
         prm.declare_entry ("CFL number", "1.0",
                            Patterns::Double (0),
@@ -114,6 +117,11 @@ namespace NSFEMSolver
             reference_time_step = -reference_time_step;
           }
 
+        use_local_time_step_size = false;
+        if (is_steady)
+          {
+            use_local_time_step_size = prm.get_bool ("local time step");
+          }
 
         CFL_number = prm.get_double ("CFL number");
         CFL_number_max = prm.get_double ("CFL number max");

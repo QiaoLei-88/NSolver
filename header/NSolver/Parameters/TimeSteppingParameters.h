@@ -56,6 +56,11 @@ namespace NSFEMSolver
       bool is_steady;
 
       /**
+       * Flag to use local time step size. Only effective in steady case.
+       */
+      bool use_local_time_step_size;
+
+      /**
        * parameters for evaluating CFL number
        */
       double CFL_number;
