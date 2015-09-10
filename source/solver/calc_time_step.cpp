@@ -56,7 +56,7 @@ namespace NSFEMSolver
                     = EulerEquations<dim>::template compute_sound_speed (solution_values[q]);
                   const double velocity
                   = EulerEquations<dim>::template compute_velocity_magnitude (solution_values[q]);
-                  min_time_step = std::min (min_time_step, cell_charact_length / velocity+sound_speed);
+                  min_time_step = std::min (min_time_step, cell_charact_length / (velocity+sound_speed));
                 }
             }
         time_step = Utilities::MPI::min (min_time_step, mpi_communicator) * CFL_number;
