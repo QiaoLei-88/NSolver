@@ -51,6 +51,12 @@ namespace NSFEMSolver
                                 DataOut<dim>::type_cell_data);
     }
     {
+      const std::string data_name ("local_time_step_size");
+      data_out.add_data_vector (local_time_step_size,
+                                data_name,
+                                DataOut<dim>::type_cell_data);
+    }
+    {
       AssertThrow (dim <= 3, ExcNotImplemented());
       char prefix[3][4] = {"1st", "2nd", "3rd"};
 

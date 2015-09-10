@@ -130,6 +130,7 @@ namespace NSFEMSolver
 
     residual_for_output.reinit (current_solution, true);
 
+    local_time_step_size.reinit (triangulation.n_active_cells());
     artificial_viscosity.reinit (triangulation.n_active_cells());
     refinement_indicators.reinit (triangulation.n_active_cells());
   }

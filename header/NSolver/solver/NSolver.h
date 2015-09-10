@@ -217,6 +217,7 @@ namespace NSFEMSolver
     // determine the out-most face values.
     NSVector      residual_for_output;
 
+    Vector<double>       local_time_step_size;
     Vector<double>       artificial_viscosity;
     Vector<float>        refinement_indicators;
 

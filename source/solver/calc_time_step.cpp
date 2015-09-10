@@ -21,6 +21,9 @@ namespace NSFEMSolver
     if (parameters->rigid_reference_time_step)
       {
         time_step = parameters->reference_time_step * CFL_number;
+        std::fill (local_time_step_size.begin(),
+                   local_time_step_size.end(),
+                   time_step);
       }
     else
       {
@@ -28,7 +31,7 @@ namespace NSFEMSolver
         const unsigned int   n_q_points = fe_v.n_quadrature_points;
         std::vector<Vector<double> > solution_values (n_q_points,
                                                       Vector<double> (EquationComponents<dim>::n_components));
-        double min_time_step = parameters->reference_time_step;
+        double min_time_step = parameters->reference_time_step * CFL_number;
         typename DoFHandler<dim>::active_cell_iterator
         cell = dof_handler.begin_active(),
         endc = dof_handler.end();
@@ -50,16 +53,20 @@ namespace NSFEMSolver
                 = static_cast<double> (GeometryInfo<dim>::faces_per_cell)
                   * cell_volumn/face_area;
 
+              double cellwise_max_v_plus_a = std::numeric_limits<double>::min();
               for (unsigned int q=0; q<n_q_points; ++q)
                 {
-                  const double sound_speed
-                    = EulerEquations<dim>::template compute_sound_speed (solution_values[q]);
-                  const double velocity
-                  = EulerEquations<dim>::template compute_velocity_magnitude (solution_values[q]);
-                  min_time_step = std::min (min_time_step, cell_charact_length / (velocity+sound_speed));
+                  cellwise_max_v_plus_a = std::max (cellwise_max_v_plus_a,
+                                                    EulerEquations<dim>::template compute_sound_speed (solution_values[q]) +
+                                                    EulerEquations<dim>::template compute_velocity_magnitude (solution_values[q]));
                 }
+              const double cellwise_min_time_step = CFL_number *
+              (cell_charact_length / cellwise_max_v_plus_a);
+
+              local_time_step_size[cell->active_cell_index()] = cellwise_min_time_step;
+              min_time_step = std::min (min_time_step, cellwise_min_time_step);
             }
-        time_step = Utilities::MPI::min (min_time_step, mpi_communicator) * CFL_number;
+        time_step = Utilities::MPI::min (min_time_step, mpi_communicator);
       }
   }
 
