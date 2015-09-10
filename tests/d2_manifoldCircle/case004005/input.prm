@@ -1,0 +1,172 @@
+# Listing of Parameters
+# ---------------------
+
+subsection FE Parameters
+  set mapping type            = MappingC1
+
+  # Element degree
+  set fe degree               = 1
+
+  # Mapping degree
+  set mapping degree          = -1
+
+  # Cell quadrature degree
+  set quadrature degree       = -1
+
+  # Face quadrature degree
+  set face quadrature degree  = -1
+
+  # Quadrature degree for error evaluation
+  set error quadrature degree = -1
+end
+
+
+subsection physical parameters
+  # Free stream Mach number
+  set Mach                  = 0.1
+
+  # Free stream Reynolds number
+  set Reynolds              = 10000
+
+  # Angle of attack, in degree
+  set angle of attack       = 0.0
+
+  # Angle of side slip, in degree
+  set angle of side slip    = 0.0
+
+  # Gas heat capacity ratio
+  set gas gamma             = 1.4
+
+  # Coordinate x of moment center
+  set moment center x       = 0.0
+
+  # Coordinate y of moment center
+  set moment center y       = 0.0
+
+  # Coordinate z of moment center
+  set moment center z       = 0.0
+
+  # Reference area
+  set reference area        = 1.0
+
+  # Reference chord length
+  set reference chord       = 1.0
+
+  # Reference span
+  set reference span        = 1.0
+
+  # Reference temperature for Sutherland's law, in Kelvin
+  set reference temperature = 273.15
+
+  # Sutherland constant, in Kelvin
+  set Sutherland constant   = 110.4
+end
+
+set MMS = 0
+set ManifoldCircle = 1
+
+# The input grid 
+set mesh = circle_half.msh #circle.msh circle_sym.msh
+set mesh format = gmsh
+set scale mesh = 1.0
+set global refinement = 1
+
+# Stabilization parameter
+set diffusion type  =  const # cell size | const | entropy
+set diffusion power = 2.0
+set diffusion coefficient = 0.0001
+
+# DOF Renumbering
+set renumber dofs = RCM # RCM_WithStartPoint # RCM # None
+set output sparsity pattern = false
+
+# --------------------------------------------------
+# Boundary conditions
+# We may specify boundary conditions for up to MAX_BD boundaries.
+# Your .inp file should have these boundaries designated.
+subsection boundary_1
+  set type = FarField # FarField AllPrimitiveValues
+  set w_0 value = 0.1
+  set w_1 value = 0.00
+  set w_2 value = 1.0
+  set w_3 value = 1.0/1.4
+end
+
+subsection boundary_2
+  set type = SlipWall
+  set integrate force = true
+end
+
+
+# --------------------------------------------------
+# Initial Conditions
+# We set the initial conditions of the conservative variables.  These lines
+# are passed to the expression parsing function.  You should use x,y,z for
+# the coordinate variables.
+
+subsection initial condition
+  set init method = FullVelocityPotential
+  set w_0 value = 0.1
+  set w_1 value = 0.00
+  set w_2 value = 1.0
+  set w_3 value = 1.0/1.4
+end
+
+# --------------------------------------------------
+# Time stepping control
+subsection time stepping
+  set rigid reference time step     = false
+  set CFL number                    = 50
+  set CFL number max                = 1.0e100
+  set iter in stage1                = 3
+  set time march tolerance          = -10
+  set final time                    = 100 # simulation end time
+  set reference time step           = -0.2 # simulation time step
+  set local time step               = true
+  set solution extrapolation length = 0.0
+  set theta scheme value            = 1.0
+  set max Newton iter               = 10000
+  set nonlinear tolerance           = 10
+end
+
+subsection linear solver
+  set output         = quiet  
+  set method         = direct #gmres #direct
+  set residual       = 1.0e-3
+
+  set RCM reorder    = false
+  set ilut fill      = 2.0
+  set ilut drop tolerance = 1e-6
+  set ilut absolute tolerance = 1e-6
+  set ilut relative tolerance = 1.0
+end
+
+# --------------------------------------------------
+# Output frequency and kind
+subsection output
+  set step           = 0.0
+  set schlieren plot = true
+end
+
+# --------------------------------------------------
+# Refinement control
+subsection refinement
+  set refinement = true # none only other option
+  set refinement indicator = Kelly # Gradient # Kelly
+  set max cells        = 2000
+  set component mask   = 8
+  set refine fraction  = 0.1
+  set coarsen fraction = 0.2
+  set shock value = 1.5
+  set shock levels = 1 # how many levels of refinement to allow
+end
+
+# --------------------------------------------------
+# Flux parameters
+subsection flux
+ set flux type  = Roe # Roe LaxFriedrichs
+ set tolerance to switch flux = -3
+ set flux type switch to = Roe
+ set stab = constant #constant or mesh
+ set stab value = 1
+end
