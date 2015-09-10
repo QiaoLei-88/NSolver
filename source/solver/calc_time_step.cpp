@@ -37,14 +37,26 @@ namespace NSFEMSolver
             {
               fe_v.reinit (cell);
               fe_v.get_function_values (current_solution, solution_values);
-              const double cell_size = fe_v.get_cell()->minimum_vertex_distance();
+
+              const double cell_volumn = cell->measure();
+              double face_area = 0.0;
+              for (unsigned int face_no=0;
+                   face_no < GeometryInfo<dim>::faces_per_cell;
+                   ++face_no)
+                {
+                  face_area += cell->face (face_no)->measure();
+                }
+              const double cell_charact_length
+                = static_cast<double> (GeometryInfo<dim>::faces_per_cell)
+                  * cell_volumn/face_area;
+
               for (unsigned int q=0; q<n_q_points; ++q)
                 {
                   const double sound_speed
                     = EulerEquations<dim>::template compute_sound_speed (solution_values[q]);
                   const double velocity
                   = EulerEquations<dim>::template compute_velocity_magnitude (solution_values[q]);
-                  min_time_step = std::min (min_time_step, cell_size / velocity+sound_speed);
+                  min_time_step = std::min (min_time_step, cell_charact_length / velocity+sound_speed);
                 }
             }
         time_step = Utilities::MPI::min (min_time_step, mpi_communicator) * CFL_number;
