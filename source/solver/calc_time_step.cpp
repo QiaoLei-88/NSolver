@@ -20,10 +20,10 @@ namespace NSFEMSolver
   {
     if (parameters->rigid_reference_time_step)
       {
-        time_step = parameters->reference_time_step * CFL_number;
+        global_time_step_size = parameters->reference_time_step * CFL_number;
         std::fill (local_time_step_size.begin(),
                    local_time_step_size.end(),
-                   time_step);
+                   global_time_step_size);
       }
     else
       {
@@ -66,7 +66,7 @@ namespace NSFEMSolver
               local_time_step_size[cell->active_cell_index()] = cellwise_min_time_step;
               min_time_step = std::min (min_time_step, cellwise_min_time_step);
             }
-        time_step = Utilities::MPI::min (min_time_step, mpi_communicator);
+        global_time_step_size = Utilities::MPI::min (min_time_step, mpi_communicator);
       }
   }
 

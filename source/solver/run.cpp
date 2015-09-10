@@ -150,7 +150,7 @@ namespace NSFEMSolver
 
     double time = 0;
     double next_output = time + parameters->output_step;
-    double old_time_step_size = time_step;
+    double old_time_step_size = global_time_step_size;
 
     predictor = old_solution;
 
@@ -297,7 +297,7 @@ namespace NSFEMSolver
                 std::printf ("   %-13.6e    %-13.6e  %04d        %-5.2e            %7.4g          %7.4g          %7.4g\n",
                              res_norm,newton_update_norm, convergence.first, convergence.second,
                              linear_search_length[index_linear_search_length],
-                             time_step, CFL_number);
+                             global_time_step_size, CFL_number);
               }
             linear_solver_diverged = std::isnan (convergence.second);
 
@@ -316,7 +316,7 @@ namespace NSFEMSolver
                 << std::setw (14) << convergence.first << ' '
                 << std::setw (13) << convergence.second << ' '
                 << std::setw (18) << linear_search_length[index_linear_search_length] << ' '
-                << std::setw (15) << time_step << ' '
+                << std::setw (15) << global_time_step_size << ' '
                 << std::setw (13) << CFL_number << ' '
                 << std::setw (19) << newton_update_norm
                 << '\n';
@@ -391,7 +391,7 @@ namespace NSFEMSolver
                 << std::setw (14) << convergence.first << ' '
                 << std::setw (13) << convergence.second << ' '
                 << std::setw (18) << linear_search_length[index_linear_search_length] << ' '
-                << std::setw (15) << time_step << ' '
+                << std::setw (15) << global_time_step_size << ' '
                 << std::setw (13) << CFL_number << ' ';
 
             // We only get to this point if the Newton iteration has converged, so
@@ -411,7 +411,7 @@ namespace NSFEMSolver
             ++converged_newton_iters;
             if (!parameters->is_steady)
               {
-                time += time_step;
+                time += global_time_step_size;
               }
             ++n_time_step;
             terminate_time_stepping = terminate_time_stepping || time >= parameters->final_time;
@@ -595,7 +595,7 @@ namespace NSFEMSolver
                   }
               }
 
-            old_time_step_size = time_step;
+            old_time_step_size = global_time_step_size;
             check_negative_density_pressure();
             calc_time_step();
             // Uncomment the following line if you want reset the linear_search_length immediately after a converged Newton iter.
@@ -624,7 +624,7 @@ namespace NSFEMSolver
                              ExcMessage ("No convergence in nonlinear solver after all small time step and linear search length tried out."));
 
                 pcout << "  Recompute with different linear search length or time step...\n\n";
-                time_step *= 0.5;
+                global_time_step_size *= 0.5;
                 CFL_number_increased = false;
                 index_linear_search_length = 0;
               }
@@ -639,7 +639,7 @@ namespace NSFEMSolver
           {
             // Only extrapolate predictor in unsteady simulation
             double const predict_ratio = parameters->solution_extrapolation_length *
-                                         time_step / old_time_step_size;
+                                         global_time_step_size / old_time_step_size;
             tmp_vector.reinit (predictor);
             tmp_vector  = old_old_solution;
             predictor.sadd (1.0+predict_ratio,

@@ -186,7 +186,7 @@ namespace NSFEMSolver
         alpha = parameters->stabilization_value;
         break;
       case Parameters::Flux::mesh_dependent:
-        alpha = face_diameter/ (2.0*time_step);
+        alpha = face_diameter/ (2.0*global_time_step_size);
         break;
       default:
         Assert (false, ExcNotImplemented());

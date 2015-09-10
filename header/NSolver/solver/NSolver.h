@@ -249,7 +249,7 @@ namespace NSFEMSolver
     double mms_error_linfty;
 
     // Runtime parameters, not specified in input file
-    double time_step;
+    double global_time_step_size;
     double CFL_number;
     int n_sparsity_pattern_out;
     // iteration counter

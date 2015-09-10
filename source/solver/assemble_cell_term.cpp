@@ -277,7 +277,7 @@ namespace NSFEMSolver
             EulerEquations<dim>::compute_conservative_vector (W_old[point], w_conservative_old);
 
             // TODO: accumulate R_i first and the multiply with shape_value_component * JxW together.
-            R_i += 1.0 / time_step *
+            R_i += 1.0 / global_time_step_size *
                    (w_conservative[component_i] - w_conservative_old[component_i]) *
                    fe_v.shape_value_component (i, point, component_i) *
                    fe_v.JxW (point);
