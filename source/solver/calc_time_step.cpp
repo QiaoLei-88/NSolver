@@ -27,7 +27,7 @@ namespace NSFEMSolver
         FEValues<dim> fe_v (*mapping_ptr, fe, quadrature, update_values);
         const unsigned int   n_q_points = fe_v.n_quadrature_points;
         std::vector<Vector<double> > solution_values (n_q_points,
-                                                      Vector<double> (dim+2));
+                                                      Vector<double> (EquationComponents<dim>::n_components));
         double min_time_step = parameters->reference_time_step;
         typename DoFHandler<dim>::active_cell_iterator
         cell = dof_handler.begin_active(),
