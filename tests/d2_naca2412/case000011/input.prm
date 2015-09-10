@@ -1,0 +1,104 @@
+# Listing of Parameters
+# ---------------------
+
+subsection physical parameters
+  # Free stream Mach number
+  set Mach                  = 0.3
+
+  # Coordinate x of moment center
+  set moment center x       = 0.25
+end
+
+# The input grid 
+set mesh = 2412.msh
+set mesh format = gmsh
+set scale mesh = 0.001
+
+# Stabilization parameter
+set diffusion type  = cell size
+set diffusion power = 2.0
+set diffusion coefficient = 0.0008
+
+# --------------------------------------------------
+# Boundary conditions
+# We may specify boundary conditions for up to MAX_BD boundaries.
+# Your .inp file should have these boundaries designated.
+
+subsection boundary_1
+  set integrate force = true
+  set type = SlipWall
+end
+
+subsection boundary_2
+  set integrate force = false
+  set type = FarField
+end
+
+#subsection boundary_3
+#  set no penetration = true # reflective
+#  set w_3 = pressure
+#  set w_3 value = 1.0
+#end
+
+#subsection boundary_4
+#  set no penetration = true #reflective
+#end
+
+# --------------------------------------------------
+# Initial Conditions
+# We set the initial conditions of the conservative variables.  These lines
+# are passed to the expression parsing function.  You should use x,y,z for
+# the coordinate variables.
+
+subsection initial condition
+  set w_0 value = 0.30
+  set w_1 value = 0.00
+  set w_2 value = 1.0  #10*(x<-0.7)*(y> 0.3)*(y< 0.45) + (1-(x<-0.7)*(y> 0.3)*(y< 0.45))*1.0
+  set w_3 value = 1.0/1.4 #(1.5-(1.0*1.0*y))/0.4
+end
+
+# --------------------------------------------------
+# Time stepping control
+subsection time stepping
+  set rigid reference time step     = true
+  set CFL number                    = 1.0
+  set minimum step increasing ratio stage2 = 1.0
+  set final time                    = 100 # simulation end time
+  set reference time step           = -0.02 # simulation time step
+  set CFL number max                = 1.0e100
+  set theta scheme value            = 1.0
+  set solution extrapolation length = 0.0
+  set nonlinear tolerance           = 10
+end
+
+subsection linear solver
+  set output         = quiet  
+  set method         = direct
+  set ilut fill      = 1.5
+  set ilut drop tolerance = 1e-7
+  set ilut absolute tolerance = 1e-7
+  set ilut relative tolerance = 1.0
+end
+
+# --------------------------------------------------
+# Output frequency and kind
+subsection output
+  set step           = 0.0
+  set schlieren plot = true
+end
+
+# --------------------------------------------------
+# Refinement control
+subsection refinement
+  set refinement = false # none only other option
+  set shock value = 1.5
+  set shock levels = 1 # how many levels of refinement to allow
+end
+
+# --------------------------------------------------
+# Flux parameters
+subsection flux
+ set flux type = Roe
+ set stab = mesh #constant or mesh
+ set stab value = 1.0
+end
