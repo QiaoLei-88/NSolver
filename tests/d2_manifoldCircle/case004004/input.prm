@@ -116,7 +116,7 @@ end
 # Time stepping control
 subsection time stepping
   set rigid reference time step     = false
-  set CFL number                    = 1.0
+  set CFL number                    = 50
   set CFL number max                = 1.0e100
   set iter in stage1                = 3
   set time march tolerance          = -10
