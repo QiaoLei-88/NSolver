@@ -21,9 +21,9 @@ namespace NSFEMSolver
         prm.declare_entry ("final time", "10.0",
                            Patterns::Double (0),
                            "simulation end time");
-        prm.declare_entry ("max Newton iter", "10000",
+        prm.declare_entry ("max Newton iter per time step", "10",
                            Patterns::Integer (0),
-                           "maximum number of Newton iterations");
+                           "maximum number of Newton iterations per time step");
         prm.declare_entry ("time march tolerance", "-10.0",
                            Patterns::Double(),
                            "Terminate time marching when log10 of error L2 norm is less than this value");
@@ -101,7 +101,7 @@ namespace NSFEMSolver
       prm.enter_subsection ("time stepping");
       {
         final_time = prm.get_double ("final time");
-        max_Newton_iter = prm.get_integer ("max Newton iter");
+        max_Newton_iter = prm.get_integer ("max Newton iter per time step");
         time_march_tolerance = prm.get_double ("time march tolerance");
         nonlinear_tolerance = prm.get_double ("nonlinear tolerance");
 

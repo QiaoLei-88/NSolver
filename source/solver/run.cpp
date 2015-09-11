@@ -238,7 +238,7 @@ namespace NSFEMSolver
         nonlin_iter = 0;
         current_solution = predictor;
         bool linear_solver_diverged (true);
-        unsigned int const nonlin_iter_threshold (10);
+        unsigned int const nonlin_iter_threshold (parameters->max_Newton_iter);
 
         double res_norm;
         double newton_update_norm;
@@ -417,7 +417,7 @@ namespace NSFEMSolver
             terminate_time_stepping = terminate_time_stepping || time >= parameters->final_time;
             terminate_time_stepping = terminate_time_stepping ||
                                       (parameters->is_steady &&
-                                       n_total_iter >= parameters -> max_Newton_iter);
+                                       n_time_step > parameters->final_time);
 
             if (parameters->do_refine == true)
               {
