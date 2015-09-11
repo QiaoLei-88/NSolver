@@ -129,7 +129,7 @@ end
 
 subsection linear solver
   set output         = quiet  
-  set Preconditioner = MDFILU
+  set Preconditioner = AZ_DD
   set ILU level      = 1
   set method         = gmres
   set residual       = 1.0e-3
