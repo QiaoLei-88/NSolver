@@ -85,7 +85,7 @@ set output sparsity pattern = false
 # We may specify boundary conditions for up to MAX_BD boundaries.
 # Your .inp file should have these boundaries designated.
 subsection boundary_1
-  set type = AllPrimitiveValues # FarField AllPrimitiveValues
+  set type = FarField # FarField AllPrimitiveValues
   set w_0 value = 0.1
   set w_1 value = 0.00
   set w_2 value = 1.0
