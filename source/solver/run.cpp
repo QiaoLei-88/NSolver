@@ -443,7 +443,7 @@ namespace NSFEMSolver
 
             if (parameters-> is_steady)
               {
-                if (n_total_iter <= parameters-> n_iter_stage1)
+                if (n_time_step <= parameters-> n_iter_stage1)
                   {
                     CFL_number *= parameters->step_increasing_ratio_stage1;
                   }
