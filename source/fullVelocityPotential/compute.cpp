@@ -53,6 +53,8 @@ namespace velocityPotential
         solve (final_residual);
         constraints.distribute (newton_update);
         locally_owned_solution += newton_update;
+        locally_relevant_solution = locally_owned_solution;
+        output_results();
         apply_kutta_condition();
         locally_relevant_solution = locally_owned_solution;
         linear_solver_diverged = std::isnan (final_residual);
