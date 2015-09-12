@@ -70,9 +70,11 @@ namespace velocityPotential
 
                       // Collect information for neighboring DoFs
                       const unsigned int previous = ((q_point+n_q_points) - 1)%n_q_points;
-                      neighboring_vertex_info[previous] = fe_values.quadrature_point (previous);
+                      neighboring_vertex_info[local_dof_indices[previous]]
+                        = fe_values.quadrature_point (previous);
                       const unsigned int next = (q_point + 1)%n_q_points;
-                      neighboring_vertex_info[next] = fe_values.quadrature_point (next);
+                      neighboring_vertex_info[local_dof_indices[next]]
+                        = fe_values.quadrature_point (next);
                     }
                 }
             }
