@@ -86,6 +86,7 @@ namespace velocityPotential
   private:
     void setup_system();
     void assemble_system();
+    void apply_kutta_condition();
     void solve (double &final_residual);
 
     MPI_Comm                                  mpi_communicator;
