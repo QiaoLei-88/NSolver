@@ -35,9 +35,13 @@ namespace velocityPotential
     // Since we are only interesting in gradient but not value of velocity
     // potential, we can set the constrained DoF to arbitrary value.
     // Here we use the default value value zero.
-    if (locally_owned_dofs.is_element (0))
+    // Because we want to enforce Kutta condition on trailing edge,
+    // we have to constrain the DoF corresponding to trailing edge vertex.
+    types::global_dof_index TE_dof_index = 0;
+    apply_kutta_condition (TE_dof_index);
+    if (locally_owned_dofs.is_element (TE_dof_index))
       {
-        constraints.add_line (0);
+        constraints.add_line (TE_dof_index);
       }
     constraints.close();
 

@@ -7,7 +7,7 @@
 namespace velocityPotential
 {
   template <int dim>
-  void FullVelocityPotential<dim>::apply_kutta_condition()
+  void FullVelocityPotential<dim>::apply_kutta_condition (types::global_dof_index &TE_dof_index)
   {
     // only works in 2D
     if (dim != 2)
@@ -68,6 +68,7 @@ namespace velocityPotential
                     {
                       velocity_on_TE.push_back (solution_gradients[q_point]);
                       value_on_TE = solution_values[q_point];
+                      TE_dof_index = local_dof_indices[q_point];
                       std::cerr << "TE vertex local index = " << q_point << std::endl;
                       // Collect information for neighboring DoFs
                       const unsigned int previous = (q_point + (((q_point&0x01)<<1)|0x01))%n_q_points;
