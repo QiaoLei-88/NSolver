@@ -27,6 +27,7 @@ namespace velocityPotential
     double res_norm;
 
     pcout << std::endl;
+    output_results();
     do // Newton iteration
       {
         system_matrix = 0;
@@ -56,6 +57,7 @@ namespace velocityPotential
         locally_relevant_solution = locally_owned_solution;
         linear_solver_diverged = std::isnan (final_residual);
         ++nonlin_iter;
+        output_results();
       }
     while (nonlin_iter < nonlin_iter_threshold
            && (!linear_solver_diverged));
