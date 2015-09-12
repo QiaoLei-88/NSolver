@@ -10,6 +10,9 @@ namespace velocityPotential
   template <int dim>
   void FullVelocityPotential<dim>::output_results() const
   {
+    static unsigned int output_file_number = 0;
+    const unsigned int myid = triangulation->locally_owned_subdomain();
+
     FullVelocityPotential<dim>::Postprocessor postprocessor (Mach_infty_square, gas_gamma);;
     DataOut<dim> data_out;
     data_out.attach_dof_handler (dof_handler);
@@ -23,10 +26,13 @@ namespace velocityPotential
 
     data_out.build_patches();
 
-    const std::string filename = ("fullVelocityPotentialSolution." +
-                                  Utilities::int_to_string
-                                  (triangulation->locally_owned_subdomain(), 4));
-    std::ofstream output ((filename + ".vtu").c_str());
+
+    const std::string output_tag = "fullVelocityPotentialSolution-" +
+                                   Utilities::int_to_string (output_file_number, 4);
+
+    const std::string slot_itag = ".slot-" + Utilities::int_to_string (myid, 4);
+
+    std::ofstream output ((output_tag + slot_itag + ".vtu").c_str());
     data_out.write_vtu (output);
 
     if (Utilities::MPI::this_mpi_process (mpi_communicator) == 0)
@@ -35,13 +41,16 @@ namespace velocityPotential
         for (unsigned int i=0;
              i<Utilities::MPI::n_mpi_processes (mpi_communicator);
              ++i)
-          filenames.push_back ("fullVelocityPotentialSolution." +
-                               Utilities::int_to_string (i, 4) +
-                               ".vtu");
-
-        std::ofstream master_output ("fullVelocityPotentialSolution.pvtu");
+          {
+            filenames.push_back (output_tag +
+                                 ".slot-" +
+                                 Utilities::int_to_string (i, 4) +
+                                 ".vtu");
+          }
+        std::ofstream master_output ((output_tag + ".pvtu").c_str());
         data_out.write_pvtu_record (master_output, filenames);
       }
+    ++output_file_number;
   }
 
 #include "fullVelocityPotential.inst"
