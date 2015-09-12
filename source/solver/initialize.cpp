@@ -94,6 +94,7 @@ namespace NSFEMSolver
         break;
       }
       }
+    locally_owned_solution.compress (VectorOperation::insert);
 
     // Restrict strong boundary conditions
     {

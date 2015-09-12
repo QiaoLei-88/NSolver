@@ -92,6 +92,7 @@ namespace velocityPotential
               }
           }
       }
+    NS_solution.compress (VectorOperation::insert);
   }
 
 #include "linearVelocityPotential.inst"
