@@ -135,6 +135,7 @@ namespace NSFEMSolver
     initialize();
     if (parameters->do_refine)
       {
+        compute_refinement_indicators();
         refine_grid();
         initialize();
       }
