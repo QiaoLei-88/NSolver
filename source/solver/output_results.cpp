@@ -88,11 +88,9 @@ namespace NSFEMSolver
 
     data_out.build_patches();
 
-    static unsigned int output_file_number = 0;
 
     const std::string output_tag = "solution-" +
-                                   Utilities::int_to_string (output_file_number, 4);
-
+                                   Utilities::int_to_string (field_output_counter, 4);
     const std::string slot_itag = ".slot-" + Utilities::int_to_string (myid, 4);
 
     std::ofstream output ((output_tag + slot_itag + ".vtu").c_str());
@@ -114,7 +112,7 @@ namespace NSFEMSolver
         data_out.write_pvtu_record (master_output, filenames);
       }
 
-    ++output_file_number;
+    ++field_output_counter;
   }
 
 #include "NSolver.inst"

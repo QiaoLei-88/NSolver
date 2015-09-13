@@ -252,6 +252,7 @@ namespace NSFEMSolver
     double global_time_step_size;
     double CFL_number;
     int n_sparsity_pattern_out;
+    mutable unsigned int field_output_counter;
     // iteration counter
     unsigned int n_time_step;
     unsigned int n_total_iter;

@@ -75,7 +75,8 @@ namespace NSFEMSolver
                      TimerOutput::summary,
                      TimerOutput::cpu_and_wall_times),
     CFL_number (para_ptr_in->CFL_number),
-    n_sparsity_pattern_out (-1)
+    n_sparsity_pattern_out (-1),
+    field_output_counter (0)
   {
     Assert (parameters, ExcMessage ("Null pointer encountered!"));
 
