@@ -91,6 +91,7 @@ namespace NSFEMSolver
                                 :
                                 AZ_all));
         solver.SetAztecOption (AZ_solver, AZ_gmres);
+        solver.SetAztecOption (AZ_kspace, parameters->AZ_Krylov_space);
         solver.SetRHS (&b);
         solver.SetLHS (&x);
 

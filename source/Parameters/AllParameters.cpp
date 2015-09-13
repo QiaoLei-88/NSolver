@@ -43,6 +43,9 @@ namespace NSFEMSolver
         prm.declare_entry ("RCM reorder", "false",
                            Patterns::Bool(),
                            "Do Reverse Cuthill–McKee reordering.");
+        prm.declare_entry ("AZ_kspace", "150",
+                           Patterns::Integer (0),
+                           "Size of Krylov space in GMRES solver");
         prm.declare_entry ("ilut fill", "2",
                            Patterns::Double(),
                            "Ilut preconditioner fill");
@@ -109,6 +112,7 @@ namespace NSFEMSolver
 
         // Do not relay on C++ standard to determine value of boolean
         AZ_RCM_reorder  = (prm.get_bool ("RCM reorder")?1:0);
+        AZ_Krylov_space = prm.get_integer ("AZ_kspace");
         ilut_fill       = prm.get_double ("ilut fill");
         ilut_atol       = prm.get_double ("ilut absolute tolerance");
         ilut_rtol       = prm.get_double ("ilut relative tolerance");
