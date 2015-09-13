@@ -83,12 +83,8 @@ namespace NSFEMSolver
     }
 
     Vector<float> subdomain (triangulation.n_active_cells());
-    for (unsigned int i=0; i<subdomain.size(); ++i)
-      {
-        subdomain (i) = triangulation.locally_owned_subdomain();
-      }
+    std::fill (subdomain.begin(), subdomain.begin(), myid);
     data_out.add_data_vector (subdomain, "subdomain");
-
 
     data_out.build_patches();
 
