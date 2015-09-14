@@ -16,17 +16,36 @@ namespace NSFEMSolver
     chord_length (chord_length_in)
   {}
 
-  virtual
   Point<2>
   get_new_point_on_line (const typename Triangulation<2,2>::line_iterator &line) const
   {
     const Point<2> candidate = (line->vertex (0) + line->vertex (1)) / 2.0;
-    const double r = solve_parameter (candidate);
+    const double x = solve_parameter (candidate);
+    Fad_db x_ad = x;
+    x_ad.diff (0,1);
+
     if (candidate[1] >= 0.0)
       {
-        const double x = x_upper
+        double x_foil = x_upper (x, std::atan (camber (x_ad).fastAccessDx (0)));
+        double y_foil = y_upper (x, std::atan (camber (x_ad).fastAccessDx (0)));
+        return (Point<2> (x_foil, y_foil));
+      }
+    else
+      {
+        double x_foil = x_lower (x, std::atan (camber (x_ad).fastAccessDx (0)));
+        double y_foil = y_lower (x, std::atan (camber (x_ad).fastAccessDx (0)));
+        return (Point<2> (x_foil, y_foil));
       }
   }
+
+
+  Tensor<1,2>
+  normal_vector (const typename Triangulation<2,2>::face_iterator &face,
+                 const Point<2> &p) const
+  {
+
+  }
+
   double BndNaca4Digit::solve_parameter (const Point<2> &candidate) const
   {
     const double x = candidate[0]/chord_length;
