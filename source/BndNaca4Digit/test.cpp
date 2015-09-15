@@ -52,10 +52,67 @@ namespace NSFEMSolver
 
       const double solved_x = solve_parameter (Point<2> (x_foil, y_foil));
 
-      x_ad = solved_x;
+      Fad_db sx_ad = solved_x;
+      sx_ad.diff (0,1);
+      const double solved_fx = x_lower<double> (solved_x, std::atan (camber (sx_ad).fastAccessDx (0)));
+      const double solved_fy = y_lower<double> (solved_x, std::atan (camber (sx_ad).fastAccessDx (0)));
+      solve_out << x << "  " << solved_x << "  " << solved_x - x << "  "
+                << x_foil << "  " << solved_fx << "  " << solved_fx - x_foil << "  "
+                << y_foil << "  " << solved_fy << "  " << solved_fy - y_foil << "  "
+                << std::endl;
+    }
+    {
+      const double x = 1.0 - std::cos (88.0/200.0 * Pi);
+      Fad_db x_ad = x;
       x_ad.diff (0,1);
-      const double solved_fx = x_lower<double> (solved_x, std::atan (camber (x_ad).fastAccessDx (0)));
-      const double solved_fy = y_lower<double> (solved_x, std::atan (camber (x_ad).fastAccessDx (0)));
+
+      const double x_foil = x_lower<double> (x, std::atan (camber (x_ad).fastAccessDx (0)));
+      const double y_foil = y_lower<double> (x, std::atan (camber (x_ad).fastAccessDx (0)));
+
+      const double solved_x = solve_parameter (Point<2> (x_foil, y_foil));
+
+      Fad_db sx_ad = solved_x;
+      sx_ad.diff (0,1);
+      const double solved_fx = x_lower<double> (solved_x, std::atan (camber (sx_ad).fastAccessDx (0)));
+      const double solved_fy = y_lower<double> (solved_x, std::atan (camber (sx_ad).fastAccessDx (0)));
+      solve_out << x << "  " << solved_x << "  " << solved_x - x << "  "
+                << x_foil << "  " << solved_fx << "  " << solved_fx - x_foil << "  "
+                << y_foil << "  " << solved_fy << "  " << solved_fy - y_foil << "  "
+                << std::endl;
+    }
+    {
+      const double x = 1.0 - std::cos (2.0/200.0 * Pi);
+      Fad_db x_ad = x;
+      x_ad.diff (0,1);
+
+      const double x_foil = x_upper<double> (x, std::atan (camber (x_ad).fastAccessDx (0)));
+      const double y_foil = y_upper<double> (x, std::atan (camber (x_ad).fastAccessDx (0)));
+
+      const double solved_x = solve_parameter (Point<2> (x_foil, y_foil));
+
+      Fad_db sx_ad = solved_x;
+      sx_ad.diff (0,1);
+      const double solved_fx = x_upper<double> (solved_x, std::atan (camber (sx_ad).fastAccessDx (0)));
+      const double solved_fy = y_upper<double> (solved_x, std::atan (camber (sx_ad).fastAccessDx (0)));
+      solve_out << x << "  " << solved_x << "  " << solved_x - x << "  "
+                << x_foil << "  " << solved_fx << "  " << solved_fx - x_foil << "  "
+                << y_foil << "  " << solved_fy << "  " << solved_fy - y_foil << "  "
+                << std::endl;
+    }
+    {
+      const double x = 1.0 - std::cos (88.0/200.0 * Pi);
+      Fad_db x_ad = x;
+      x_ad.diff (0,1);
+
+      const double x_foil = x_upper<double> (x, std::atan (camber (x_ad).fastAccessDx (0)));
+      const double y_foil = y_upper<double> (x, std::atan (camber (x_ad).fastAccessDx (0)));
+
+      const double solved_x = solve_parameter (Point<2> (x_foil, y_foil));
+
+      Fad_db sx_ad = solved_x;
+      sx_ad.diff (0,1);
+      const double solved_fx = x_upper<double> (solved_x, std::atan (camber (sx_ad).fastAccessDx (0)));
+      const double solved_fy = y_upper<double> (solved_x, std::atan (camber (sx_ad).fastAccessDx (0)));
       solve_out << x << "  " << solved_x << "  " << solved_x - x << "  "
                 << x_foil << "  " << solved_fx << "  " << solved_fx - x_foil << "  "
                 << y_foil << "  " << solved_fy << "  " << solved_fy - y_foil << "  "
