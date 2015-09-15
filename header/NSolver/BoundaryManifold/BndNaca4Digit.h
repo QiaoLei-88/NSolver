@@ -139,6 +139,10 @@ namespace NSFEMSolver
   {
     Assert (x>=0.0, ExcMessage ("Point not on airfoil camber"));
     Assert (x<=1.0, ExcMessage ("Point not on airfoil camber"));
+    if (position_of_max_camber <= 0.0)
+      {
+        return (Number (0.0));
+      }
     if (x<=position_of_max_camber)
       {
         return (max_camber * x / (position_of_max_camber * position_of_max_camber)
