@@ -175,14 +175,14 @@ namespace NSFEMSolver
   inline
   Number BndNaca4Digit::y_upper (const Number &x, const Number &theta) const
   {
-    return ((camber (x)+ thickness (x)* std::sin (theta)) * chord_length);
+    return ((camber (x)+ thickness (x)* std::cos (theta)) * chord_length);
   }
 
   template<typename Number>
   inline
   Number BndNaca4Digit::y_lower (const Number &x, const Number &theta) const
   {
-    return ((camber (x)- thickness (x)* std::sin (theta)) * chord_length);
+    return ((camber (x)- thickness (x)* std::cos (theta)) * chord_length);
   }
 }
 #endif
