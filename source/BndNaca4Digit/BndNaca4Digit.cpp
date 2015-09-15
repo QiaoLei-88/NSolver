@@ -23,11 +23,13 @@ namespace NSFEMSolver
   Point<2>
   BndNaca4Digit::get_new_point_on_line (const typename Triangulation<2,2>::line_iterator &line) const
   {
+    std::cerr << "\n\n\n";
     const Point<2> candidate = (line->vertex (0) + line->vertex (1)) / 2.0;
     const unsigned int bc_id = line->boundary_id();
     std::cerr << bc_id << ": "
               << line->vertex (0) << "; "
               << line->vertex (1) << std::endl;
+    std::cerr << "candidate : " << candidate << std::endl;
     if (line->boundary_id() == 0)
       {
         return (candidate);
@@ -40,12 +42,14 @@ namespace NSFEMSolver
       {
         double x_foil = x_upper<double> (x, std::atan (camber (x_ad).fastAccessDx (0)));
         double y_foil = y_upper<double> (x, std::atan (camber (x_ad).fastAccessDx (0)));
+        std::cerr << "new_point : " << x_foil << ", " << y_foil << std::endl;
         return (Point<2> (x_foil, y_foil));
       }
     else
       {
         double x_foil = x_lower<double> (x, std::atan (camber (x_ad).fastAccessDx (0)));
         double y_foil = y_lower<double> (x, std::atan (camber (x_ad).fastAccessDx (0)));
+        std::cerr << "new_point : " << x_foil << ", " << y_foil << std::endl;
         return (Point<2> (x_foil, y_foil));
       }
   }
@@ -55,6 +59,9 @@ namespace NSFEMSolver
   BndNaca4Digit::normal_vector (const typename Triangulation<2,2>::face_iterator &face,
                                 const Point<2> &p) const
   {
+    std::cerr << "\n normal_vector : "
+              << p << std::endl;
+
     const double x = solve_parameter (p);
 
     Fad_db x_ad = x;
@@ -67,15 +74,15 @@ namespace NSFEMSolver
       {
         Fad_db x_foil = x_upper<Fad_db> (x_ad, std::atan (camber (x_ad_ad).fastAccessDx (0)));
         Fad_db y_foil = y_upper<Fad_db> (x_ad, std::atan (camber (x_ad_ad).fastAccessDx (0)));
-        return_value[0] =  y_foil.fastAccessDx (0);
-        return_value[1] = -x_foil.fastAccessDx (0);
+        return_value[0] = -y_foil.fastAccessDx (0);
+        return_value[1] =  x_foil.fastAccessDx (0);
       }
     else
       {
         Fad_db x_foil = x_lower<Fad_db> (x_ad, std::atan (camber (x_ad_ad).fastAccessDx (0)));
         Fad_db y_foil = y_lower<Fad_db> (x_ad, std::atan (camber (x_ad_ad).fastAccessDx (0)));
-        return_value[0] = -y_foil.fastAccessDx (0);
-        return_value[1] =  x_foil.fastAccessDx (0);
+        return_value[0] =  y_foil.fastAccessDx (0);
+        return_value[1] = -x_foil.fastAccessDx (0);
       }
     return_value /= return_value.norm();
     return (return_value);
@@ -86,6 +93,9 @@ namespace NSFEMSolver
   BndNaca4Digit::project_to_surface (const typename Triangulation<2,2>::line_iterator &line,
                                      const Point<2> &trial_point) const
   {
+    std::cerr << "\n project_to_surface : "
+              << trial_point << std::endl;
+
     const Point<2> &p1 = line->vertex (0);
     const Point<2> &p2 = line->vertex (1);
 
