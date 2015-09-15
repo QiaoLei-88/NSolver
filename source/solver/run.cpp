@@ -108,6 +108,7 @@ namespace NSFEMSolver
                     }
                 }
           triangulation.set_boundary (1, NACA_foil_boundary);
+          NACA_foil_boundary.test();
         }
 
       if (parameters->n_global_refinement > 0)
