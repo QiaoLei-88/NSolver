@@ -93,6 +93,11 @@ namespace NSFEMSolver
     project_to_surface (const typename Triangulation<2,2>::line_iterator &line,
                         const Point<2> &trial_point) const;
 
+    /**
+     * Test driver for private functions.
+     */
+    void test() const;
+
   private:
     typedef Sacado::Fad::DFad<double> Fad_db;
     typedef Sacado::Fad::DFad<Fad_db> FFad_db;
