@@ -125,13 +125,13 @@ namespace NSFEMSolver
 
             double x_l = 0.0;
             double y_l = 0.0;
-            double x_r = x_try;
+            double x_r = x;
             double y_r = -1.0;
 
             {
               Fad_db x_r_ad = x_r;
               x_r_ad.diff (0,1);
-              y_r = y_upper (x_r, std::atan (camber (x_r_ad).fastAccessDx (0)));
+              y_r = y_upper<double> (x_r, std::atan (camber (x_r_ad).fastAccessDx (0)));
             }
 
             if (y_r == y)
@@ -146,7 +146,7 @@ namespace NSFEMSolver
                 x_r = 2.0 * x_l;
                 Fad_db x_r_ad = x_r;
                 x_r_ad.diff (0,1);
-                y_r = y_upper (x_r, std::atan (camber (x_r_ad).fastAccessDx (0)));
+                y_r = y_upper<double> (x_r, std::atan (camber (x_r_ad).fastAccessDx (0)));
               }
             if (y_r == y)
               {
@@ -155,10 +155,11 @@ namespace NSFEMSolver
 
             while (std::abs (x_r-x_l) >= 1.0e-10)
               {
-                const double x_try = (y-yl)* (x_r-x_l)/ (y_r-yl);
+                const double x_try = (y-y_l)* (x_r-x_l)/ (y_r-y_l);
                 Fad_db x_r_ad = x_try;
                 x_r_ad.diff (0,1);
-                y_try = y_upper (x_try, std::atan (camber (x_r_ad).fastAccessDx (0)));
+                const double y_try =
+                  y_upper<double> (x_try, std::atan (camber (x_r_ad).fastAccessDx (0)));
 
                 // These two if statements also handle (y_try == y)
                 if (y_try >= y)
@@ -178,13 +179,13 @@ namespace NSFEMSolver
                     ExcMessage ("Point not on airfoil (LE Lower)"));
             double x_l = 0.0;
             double y_l = 0.0;
-            double x_r = x_try;
+            double x_r = x;
             double y_r = 1.0;
 
             {
               Fad_db x_r_ad = x_r;
               x_r_ad.diff (0,1);
-              y_r = y_lower (x_r, std::atan (camber (x_r_ad).fastAccessDx (0)));
+              y_r = y_lower<double> (x_r, std::atan (camber (x_r_ad).fastAccessDx (0)));
             }
 
             if (y_r == y)
@@ -199,7 +200,7 @@ namespace NSFEMSolver
                 x_r = 2.0 * x_l;
                 Fad_db x_r_ad = x_r;
                 x_r_ad.diff (0,1);
-                y_r = y_lower (x_r, std::atan (camber (x_r_ad).fastAccessDx (0)));
+                y_r = y_lower<double> (x_r, std::atan (camber (x_r_ad).fastAccessDx (0)));
               }
             if (y_r == y)
               {
@@ -208,10 +209,11 @@ namespace NSFEMSolver
 
             while (std::abs (x_r-x_l) >= 1.0e-10)
               {
-                const double x_try = (y-yl)* (x_r-x_l)/ (y_r-yl);
+                const double x_try = (y-y_l)* (x_r-x_l)/ (y_r-y_l);
                 Fad_db x_r_ad = x_try;
                 x_r_ad.diff (0,1);
-                y_try = y_lower (x_try, std::atan (camber (x_r_ad).fastAccessDx (0)));
+                const double y_try =
+                  y_lower<double> (x_try, std::atan (camber (x_r_ad).fastAccessDx (0)));
 
                 // These two if statements also handle (y_try == y)
                 if (y_try <= y)
@@ -230,7 +232,7 @@ namespace NSFEMSolver
             return (0.0);
           }
       }
-    else
+    else //if (x<0.001)
       {
         // Solve X equation for parameter
         Assert (x<=1.0, ExcMessage ("Point not on airfoil (TE)"));
@@ -245,7 +247,7 @@ namespace NSFEMSolver
                 x_ad.diff (0,1);
                 FFad_db x_ad_ad = x_ad;
                 x_ad_ad.diff (0,1);
-                Fad_db res_ad = x_upper (x_r_ad, std::atan (camber (x_ad_ad).fastAccessDx (0)));
+                Fad_db res_ad = x_upper<Fad_db> (x_ad, std::atan (camber (x_ad_ad).fastAccessDx (0)));
 
                 if (std::abs (res_ad.val()) < 1.0e-10)
                   {
@@ -253,17 +255,13 @@ namespace NSFEMSolver
                   }
                 return_value -= res_ad.fastAccessDx (0);
               };
+            return (return_value);
           }
-        return (return_value);
-      }
-    else if (y < 0.0)
-      {
-        Assert (y>= -max_thickness + max_camber - 0.005,
-                ExcMessage ("Point not on airfoil (TE Lower)"));
-        if (y > 0.0)
+        else if (y < 0.0)
           {
-            Assert (y <= max_thickness + max_camber + 0.005,
-                    ExcMessage ("Point not on airfoil (TE Upper)"));
+            Assert (y>= -max_thickness + max_camber - 0.005,
+                    ExcMessage ("Point not on airfoil (TE Lower)"));
+
             double return_value = x;
             while (true)
               {
@@ -271,7 +269,7 @@ namespace NSFEMSolver
                 x_ad.diff (0,1);
                 FFad_db x_ad_ad = x_ad;
                 x_ad_ad.diff (0,1);
-                Fad_db res_ad = x_lower (x_r_ad, std::atan (camber (x_ad_ad).fastAccessDx (0)));
+                Fad_db res_ad = x_lower<Fad_db> (x_ad, std::atan (camber (x_ad_ad).fastAccessDx (0)));
 
                 if (std::abs (res_ad.val()) < 1.0e-10)
                   {
@@ -279,14 +277,13 @@ namespace NSFEMSolver
                   }
                 return_value -= res_ad.fastAccessDx (0);
               };
+            return (return_value);
           }
-        return (return_value);
-      }
-    else
-      {
-        return (1.0);
-      }
-  }
-}
+        else
+          {
+            return (1.0);
+          }
+      } // if (x<0.001)
+  } // End function BndNaca4Digit::solve_parameter
 
 }
