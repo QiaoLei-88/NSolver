@@ -103,7 +103,7 @@ DEAL_II_ENABLE_EXTRA_DIAGNOSTICS
 #include <NSolver/velocityPotential/fullVelocityPotential.h>
 #include <NSolver/MDFILU/MDFILU.h>
 #include <NSolver/Tools.h>
-
+#include <NSolver/BoundaryManifold/BndNaca4Digit.h>
 
 // Here finally comes the class that actually does something with all the
 // Euler equation and parameter specifics we've defined above. The public
@@ -174,6 +174,7 @@ namespace NSFEMSolver
     // Must appear before Triangulation to make it initialized before triangulation
     // and destroyed after triangulation.
     const HyperBallBoundary<dim> spherical_boundary;
+    const BndNaca4Digit NACA_foil_boundary;
 
     parallel::distributed::Triangulation<dim> triangulation;
 
