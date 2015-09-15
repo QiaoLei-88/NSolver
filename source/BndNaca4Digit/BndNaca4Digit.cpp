@@ -24,6 +24,14 @@ namespace NSFEMSolver
   BndNaca4Digit::get_new_point_on_line (const typename Triangulation<2,2>::line_iterator &line) const
   {
     std::cerr << "\n\n\n";
+    static std::ofstream new_points_out ("new_points_debug.txt");
+    static std::ofstream old_points_out ("old_points_debug.txt");
+    new_points_out << std::scientific;
+    new_points_out.precision (8);
+    old_points_out << std::scientific;
+    old_points_out.precision (8);
+    old_points_out << line->vertex (0)[0] << "\t" << line->vertex (0)[1] << std::endl;
+    old_points_out << line->vertex (1)[0] << "\t" << line->vertex (1)[1] << std::endl;
     const Point<2> candidate = (line->vertex (0) + line->vertex (1)) / 2.0;
     const unsigned int bc_id = line->boundary_id();
     std::cerr << bc_id << ": "
@@ -43,6 +51,7 @@ namespace NSFEMSolver
         double x_foil = x_upper<double> (x, std::atan (camber (x_ad).fastAccessDx (0)));
         double y_foil = y_upper<double> (x, std::atan (camber (x_ad).fastAccessDx (0)));
         std::cerr << "new_point : " << x_foil << ", " << y_foil << std::endl;
+        new_points_out << x_foil << "\t" << y_foil << std::endl;
         return (Point<2> (x_foil, y_foil));
       }
     else
@@ -50,6 +59,7 @@ namespace NSFEMSolver
         double x_foil = x_lower<double> (x, std::atan (camber (x_ad).fastAccessDx (0)));
         double y_foil = y_lower<double> (x, std::atan (camber (x_ad).fastAccessDx (0)));
         std::cerr << "new_point : " << x_foil << ", " << y_foil << std::endl;
+        new_points_out << x_foil << "\t" << y_foil << std::endl;
         return (Point<2> (x_foil, y_foil));
       }
   }
@@ -259,6 +269,7 @@ namespace NSFEMSolver
           }
         else
           {
+            std::cerr << "\n Bypass LE" << std::endl;
             return (0.0);
           }
       }
@@ -315,6 +326,7 @@ namespace NSFEMSolver
           }
         else
           {
+            std::cerr << "\n Bypass TE" << std::endl;
             return (1.0);
           }
       } // if (x<0.001)
