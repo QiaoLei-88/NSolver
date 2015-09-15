@@ -102,12 +102,12 @@ namespace NSFEMSolver
             for (unsigned int f=0; f<GeometryInfo<dim>::faces_per_cell; ++f)
               if (cell->face (f)->at_boundary())
                 {
-                  if (cell->face (f)->boundary_id() == 2)
+                  if (cell->face (f)->boundary_id() == 1)
                     {
-                      cell->face (f)->set_manifold_id (2);
+                      cell->face (f)->set_manifold_id (1);
                     }
                 }
-          triangulation.set_boundary (2, NACA_foil_boundary);
+          triangulation.set_boundary (1, NACA_foil_boundary);
         }
 
       if (parameters->n_global_refinement > 0)
