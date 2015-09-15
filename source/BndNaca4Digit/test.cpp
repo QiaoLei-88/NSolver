@@ -25,8 +25,11 @@ namespace NSFEMSolver
         double x_foil = x_upper<double> (x, std::atan (camber (x_ad).fastAccessDx (0)));
         double y_foil = y_upper<double> (x, std::atan (camber (x_ad).fastAccessDx (0)));
         foil_out  << x_foil << "\t" << y_foil << std::endl;
+
+        const double weight = std::sin (static_cast<double> (i)/100.0 * Pi);
         foil_gmsh << "Point(" << ++point_counter << ") = {"
-                  << x_foil << ", " << y_foil << ", 0.0};\n";
+                  << x_foil << ", " << y_foil << ", 0.0, "
+                  << 0.1* (1.0-weight) + weight << "*mesh_foil_size};\n";
       }
 
     for (int i=0; i<=100; ++i)
@@ -40,8 +43,11 @@ namespace NSFEMSolver
         foil_out  << x_foil << "\t" << y_foil << std::endl;
         camber_out << x  << "\t" << camber (x_ad).val() << std::endl;
         thickness_out << x << "\t" << thickness (x) << std::endl;
+
+        const double weight = std::sin (static_cast<double> (i)/100.0 * Pi);
         foil_gmsh << "Point(" << ++point_counter << ") = {"
-                  << x_foil << ", " << y_foil << ", 0.0};\n";
+                  << x_foil << ", " << y_foil << ", 0.0, "
+                  << 0.1* (1.0-weight) + weight << "*mesh_foil_size};\n";
       }
     foil_gmsh << "\nSpline(1) = { 1";
     for (int i=2; i<=point_counter; ++i)
