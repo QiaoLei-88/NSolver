@@ -336,6 +336,9 @@ namespace NSFEMSolver
       prm.declare_entry ("ManifoldCircle", "0",
                          Patterns::Integer(),
                          "Activate C1Circle test case.");
+      prm.declare_entry ("NACA_foil", "0",
+                         Patterns::Integer(),
+                         "Use NACA 4 digit foil as boundary manifold.");
 
       prm.declare_entry ("mesh", "grid.inp",
                          Patterns::Anything(),
@@ -475,6 +478,7 @@ namespace NSFEMSolver
 
       n_mms = prm.get_integer ("MMS");
       manifold_circle = prm.get_integer ("ManifoldCircle");
+      NACA_foil = prm.get_integer ("NACA_foil");
 
       mesh_filename = prm.get ("mesh");
       time_advance_history_filename = prm.get ("time history");

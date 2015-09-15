@@ -310,6 +310,7 @@ namespace NSFEMSolver
 
       int n_mms;
       int manifold_circle;
+      int NACA_foil;
     };
 
   } /* End of namespace Parameters */
