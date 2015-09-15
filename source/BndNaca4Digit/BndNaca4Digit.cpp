@@ -24,6 +24,14 @@ namespace NSFEMSolver
   BndNaca4Digit::get_new_point_on_line (const typename Triangulation<2,2>::line_iterator &line) const
   {
     const Point<2> candidate = (line->vertex (0) + line->vertex (1)) / 2.0;
+    const unsigned int bc_id = line->boundary_id();
+    std::cerr << bc_id << ": "
+              << line->vertex (0) << "; "
+              << line->vertex (1) << std::endl;
+    if (line->boundary_id() == 0)
+      {
+        return (candidate);
+      }
     const double x = solve_parameter (candidate);
     Fad_db x_ad = x;
     x_ad.diff (0,1);
@@ -253,7 +261,7 @@ namespace NSFEMSolver
                   {
                     break;
                   }
-                return_value -= res_ad.fastAccessDx (0);
+                return_value -= res_ad.val()/res_ad.fastAccessDx (0);
               };
             return (return_value);
           }
@@ -275,7 +283,7 @@ namespace NSFEMSolver
                   {
                     break;
                   }
-                return_value -= res_ad.fastAccessDx (0);
+                return_value -= res_ad.val()/res_ad.fastAccessDx (0);
               };
             return (return_value);
           }

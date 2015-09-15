@@ -161,28 +161,28 @@ namespace NSFEMSolver
   inline
   Number BndNaca4Digit::x_upper (const Number &x, const Number &theta) const
   {
-    return (x- thickness (x)* std::sin (theta));
+    return ((x- thickness (x)* std::sin (theta)) * chord_length);
   }
 
   template<typename Number>
   inline
   Number BndNaca4Digit::x_lower (const Number &x, const Number &theta) const
   {
-    return (x+ thickness (x)* std::sin (theta));
+    return ((x+ thickness (x)* std::sin (theta)) * chord_length);
   }
 
   template<typename Number>
   inline
   Number BndNaca4Digit::y_upper (const Number &x, const Number &theta) const
   {
-    return (camber (x)+ thickness (x)* std::sin (theta));
+    return ((camber (x)+ thickness (x)* std::sin (theta)) * chord_length);
   }
 
   template<typename Number>
   inline
   Number BndNaca4Digit::y_lower (const Number &x, const Number &theta) const
   {
-    return (camber (x)- thickness (x)* std::sin (theta));
+    return ((camber (x)- thickness (x)* std::sin (theta)) * chord_length);
   }
 }
 #endif
