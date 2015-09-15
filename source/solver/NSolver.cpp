@@ -54,6 +54,7 @@ namespace NSFEMSolver
     :
     mpi_communicator (MPI_COMM_WORLD),
     spherical_boundary (Point<dim>()/*=(0,0,...)*/,/*radius=*/0.5),
+    NACA_foil_boundary (para_ptr_in->NACA_foil, 1.0),
     triangulation (mpi_communicator,
                    typename Triangulation<dim>::MeshSmoothing
                    (Triangulation<dim>::smoothing_on_refinement |
