@@ -43,8 +43,32 @@ namespace NSFEMSolver
   normal_vector (const typename Triangulation<2,2>::face_iterator &face,
                  const Point<2> &p) const
   {
+    const double x = solve_parameter (p);
 
+    Fad_db x_ad = x;
+    x_ad.diff (0,1);
+    FFad_db x_ad_ad = x_ad;
+    x_ad_ad.diff (0,1);
+    Tensor<1,2> return_value;
+
+    if (p[1] >= 0.0)
+      {
+        Fad_db x_foil = x_upper (x_ad, std::atan (camber (x_ad_ad).fastAccessDx (0)));
+        Fad_db y_foil = y_upper (x_ad, std::atan (camber (x_ad_ad).fastAccessDx (0)));
+        return_value.[0] =  y_foil.fastAccessDx (0);
+        return_value.[1] = -x_foil.fastAccessDx (0);
+      }
+    else
+      {
+        Fad_db x_foil = x_lower (x_ad, std::atan (camber (x_ad_ad).fastAccessDx (0)));
+        Fad_db y_foil = y_lower (x_ad, std::atan (camber (x_ad_ad).fastAccessDx (0)));
+        return_value.[0] = -y_foil.fastAccessDx (0);
+        return_value.[1] =  x_foil.fastAccessDx (0);
+      }
+    return_value /= return_value.norm();
+    return (return_value);
   }
+
 
   double BndNaca4Digit::solve_parameter (const Point<2> &candidate) const
   {
