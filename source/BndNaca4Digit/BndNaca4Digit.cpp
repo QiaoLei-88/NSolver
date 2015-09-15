@@ -16,10 +16,80 @@ namespace NSFEMSolver
     chord_length (chord_length_in)
   {}
 
+  BndNaca4Digit::~BndNaca4Digit()
+  {}
+
+
   Point<2>
-  get_new_point_on_line (const typename Triangulation<2,2>::line_iterator &line) const
+  BndNaca4Digit::get_new_point_on_line (const typename Triangulation<2,2>::line_iterator &line) const
   {
     const Point<2> candidate = (line->vertex (0) + line->vertex (1)) / 2.0;
+    const double x = solve_parameter (candidate);
+    Fad_db x_ad = x;
+    x_ad.diff (0,1);
+
+    if (candidate[1] >= 0.0)
+      {
+        double x_foil = x_upper<double> (x, std::atan (camber (x_ad).fastAccessDx (0)));
+        double y_foil = y_upper<double> (x, std::atan (camber (x_ad).fastAccessDx (0)));
+        return (Point<2> (x_foil, y_foil));
+      }
+    else
+      {
+        double x_foil = x_lower<double> (x, std::atan (camber (x_ad).fastAccessDx (0)));
+        double y_foil = y_lower<double> (x, std::atan (camber (x_ad).fastAccessDx (0)));
+        return (Point<2> (x_foil, y_foil));
+      }
+  }
+
+
+  Tensor<1,2>
+  BndNaca4Digit::normal_vector (const typename Triangulation<2,2>::face_iterator &face,
+                                const Point<2> &p) const
+  {
+    const double x = solve_parameter (p);
+
+    Fad_db x_ad = x;
+    x_ad.diff (0,1);
+    FFad_db x_ad_ad = x_ad;
+    x_ad_ad.diff (0,1);
+    Tensor<1,2> return_value;
+
+    if (p[1] >= 0.0)
+      {
+        Fad_db x_foil = x_upper<Fad_db> (x_ad, std::atan (camber (x_ad_ad).fastAccessDx (0)));
+        Fad_db y_foil = y_upper<Fad_db> (x_ad, std::atan (camber (x_ad_ad).fastAccessDx (0)));
+        return_value[0] =  y_foil.fastAccessDx (0);
+        return_value[1] = -x_foil.fastAccessDx (0);
+      }
+    else
+      {
+        Fad_db x_foil = x_lower<Fad_db> (x_ad, std::atan (camber (x_ad_ad).fastAccessDx (0)));
+        Fad_db y_foil = y_lower<Fad_db> (x_ad, std::atan (camber (x_ad_ad).fastAccessDx (0)));
+        return_value[0] = -y_foil.fastAccessDx (0);
+        return_value[1] =  x_foil.fastAccessDx (0);
+      }
+    return_value /= return_value.norm();
+    return (return_value);
+  }
+
+
+  Point<2>
+  BndNaca4Digit::project_to_surface (const typename Triangulation<2,2>::line_iterator &line,
+                                     const Point<2> &trial_point) const
+  {
+    const Point<2> &p1 = line->vertex (0);
+    const Point<2> &p2 = line->vertex (1);
+
+    const double s = (trial_point-p1)* (p2-p1) / ((p2-p1)* (p2-p1));
+
+    Assert (s > -0.5,
+            ExcMessage ("Project source point is to far in negative."));
+    Assert (s < 1.5,
+            ExcMessage ("Project source point is to far in positive."));
+
+    const Point<2> candidate = p1 + s* (p2-p1);
+
     const double x = solve_parameter (candidate);
     Fad_db x_ad = x;
     x_ad.diff (0,1);
@@ -39,38 +109,8 @@ namespace NSFEMSolver
   }
 
 
-  Tensor<1,2>
-  normal_vector (const typename Triangulation<2,2>::face_iterator &face,
-                 const Point<2> &p) const
-  {
-    const double x = solve_parameter (p);
-
-    Fad_db x_ad = x;
-    x_ad.diff (0,1);
-    FFad_db x_ad_ad = x_ad;
-    x_ad_ad.diff (0,1);
-    Tensor<1,2> return_value;
-
-    if (p[1] >= 0.0)
-      {
-        Fad_db x_foil = x_upper (x_ad, std::atan (camber (x_ad_ad).fastAccessDx (0)));
-        Fad_db y_foil = y_upper (x_ad, std::atan (camber (x_ad_ad).fastAccessDx (0)));
-        return_value.[0] =  y_foil.fastAccessDx (0);
-        return_value.[1] = -x_foil.fastAccessDx (0);
-      }
-    else
-      {
-        Fad_db x_foil = x_lower (x_ad, std::atan (camber (x_ad_ad).fastAccessDx (0)));
-        Fad_db y_foil = y_lower (x_ad, std::atan (camber (x_ad_ad).fastAccessDx (0)));
-        return_value.[0] = -y_foil.fastAccessDx (0);
-        return_value.[1] =  x_foil.fastAccessDx (0);
-      }
-    return_value /= return_value.norm();
-    return (return_value);
-  }
-
-
-  double BndNaca4Digit::solve_parameter (const Point<2> &candidate) const
+  double
+  BndNaca4Digit::solve_parameter (const Point<2> &candidate) const
   {
     const double x = candidate[0]/chord_length;
     const double y = candidate[1]/chord_length;

@@ -27,7 +27,8 @@ namespace NSFEMSolver
   class BndNaca4Digit: public StraightBoundary<2>
   {
   public:
-    BndNaca4Digit (const unsigned int number);
+    BndNaca4Digit (const unsigned int number,
+                   const double chord_length_in);
     ~BndNaca4Digit();
     /**
      * Let the new point be the arithmetic mean of the two vertices of the line.
@@ -39,17 +40,17 @@ namespace NSFEMSolver
     Point<2>
     get_new_point_on_line (const typename Triangulation<2,2>::line_iterator &line) const;
 
-    /**
-     * Gives <tt>n=points.size()</tt> points that splits the StraightBoundary
-     * line into $n+1$ partitions of equal lengths.
-     *
-     * Refer to the general documentation of this class and the documentation of
-     * the base class.
-     */
-    virtual
-    void
-    get_intermediate_points_on_line (const typename Triangulation<2,2>::line_iterator &line,
-                                     std::vector<Point<2> > &points) const;
+    // /**
+    //  * Gives <tt>n=points.size()</tt> points that splits the StraightBoundary
+    //  * line into $n+1$ partitions of equal lengths.
+    //  *
+    //  * Refer to the general documentation of this class and the documentation of
+    //  * the base class.
+    //  */
+    // virtual
+    // void
+    // get_intermediate_points_on_line (const typename Triangulation<2,2>::line_iterator &line,
+    //                                  std::vector<Point<2> > &points) const;
 
     /**
       * Implementation of the function declared in the base class.
@@ -62,16 +63,16 @@ namespace NSFEMSolver
     normal_vector (const typename Triangulation<2,2>::face_iterator &face,
                    const Point<2> &p) const;
 
-    /**
-     * Compute the normals to the boundary at the vertices of the given face.
-     *
-     * Refer to the general documentation of this class and the documentation of
-     * the base class.
-     */
-    virtual
-    void
-    get_normals_at_vertices (const typename Triangulation<2,2>::face_iterator &face,
-                             typename Boundary<2,2>::FaceVertexNormals &face_vertex_normals) const;
+    // /**
+    //  * Compute the normals to the boundary at the vertices of the given face.
+    //  *
+    //  * Refer to the general documentation of this class and the documentation of
+    //  * the base class.
+    //  */
+    // virtual
+    // void
+    // get_normals_at_vertices (const typename Triangulation<2,2>::face_iterator &face,
+    //                          typename Boundary<2,2>::FaceVertexNormals &face_vertex_normals) const;
 
     /**
      * Given a candidate point and a line segment characterized by the iterator,
@@ -90,7 +91,8 @@ namespace NSFEMSolver
     virtual
     Point<2>
     project_to_surface (const typename Triangulation<2,2>::line_iterator &line,
-                        const Point<2> &candidate) const;
+                        const Point<2> &trial_point) const;
+
   private:
     typedef Sacado::Fad::DFad<double> Fad_db;
     typedef Sacado::Fad::DFad<Fad_db> FFad_db;
@@ -102,16 +104,16 @@ namespace NSFEMSolver
     Number camber (const Number &x) const;
 
     template<typename Number>
-    Number x_upper (const Number &x, const Number theta) const;
+    Number x_upper (const Number &x, const Number &theta) const;
 
     template<typename Number>
-    Number x_lower (const Number &x, const Number theta) const;
+    Number x_lower (const Number &x, const Number &theta) const;
 
     template<typename Number>
-    Number y_upper (const Number &x, const Number theta) const;
+    Number y_upper (const Number &x, const Number &theta) const;
 
     template<typename Number>
-    Number y_lower (const Number &x, const Number theta) const;
+    Number y_lower (const Number &x, const Number &theta) const;
 
     double max_thickness;
     double max_camber;
@@ -153,28 +155,28 @@ namespace NSFEMSolver
 
   template<typename Number>
   inline
-  Number x_upper (const Number &x, const double theta) const
+  Number BndNaca4Digit::x_upper (const Number &x, const Number &theta) const
   {
     return (x- thickness (x)* std::sin (theta));
   }
 
   template<typename Number>
   inline
-  Number x_lower (const Number &x, const double theta) const;
+  Number BndNaca4Digit::x_lower (const Number &x, const Number &theta) const
   {
     return (x+ thickness (x)* std::sin (theta));
   }
 
   template<typename Number>
   inline
-  Number y_upper (const Number &x, const double theta) const;
+  Number BndNaca4Digit::y_upper (const Number &x, const Number &theta) const
   {
     return (camber (x)+ thickness (x)* std::sin (theta));
   }
 
   template<typename Number>
   inline
-  Number y_lower (const Number &x, const double theta) const;
+  Number BndNaca4Digit::y_lower (const Number &x, const Number &theta) const
   {
     return (camber (x)- thickness (x)* std::sin (theta));
   }
