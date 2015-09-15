@@ -14,9 +14,9 @@ namespace NSFEMSolver
     std::ofstream thickness_out ("NACA_thickness.txt");
     std::ofstream foil_out ("NACA_foil.txt");
 
-    for (int i=100; i>=0; --i)
+    for (int i=100; i>0; --i)
       {
-        const double x = 1.0 - static_cast<double> (i)/200.0 * Pi;
+        const double x = 1.0 - std::cos (static_cast<double> (i)/200.0 * Pi);
         Fad_db x_ad = x;
         x_ad.diff (0,1);
         double x_foil = x_upper<double> (x, std::atan (camber (x_ad).fastAccessDx (0)));
@@ -24,9 +24,9 @@ namespace NSFEMSolver
         foil_out  << x_foil << "\t" << y_foil << std::endl;
       }
 
-    for (int i=1; i<=100; ++i)
+    for (int i=0; i<=100; ++i)
       {
-        const double x = static_cast<double> (i)/200.0 * Pi;
+        const double x = 1.0 - std::cos (static_cast<double> (i)/200.0 * Pi);
         Fad_db x_ad = x;
         x_ad.diff (0,1);
 
