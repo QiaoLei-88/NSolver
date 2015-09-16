@@ -162,12 +162,12 @@ namespace NSFEMSolver
                     return_value[1] = 1.0;
                   }
                 norm_setted = true;
+                break;
               }
-            Assert (norm_setted, ExcMessage ("All vertices on face have zero Y"));
           }
+        Assert (norm_setted, ExcMessage ("All vertices on face have zero Y"));
       }
-    return_value /= return_value.norm();
-    return (return_value);
+    return (return_value/return_value.norm());
   }
 
   void
