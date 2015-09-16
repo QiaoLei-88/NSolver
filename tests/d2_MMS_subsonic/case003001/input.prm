@@ -101,8 +101,6 @@ end
 # Refinement control
 subsection refinement
   set refinement = false # none only other option
-  set shock value = 1.5
-  set shock levels = 1 # how many levels of refinement to allow
 end
 
 # --------------------------------------------------
