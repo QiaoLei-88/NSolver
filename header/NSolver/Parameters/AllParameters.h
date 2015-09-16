@@ -113,8 +113,6 @@ namespace NSFEMSolver
       Indicator refinement_indicator;
 
       double shock_val;
-      double max_refine_level;
-
       double refine_fraction;
       double coarsen_fraction;
 
@@ -127,6 +125,17 @@ namespace NSFEMSolver
        * By default, number of cell can increase to four times of initial mesh.
        */
       double max_cells;
+      double max_refine_level;
+      /**
+       * when refinement flag is true, mesh cell with size larger than max_cell_size
+       * will be forced to refine. The relevant cell size is obtained by
+       * TriaAccessor::minimum_vertex_distance()
+       *
+       * Negative input value will disable this limit.
+       * @warning Zero input value will not disable this limit, which will turn
+       * every adaptive refinement into global refinement.
+       */
+      double max_cell_size;
 
       ComponentMask component_mask;
 

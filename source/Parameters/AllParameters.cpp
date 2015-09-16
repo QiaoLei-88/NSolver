@@ -155,6 +155,9 @@ namespace NSFEMSolver
         prm.declare_entry ("max cells", "-4.0",
                            Patterns::Double(),
                            "maximum number (positive value) or maximum number ratio (negative value) of cells");
+        prm.declare_entry ("max cell size", "-1.0",
+                           Patterns::Double(),
+                           "maximum cell size in mesh refinement");
         prm.declare_entry ("component mask", "65535",
                            Patterns::Integer (0),
                            "Equation components want to use in Kelly error estimator");
@@ -195,6 +198,11 @@ namespace NSFEMSolver
         }
         shock_val        = prm.get_double ("shock value");
         max_refine_level = prm.get_double ("max refine level");
+        max_cell_size    = prm.get_double ("max cell size");
+        if (max_cell_size < 0.0)
+          {
+            max_cell_size = std::numeric_limits<double>::max();
+          }
       }
       prm.leave_subsection();
     }
