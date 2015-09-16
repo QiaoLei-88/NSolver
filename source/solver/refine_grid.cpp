@@ -35,7 +35,7 @@ namespace NSFEMSolver
               cell->clear_coarsen_flag();
               cell->clear_refine_flag();
 
-              if ((cell->level() < parameters->shock_levels) &&
+              if ((cell->level() < parameters->max_refine_level) &&
                   (std::fabs (refinement_indicators (cell_no)) > parameters->shock_val))
                 {
                   cell->set_refine_flag();

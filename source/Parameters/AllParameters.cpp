@@ -193,8 +193,8 @@ namespace NSFEMSolver
               component_mask.set (ic, mask_int & (1<<ic));
             }
         }
-        shock_val     = prm.get_double ("shock value");
-        shock_levels  = prm.get_double ("shock levels");
+        shock_val        = prm.get_double ("shock value");
+        max_refine_level = prm.get_double ("shock levels");
       }
       prm.leave_subsection();
     }
