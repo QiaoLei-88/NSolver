@@ -174,28 +174,37 @@ namespace NSFEMSolver
   BndNaca4DigitSymm::get_normals_at_vertices (const typename Triangulation<2,2>::face_iterator &face,
                                               typename Boundary<2,2>::FaceVertexNormals &face_vertex_normals) const
   {
-    // Beware upper_or_lower == 1.0 for lower half of the foil
-    // and upper_or_lower == -1.0 for upper half of the foil.
-    // Because we want the outer normal vector of the flow field
-    // rather than the air foil.
-    // This may be a surprise.
-    double upper_or_lower = 0.0;
-    for (unsigned int v=0; v<GeometryInfo<2>::vertices_per_face; ++v)
-      {
-        if (face->vertex (v)[1] > 0.0)
-          {
-            upper_or_lower = -1.0;
-          }
-        else
-          {
-            upper_or_lower = 1.0;
-          }
-      }
-    Assert (upper_or_lower != 0.0, ExcMessage ("All vertices on face have zero Y"));
-
     for (unsigned int v=0; v<GeometryInfo<2>::vertices_per_face; ++v)
       {
         const Point<2> &p = face->vertex (v);
+        // Beware upper_or_lower == 1.0 for lower half of the foil
+        // and upper_or_lower == -1.0 for upper half of the foil.
+        // Because we want the outer normal vector of the flow field
+        // rather than the air foil.
+        // This may be a surprise.
+        double upper_or_lower = 0.0;
+        if (p[1] > 0.0)
+          {
+            upper_or_lower = -1.0;
+          }
+        else if (p[1] < 0.0)
+          {
+            upper_or_lower = 1.0;
+          }
+        else //if (p[1]  == 0.0)
+          {
+            // Then another vertex must not have zero Y coordinate
+            if (face->vertex (1-v)[1] > 0.0)
+              {
+                upper_or_lower = -1.0;
+              }
+            else if (face->vertex (1-v)[1] < 0.0)
+              {
+                upper_or_lower = 1.0;
+              }
+          }
+        Assert (upper_or_lower != 0.0, ExcMessage ("All vertices on face have zero Y"));
+
         const double x = std::max (p[0], 1e-16);
         Assert (p[0] > -1e-6, ExcMessage ("Point not on foil"));
         Assert (p[0] <  1.0 + 1e-6, ExcMessage ("Point not on foil"));
