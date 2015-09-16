@@ -156,7 +156,7 @@ subsection refinement
   set refine fraction  = 0.1
   set coarsen fraction = 0.2
   set shock value = 1.5
-  set shock levels = 1 # how many levels of refinement to allow
+  set max refine level = 1 # how many levels of refinement to allow
 end
 
 # --------------------------------------------------

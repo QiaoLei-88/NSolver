@@ -149,9 +149,9 @@ namespace NSFEMSolver
         prm.declare_entry ("shock value", "4.0",
                            Patterns::Double(),
                            "value for shock indicator");
-        prm.declare_entry ("shock levels", "3.0",
+        prm.declare_entry ("max refine level", "3.0",
                            Patterns::Double(),
-                           "number of shock refinement levels");
+                           "number of max refinement levels");
         prm.declare_entry ("max cells", "-4.0",
                            Patterns::Double(),
                            "maximum number (positive value) or maximum number ratio (negative value) of cells");
@@ -194,7 +194,7 @@ namespace NSFEMSolver
             }
         }
         shock_val        = prm.get_double ("shock value");
-        max_refine_level = prm.get_double ("shock levels");
+        max_refine_level = prm.get_double ("max refine level");
       }
       prm.leave_subsection();
     }
