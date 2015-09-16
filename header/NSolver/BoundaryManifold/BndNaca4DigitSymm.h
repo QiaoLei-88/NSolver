@@ -67,10 +67,10 @@ namespace NSFEMSolver
       * Refer to the general documentation of this class and the documentation of
       * the base class.
       */
-    // virtual
-    // Tensor<1,2>
-    // normal_vector (const typename Triangulation<2,2>::face_iterator &face,
-    //                const Point<2> &p) const;
+    virtual
+    Tensor<1,2>
+    normal_vector (const typename Triangulation<2,2>::face_iterator &face,
+                   const Point<2> &p) const;
 
     // /**
     //  * Compute the normals to the boundary at the vertices of the given face.

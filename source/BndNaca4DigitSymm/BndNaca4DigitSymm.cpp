@@ -123,38 +123,52 @@ namespace NSFEMSolver
   }
 
 
-  // Tensor<1,2>
-  // BndNaca4DigitSymm::normal_vector (const typename Triangulation<2,2>::face_iterator &face,
-  //                                   const Point<2> &p) const
-  // {
-  //   std::cerr << "\n normal_vector : "
-  //             << p << std::endl;
+  Tensor<1,2>
+  BndNaca4DigitSymm::normal_vector (const typename Triangulation<2,2>::face_iterator &face,
+                                    const Point<2> &p) const
+  {
+    const double x = std::max (p[0], 1e-16);
+    Assert (p[0] > -1e-6, ExcMessage ("Point not on foil"));
+    Assert (p[0] <  1.0 + 1e-6, ExcMessage ("Point not on foil"));
 
-  //   const double x = solve_parameter (p);
+    Fad_db x_ad = x;
+    x_ad.diff (0,1);
 
-  //   Fad_db x_ad = x;
-  //   x_ad.diff (0,1);
-  //   FFad_db x_ad_ad = x_ad;
-  //   x_ad_ad.diff (0,1);
-  //   Tensor<1,2> return_value;
-
-  //   if (p[1] >= 0.0)
-  //     {
-  //       Fad_db x_foil = x_upper<Fad_db> (x_ad, std::atan (camber (x_ad_ad).fastAccessDx (0)));
-  //       Fad_db y_foil = y_upper<Fad_db> (x_ad, std::atan (camber (x_ad_ad).fastAccessDx (0)));
-  //       return_value[0] = -y_foil.fastAccessDx (0);
-  //       return_value[1] =  x_foil.fastAccessDx (0);
-  //     }
-  //   else
-  //     {
-  //       Fad_db x_foil = x_lower<Fad_db> (x_ad, std::atan (camber (x_ad_ad).fastAccessDx (0)));
-  //       Fad_db y_foil = y_lower<Fad_db> (x_ad, std::atan (camber (x_ad_ad).fastAccessDx (0)));
-  //       return_value[0] =  y_foil.fastAccessDx (0);
-  //       return_value[1] = -x_foil.fastAccessDx (0);
-  //     }
-  //   return_value /= return_value.norm();
-  //   return (return_value);
-  // }
+    Fad_db y = thickness<Fad_db> (x_ad);
+    Assert (std::abs (p[1] - y) < 1e-6, ExcMessage ("Point not on foil"));
+    Tensor<1,2> return_value;
+    return_value[0] = y.fastAccessDx (0);
+    if (p[1] > 0.0)
+      {
+        return_value[1] = -1.0;
+      }
+    else if (p[1] < 0.0)
+      {
+        return_value[1] = 1.0;
+      }
+    else //if (p[1]  == 0.0)
+      {
+        bool norm_setted = false;
+        for (unsigned int v=0; v<GeometryInfo<2>::vertices_per_face; ++v)
+          {
+            if (face->vertex (v)[1] != 0.0)
+              {
+                if (face->vertex (v)[1] > 0.0)
+                  {
+                    return_value[1] = -1.0;
+                  }
+                else // if (face->vertex (v)[1]] < 0.0)
+                  {
+                    return_value[1] = 1.0;
+                  }
+                norm_setted = true;
+              }
+            Assert (norm_setted, ExcMessage ("All vertices on face have zero Y"));
+          }
+      }
+    return_value /= return_value.norm();
+    return (return_value);
+  }
 
 
   // Point<2>
