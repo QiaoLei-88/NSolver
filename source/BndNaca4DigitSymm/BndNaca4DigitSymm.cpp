@@ -135,7 +135,7 @@ namespace NSFEMSolver
     x_ad.diff (0,1);
 
     Fad_db y = thickness<Fad_db> (x_ad);
-    Assert (std::abs (p[1] - y) < 1e-6, ExcMessage ("Point not on foil"));
+    Assert (std::abs (std::abs (p[1]) - y) < 1e-6, ExcMessage ("Point not on foil"));
     Tensor<1,2> return_value;
     return_value[0] = y.fastAccessDx (0);
     if (p[1] > 0.0)
@@ -204,7 +204,7 @@ namespace NSFEMSolver
         x_ad.diff (0,1);
 
         Fad_db y = thickness<Fad_db> (x_ad);
-        Assert (std::abs (p[1] - y) < 1e-6, ExcMessage ("Point not on foil"));
+        Assert (std::abs (std::abs (p[1]) - y) < 1e-6, ExcMessage ("Point not on foil"));
         Tensor<1,2> return_value;
         return_value[0] = y.fastAccessDx (0);
         return_value[1] = upper_or_lower;
