@@ -170,41 +170,48 @@ namespace NSFEMSolver
     return (return_value);
   }
 
+  void
+  BndNaca4DigitSymm::get_normals_at_vertices (const typename Triangulation<2,2>::face_iterator &face,
+                                              typename Boundary<2,2>::FaceVertexNormals &face_vertex_normals) const
+  {
+    // Beware upper_or_lower == 1.0 for lower half of the foil
+    // and upper_or_lower == -1.0 for upper half of the foil.
+    // Because we want the outer normal vector of the flow field
+    // rather than the air foil.
+    // This may be a surprise.
+    double upper_or_lower = 0.0;
+    for (unsigned int v=0; v<GeometryInfo<2>::vertices_per_face; ++v)
+      {
+        if (face->vertex (v)[1] > 0.0)
+          {
+            upper_or_lower = -1.0;
+          }
+        else
+          {
+            upper_or_lower = 1.0;
+          }
+      }
+    Assert (upper_or_lower != 0.0, ExcMessage ("All vertices on face have zero Y"));
 
-  // Point<2>
-  // BndNaca4DigitSymm::project_to_surface (const typename Triangulation<2,2>::line_iterator &line,
-  //                                        const Point<2> &trial_point) const
-  // {
-  //   std::cerr << "\n project_to_surface : "
-  //             << trial_point << std::endl;
+    for (unsigned int v=0; v<GeometryInfo<2>::vertices_per_face; ++v)
+      {
+        const Point<2> &p = face->vertex (v);
+        const double x = std::max (p[0], 1e-16);
+        Assert (p[0] > -1e-6, ExcMessage ("Point not on foil"));
+        Assert (p[0] <  1.0 + 1e-6, ExcMessage ("Point not on foil"));
 
-  //   const Point<2> &p1 = line->vertex (0);
-  //   const Point<2> &p2 = line->vertex (1);
+        Fad_db x_ad = x;
+        x_ad.diff (0,1);
 
-  //   const double s = (trial_point-p1)* (p2-p1) / ((p2-p1)* (p2-p1));
+        Fad_db y = thickness<Fad_db> (x_ad);
+        Assert (std::abs (p[1] - y) < 1e-6, ExcMessage ("Point not on foil"));
+        Tensor<1,2> return_value;
+        return_value[0] = y.fastAccessDx (0);
+        return_value[1] = upper_or_lower;
+        face_vertex_normals[v] = return_value/return_value.norm();
+      }
+    return;
+  }
 
-  //   Assert (s > -0.5,
-  //           ExcMessage ("Project source point is to far in negative."));
-  //   Assert (s < 1.5,
-  //           ExcMessage ("Project source point is to far in positive."));
 
-  //   const Point<2> candidate = p1 + s* (p2-p1);
-
-  //   const double x = solve_parameter (candidate);
-  //   Fad_db x_ad = x;
-  //   x_ad.diff (0,1);
-
-  //   if (candidate[1] >= 0.0)
-  //     {
-  //       double x_foil = x_upper (x, std::atan (camber (x_ad).fastAccessDx (0)));
-  //       double y_foil = y_upper (x, std::atan (camber (x_ad).fastAccessDx (0)));
-  //       return (Point<2> (x_foil, y_foil));
-  //     }
-  //   else
-  //     {
-  //       double x_foil = x_lower (x, std::atan (camber (x_ad).fastAccessDx (0)));
-  //       double y_foil = y_lower (x, std::atan (camber (x_ad).fastAccessDx (0)));
-  //       return (Point<2> (x_foil, y_foil));
-  //     }
-  // }
 }

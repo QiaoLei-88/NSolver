@@ -72,16 +72,16 @@ namespace NSFEMSolver
     normal_vector (const typename Triangulation<2,2>::face_iterator &face,
                    const Point<2> &p) const;
 
-    // /**
-    //  * Compute the normals to the boundary at the vertices of the given face.
-    //  *
-    //  * Refer to the general documentation of this class and the documentation of
-    //  * the base class.
-    //  */
-    // virtual
-    // void
-    // get_normals_at_vertices (const typename Triangulation<2,2>::face_iterator &face,
-    //                          typename Boundary<2,2>::FaceVertexNormals &face_vertex_normals) const;
+    /**
+     * Compute the normals to the boundary at the vertices of the given face.
+     *
+     * Refer to the general documentation of this class and the documentation of
+     * the base class.
+     */
+    virtual
+    void
+    get_normals_at_vertices (const typename Triangulation<2,2>::face_iterator &face,
+                             typename Boundary<2,2>::FaceVertexNormals &face_vertex_normals) const;
 
     /**
      * Given a candidate point and a line segment characterized by the iterator,
