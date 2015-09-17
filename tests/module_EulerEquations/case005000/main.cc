@@ -37,7 +37,7 @@ int main (int argc, char *argv[])
   Vector<double>      boundary_values (EquationComponents<dim>::n_components);
   Table<2,double>     Wminus (1,EquationComponents<dim>::n_components);
 
-  std::ofstream fout ("all.out");
+  std::ofstream fout ("output.out");
 
   {
     normal_vector[0] = 0.0;

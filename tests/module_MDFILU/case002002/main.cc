@@ -242,5 +242,5 @@ int main (int argc, char *argv[])
 // #ifdef VERBOSE_OUTPUT
 //   debugStream.close();
 // #endif
-  return (system ("cat  A.out  apply.out  LU.out  matrix.out  > all.out"));
+  return (system ("cat  A.out  apply.out  LU.out  matrix.out  > output.out"));
 }
