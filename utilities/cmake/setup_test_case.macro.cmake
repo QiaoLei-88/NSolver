@@ -89,4 +89,19 @@ MACRO(SETUP_TEST_CASE)
     ADDITIONAL_MAKE_CLEAN_FILES "${_additional_clean_up_files}"
     )
 
+  ADD_CUSTOM_TARGET(clean_${_test_name}
+    COMMAND ${CMAKE_COMMAND} -E remove -f ${_additional_clean_up_files}
+    COMMAND ${CMAKE_COMMAND} -E remove -f output.diff
+    COMMAND ${CMAKE_COMMAND} -E remove -f ${_extra_depends_for_output}
+    COMMAND ${CMAKE_COMMAND} -E remove -f ${_output_file}
+    COMMAND ${CMAKE_COMMAND} -E remove -f ${_input_file_list}
+    COMMAND ${CMAKE_COMMAND} -E remove -f ${_shared_input_file_list}
+    COMMAND ${CMAKE_COMMAND} -E remove -f ${_comparison_file}
+    WORKING_DIRECTORY ${_test_directory}
+    )
+
+  ADD_DEPENDENCIES(clean_${_test_name_prefix}
+    clean_${_test_name}
+    )
+
 ENDMACRO()

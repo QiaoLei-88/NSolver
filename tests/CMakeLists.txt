@@ -52,4 +52,13 @@ ENDFOREACH()
 UNSET(__sub_dir)
 SET(_addtional_solver_outputs *.vtu *.pvtu *_runtime.error run.success time_history.out)
 
+# Set up clean target
+LIST_ALL_SUBDIRECTORIES (__sub_dir_list ${CMAKE_CURRENT_SOURCE_DIR})
+FOREACH(__sub_dir ${__sub_dir_list})
+  ADD_CUSTOM_TARGET(clean_${__sub_dir})
+  ADD_DEPENDENCIES(clean_all_tests clean_${__sub_dir})
+ENDFOREACH()
+UNSET(__sub_dir)
+UNSET(__sub_dir_list)
+
 PICKUP_ALL_SUBDIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})

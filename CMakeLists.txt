@@ -89,6 +89,10 @@ ADD_CUSTOM_TARGET(reset
   COMMENT "reset invoked"
   )
 
+ADD_CUSTOM_TARGET(clean_all_tests
+  COMMENT "clean up all regression tests"
+  )
+
 
 ADD_CUSTOM_TARGET(info
   COMMAND ${CMAKE_COMMAND}

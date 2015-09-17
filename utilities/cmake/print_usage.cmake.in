@@ -7,19 +7,22 @@ MESSAGE(
 #  CMAKE_BUILD_TYPE:          ${CMAKE_BUILD_TYPE}
 #
 #  You can now run
-#       @_make_command@                - to compile and link the program
+#       @_make_command@                    - to compile and link the program
 #
-#       @_make_command@ debug          - to switch the build type to 'Debug'
-#       @_make_command@ release        - to switch the build type to 'Release'
+#       @_make_command@ debug              - to switch the build type to 'Debug'
+#       @_make_command@ release            - to switch the build type to 'Release'
 #
-#       @_make_command@ distclean      - to clean the build directory
-#                                This will remove directory bin, source and tests.
-#                                Use with caution!
-#       @_make_command@ reset          - to regenerate cmake files after a distclean
+#       @_make_command@ distclean          - to clean the build directory
+#                                    This will remove directory bin, source and tests.
+#                                    Use with caution!
+#       @_make_command@ clean_all_tests    - to clean the tests directory
+#                                    Furthermore, each test category and each test case
+#                                    also has its own clean target.
 #
-#       @_make_command@ info           - to view this message again
+#       @_make_command@ reset              - to regenerate cmake files after a distclean
+#
+#       @_make_command@ info               - to view this message again
 #
 #  Have a nice day!
 #
 ###")
-
