@@ -1,3 +1,6 @@
+# Parameters of macro are not variables.
+# But parameter expansion is not verbatim text replacement, but some thing
+# like this: ${curdir} -> value passed to macro parameter curdir.
 MACRO(LIST_ALL_SUBDIRECTORIES result curdir)
 
   FILE(GLOB __children RELATIVE ${curdir} ${curdir}/*)
