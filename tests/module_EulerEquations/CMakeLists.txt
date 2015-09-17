@@ -5,7 +5,5 @@ SET (_input_file_list "input.prm")
 SET (_output_file all.out)
 SET (_comparison_file all.out.reference)
 
-SET (_para_diff  -a 1e-8 -r 1e-8 -s  "' \\t\\n:<>=,\(\)\;'")
-
 SETUP_TEST_CATEGORY()
 

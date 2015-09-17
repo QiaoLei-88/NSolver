@@ -32,7 +32,7 @@ IF( _exec_diff MATCHES "-NOTFOUND")
   SET (_para_diff "" )
 ELSE()
   # numdiff found
-  SET (_para_diff  -a 1e-8 -r 1e-8 -s  "' \\t\\n:<>=,\;'")
+  SET (_para_diff  -a 1e-8 -r 1e-8 -s  "' \\t\\n:<>=,\(\)[]\;'")
 ENDIF()
 # End find and set diff
 
