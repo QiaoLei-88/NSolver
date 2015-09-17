@@ -1,6 +1,7 @@
 
 INCLUDE(${CMAKE_SOURCE_DIR}/utilities/cmake/setup_test_case.macro.cmake)
 INCLUDE(${CMAKE_SOURCE_DIR}/utilities/cmake/setup_module_test_case.macro.cmake)
+INCLUDE(${CMAKE_SOURCE_DIR}/utilities/cmake/setup_test_category.macro.cmake)
 
 SET (_exec_copy ln )
 SET (_para_copy -s )
@@ -49,5 +50,6 @@ FOREACH(__sub_dir ${_static_lib_list})
   LIST(APPEND _static_lib_for_modele_test ${__sub_dir}_for_modele_test)
 ENDFOREACH()
 UNSET(__sub_dir)
+SET(_addtional_solver_outputs *.vtu *.pvtu *_runtime.error run.success time_history.out)
 
 PICKUP_ALL_SUBDIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
