@@ -46,7 +46,7 @@ MACRO(SETUP_TEST_CASE)
     )
 
   # Bring ${_comparison_file} into ${_test_directory} for possible manual comparison.
-    ADD_CUSTOM_COMMAND(OUTPUT ${_test_directory}/${_comparison_file}
+  ADD_CUSTOM_COMMAND(OUTPUT ${_test_directory}/${_comparison_file}
     COMMAND  ${_exec_copy}  ${_para_copy} ${_test_src_directory}/${_comparison_file} ${_test_directory}/${_comparison_file}
     WORKING_DIRECTORY
       ${_test_directory}
@@ -55,13 +55,20 @@ MACRO(SETUP_TEST_CASE)
     VERBATIM
     )
   # Compare output
-  ADD_CUSTOM_TARGET(diff_${_test_name}
+  ADD_CUSTOM_COMMAND(OUTPUT ${_test_directory}/output.diff
     COMMAND ${_exec_diff} ${_para_diff} ${_test_directory}/${_output_file}  ${_test_directory}/${_comparison_file} > output.diff 2>&1
     WORKING_DIRECTORY
       ${_test_directory}
     DEPENDS
       ${_test_directory}/${_output_file}
       ${_test_directory}/${_comparison_file}
+    )
+
+  ADD_CUSTOM_TARGET(diff_${_test_name}
+    WORKING_DIRECTORY
+      ${_test_directory}
+    DEPENDS
+      ${_test_directory}/output.diff
     )
 
   # Finally add test target. This will be invoked by the ctest command.
