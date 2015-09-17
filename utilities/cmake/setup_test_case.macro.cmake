@@ -83,4 +83,10 @@ MACRO(SETUP_TEST_CASE)
     PROPERTIES TIMEOUT ${_time_out_time}
     )
 
+  # Code for cleaning
+  SET_DIRECTORY_PROPERTIES(
+    PROPERTIES
+    ADDITIONAL_MAKE_CLEAN_FILES "${_additional_clean_up_files}"
+    )
+
 ENDMACRO()
