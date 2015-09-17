@@ -158,6 +158,9 @@ namespace NSFEMSolver
         prm.declare_entry ("max cell size", "-1.0",
                            Patterns::Double(),
                            "maximum cell size in mesh refinement");
+        prm.declare_entry ("min cell size", "-1.0",
+                           Patterns::Double(),
+                           "minimum cell size in mesh refinement");
         prm.declare_entry ("component mask", "65535",
                            Patterns::Integer (0),
                            "Equation components want to use in Kelly error estimator");
@@ -202,6 +205,11 @@ namespace NSFEMSolver
         if (max_cell_size < 0.0)
           {
             max_cell_size = std::numeric_limits<double>::max();
+          }
+        min_cell_size    = prm.get_double ("min cell size");
+        if (min_cell_size < 0.0)
+          {
+            min_cell_size = std::numeric_limits<double>::min();
           }
       }
       prm.leave_subsection();

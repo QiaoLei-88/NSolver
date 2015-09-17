@@ -136,6 +136,15 @@ namespace NSFEMSolver
        * every adaptive refinement into global refinement.
        */
       double max_cell_size;
+      /**
+       * when refinement flag is true, mesh cell with size smaller than min_cell_size
+       * will never be refined. The relevant cell size is obtained by
+       * TriaAccessor::minimum_vertex_distance()
+       *
+       * Negative input value will disable this limit.
+       * @note Zero value will not be escaped. But this doesn't hurt in normal cases.
+       */
+      double min_cell_size;
 
       ComponentMask component_mask;
 
