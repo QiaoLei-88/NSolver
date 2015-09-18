@@ -64,6 +64,20 @@ namespace NSFEMSolver
         break;
       }
       }
+    // clear all flags for cells that we don't locally own
+    // to avoid unnecessary operations
+    {
+      typename DoFHandler<dim>::active_cell_iterator
+      cell = dof_handler.begin_active();
+      const  typename DoFHandler<dim>::active_cell_iterator
+      endc = dof_handler.end();
+      for (; cell != endc; ++cell)
+        if (!cell->is_locally_owned())
+          {
+            cell->clear_refine_flag();
+            cell->clear_coarsen_flag();
+          }
+    }
 
     // Then we need to transfer the various solution vectors from the old to
     // the new grid while we do the refinement. The SolutionTransfer class is
