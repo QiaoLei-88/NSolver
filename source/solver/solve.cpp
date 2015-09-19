@@ -40,9 +40,10 @@ namespace NSFEMSolver
       case Parameters::Solver::direct:
       {
         SolverControl solver_control (1,0);
-        TrilinosWrappers::SolverDirect direct (solver_control,
-                                               parameters->output ==
-                                               Parameters::Solver::verbose);
+
+        TrilinosWrappers::SolverDirect::AdditionalData
+        solver_data (parameters->output == Parameters::Solver::verbose);
+        TrilinosWrappers::SolverDirect direct (solver_control, solver_data);
 
         direct.solve (system_matrix, newton_update, right_hand_side);
 

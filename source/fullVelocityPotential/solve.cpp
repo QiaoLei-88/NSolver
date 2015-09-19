@@ -13,17 +13,20 @@ namespace velocityPotential
 
     SolverControl solver_control (300, 1e-10);
 
+#ifdef USE_PETSC_LA
     LA::SolverGMRES solver (solver_control, mpi_communicator);
+#else
+    LA::SolverGMRES solver (solver_control);
+#endif
 
     LA::MPI::PreconditionAMG preconditioner;
-    LA::MPI::PreconditionAMG::AdditionalData data;
-
+    LA::MPI::PreconditionAMG::AdditionalData prec_data;
 #ifdef USE_PETSC_LA
-    data.symmetric_operator = true;
+    prec_data.symmetric_operator = true;
 #else
-    data.elliptic = false;
+    prec_data.elliptic = false;
 #endif
-    preconditioner.initialize (system_matrix, data);
+    preconditioner.initialize (system_matrix, prec_data);
 
     solver.solve (system_matrix, newton_update, system_rhs,
                   preconditioner);

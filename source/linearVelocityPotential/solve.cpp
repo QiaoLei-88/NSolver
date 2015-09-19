@@ -16,17 +16,20 @@ namespace velocityPotential
 
     SolverControl solver_control (dof_handler.n_dofs(), 1e-12);
 
-    LA::SolverCG solver (solver_control, mpi_communicator);
-    LA::MPI::PreconditionAMG preconditioner;
-
-    LA::MPI::PreconditionAMG::AdditionalData data;
-
 #ifdef USE_PETSC_LA
-    data.symmetric_operator = true;
+    LA::SolverCG solver (solver_control, mpi_communicator);
+#else
+    LA::SolverCG solver (solver_control);
+#endif
+
+    LA::MPI::PreconditionAMG preconditioner;
+    LA::MPI::PreconditionAMG::AdditionalData prec_data;
+#ifdef USE_PETSC_LA
+    prec_data.symmetric_operator = true;
 #else
     /* Trilinos defaults are good */
 #endif
-    preconditioner.initialize (system_matrix, data);
+    preconditioner.initialize (system_matrix, prec_data);
 
     solver.solve (system_matrix, locally_owned_solution, system_rhs,
                   preconditioner);
