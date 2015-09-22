@@ -1,0 +1,2 @@
+Test max level limit for function refine_and_coarsen_fixed_number.
+Initialize with hypercube to avoid extra cell refinement.

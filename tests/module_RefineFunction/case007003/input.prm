@@ -1,0 +1,12 @@
+# Listing of Parameters
+# ---------------------
+
+# Refinement control
+subsection refinement
+  set refinement = true
+  set max cells        = 2000
+  set refine fraction  = 0.1
+  set coarsen fraction = 0.0
+  set max refine level = 8
+end
+
