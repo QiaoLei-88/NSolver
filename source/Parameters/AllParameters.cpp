@@ -134,9 +134,6 @@ namespace NSFEMSolver
 
       prm.enter_subsection ("refinement");
       {
-        prm.declare_entry ("refinement", "true",
-                           Patterns::Bool(),
-                           "Whether to perform mesh refinement or not");
         prm.declare_entry ("refinement indicator", "Gradient",
                            Patterns::Selection ("Gradient|Kelly"),
                            "type of refinement indicator");
@@ -176,7 +173,6 @@ namespace NSFEMSolver
     {
       prm.enter_subsection ("refinement");
       {
-        do_refine     = prm.get_bool ("refinement");
         {
           const std::string buff = prm.get ("refinement indicator");
           if (buff == "Gradient")

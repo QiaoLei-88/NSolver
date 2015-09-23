@@ -109,7 +109,6 @@ namespace NSFEMSolver
         Kelly
       };
 
-      bool do_refine;
       Indicator refinement_indicator;
 
       double shock_val;
