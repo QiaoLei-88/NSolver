@@ -229,7 +229,7 @@ namespace NSFEMSolver
               << std::endl;
 
         pcout << "   NonLin Res   NewtonUpdateNorm  Lin Iter     Lin Res     "
-              << "Linear Search Len      Time Step Size      CFL number" << std::endl
+              << "Linear Search Len      Time Step Size      CFL number   ||Res||_infty ||Res||_infty_all" << std::endl
               << "   __________________________________________"
               << "_____________________________________________" << std::endl;
 
@@ -324,10 +324,10 @@ namespace NSFEMSolver
             newton_update_norm = newton_update.l2_norm();
             if (I_am_host)
               {
-                std::printf ("   %-13.6e    %-13.6e  %04d        %-5.2e            %7.4g          %7.4g          %7.4g\n",
+                std::printf ("   %-13.6e    %-13.6e  %04d        %-5.2e            %7.4g          %7.4g          %7.4g      %11.4e    %11.4e\n",
                              res_norm,newton_update_norm, convergence.first, convergence.second,
                              linear_search_length[index_linear_search_length],
-                             global_time_step_size, CFL_number);
+                             global_time_step_size, CFL_number, res_norm_infty, res_norm_infty_total);
               }
             linear_solver_diverged = std::isnan (convergence.second);
 
