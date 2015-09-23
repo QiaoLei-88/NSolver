@@ -127,6 +127,14 @@ namespace NSFEMSolver
       double max_cells;
       double max_refine_level;
       /**
+       * Stop mesh refinement after max_refine_time. The limit is compared against
+       * n_time_step in steady case and against time in unsteady case.
+       * The default value is zero, in which case no mesh adaptation will happen.
+       *
+       * Negative input value will disable this limit.
+       */
+      double max_refine_time;
+      /**
        * when refinement flag is true, mesh cell with size larger than max_cell_size
        * will be forced to refine. The relevant cell size is obtained by
        * TriaAccessor::minimum_vertex_distance()

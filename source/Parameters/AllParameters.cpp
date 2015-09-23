@@ -152,6 +152,9 @@ namespace NSFEMSolver
         prm.declare_entry ("max refine level", "3.0",
                            Patterns::Double(),
                            "number of max refinement levels");
+        prm.declare_entry ("max refine time", "0",
+                           Patterns::Double(),
+                           "stop mesh refinement after this number of step");
         prm.declare_entry ("max cells", "-4.0",
                            Patterns::Double(),
                            "maximum number (positive value) or maximum number ratio (negative value) of cells");
@@ -201,6 +204,11 @@ namespace NSFEMSolver
         }
         shock_val        = prm.get_double ("shock value");
         max_refine_level = prm.get_double ("max refine level");
+        max_refine_time  = prm.get_double ("max refine time");
+        if (max_refine_time < 0.0)
+          {
+            max_refine_time = std::numeric_limits<double>::max();
+          }
         max_cell_size    = prm.get_double ("max cell size");
         if (max_cell_size < 0.0)
           {
