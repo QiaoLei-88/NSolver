@@ -165,6 +165,8 @@ namespace NSFEMSolver
                 break;
               }
           }
+        // avoid warning "unused-but-set-variable"
+        (void)norm_setted;
         Assert (norm_setted, ExcMessage ("All vertices on face have zero Y"));
       }
     return (return_value/return_value.norm());
