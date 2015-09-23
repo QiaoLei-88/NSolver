@@ -50,12 +50,10 @@ namespace NSFEMSolver
       }
       case Parameters::Refinement<dim>::Kelly:
       {
-        parallel::distributed::GridRefinement::
+        NSFEMSolver::Tools::
         refine_and_coarsen_fixed_number (triangulation,
                                          refinement_indicators,
-                                         parameters->refine_fraction,
-                                         parameters->coarsen_fraction,
-                                         parameters->max_cells);
+                                         parameters);
         break;
       }
       default:
