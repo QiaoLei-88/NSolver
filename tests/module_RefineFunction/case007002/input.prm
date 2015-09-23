@@ -3,7 +3,6 @@
 
 # Refinement control
 subsection refinement
-  set refinement = true
   set max cells        = 1000
   set refine fraction  = 0.2
   set coarsen fraction = 0.2

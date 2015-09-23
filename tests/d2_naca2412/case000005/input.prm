@@ -88,7 +88,7 @@ end
 # --------------------------------------------------
 # Refinement control
 subsection refinement
-  set refinement = true # none only other option
+  set max refine time  = -1
   set shock value = 1.5
   set max refine level = 1 # how many levels of refinement to allow
 end

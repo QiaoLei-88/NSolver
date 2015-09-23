@@ -90,7 +90,6 @@ end
 # --------------------------------------------------
 # Refinement control
 subsection refinement
-  set refinement = false # none only other option
 end
 
 # --------------------------------------------------

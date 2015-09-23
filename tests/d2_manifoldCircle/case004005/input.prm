@@ -151,7 +151,7 @@ end
 # --------------------------------------------------
 # Refinement control
 subsection refinement
-  set refinement = true # none only other option
+  set max refine time  = 13
   set refinement indicator = Kelly # Gradient # Kelly
   set max cells        = 2000
   set component mask   = 8

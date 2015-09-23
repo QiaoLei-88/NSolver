@@ -78,7 +78,7 @@ end
 # --------------------------------------------------
 # Refinement control
 subsection refinement
-  set refinement = true # none only other option
+  set max refine time  = -1
   set refinement indicator = Gradient
   set component mask   = 4
   set shock value = 1.5
