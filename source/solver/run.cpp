@@ -208,6 +208,7 @@ namespace NSFEMSolver
     bool terminate_time_stepping (false);
     double res_norm_total (0.0);
     double res_norm_total_previous (0.0);
+    double res_norm_infty_total (0.0);
     while (!terminate_time_stepping)
       {
         computing_timer.enter_subsection ("2:Prepare Newton iteration");
@@ -265,6 +266,7 @@ namespace NSFEMSolver
         unsigned int const nonlin_iter_threshold (parameters->max_Newton_iter);
 
         double res_norm;
+        double res_norm_infty;
         double newton_update_norm;
         std::pair<unsigned int, double> convergence;
 
@@ -274,6 +276,7 @@ namespace NSFEMSolver
 
         res_norm_total_previous = res_norm_total;
         res_norm_total = 0.0;
+        res_norm_infty_total = 0.0;
         calc_artificial_viscosity();
         do // Newton iteration
           {
@@ -299,6 +302,9 @@ namespace NSFEMSolver
 
             res_norm = right_hand_side.l2_norm();
             res_norm_total += res_norm;
+
+            res_norm_infty = right_hand_side.linfty_norm();
+            res_norm_infty_total += res_norm_infty;
             if (nonlin_iter == 0)
               {
                 residual_for_output = right_hand_side;
