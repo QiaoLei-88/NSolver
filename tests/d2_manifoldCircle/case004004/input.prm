@@ -125,6 +125,7 @@ subsection time stepping
   set solution extrapolation length = 0.0
   set theta scheme value            = 1.0
   set nonlinear tolerance           = 10
+  set minimum step increasing ratio stage2 = 1.0
 end
 
 subsection linear solver
@@ -153,10 +154,10 @@ subsection refinement
   set refinement indicator = Kelly # Gradient # Kelly
   set max cells        = 2000
   set component mask   = 8
-  set refine fraction  = 0.1
+  set refine fraction  = 0.2
   set coarsen fraction = 0.2
   set shock value = 1.5
-  set max refine level = 1 # how many levels of refinement to allow
+  set max refine level = 5 # how many levels of refinement to allow
 end
 
 # --------------------------------------------------
