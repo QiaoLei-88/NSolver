@@ -156,7 +156,7 @@ namespace NSFEMSolver
     setup_system();
 
     initialize();
-    if (parameters->do_refine)
+    if (parameters->max_refine_time > 0)
       {
         compute_refinement_indicators();
         refine_grid();
@@ -448,8 +448,14 @@ namespace NSFEMSolver
             terminate_time_stepping = terminate_time_stepping ||
                                       (parameters->is_steady &&
                                        n_time_step > parameters->final_time);
-
-            if (parameters->do_refine == true)
+            const bool do_refine = (
+                                     (parameters->is_steady)
+                                     ?
+                                     (static_cast<unsigned int> (parameters->max_refine_time) >= n_time_step)
+                                     :
+                                     (parameters->max_refine_time >= time)
+                                   );
+            if (do_refine)
               {
                 compute_refinement_indicators();
               }
@@ -616,13 +622,9 @@ namespace NSFEMSolver
 
             old_old_solution = old_solution;
             old_solution = current_solution;
-            if (parameters->do_refine == true)
+            if (do_refine)
               {
-                if (! (parameters->manifold_circle == 1 && n_time_step >= 14))
-                  {
-                    // Hard coded test case: ManifoldCircle
-                    refine_grid();
-                  }
+                refine_grid();
               }
 
             old_time_step_size = global_time_step_size;
