@@ -59,8 +59,8 @@ namespace NSFEMSolver
           for (; cell != endc; ++cell)
             if (cell->is_locally_owned())
               {
-                cell->set_refine_flag();
                 cell->clear_coarsen_flag();
+                cell->set_refine_flag();
               }
 
           return (n_target_cells);
@@ -101,6 +101,7 @@ namespace NSFEMSolver
             for (; cell != endc; ++cell)
               if (cell->is_locally_owned())
                 {
+                  cell->clear_coarsen_flag();
                   cell->clear_refine_flag();
                 }
           }
