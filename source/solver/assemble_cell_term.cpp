@@ -261,6 +261,7 @@ namespace NSFEMSolver
     for (unsigned int i=0; i<fe_v.dofs_per_cell; ++i)
       {
         Sacado::Fad::DFad<double> R_i = 0;
+        double cell_physical_residual = 0.0;
 
         const unsigned int
         component_i = fe_v.get_fe().system_to_component_index (i).first;
@@ -278,31 +279,53 @@ namespace NSFEMSolver
             EulerEquations<dim>::compute_conservative_vector (W_old[point], w_conservative_old);
 
             // TODO: accumulate R_i first and the multiply with shape_value_component * JxW together.
-            R_i += 1.0 / dt *
-                   (w_conservative[component_i] - w_conservative_old[component_i]) *
-                   fe_v.shape_value_component (i, point, component_i) *
-                   fe_v.JxW (point);
+            {
+              const Sacado::Fad::DFad<double> tmp =
+                1.0 / dt *
+                (w_conservative[component_i] - w_conservative_old[component_i]) *
+                fe_v.shape_value_component (i, point, component_i) *
+                fe_v.JxW (point);
+              R_i += tmp;
+              if (!parameters->is_steady)
+                {
+                  cell_physical_residual += tmp.val();
+                }
+            }
 
             for (unsigned int d=0; d<dim; d++)
               {
-                R_i -= (parameters->theta * flux[point][component_i][d] +
-                        (1.0-parameters->theta) * flux_old[point][component_i][d]) *
-                       fe_v.shape_grad_component (i, point, component_i)[d] *
-                       fe_v.JxW (point);
+                {
+                  const Sacado::Fad::DFad<double> tmp =
+                    (parameters->theta * flux[point][component_i][d] +
+                     (1.0-parameters->theta) * flux_old[point][component_i][d]) *
+                    fe_v.shape_grad_component (i, point, component_i)[d] *
+                    fe_v.JxW (point);
+                  R_i -= tmp;
+                  cell_physical_residual -= tmp.val();
+                }
+
                 R_i += visc_flux[point][component_i][d] * viscos_coeff *
                        fe_v.shape_grad_component (i, point, component_i)[d] *
                        fe_v.JxW (point);
               }
-            R_i -= (parameters->theta  * forcing[point][component_i] +
-                    (1.0 - parameters->theta) * forcing_old[point][component_i]) *
-                   fe_v.shape_value_component (i, point, component_i) *
-                   fe_v.JxW (point);
+            {
+              const Sacado::Fad::DFad<double> tmp =
+                (parameters->theta  * forcing[point][component_i] +
+                 (1.0 - parameters->theta) * forcing_old[point][component_i]) *
+                fe_v.shape_value_component (i, point, component_i) *
+                fe_v.JxW (point);
+              R_i -= tmp;
+              cell_physical_residual -= tmp.val();
+            }
             if (parameters->n_mms == 1)
               {
                 //MMS: apply MMS source term
-                R_i -= mms_source[point][component_i] *
-                       fe_v.shape_value_component (i, point, component_i) *
-                       fe_v.JxW (point);
+                const Sacado::Fad::DFad<double> tmp =
+                  mms_source[point][component_i] *
+                  fe_v.shape_value_component (i, point, component_i) *
+                  fe_v.JxW (point);
+                R_i -= tmp;
+                cell_physical_residual -= tmp.val();
               }
           }
 
@@ -316,6 +339,7 @@ namespace NSFEMSolver
         system_matrix.add (dof_indices[i], dof_indices.size(),
                            & (dof_indices[0]), & (R_i.fastAccessDx (0)));
         right_hand_side (dof_indices[i]) -= R_i.val();
+        physical_residual (dof_indices[i]) -= cell_physical_residual;
       }
   }
 

@@ -126,6 +126,7 @@ namespace NSFEMSolver
     predictor.reinit (locally_owned_solution, true);
 
     right_hand_side.reinit (locally_owned_solution, true);
+    physical_residual.reinit (locally_owned_solution, true);
     newton_update.reinit (locally_owned_solution, true);
 
     residual_for_output.reinit (current_solution, true);
