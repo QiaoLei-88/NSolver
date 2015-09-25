@@ -293,6 +293,7 @@ namespace NSFEMSolver
             computing_timer.enter_subsection ("3:Assemble Newton system");
             system_matrix = 0;
             right_hand_side = 0;
+            physical_residual = 0;
             newton_update = 0;
 
             assemble_system();
@@ -312,6 +313,7 @@ namespace NSFEMSolver
 
             res_norm = right_hand_side.l2_norm();
             res_norm_total += res_norm;
+            const double physical_res_norm = physical_residual.l2_norm();
 
             res_norm_infty = right_hand_side.linfty_norm();
             res_norm_infty_total += res_norm_infty;
@@ -334,10 +336,11 @@ namespace NSFEMSolver
             newton_update_norm = newton_update.l2_norm();
             if (I_am_host)
               {
-                std::printf ("   %-13.6e    %-13.6e  %04d        %-5.2e            %7.4g          %7.4g          %7.4g      %11.4e    %11.4e\n",
+                std::printf ("   %-13.6e    %-13.6e  %04d        %-5.2e            %7.4g          %7.4g          %7.4g      %11.4e    %11.4e    %11.4e\n",
                              res_norm,newton_update_norm, convergence.first, convergence.second,
                              linear_search_length[index_linear_search_length],
-                             global_time_step_size, CFL_number, res_norm_infty, res_norm_infty_total);
+                             global_time_step_size, CFL_number, res_norm_infty, res_norm_infty_total,
+                             physical_res_norm);
               }
             linear_solver_diverged = std::isnan (convergence.second);
 
