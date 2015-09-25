@@ -210,7 +210,6 @@ namespace NSFEMSolver
     // this is an internal face, we also have to take into account the
     // sensitivities of the residual contributions to the degrees of freedom on
     // the neighboring cell:
-    std::vector<double> residual_derivatives (dofs_per_cell);
     for (unsigned int i=0; i<fe_v.dofs_per_cell; ++i)
       if (fe_v.get_fe().has_support_on_face (i, face_no) == true)
         {
@@ -227,22 +226,12 @@ namespace NSFEMSolver
                      fe_v.JxW (point);
             }
 
-          // TODO:[QL] may be it's not necessary to store the derivatives into a
-          // temporary array.
-          for (unsigned int k=0; k<dofs_per_cell; ++k)
-            {
-              residual_derivatives[k] = R_i.fastAccessDx (k);
-            }
-          system_matrix.add (dof_indices[i], dof_indices, residual_derivatives);
-
+          system_matrix.add (dof_indices[i], dof_indices.size(),
+                             &dof_indices[0], & (R_i.fastAccessDx (0)));
           if (external_face == false)
             {
-              for (unsigned int k=0; k<dofs_per_cell; ++k)
-                {
-                  residual_derivatives[k] = R_i.fastAccessDx (dofs_per_cell+k);
-                }
-              system_matrix.add (dof_indices[i], dof_indices_neighbor,
-                                 residual_derivatives);
+              system_matrix.add (dof_indices[i], dof_indices_neighbor.size(),
+                                 &dof_indices_neighbor[0], & (R_i.fastAccessDx (dof_indices.size())));
             }
 
           right_hand_side (dof_indices[i]) -= R_i.val();

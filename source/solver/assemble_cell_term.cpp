@@ -90,8 +90,6 @@ namespace NSFEMSolver
     Table<3,double>
     grad_W_old (n_q_points, EquationComponents<dim>::n_components, dim);
 
-    std::vector<double> residual_derivatives (dofs_per_cell);
-
     // Next, we have to define the independent variables that we will try to
     // determine by solving a Newton step. These independent variables are the
     // values of the local degrees of freedom which we extract here:
@@ -316,11 +314,8 @@ namespace NSFEMSolver
         // temporary array. This information about the whole row of local dofs
         // is then added to the Trilinos matrix at once (which supports the
         // data types we have chosen).
-        for (unsigned int k=0; k<dofs_per_cell; ++k)
-          {
-            residual_derivatives[k] = R_i.fastAccessDx (k);
-          }
-        system_matrix.add (dof_indices[i], dof_indices, residual_derivatives);
+        system_matrix.add (dof_indices[i], dof_indices.size(),
+                           & (dof_indices[0]), & (R_i.fastAccessDx (0)));
         right_hand_side (dof_indices[i]) -= R_i.val();
       }
   }
