@@ -107,7 +107,6 @@ namespace NSFEMSolver
       }
       }
 
-    EulerEquations<dim>::gas_gamma = 1.4;
     EulerEquations<dim>::set_parameter (parameters);
 
     verbose_cout.set_condition (parameters->output == Parameters::Solver::verbose);

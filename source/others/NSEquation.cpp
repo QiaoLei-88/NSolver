@@ -17,6 +17,7 @@ namespace NSFEMSolver
   {
     Assert (para_ptr_in, ExcMessage ("Null pointer encountered!"));
     parameters = para_ptr_in;
+    EulerEquations<dim>::gas_gamma = para_ptr_in->gas_gamma;
   }
 
   // @sect4{EulerEquations::compute_refinement_indicators}

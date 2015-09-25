@@ -66,15 +66,6 @@ namespace NSFEMSolver
   public:
     // @sect4{Transformations between variables}
 
-    // Next, we define the gas constant. We will set it to 1.4 in its
-    // definition immediately following the declaration of this class (unlike
-    // integer variables, like the ones above, static const floating point
-    // member variables cannot be initialized within the class declaration in
-    // C++). This value of 1.4 is representative of a gas that consists of
-    // molecules composed of two atoms, such as air which consists up to small
-    // traces almost entirely of $N_2$ and $O_2$.
-    static double gas_gamma;
-
     /**
      * Inform the EulerEquations class with a pointer to runtime parameter.
      * The EulerEquations class needs to know free stream conditions, diffusion
@@ -306,6 +297,10 @@ namespace NSFEMSolver
     static unsigned const pressure_component       = EquationComponents<dim>::pressure_component      ;
 
     static Parameters::AllParameters<dim> const *parameters;
+    /**
+     * Gas heat capacity ratio
+     */
+    static double gas_gamma;
   };
 
   // Put the definition of nested class member function templates in header

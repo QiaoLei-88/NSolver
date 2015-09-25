@@ -77,7 +77,7 @@ namespace NSFEMSolver
           }
         free_stream_condition[EquationComponents<dim>::density_component] = 1.0;
         free_stream_condition[EquationComponents<dim>::pressure_component] =
-          1.0/EulerEquations<dim>::gas_gamma;
+          1.0 / (parameters->gas_gamma);
 
         ConstantFunction<dim> free_stream_initial_value (
           &free_stream_condition[0],
