@@ -75,7 +75,11 @@ namespace NSFEMSolver
     // traces almost entirely of $N_2$ and $O_2$.
     static double gas_gamma;
 
-
+    /**
+     * Inform the EulerEquations class with a pointer to runtime parameter.
+     * The EulerEquations class needs to know free stream conditions, diffusion
+     * constant and gravity from the run time parameter.
+     */
     static void set_parameter (const Parameters::AllParameters<dim> *const para_ptr_in);
 
     // In the following, we will need to compute the kinetic energy and the
