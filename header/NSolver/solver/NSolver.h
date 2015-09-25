@@ -214,6 +214,7 @@ namespace NSFEMSolver
     NSVector       predictor;
 
     NSVector       right_hand_side;
+    NSVector       physical_residual;
     // Cache up the right_hand_side for out put at the first Newton iteration
     // of each time step.
 
