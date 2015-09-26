@@ -29,7 +29,6 @@ int main (int argc, char *argv[])
     prm.read_input (input_file);
     solver_parameters.parse_parameters (prm);
   }
-  EulerEquations<dim>::gas_gamma = 1.4;
   EulerEquations<dim>::set_parameter (&solver_parameters);
 
   Tensor<1,dim>       normal_vector;
