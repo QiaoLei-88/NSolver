@@ -13,7 +13,7 @@ namespace NSFEMSolver
     refine_and_coarsen_fixed_number (
       parallel::distributed::Triangulation<dim>           &tria,
       const Vector                                        &criteria,
-      const SmartPointer<Parameters::AllParameters<dim> > &parameters)
+      const SmartPointer<Parameters::AllParameters<dim> const> &parameters)
     {
       typedef typename parallel::distributed::Triangulation<dim> TypeTria;
       typedef typename Vector::value_type VType;
@@ -168,28 +168,28 @@ namespace NSFEMSolver
     refine_and_coarsen_fixed_number<2, Vector<float> > (
       parallel::distributed::Triangulation<2> &,
       const Vector<float> &,
-      const SmartPointer<Parameters::AllParameters<2> > &);
+      const SmartPointer<Parameters::AllParameters<2> const> &);
 
     template
     void
     refine_and_coarsen_fixed_number<2, Vector<double> > (
       parallel::distributed::Triangulation<2> &,
       const Vector<double> &,
-      const SmartPointer<Parameters::AllParameters<2> > &);
+      const SmartPointer<Parameters::AllParameters<2> const> &);
 
     template
     void
     refine_and_coarsen_fixed_number<3, Vector<float> > (
       parallel::distributed::Triangulation<3> &,
       const Vector<float> &,
-      const SmartPointer<Parameters::AllParameters<3> > &);
+      const SmartPointer<Parameters::AllParameters<3> const> &);
 
     template
     void
     refine_and_coarsen_fixed_number<3, Vector<double> > (
       parallel::distributed::Triangulation<3> &,
       const Vector<double> &,
-      const SmartPointer<Parameters::AllParameters<3> > &);
+      const SmartPointer<Parameters::AllParameters<3> const> &);
 
   } // NAMESPACE Tools
 } // NAMESPACE NSFEMSolver

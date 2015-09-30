@@ -120,13 +120,13 @@ namespace NSFEMSolver
 
     if (parameters->max_cells < 0.0)
       {
-        parameters->max_cells = std::max (1.0, - (parameters->max_cells));
-        parameters->max_cells *= triangulation.n_global_active_cells();
+        parameters_modifier->max_cells = std::max (1.0, - (parameters->max_cells));
+        parameters_modifier->max_cells *= triangulation.n_global_active_cells();
       }
     else
       {
-        parameters->max_cells = std::max (parameters->max_cells,
-                                          static_cast<double> (triangulation.n_global_active_cells()));
+        parameters_modifier->max_cells = std::max (parameters->max_cells,
+                                                   static_cast<double> (triangulation.n_global_active_cells()));
       }
 
     std::ofstream iteration_history_file_std;
@@ -614,7 +614,7 @@ namespace NSFEMSolver
 
             if (swith_flux)
               {
-                parameters->numerical_flux_type = parameters->flux_type_switch_to;
+                parameters_modifier->numerical_flux_type = parameters->flux_type_switch_to;
               }
             terminate_time_stepping = terminate_time_stepping ||
                                       (parameters->is_steady &&

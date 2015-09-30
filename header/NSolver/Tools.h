@@ -115,7 +115,7 @@ namespace NSFEMSolver
     refine_and_coarsen_fixed_number (
       parallel::distributed::Triangulation<dim>           &tria,
       const Vector                                        &criteria,
-      const SmartPointer<Parameters::AllParameters<dim> > &parameters);
+      const SmartPointer<Parameters::AllParameters<dim> const> &parameters);
   }
 }
 #endif

@@ -73,7 +73,7 @@ namespace velocityPotential
   public:
     LinearVelocityPotential (
       const SmartPointer<parallel::distributed::Triangulation<dim> const > triangulation_in,
-      const SmartPointer<NSFEMSolver::Parameters::AllParameters<dim> > parameters,
+      const SmartPointer<NSFEMSolver::Parameters::AllParameters<dim> const> parameters,
       MPI_Comm mpi_communicator_in);
     ~LinearVelocityPotential();
 

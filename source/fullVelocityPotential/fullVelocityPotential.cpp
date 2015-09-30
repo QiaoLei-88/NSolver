@@ -9,7 +9,7 @@ namespace velocityPotential
   template <int dim>
   FullVelocityPotential<dim>::FullVelocityPotential (
     const SmartPointer<parallel::distributed::Triangulation<dim> const > triangulation_in,
-    const SmartPointer<NSFEMSolver::Parameters::AllParameters<dim> > parameters_in,
+    const SmartPointer<NSFEMSolver::Parameters::AllParameters<dim> const> parameters_in,
     MPI_Comm mpi_communicator_in)
     :
     mpi_communicator (mpi_communicator_in),

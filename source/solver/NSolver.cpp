@@ -67,6 +67,7 @@ namespace NSFEMSolver
     I_am_host (Utilities::MPI::this_mpi_process (mpi_communicator) == 0),
     myid (Utilities::MPI::this_mpi_process (mpi_communicator)),
     parameters (para_ptr_in),
+    parameters_modifier (para_ptr_in),
     verbose_cout (std::cout, false),
     pcout (std::cout,
            (Utilities::MPI::this_mpi_process (mpi_communicator)

@@ -239,7 +239,11 @@ namespace NSFEMSolver
 
     const bool I_am_host;
     const unsigned int myid;
-    const SmartPointer<Parameters::AllParameters<dim> >    parameters;
+    const SmartPointer<Parameters::AllParameters<dim> const>  parameters;
+    /**
+     * pointer to the same object to @p parameters but could modify its value.
+     */
+    Parameters::AllParameters<dim> *const                     parameters_modifier;
     ConditionalOStream              verbose_cout;
     ConditionalOStream              pcout;
     TimerOutput                     computing_timer;
