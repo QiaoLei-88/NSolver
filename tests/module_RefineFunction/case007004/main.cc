@@ -26,7 +26,7 @@ int main (int argc, char *argv[])
     }
 
   Parameters::AllParameters<dimension> solver_parameters;
-  SmartPointer<Parameters::AllParameters<dimension> > prt_parameters (&solver_parameters);
+  SmartPointer<Parameters::AllParameters<dimension> const> prt_parameters (&solver_parameters);
   {
     ParameterHandler prm;
 
