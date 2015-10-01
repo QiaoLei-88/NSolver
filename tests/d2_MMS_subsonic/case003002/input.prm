@@ -1,0 +1,114 @@
+# Listing of Parameters
+# ---------------------
+
+subsection FE Parameters
+  # Element degree
+  set fe degree               = 2
+
+  # Mapping degree
+  set mapping degree          = 1
+
+  # Cell quadrature degree
+  set quadrature degree       = 3
+
+  # Face quadrature degree
+  set face quadrature degree  = 3
+
+  # Quadrature degree for error evaluation
+  set error quadrature degree = 4
+end
+
+subsection physical parameters
+  # x component of gravity
+  set gravity x             = 0.0
+
+  # y component of gravity
+  set gravity y             = 0.0
+
+  # z component of gravity
+  set gravity z             = 0.0
+end
+
+set MMS = 1
+
+# Doesn't need input grid
+set global refinement = 3
+
+# Stabilization parameter
+set diffusion type  = const # <cell size|entropy|const>
+set diffusion power = 2.0
+set diffusion coefficient = 0.0
+
+# --------------------------------------------------
+# Boundary conditions
+# We may specify boundary conditions for up to MAX_BD boundaries.
+# Your .inp file should have these boundaries designated.
+
+subsection boundary_5
+  set type = MMS_BC
+end
+
+# --------------------------------------------------
+# Initial Conditions
+# We set the initial conditions of the conservative variables.  These lines
+# are passed to the expression parsing function.  You should use x,y,z for
+# the coordinate variables.
+
+subsection initial condition
+  set w_0 value = 0.2
+  set w_1 value = 0.4
+  set w_2 value = 1.0
+  set w_3 value = 1.0/1.4
+end
+
+# --------------------------------------------------
+# Time stepping control
+subsection time stepping
+  set rigid reference time step     = true
+  set CFL number                    = 1.0
+  set CFL number max                = 1000
+  set iter in stage1                = 1
+  set time march tolerance          = -10
+  set final time                    = 100 # simulation end time
+  set reference time step           = -1 # simulation time step
+  set solution extrapolation length = 0.0
+  set theta scheme value            = 1.0
+  set nonlinear tolerance           = 10
+end
+
+subsection linear solver
+  set Preconditioner = MDFILU
+  set ILU level      = 1
+  set output         = quiet  
+  set method         = direct
+  set RCM reorder    = true
+  set ilut fill      = 1.5
+  set ilut drop tolerance = 1e-10
+  set ilut absolute tolerance = 1e-10
+  set ilut relative tolerance = 1.00
+  set max iters      = 100
+  set residual       = 1e-4
+end
+
+# --------------------------------------------------
+# Output frequency and kind
+subsection output
+  set step           = 0.0
+  set schlieren plot = true
+end
+
+# --------------------------------------------------
+# Refinement control
+subsection refinement
+end
+
+# --------------------------------------------------
+# Flux parameters
+subsection flux
+ # Numerical flux type
+ set flux type  = LaxFriedrichs # Roe LaxFriedrichs
+ set tolerance to switch flux = -5
+ set flux type switch to = Roe
+ set stab = constant # constant or mesh, only used in LaxFriedrichs flux
+ set stab value = 1.0 # only used in LaxFriedrichs flux
+end
