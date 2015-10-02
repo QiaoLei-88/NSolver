@@ -508,14 +508,17 @@ namespace NSFEMSolver
             for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
               {
                 mms_error_l2[ic] = 0.0;
+                mms_error_H1_semi[ic] = 0.0;
                 time_advance_l2_norm[ic] = 0.0;
               }
             mms_error_linfty = 0.0;
 
             std::vector<Vector<double> > solution_values;
+            std::vector< std::vector< Tensor<1, dim> > > solution_grad;
             std::vector<Vector<double> > old_solution_values;
             //MMS: update quadrature points for evaluation of manufactured solution.
             const UpdateFlags update_flags = update_values
+                                             | update_gradients
                                              | update_JxW_values
                                              | update_quadrature_points;
             const QGauss<dim> quadrature_error (parameters->error_quadrature_degree);
@@ -533,9 +536,12 @@ namespace NSFEMSolver
 
                   solution_values.resize (n_q_points,
                                           Vector<double> (EquationComponents<dim>::n_components));
+                  solution_grad.resize (n_q_points,
+                                        std::vector< Tensor<1, dim> > (EquationComponents<dim>::n_components));
                   old_solution_values.resize (n_q_points,
                                               Vector<double> (EquationComponents<dim>::n_components));
                   fe_v.get_function_values (current_solution, solution_values);
+                  fe_v.get_function_gradients (current_solution, solution_grad);
                   fe_v.get_function_values (old_solution, old_solution_values);
 
                   std::vector <MMS::F_V> mms_source (n_q_points);
@@ -567,6 +573,13 @@ namespace NSFEMSolver
                               mms_error_l2[ic] += (mms_value[q][ic] - solution_values[q][ic]) *
                                                   (mms_value[q][ic] - solution_values[q][ic]) *
                                                   fe_v.JxW (q);
+                              double grad_diff = 0.0;
+                              for (unsigned int d=0; d<dim; ++d)
+                                {
+                                  grad_diff += (mms_grad[q][ic][d] - solution_grad[q][ic][d]) *
+                                               (mms_grad[q][ic][d] - solution_grad[q][ic][d]);
+                                }
+                              mms_error_H1_semi[ic] += grad_diff * fe_v.JxW (q);
                             }
                         }
                     }
@@ -582,6 +595,17 @@ namespace NSFEMSolver
                       Utilities::MPI::sum (mms_error_l2[ic], mpi_communicator);
                     mms_error_l2[ic] = received_sum;
                     pcout << 0.5 * std::log10 (mms_error_l2[ic]) << ' ';
+                  }
+                pcout << std::endl;
+                pcout << "  MMS Error H1-semi norm:\n";
+                pcout << "    n_dofs    u_err    v_err  rho_err    p_err (log10)\n   ";
+                pcout <<  std::log10 (dof_handler.n_dofs()) << ' ';
+                for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
+                  {
+                    const double received_sum =
+                      Utilities::MPI::sum (mms_error_H1_semi[ic], mpi_communicator);
+                    mms_error_H1_semi[ic] = received_sum;
+                    pcout << 0.5 * std::log10 (mms_error_H1_semi[ic]) << ' ';
                   }
                 pcout << std::endl;
               }

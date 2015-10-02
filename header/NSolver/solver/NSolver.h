@@ -251,6 +251,7 @@ namespace NSFEMSolver
     //Introduce MMS
     MMS mms;
     MMS::F_V mms_error_l2;
+    MMS::F_V mms_error_H1_semi;
     double mms_error_linfty;
 
     // Runtime parameters, not specified in input file
