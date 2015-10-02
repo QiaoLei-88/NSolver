@@ -113,8 +113,10 @@ namespace NSFEMSolver
                  ++face_no)
               if (cell->at_boundary (face_no))
                 {
-                  const typename types::boundary_id boundary_id = cell->face (face_no)->boundary_id();
-                  if (parameters->boundary_conditions[boundary_id].kind == Boundary::NonSlipWall)
+                  const types::boundary_id boundary_id = cell->face (face_no)->boundary_id();
+                  switch (parameters->boundary_conditions[boundary_id].kind)
+                    {
+                    case Boundary::NonSlipWall:
                     {
                       for (unsigned int i=0; i<dofs_per_cell; ++i)
                         if (fe.has_support_on_face (i, face_no) == true)
@@ -127,7 +129,13 @@ namespace NSFEMSolver
                                 locally_owned_solution[dof_indices[i]] = 0.0;
                               }
                           }
+                      break;
                     }
+                    default:
+                    {
+                      break;
+                    }
+                    } // switch
                 } // for .. face at_boundary
           } // for .. cell is_locally_owned
     }
