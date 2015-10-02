@@ -334,6 +334,7 @@ namespace NSFEMSolver
       void parse_parameters (ParameterHandler &prm);
 
       int n_mms;
+      bool mms_use_strong_BC;
       int manifold_circle;
       int NACA_foil;
     };

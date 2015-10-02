@@ -353,6 +353,9 @@ namespace NSFEMSolver
       prm.declare_entry ("MMS", "0",
                          Patterns::Integer(),
                          "Number of manufactured solution to test against");
+      prm.declare_entry ("MMS use strong BC", "false",
+                         Patterns::Bool(),
+                         "Use strong boundary for MMS boundary condition");
       prm.declare_entry ("ManifoldCircle", "0",
                          Patterns::Integer(),
                          "Activate C1Circle test case.");
@@ -497,6 +500,7 @@ namespace NSFEMSolver
       Parameters::PhysicalParameters::parse_parameters (prm);
 
       n_mms = prm.get_integer ("MMS");
+      mms_use_strong_BC = prm.get_bool ("MMS use strong BC");
       manifold_circle = prm.get_integer ("ManifoldCircle");
       NACA_foil = prm.get_integer ("NACA_foil");
 
