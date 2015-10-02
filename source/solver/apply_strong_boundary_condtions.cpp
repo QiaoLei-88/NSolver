@@ -45,6 +45,22 @@ namespace NSFEMSolver
                                          component_mask);
             break;
           }
+          case Boundary::MMS_BC:
+          {
+            if (mms.is_subsonic())
+              {
+                // Constraint all components
+                ComponentMask component_mask (EquationComponents<dim>::n_components, true);
+                VectorTools::
+                interpolate_boundary_values (*mapping_ptr,
+                                             dof_handler,
+                                             i_boundary,
+                                             ZeroFunction<dim> (EquationComponents<dim>::n_components),
+                                             boundary_values,
+                                             component_mask);
+              }
+            break;
+          }
           default:
           {
             break;

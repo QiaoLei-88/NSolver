@@ -131,6 +131,28 @@ namespace NSFEMSolver
                           }
                       break;
                     }
+                    case Boundary::MMS_BC:
+                    {
+                      if (mms.is_subsonic())
+                        {
+                          std::map<types::global_dof_index, double> boundary_values;
+                          ComponentMask component_mask (EquationComponents<dim>::n_components, true);
+                          VectorTools::interpolate_boundary_values (*mapping_ptr,
+                                                                    dof_handler,
+                                                                    boundary_id,
+                                                                    mms,
+                                                                    boundary_values,
+                                                                    component_mask);
+                          for (typename std::map<types::global_dof_index, double>::const_iterator
+                               it = boundary_values.begin();
+                               it != boundary_values.end();
+                               ++it)
+                            {
+                              locally_owned_solution[it->first] = it->second;
+                            }
+                        }
+                      break;
+                    }
                     default:
                     {
                       break;
