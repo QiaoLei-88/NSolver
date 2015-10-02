@@ -18,6 +18,9 @@ namespace NSFEMSolver
   template <int dim>
   void NSolver<dim>::apply_strong_boundary_condtions()
   {
+    // For Newton method, values of strong boundary condition should be prescribed
+    // in initial condition. Constraint in linear system corresponding to Newton
+    // update, which always has zero values.
     std::map<types::global_dof_index, double> boundary_values;
 
     for (unsigned int i_boundary = 0;
