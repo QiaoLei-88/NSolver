@@ -99,7 +99,6 @@ namespace NSFEMSolver
     FADD y=p (1);
     x.diff (0,2);
     y.diff (1,2);
-    const double &Pi = numbers::PI;
     FADD_V value_ad;
     for (unsigned int ic=0; ic<EquationComponents<dim2>::n_components; ++ic)
       {
@@ -108,37 +107,7 @@ namespace NSFEMSolver
 
     for (unsigned int ic=0; ic<EquationComponents<dim2>::n_components; ++ic)
       {
-        const Coeff_2D &t = c[ic];
-        switch (ic)
-          {
-          case EquationComponents<dim2>::first_momentum_component:
-            value_ad[ic] += t.c0;
-            value_ad[ic] += t.cx  * std::sin (t.ax  * Pi * x);
-            value_ad[ic] += t.cy  * std::cos (t.ay  * Pi * y);
-            value_ad[ic] += t.cxy * std::cos (t.axy * Pi * x * y);
-            break;
-          case EquationComponents<dim2>::first_momentum_component + 1:
-            value_ad[ic] += t.c0;
-            value_ad[ic] += t.cx  * std::cos (t.ax  * Pi * x);
-            value_ad[ic] += t.cy  * std::sin (t.ay  * Pi * y);
-            value_ad[ic] += t.cxy * std::cos (t.axy * Pi * x * y);
-            break;
-          case EquationComponents<dim2>::density_component:
-            value_ad[ic] += t.c0;
-            value_ad[ic] += t.cx  * std::sin (t.ax  * Pi * x);
-            value_ad[ic] += t.cy  * std::cos (t.ay  * Pi * y);
-            value_ad[ic] += t.cxy * std::cos (t.axy * Pi * x * y);
-            break;
-          case EquationComponents<dim2>::pressure_component:
-            value_ad[ic] += t.c0;
-            value_ad[ic] += t.cx  * std::cos (t.ax  * Pi * x);
-            value_ad[ic] += t.cy  * std::sin (t.ay  * Pi * y);
-            value_ad[ic] += t.cxy * std::sin (t.axy * Pi * x * y);
-            break;
-          default:
-            Assert (false, ExcNotImplemented());
-            break;
-          }
+        value_at_point<FADD> (x,y,ic,value_ad[ic]);
       }
 
     for (unsigned int ic=0; ic<EquationComponents<dim2>::n_components; ++ic)
@@ -180,6 +149,47 @@ namespace NSFEMSolver
                 source[ic] -= (visc_flux[ic][0].dx (0) + visc_flux[ic][1].dx (1));
               }
           }
+      }
+    return;
+  }
+
+  template<typename Number>
+  void MMS::value_at_point (const Number &x,
+                            const Number &y,
+                            const unsigned int component,
+                            Number &result) const
+  {
+    const double &Pi = numbers::PI;
+    const Coeff_2D &t = c[component];
+    switch (component)
+      {
+      case EquationComponents<dim2>::first_momentum_component:
+        result += t.c0;
+        result += t.cx  * std::sin (t.ax  * Pi * x);
+        result += t.cy  * std::cos (t.ay  * Pi * y);
+        result += t.cxy * std::cos (t.axy * Pi * x * y);
+        break;
+      case EquationComponents<dim2>::first_momentum_component + 1:
+        result += t.c0;
+        result += t.cx  * std::cos (t.ax  * Pi * x);
+        result += t.cy  * std::sin (t.ay  * Pi * y);
+        result += t.cxy * std::cos (t.axy * Pi * x * y);
+        break;
+      case EquationComponents<dim2>::density_component:
+        result += t.c0;
+        result += t.cx  * std::sin (t.ax  * Pi * x);
+        result += t.cy  * std::cos (t.ay  * Pi * y);
+        result += t.cxy * std::cos (t.axy * Pi * x * y);
+        break;
+      case EquationComponents<dim2>::pressure_component:
+        result += t.c0;
+        result += t.cx  * std::cos (t.ax  * Pi * x);
+        result += t.cy  * std::sin (t.ay  * Pi * y);
+        result += t.cxy * std::sin (t.axy * Pi * x * y);
+        break;
+      default:
+        Assert (false, ExcNotImplemented());
+        break;
       }
     return;
   }

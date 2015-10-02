@@ -120,6 +120,12 @@ namespace NSFEMSolver
     C_V c;
     bool initialized;
     bool is_NS;
+
+    template<typename Number>
+    void value_at_point (const Number &x,
+                         const Number &y,
+                         const unsigned int component,
+                         Number &result) const;
   };
 }
 #endif
