@@ -47,7 +47,7 @@ namespace NSFEMSolver
           }
           case Boundary::MMS_BC:
           {
-            if (mms.is_subsonic())
+            if (parameters->mms_use_strong_BC)
               {
                 // Constraint all components
                 ComponentMask component_mask (EquationComponents<dim>::n_components, true);
