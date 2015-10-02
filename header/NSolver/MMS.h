@@ -10,6 +10,7 @@
 #define __NSolver__MMS__
 
 #include <NSolver/NSEquation.h>
+#include <deal.II/base/function.h>
 
 namespace NSFEMSolver
 {
@@ -54,7 +55,7 @@ namespace NSFEMSolver
    * By default, this class works in Euler mode, i.e., no viscous flux
    * will be involved.
    */
-  class MMS
+  class MMS : public Function<dim2>
   {
   public:
     typedef Sacado::Fad::DFad<double> FADD;
@@ -75,21 +76,17 @@ namespace NSFEMSolver
      */
     MMS();
 
-
     /**
      * Copy constructor
      */
     MMS (const MMS &mms_in);
-
 
     /**
      * Initialize the object with provided coefficients. This has nothing to
      * do with whether the calling object will work in Euler or Navier-Stokes
      * mode.
      */
-    void reinit
-    (C_V &c_in);
-
+    void reinit (C_V &c_in);
 
     /**
      * You can control the equation mode of the MMS object by the flowing two
@@ -116,6 +113,28 @@ namespace NSFEMSolver
                    F_T &grad,
                    F_V &source,
                    const bool need_source = false) const;
+    /**
+     * access to one component at one point
+     */
+    virtual double value (const Point<dim2>  &p,
+                          const unsigned int component = 0) const;
+    /**
+     * return all components at one point
+     */
+    virtual void vector_value (const Point<dim2> &p,
+                               Vector<double>   &value) const;
+
+    /**
+     * access to one component at several points
+     */
+    virtual void value_list (const std::vector<Point<dim2> > &point_list,
+                             std::vector<double>             &value_list,
+                             const unsigned int  component = 0) const;
+    /**
+     * return all components at several points
+     */
+    virtual void vector_value_list (const std::vector<Point<dim2> > &point_list,
+                                    std::vector<Vector<double> >    &value_list) const;
   private:
     C_V c;
     bool initialized;

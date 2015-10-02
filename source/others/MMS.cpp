@@ -39,6 +39,7 @@ namespace NSFEMSolver
 
   MMS::MMS()
     :
+    Function<dim2> (EquationComponents<dim2>::n_components),
     initialized (false),
     is_NS (false)
   {}
@@ -46,6 +47,7 @@ namespace NSFEMSolver
 
   MMS::MMS (const MMS &mms_in)
     :
+    Function<dim2> (EquationComponents<dim2>::n_components),
     initialized (mms_in.initialized),
     is_NS (mms_in.is_NS)
     // TODO: It seems now the deal.II provided std_cxx11::array does not
@@ -56,7 +58,6 @@ namespace NSFEMSolver
         c[i] = mms_in.c[i];
       }
   }
-
 
   void MMS::reinit
   (std_cxx11::array<Coeff_2D, EquationComponents<dim2>::n_components> &c_in)
@@ -85,6 +86,51 @@ namespace NSFEMSolver
     // This implementation id no reliable, but works under current situation.
     // Mean velocity square
     return ((c[0].c0*c[0].c0 + c[1].c0*c[1].c0) < 1.0);
+  }
+
+  double MMS::value (const Point<dim2>  &p,
+                     const unsigned int component) const
+  {
+    double rv (0.0);
+    value_at_point<double> (p[0], p[1], component, rv);
+    return (rv);
+  }
+
+  void MMS::vector_value (const Point<dim2> &p,
+                          Vector<double>   &value) const
+  {
+    Assert (value.size() >= this->n_components,
+            ExcMessage ("Not enough space for all components!"));
+    for (unsigned int i=0; i<this->n_components; ++i)
+      {
+        value[i] = this->value (p,i);
+      }
+    return;
+  }
+
+  void MMS::value_list (const std::vector<Point<dim2> > &point_list,
+                        std::vector<double>             &value_list,
+                        const unsigned int  component) const
+  {
+    Assert (point_list.size() == value_list.size(),
+            ExcMessage ("Vector size mismatch!"));
+    for (unsigned int i=0; i<point_list.size(); ++i)
+      {
+        value_list[i] = this->value (point_list[i], component);
+      }
+    return;
+  }
+
+  void MMS::vector_value_list (const std::vector<Point<dim2> > &point_list,
+                               std::vector<Vector<double> >    &value_list) const
+  {
+    Assert (point_list.size() == value_list.size(),
+            ExcMessage ("Vector size mismatch!"));
+    for (unsigned int i=0; i<point_list.size(); ++i)
+      {
+        this->vector_value (point_list[i], value_list[i]);
+      }
+    return;
   }
 
   void MMS::evaluate (const Point<dim2>   &p,
