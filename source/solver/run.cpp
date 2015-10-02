@@ -576,7 +576,9 @@ namespace NSFEMSolver
                 pcout <<  std::log10 (dof_handler.n_dofs()) << ' ';
                 for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
                   {
-                    Utilities::MPI::sum (mms_error_l2[ic], mpi_communicator);
+                    const double received_sum =
+                      Utilities::MPI::sum (mms_error_l2[ic], mpi_communicator);
+                    mms_error_l2[ic] = received_sum;
                     pcout << 0.5 * std::log10 (mms_error_l2[ic]) << ' ';
                   }
                 pcout << std::endl;
