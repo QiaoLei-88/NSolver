@@ -190,15 +190,14 @@ namespace NSFEMSolver
     //MMS: evaluate source term
     std::vector <MMS::F_V> mms_source (n_q_points);
     std::vector <MMS::F_V> mms_value (n_q_points);
+    std::vector <MMS::F_T> mms_grad (n_q_points);
     if (parameters->n_mms == 1)
       {
         for (unsigned int q=0; q<n_q_points; ++q)
           {
-            mms.evaluate (fe_v.quadrature_point (q), mms_value[q], mms_source[q], /* const bool need_source = */ true);
+            mms.evaluate (fe_v.quadrature_point (q), mms_value[q], mms_grad[q], mms_source[q], /* const bool need_source = */ true);
           }
-
       }
-
 
     for (unsigned int q=0; q<n_q_points; ++q)
       {

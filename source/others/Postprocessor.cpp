@@ -101,7 +101,9 @@ namespace NSFEMSolver
           {
             MMS::F_V sol;
             MMS::F_V src;
-            mms_x->evaluate (points[q],sol,src,true);
+            MMS::F_T grad;
+            mms_x->evaluate (points[q],sol,grad,src,true);
+
             int i_out = dim + 2;
             for (unsigned int ic = 0; ic < EquationComponents<dim>::n_components; ++ic, ++i_out)
               {

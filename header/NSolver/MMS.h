@@ -108,6 +108,7 @@ namespace NSFEMSolver
      */
     void evaluate (const Point<dim2>   &p,
                    F_V &value,
+                   F_T &grad,
                    F_V &source,
                    const bool need_source = false) const;
   private:

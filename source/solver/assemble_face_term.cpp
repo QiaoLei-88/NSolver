@@ -144,7 +144,8 @@ namespace NSFEMSolver
                 const Point<dim> p = fe_v.quadrature_point (q);
                 MMS::F_V sol;
                 MMS::F_V src;
-                mms.evaluate (p,sol,src,false);
+                MMS::F_T grad;
+                mms.evaluate (p,sol,grad,src,false);
                 for (unsigned int ic=0; ic < EquationComponents<dim>::n_components; ++ic)
                   {
                     boundary_values[q][ic] = sol[ic];

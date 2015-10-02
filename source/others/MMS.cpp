@@ -82,6 +82,7 @@ namespace NSFEMSolver
 
   void MMS::evaluate (const Point<dim2>   &p,
                       F_V &value,
+                      F_T &grad,
                       F_V &source,
                       const bool need_source) const
   {
@@ -136,6 +137,10 @@ namespace NSFEMSolver
     for (unsigned int ic=0; ic<EquationComponents<dim2>::n_components; ++ic)
       {
         value[ic] = value_ad[ic].val();
+        for (unsigned int d=0; d<dim2; ++d)
+          {
+            grad[ic][d] = value_ad[ic].dx (d);
+          }
       }
 
     if (need_source)
