@@ -81,19 +81,18 @@ namespace NSFEMSolver
   }
 
   void MMS::evaluate (const Point<dim2>   &p,
-                      std_cxx11::array<double, EquationComponents<dim2>::n_components> &value,
-                      std_cxx11::array<double, EquationComponents<dim2>::n_components> &source,
+                      F_V &value,
+                      F_V &source,
                       const bool need_source) const
   {
     Assert (initialized, ExcMessage ("run MMS::reinit(...) before MMS::evaluation(...)."));
 
-    typedef Sacado::Fad::DFad<double> FADD;
     FADD x=p (0);
     FADD y=p (1);
     x.diff (0,2);
     y.diff (1,2);
     const double &Pi = numbers::PI;
-    std_cxx11::array<FADD, EquationComponents<dim2>::n_components> value_ad;
+    FADD_V value_ad;
     for (unsigned int ic=0; ic<EquationComponents<dim2>::n_components; ++ic)
       {
         value_ad[ic] = 0.0;
@@ -142,9 +141,7 @@ namespace NSFEMSolver
     if (need_source)
       {
         {
-          std_cxx11::array
-          <std_cxx11::array <FADD, dim2>, EquationComponents<dim2>::n_components >
-          flux;
+          FADD_T flux;
 
           EulerEquations<dim2>::compute_inviscid_flux (value_ad, flux);
 
@@ -155,18 +152,14 @@ namespace NSFEMSolver
         }
         if (is_NS)
           {
-            std_cxx11::array
-            <std_cxx11::array <FADD, dim2>, EquationComponents<dim2>::n_components >
-            grad_value;
+            FADD_T grad_value;
             for (unsigned int ic=0; ic<EquationComponents<dim2>::n_components; ++ic)
               {
                 grad_value[ic][0] = value_ad[ic].dx (0);
                 grad_value[ic][1] = value_ad[ic].dx (1);
               }
 
-            std_cxx11::array
-            <std_cxx11::array <FADD, dim2>, EquationComponents<dim2>::n_components >
-            visc_flux;
+            FADD_T visc_flux;
 
             EulerEquations<dim2>::compute_viscous_flux (value_ad, grad_value, visc_flux);
 

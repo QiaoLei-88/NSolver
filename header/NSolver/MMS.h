@@ -57,6 +57,19 @@ namespace NSFEMSolver
   class MMS
   {
   public:
+    typedef Sacado::Fad::DFad<double> FADD;
+    // Fluid vector
+    typedef std_cxx11::array<double, EquationComponents<dim2>::n_components>  F_V;
+    // Fluid tensor
+    typedef std_cxx11::array <std_cxx11::array <double, dim2>,
+            EquationComponents<dim2>::n_components > F_T;
+
+    typedef std_cxx11::array<FADD, EquationComponents<dim2>::n_components> FADD_V;
+    typedef std_cxx11::array <std_cxx11::array <FADD, dim2>,
+            EquationComponents<dim2>::n_components > FADD_T;
+    // coefficient vector
+    typedef std_cxx11::array<Coeff_2D, EquationComponents<dim2>::n_components> C_V;
+  public:
     /**
      * Default constructor
      */
@@ -75,7 +88,7 @@ namespace NSFEMSolver
      * mode.
      */
     void reinit
-    (std_cxx11::array<Coeff_2D, EquationComponents<dim2>::n_components> &c_in);
+    (C_V &c_in);
 
 
     /**
@@ -94,11 +107,11 @@ namespace NSFEMSolver
      * The divergence is evaluated by automatic differentiation with Sacado::FAD.
      */
     void evaluate (const Point<dim2>   &p,
-                   std_cxx11::array<double, EquationComponents<dim2>::n_components> &value,
-                   std_cxx11::array<double, EquationComponents<dim2>::n_components> &source,
+                   F_V &value,
+                   F_V &source,
                    const bool need_source = false) const;
   private:
-    std_cxx11::array<Coeff_2D, EquationComponents<dim2>::n_components> c;
+    C_V c;
     bool initialized;
     bool is_NS;
   };
