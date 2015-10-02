@@ -43,7 +43,7 @@ namespace NSFEMSolver
     std::vector<types::global_dof_index> dof_indices (dofs_per_cell);
     std::vector<types::global_dof_index> dof_indices_neighbor (dofs_per_cell);
 
-    //MMS: update quadrature points for evaluation of manufactored solution.
+    //MMS: update quadrature points for evaluation of manufactured solution.
     const UpdateFlags update_flags               = update_values
                                                    | update_gradients
                                                    | update_q_points
