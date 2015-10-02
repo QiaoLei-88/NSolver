@@ -250,7 +250,7 @@ namespace NSFEMSolver
 
     //Introduce MMS
     MMS mms;
-    std_cxx11::array<double, EquationComponents<dim>::n_components> mms_error_l2;
+    MMS::F_V mms_error_l2;
     double mms_error_linfty;
 
     // Runtime parameters, not specified in input file

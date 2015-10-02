@@ -99,7 +99,8 @@ namespace NSFEMSolver
 
         if (output_mms)
           {
-            std_cxx11::array<double, EquationComponents<dim>::n_components> sol, src;
+            MMS::F_V sol;
+            MMS::F_V src;
             mms_x->evaluate (points[q],sol,src,true);
             int i_out = dim + 2;
             for (unsigned int ic = 0; ic < EquationComponents<dim>::n_components; ++ic, ++i_out)

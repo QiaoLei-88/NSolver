@@ -538,8 +538,8 @@ namespace NSFEMSolver
                   fe_v.get_function_values (current_solution, solution_values);
                   fe_v.get_function_values (old_solution, old_solution_values);
 
-                  std::vector < std_cxx11::array< double, EquationComponents<dim>::n_components> >
-                  mms_source (n_q_points), mms_value (n_q_points);
+                  std::vector <MMS::F_V> mms_source (n_q_points);
+                  std::vector <MMS::F_V> mms_value (n_q_points);
 
                   for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
                     {

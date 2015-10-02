@@ -142,7 +142,8 @@ namespace NSFEMSolver
             for (unsigned int q = 0; q < n_q_points; q++)
               {
                 const Point<dim> p = fe_v.quadrature_point (q);
-                std_cxx11::array<double, EquationComponents<dim>::n_components> sol, src;
+                MMS::F_V sol;
+                MMS::F_V src;
                 mms.evaluate (p,sol,src,false);
                 for (unsigned int ic=0; ic < EquationComponents<dim>::n_components; ++ic)
                   {
