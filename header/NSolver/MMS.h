@@ -99,6 +99,11 @@ namespace NSFEMSolver
     void set_eqn_to_Euler();
 
     /**
+     * return the manufactured solution is subsonic or not.
+     */
+    bool is_subsonic() const;
+
+    /**
      * Evaluate the exact solution at specified point p and put result into
      * array value. If need_source is set to true, the corresponding source
      * term at point p will be evaluated and put into array source.

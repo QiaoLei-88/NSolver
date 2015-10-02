@@ -80,6 +80,13 @@ namespace NSFEMSolver
     return;
   }
 
+  bool MMS::is_subsonic() const
+  {
+    // This implementation id no reliable, but works under current situation.
+    // Mean velocity square
+    return ((c[0].c0*c[0].c0 + c[1].c0*c[1].c0) < 1.0);
+  }
+
   void MMS::evaluate (const Point<dim2>   &p,
                       F_V &value,
                       F_T &grad,
