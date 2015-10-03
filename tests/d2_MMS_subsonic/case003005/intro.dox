@@ -1,0 +1,2 @@
+Run case003003 with strong boundary condition.
+Also update some time marching parameters to avoid divergence.
