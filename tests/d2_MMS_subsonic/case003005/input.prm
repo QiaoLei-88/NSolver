@@ -30,10 +30,10 @@ subsection physical parameters
 end
 
 set MMS = 1
+set MMS use strong BC = true
 
 # Doesn't need input grid
 set global refinement = 3
-set MMS use strong BC = true
 
 # Stabilization parameter
 set diffusion type  = const # <cell size|entropy|const>
