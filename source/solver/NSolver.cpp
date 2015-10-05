@@ -81,7 +81,7 @@ namespace NSFEMSolver
     field_output_counter (0),
     init_res_norm (1.0e-2),
     res_norm (1.0e-2),
-    last_viscosity_coeff (1e+42)
+    last_viscosity_coeff (para_ptr_in->diffusion_coefficoent)
   {
     Assert (parameters, ExcMessage ("Null pointer encountered!"));
 
