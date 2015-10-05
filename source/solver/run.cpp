@@ -219,6 +219,17 @@ namespace NSFEMSolver
     double res_norm_total (0.0);
     double res_norm_total_previous (0.0);
     double res_norm_infty_total (0.0);
+    {
+      system_matrix = 0;
+      right_hand_side = 0;
+      physical_residual = 0;
+      newton_update = 0;
+
+      assemble_system();
+      apply_strong_boundary_condtions();
+      physical_res_norm = physical_residual.l2_norm();
+      old_physical_res_norm = physical_res_norm;
+    }
     while (!terminate_time_stepping)
       {
         computing_timer.enter_subsection ("2:Prepare Newton iteration");
@@ -312,7 +323,8 @@ namespace NSFEMSolver
 
             res_norm = right_hand_side.l2_norm();
             res_norm_total += res_norm;
-            const double physical_res_norm = physical_residual.l2_norm();
+            old_physical_res_norm = physical_res_norm;
+            physical_res_norm = physical_residual.l2_norm();
 
             res_norm_infty = right_hand_side.linfty_norm();
             res_norm_infty_total += res_norm_infty;

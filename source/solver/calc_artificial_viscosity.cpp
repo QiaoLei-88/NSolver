@@ -137,14 +137,14 @@ namespace NSFEMSolver
       }
       case Parameters::AllParameters<dim>::diffu_res:
       {
-        const double visc_min = parameters->Mach / parameters->Reynolds;
-        const double ratio = (std::log10 (init_res_norm) - std::log10 (res_norm))/
-                             (std::log10 (init_res_norm) - parameters->time_march_tolerance);
-        double viscos_coeff = ratio * visc_min +
-                              (1.0 - ratio) * parameters->diffusion_coefficoent;
-        viscos_coeff = std::max (visc_min, viscos_coeff);
+        // const double visc_min = parameters->Mach / parameters->Reynolds;
+        // const double ratio = (std::log10 (init_res_norm) - std::log10 (res_norm))/
+        //                      (std::log10 (init_res_norm) - parameters->time_march_tolerance);
+        // double viscos_coeff = ratio * visc_min +
+        //                       (1.0 - ratio) * parameters->diffusion_coefficoent;
+        // viscos_coeff = std::max (visc_min, viscos_coeff);
+        double viscos_coeff = physical_res_norm * physical_res_norm / old_physical_res_norm;
         viscos_coeff = std::min (viscos_coeff, last_viscosity_coeff);
-        viscos_coeff = last_viscosity_coeff * 0.5;
         last_viscosity_coeff = viscos_coeff;
         std::fill (artificial_viscosity.begin(),
                    artificial_viscosity.end(),

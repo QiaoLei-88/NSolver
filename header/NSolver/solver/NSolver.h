@@ -275,6 +275,8 @@ namespace NSFEMSolver
     double res_norm;
     double newton_update_norm;
     double last_viscosity_coeff;
+    double physical_res_norm;
+    double old_physical_res_norm;
   };
 
 }
