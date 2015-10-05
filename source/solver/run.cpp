@@ -382,7 +382,7 @@ namespace NSFEMSolver
             // Check result.
             newton_iter_converged
               = (std::log10 (res_norm) < parameters->nonlinear_tolerance);
-            newton_iter_converged = newton_iter_converged &&
+            newton_iter_converged = newton_iter_converged ||
                                     (res_norm < 0.1 * local_init_res);
 
             if (linear_solver_diverged)
