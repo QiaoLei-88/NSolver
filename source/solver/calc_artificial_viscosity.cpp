@@ -144,7 +144,7 @@ namespace NSFEMSolver
         //                       (1.0 - ratio) * parameters->diffusion_coefficoent;
         // viscos_coeff = std::max (visc_min, viscos_coeff);
         double viscos_coeff = physical_res_norm * physical_res_norm / old_physical_res_norm;
-        viscos_coeff = std::min (viscos_coeff, last_viscosity_coeff);
+        viscos_coeff = std::min (viscos_coeff, 0.5 * last_viscosity_coeff);
         last_viscosity_coeff = viscos_coeff;
         std::fill (artificial_viscosity.begin(),
                    artificial_viscosity.end(),
