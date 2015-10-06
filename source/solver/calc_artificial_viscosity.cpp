@@ -106,8 +106,13 @@ namespace NSFEMSolver
                 * cell->diameter()
                 * rho_max * characteristic_speed_max;
 
+                // Smooth for initial stage
+                double viscos_coeff = physical_res_norm * physical_res_norm / old_physical_res_norm;
+                viscos_coeff = std::min (viscos_coeff, 0.5 * last_viscosity_coeff);
+                last_viscosity_coeff = viscos_coeff;
+
                 artificial_viscosity[cell->active_cell_index()] =
-                std::min (miu_max, entropy_visc);
+                std::max (std::min (miu_max, entropy_visc), viscos_coeff);
               } // End if cell is locally owned
           } // End for active cells
         break;
