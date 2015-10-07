@@ -17,6 +17,10 @@ namespace NSFEMSolver
       {
       case Parameters::AllParameters<dim>::diffu_entropy:
       {
+        if (n_time_step > 50)
+          {
+            break;
+          }
         // Entropy viscosity
         FEValues<dim> fe_values (fe,
                                  quadrature,
@@ -32,6 +36,32 @@ namespace NSFEMSolver
         std::vector<Vector<double> > W_old (n_q_points, Vector<double> (EquationComponents<dim>::n_components));
 
         std::vector<types::global_dof_index> global_indices_of_local_dofs (dofs_per_cell);
+
+        double viscos_coeff (0.0);
+        // Smooth for initial stage
+        viscos_coeff = physical_res_norm * physical_res_norm / old_physical_res_norm;
+        viscos_coeff = std::min (viscos_coeff, 0.5 * last_viscosity_coeff);
+        viscos_coeff = std::max (viscos_coeff, 3.0e-5);
+        if (n_time_step<5)
+          {
+            viscos_coeff = last_viscosity_coeff;
+          }
+        std::cerr << "viscos_coeff = " << viscos_coeff << std::endl;
+
+        double h (0.707);
+        {
+          typename DoFHandler<dim>::active_cell_iterator cell =
+            dof_handler.begin_active();
+          const typename DoFHandler<dim>::active_cell_iterator endc =
+            dof_handler.end();
+          for (; cell!=endc; ++cell)
+            {
+              if (cell->is_locally_owned())
+                {
+                  h = std::min (cell->diameter(), h);
+                }
+            }
+        }
 
         typename DoFHandler<dim>::active_cell_iterator cell =
           dof_handler.begin_active();
@@ -70,6 +100,7 @@ namespace NSFEMSolver
 
                     double D_h1 (0.0),D_h2 (0.0);
                     D_h1 = (entropy.val() - entroy_old)/dt;
+                    D_h1 = 0.0;
                     D_h2 = (W[q][EquationComponents<dim>::density_component] - W_old[q][EquationComponents<dim>::density_component])/dt;
 
                     //sum up divergence
@@ -100,21 +131,17 @@ namespace NSFEMSolver
                   }
                 const double entropy_visc
                 = parameters->entropy_visc_cE * rho_max
-                * std::pow (cell->diameter(), 2.0) * D_h_max;
+                * h * h * D_h_max;
                 const double miu_max
                 = parameters->entropy_visc_cLinear
                 * cell->diameter()
                 * rho_max * characteristic_speed_max;
 
-                // Smooth for initial stage
-                double viscos_coeff = physical_res_norm * physical_res_norm / old_physical_res_norm;
-                viscos_coeff = std::min (viscos_coeff, 0.5 * last_viscosity_coeff);
-                last_viscosity_coeff = viscos_coeff;
-
                 artificial_viscosity[cell->active_cell_index()] =
-                std::max (std::min (miu_max, entropy_visc), viscos_coeff);
+                std::min (std::max (entropy_visc, viscos_coeff), 1.0);
               } // End if cell is locally owned
           } // End for active cells
+        last_viscosity_coeff = viscos_coeff;
         break;
       }
       case Parameters::AllParameters<dim>::diffu_cell_size:
