@@ -33,6 +33,21 @@ namespace NSFEMSolver
         last_viscosity_coeff = viscos_coeff;
         if (n_time_step > 50)
           {
+            typename DoFHandler<dim>::active_cell_iterator cell =
+              dof_handler.begin_active();
+            const typename DoFHandler<dim>::active_cell_iterator endc =
+              dof_handler.end();
+            for (; cell!=endc; ++cell)
+              {
+                if (cell->is_locally_owned())
+                  {
+                    const double v = artificial_viscosity[cell->active_cell_index()];
+                    if (v <= 3.01e-5)
+                      {
+                        artificial_viscosity[cell->active_cell_index()] = viscos_coeff;
+                      }
+                  }
+              }
             break;
           }
         // Entropy viscosity
