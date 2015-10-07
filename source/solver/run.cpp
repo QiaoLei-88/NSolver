@@ -229,6 +229,7 @@ namespace NSFEMSolver
       apply_strong_boundary_condtions();
       physical_res_norm = physical_residual.l2_norm();
       old_physical_res_norm = physical_res_norm;
+      std::cerr << "RUN: " << physical_res_norm << std::endl;
     }
     while (!terminate_time_stepping)
       {
@@ -479,13 +480,15 @@ namespace NSFEMSolver
             terminate_time_stepping = terminate_time_stepping ||
                                       (parameters->is_steady &&
                                        n_time_step > parameters->final_time);
-            const bool do_refine = (
-                                     (parameters->is_steady)
-                                     ?
-                                     (static_cast<unsigned int> (parameters->max_refine_time) >= n_time_step)
-                                     :
-                                     (parameters->max_refine_time >= time)
-                                   );
+            bool do_refine = (
+                               (parameters->is_steady)
+                               ?
+                               (static_cast<unsigned int> (parameters->max_refine_time) >= n_time_step)
+                               :
+                               (parameters->max_refine_time >= time)
+                             );
+            do_refine = do_refine && (n_time_step%3 == 0);
+            do_refine = do_refine || (n_time_step < 10);
             if (do_refine)
               {
                 compute_refinement_indicators();
