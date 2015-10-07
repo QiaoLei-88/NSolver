@@ -45,10 +45,10 @@ namespace NSFEMSolver
           {
             viscos_coeff = std::max (viscos_coeff, 3.0e-5);
           }
-        if (n_time_step<5)
-          {
-            viscos_coeff = last_viscosity_coeff;
-          }
+        // if (n_time_step<5)
+        //   {
+        //     viscos_coeff = last_viscosity_coeff;
+        //   }
         std::cerr << "viscos_coeff = " << viscos_coeff << std::endl;
 
         double h (0.707);
