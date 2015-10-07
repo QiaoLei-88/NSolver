@@ -299,6 +299,7 @@ namespace NSFEMSolver
         res_norm_infty_total = 0.0;
         calc_artificial_viscosity();
         double local_init_res (0.0);
+        physical_res_norm = 0.0;
         do // Newton iteration
           {
             computing_timer.enter_subsection ("3:Assemble Newton system");
@@ -324,9 +325,11 @@ namespace NSFEMSolver
 
             res_norm = right_hand_side.l2_norm();
             res_norm_total += res_norm;
-            old_physical_res_norm = physical_res_norm;
-            physical_res_norm = physical_residual.l2_norm();
-
+            if (nonlin_iter == 0)
+              {
+                old_physical_res_norm = physical_res_norm;
+                physical_res_norm += physical_residual.l2_norm();
+              }
             res_norm_infty = right_hand_side.linfty_norm();
             res_norm_infty_total += res_norm_infty;
             if (n_time_step == 0)
