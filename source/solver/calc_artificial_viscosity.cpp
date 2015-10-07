@@ -41,7 +41,10 @@ namespace NSFEMSolver
         // Smooth for initial stage
         viscos_coeff = physical_res_norm * physical_res_norm / old_physical_res_norm;
         viscos_coeff = std::min (viscos_coeff, 0.5 * last_viscosity_coeff);
-        viscos_coeff = std::max (viscos_coeff, 3.0e-5);
+        if (n_time_step <= 50)
+          {
+            viscos_coeff = std::max (viscos_coeff, 3.0e-5);
+          }
         if (n_time_step<5)
           {
             viscos_coeff = last_viscosity_coeff;
