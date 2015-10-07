@@ -17,6 +17,20 @@ namespace NSFEMSolver
       {
       case Parameters::AllParameters<dim>::diffu_entropy:
       {
+        double viscos_coeff (0.0);
+        // Smooth for initial stage
+        viscos_coeff = physical_res_norm * physical_res_norm / old_physical_res_norm;
+        viscos_coeff = std::min (viscos_coeff, 0.5 * last_viscosity_coeff);
+        if (n_time_step <= 50)
+          {
+            viscos_coeff = std::max (viscos_coeff, 3.0e-5);
+          }
+        // if (n_time_step<5)
+        //   {
+        //     viscos_coeff = last_viscosity_coeff;
+        //   }
+        std::cerr << "viscos_coeff = " << viscos_coeff << std::endl;
+        last_viscosity_coeff = viscos_coeff;
         if (n_time_step > 50)
           {
             break;
@@ -36,20 +50,6 @@ namespace NSFEMSolver
         std::vector<Vector<double> > W_old (n_q_points, Vector<double> (EquationComponents<dim>::n_components));
 
         std::vector<types::global_dof_index> global_indices_of_local_dofs (dofs_per_cell);
-
-        double viscos_coeff (0.0);
-        // Smooth for initial stage
-        viscos_coeff = physical_res_norm * physical_res_norm / old_physical_res_norm;
-        viscos_coeff = std::min (viscos_coeff, 0.5 * last_viscosity_coeff);
-        if (n_time_step <= 50)
-          {
-            viscos_coeff = std::max (viscos_coeff, 3.0e-5);
-          }
-        // if (n_time_step<5)
-        //   {
-        //     viscos_coeff = last_viscosity_coeff;
-        //   }
-        std::cerr << "viscos_coeff = " << viscos_coeff << std::endl;
 
         double h (0.707);
         {
@@ -144,7 +144,6 @@ namespace NSFEMSolver
                 std::min (std::max (entropy_visc, viscos_coeff), 1.0);
               } // End if cell is locally owned
           } // End for active cells
-        last_viscosity_coeff = viscos_coeff;
         break;
       }
       case Parameters::AllParameters<dim>::diffu_cell_size:
