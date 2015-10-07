@@ -328,7 +328,7 @@ namespace NSFEMSolver
             if (nonlin_iter == 0)
               {
                 old_physical_res_norm = physical_res_norm;
-                physical_res_norm += physical_residual.l2_norm();
+                physical_res_norm = physical_residual.l2_norm();
               }
             res_norm_infty = right_hand_side.linfty_norm();
             res_norm_infty_total += res_norm_infty;
@@ -360,7 +360,7 @@ namespace NSFEMSolver
                              res_norm,newton_update_norm, convergence.first, convergence.second,
                              linear_search_length[index_linear_search_length],
                              global_time_step_size, CFL_number, res_norm_infty, res_norm_infty_total,
-                             physical_res_norm);
+                             physical_residual.l2_norm());
               }
             linear_solver_diverged = std::isnan (convergence.second);
 
