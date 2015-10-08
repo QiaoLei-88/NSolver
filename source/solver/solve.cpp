@@ -23,7 +23,7 @@ namespace NSFEMSolver
   std::pair<unsigned int, double>
   NSolver<dim>::solve (NSVector &newton_update)
   {
-    std::pair<unsigned int, double> return_value (0,0);
+    std::pair<unsigned int, double> return_value (-1, -1);
     switch (parameters->solver)
       {
       // If the parameter file specified that a direct solver shall be used,
