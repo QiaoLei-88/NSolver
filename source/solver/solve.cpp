@@ -23,6 +23,7 @@ namespace NSFEMSolver
   std::pair<unsigned int, double>
   NSolver<dim>::solve (NSVector &newton_update)
   {
+    std::pair<unsigned int, double> return_value (0,0);
     switch (parameters->solver)
       {
       // If the parameter file specified that a direct solver shall be used,
@@ -47,8 +48,9 @@ namespace NSFEMSolver
 
         direct.solve (system_matrix, newton_update, right_hand_side);
 
-        return std::pair<unsigned int, double> (solver_control.last_step(),
-                                                solver_control.last_value());
+        return_value.first = solver_control.last_step();
+        return_value.second = solver_control.last_value();
+        break;
       }
 
       // Likewise, if we are to use an iterative solver, we use Aztec's GMRES
@@ -150,17 +152,23 @@ namespace NSFEMSolver
                               (&system_matrix.trilinos_matrix()));
         solver.Iterate (parameters->max_iterations, parameters->linear_residual);
 
-        return std::pair<unsigned int, double> (solver.NumIters(),
-                                                solver.TrueResidual());
+        return_value.first = solver.NumIters();
+        return_value.second = solver.TrueResidual();
         if (!preconditioner_ptr)
           {
             delete preconditioner_ptr;
           }
+        break;
+        // End case Parameters::Solver::gmres:
       }
+      default:
+      {
+        AssertThrow (false, ExcNotImplemented());
+        break;
       }
+      } // End switch (parameters->solver)
 
-    Assert (false, ExcNotImplemented());
-    return std::pair<unsigned int, double> (0,0);
+    return (return_value);
   }
 
 #include "NSolver.inst"
