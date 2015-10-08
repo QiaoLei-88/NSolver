@@ -108,7 +108,7 @@ namespace NSFEMSolver
     }
 
     if (variation_coefficient > last_refine_variation_coefficient ||
-        triangulation.n_global_active_cells() < parameters->max_cells)
+        triangulation.n_global_active_cells() < (parameters->max_cells)*0.97)
       {
 
         // Then we need to transfer the various solution vectors from the old to
