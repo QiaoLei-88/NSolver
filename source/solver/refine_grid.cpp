@@ -107,7 +107,8 @@ namespace NSFEMSolver
       std::cerr << "variation_coefficient = " << variation_coefficient << std::endl;
     }
 
-    if (variation_coefficient > last_refine_variation_coefficient)
+    if (variation_coefficient > last_refine_variation_coefficient ||
+        triangulation.n_global_active_cells() < parameters->max_cells)
       {
 
         // Then we need to transfer the various solution vectors from the old to
