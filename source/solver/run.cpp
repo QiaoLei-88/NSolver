@@ -490,8 +490,8 @@ namespace NSFEMSolver
                                :
                                (parameters->max_refine_time >= time)
                              );
-            do_refine = do_refine && (n_time_step%3 == 0);
-            do_refine = do_refine || (n_time_step < 10);
+            // do_refine = do_refine && (n_time_step%3 == 0);
+            // do_refine = do_refine || (n_time_step < 10);
             if (do_refine)
               {
                 compute_refinement_indicators();
