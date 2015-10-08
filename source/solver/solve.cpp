@@ -143,7 +143,7 @@ namespace NSFEMSolver
           }
           default:
           {
-            AssertThrow (false, ExcNotImplemented());
+            AssertThrow (false, ExcMessage ("Preconditioner type not implemented."));
             break;
           }
           } //End of switch (parameters->prec_type)
@@ -163,7 +163,7 @@ namespace NSFEMSolver
       }
       default:
       {
-        AssertThrow (false, ExcNotImplemented());
+        AssertThrow (false, ExcMessage ("Solver type not implemented."));
         break;
       }
       } // End switch (parameters->solver)
