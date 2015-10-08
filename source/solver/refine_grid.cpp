@@ -77,6 +77,34 @@ namespace NSFEMSolver
           }
     }
 
+    {
+      // compute normalized standard deviation (variation coefficient) of refinement indicator
+      double x_sum (0.0);
+      double x_square_sum (0.0);
+      double n_cell_active_local (0.0);
+
+      typename DoFHandler<dim>::active_cell_iterator
+      cell = dof_handler.begin_active();
+      const  typename DoFHandler<dim>::active_cell_iterator
+      endc = dof_handler.end();
+      for (; cell != endc; ++cell)
+        if (cell->is_locally_owned())
+          {
+            const double x = refinement_indicators[cell->active_cell_index()];
+            x_sum += x;
+            x_square_sum += x*x;
+            ++n_cell_active_local;
+          }
+      const double n_cell_active_global = Utilities::MPI::sum (n_cell_active_local, mpi_communicator);
+      std::cerr << "n_cell_active_local = " << n_cell_active_local << std::endl;
+      std::cerr << "n_cell_active_global = " << n_cell_active_global << std::endl;
+      const double x_mean_global = Utilities::MPI::sum (x_sum, mpi_communicator) / n_cell_active_global;
+      const double x_square_mean_global = Utilities::MPI::sum (x_square_sum, mpi_communicator) / n_cell_active_global;
+      std::cerr << "x_square_mean_global = " << x_square_mean_global << std::endl;
+      std::cerr << "x_mean_global = " << x_mean_global << std::endl;
+      const double variation_coefficient = std::sqrt (x_square_mean_global - x_mean_global*x_mean_global) / x_mean_global;
+      std::cerr << "variation_coefficient = " << variation_coefficient << std::endl;
+    }
     // Then we need to transfer the various solution vectors from the old to
     // the new grid while we do the refinement. The SolutionTransfer class is
     // our friend here; it has a fairly extensive documentation, including
