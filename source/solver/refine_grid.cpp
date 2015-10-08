@@ -77,6 +77,7 @@ namespace NSFEMSolver
           }
     }
 
+    double variation_coefficient (-1.0);
     {
       // compute normalized standard deviation (variation coefficient) of refinement indicator
       double x_sum (0.0);
@@ -102,47 +103,52 @@ namespace NSFEMSolver
       const double x_square_mean_global = Utilities::MPI::sum (x_square_sum, mpi_communicator) / n_cell_active_global;
       std::cerr << "x_square_mean_global = " << x_square_mean_global << std::endl;
       std::cerr << "x_mean_global = " << x_mean_global << std::endl;
-      const double variation_coefficient = std::sqrt (x_square_mean_global - x_mean_global*x_mean_global) / x_mean_global;
+      variation_coefficient = std::sqrt (x_square_mean_global - x_mean_global*x_mean_global) / x_mean_global;
       std::cerr << "variation_coefficient = " << variation_coefficient << std::endl;
     }
-    // Then we need to transfer the various solution vectors from the old to
-    // the new grid while we do the refinement. The SolutionTransfer class is
-    // our friend here; it has a fairly extensive documentation, including
-    // examples, so we won't comment much on the following code. The last
-    // three lines simply re-set the sizes of some other vectors to the now
-    // correct size:
 
-    NSVector tmp_vector;
-    tmp_vector.reinit (old_solution, true);
-    tmp_vector = predictor;
-    // transfer_in needs vectors with ghost cells.
-    std::vector<const NSVector * > transfer_in;
-    transfer_in.push_back (&old_solution);
-    transfer_in.push_back (&tmp_vector);
+    if (variation_coefficient > last_refine_variation_coefficient)
+      {
 
-    parallel::distributed::SolutionTransfer<dim, NSVector> soltrans (dof_handler);
+        // Then we need to transfer the various solution vectors from the old to
+        // the new grid while we do the refinement. The SolutionTransfer class is
+        // our friend here; it has a fairly extensive documentation, including
+        // examples, so we won't comment much on the following code. The last
+        // three lines simply re-set the sizes of some other vectors to the now
+        // correct size:
 
-    triangulation.prepare_coarsening_and_refinement();
-    soltrans.prepare_for_coarsening_and_refinement (transfer_in);
+        NSVector tmp_vector;
+        tmp_vector.reinit (old_solution, true);
+        tmp_vector = predictor;
+        // transfer_in needs vectors with ghost cells.
+        std::vector<const NSVector * > transfer_in;
+        transfer_in.push_back (&old_solution);
+        transfer_in.push_back (&tmp_vector);
 
-    triangulation.execute_coarsening_and_refinement();
+        parallel::distributed::SolutionTransfer<dim, NSVector> soltrans (dof_handler);
 
-    setup_system();
+        triangulation.prepare_coarsening_and_refinement();
+        soltrans.prepare_for_coarsening_and_refinement (transfer_in);
 
-    // Transfer data out
-    {
-      std::vector<NSVector * > transfer_out;
-      NSVector interpolated_old_solution (predictor);
-      NSVector interpolated_predictor (predictor);
-      // transfer_out needs vectors without ghost cells.
-      transfer_out.push_back (&interpolated_old_solution);
-      transfer_out.push_back (&interpolated_predictor);
-      soltrans.interpolate (transfer_out);
-      old_solution = interpolated_old_solution;
-      predictor = interpolated_predictor;
-      current_solution = old_solution;
-    }
+        triangulation.execute_coarsening_and_refinement();
 
+        setup_system();
+
+        // Transfer data out
+        {
+          std::vector<NSVector * > transfer_out;
+          NSVector interpolated_old_solution (predictor);
+          NSVector interpolated_predictor (predictor);
+          // transfer_out needs vectors without ghost cells.
+          transfer_out.push_back (&interpolated_old_solution);
+          transfer_out.push_back (&interpolated_predictor);
+          soltrans.interpolate (transfer_out);
+          old_solution = interpolated_old_solution;
+          predictor = interpolated_predictor;
+          current_solution = old_solution;
+        }
+      }
+    last_refine_variation_coefficient = variation_coefficient;
     return;
   }
 
