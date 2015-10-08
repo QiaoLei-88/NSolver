@@ -96,28 +96,27 @@ namespace NSFEMSolver
         solver.SetRHS (&b);
         solver.SetLHS (&x);
 
-        if (parameters->prec_type == Parameters::Solver::NoPrec)
+        Epetra_Operator *preconditioner_ptr (0);
+        switch (parameters->prec_type)
           {
-            solver.SetAztecOption (AZ_precond,         AZ_none);
+          case Parameters::Solver::NoPrec:
+          {
+            solver.SetAztecOption (AZ_precond, AZ_none);
+            break;
           }
-        else if (parameters->prec_type == Parameters::Solver::AZ_DD)
+          case Parameters::Solver::AZ_DD:
           {
-            solver.SetAztecOption (AZ_precond,         AZ_dom_decomp);
+            solver.SetAztecOption (AZ_precond,  AZ_dom_decomp);
             solver.SetAztecOption (AZ_subdomain_solve, AZ_ilut);
-            solver.SetAztecOption (AZ_overlap,         0);
+            solver.SetAztecOption (AZ_overlap,  0);
             solver.SetAztecOption (AZ_reorder,  parameters->AZ_RCM_reorder);
 
             solver.SetAztecParam (AZ_drop,      parameters->ilut_drop);
             solver.SetAztecParam (AZ_ilut_fill, parameters->ilut_fill);
             solver.SetAztecParam (AZ_athresh,   parameters->ilut_atol);
             solver.SetAztecParam (AZ_rthresh,   parameters->ilut_rtol);
+            break;
           }
-
-        solver.SetUserMatrix (const_cast<Epetra_CrsMatrix *>
-                              (&system_matrix.trilinos_matrix()));
-
-        switch (parameters->prec_type)
-          {
           case Parameters::Solver::MDFILU:
           {
             std::cerr << "Initialize MDFILU\n";
@@ -127,20 +126,17 @@ namespace NSFEMSolver
                       << std::endl;
             std::cerr << "system_matrix.m(): " << system_matrix.m()
                       << std::endl;
-            MDFILU mdfilu (system_matrix,
-                           estimated_row_length,
-                           parameters->ILU_level);
-            std::cerr << "number of new fill in: " << mdfilu.number_of_new_fill_ins()
+            preconditioner_ptr = new MDFILU (system_matrix,
+                                             estimated_row_length,
+                                             parameters->ILU_level);
+            // Casting pointer type is not recommended, however here it is just
+            // use for debug output.
+            std::cerr << "number of new fill in: "
+                      << static_cast<MDFILU *> (preconditioner_ptr)->number_of_new_fill_ins()
                       << std::endl;
-            mdfilu.SetUseTranspose (false);
-            solver.SetPrecOperator (&mdfilu);
+            preconditioner_ptr->SetUseTranspose (false);
+            solver.SetPrecOperator (preconditioner_ptr);
             std::cerr << "Start Iterate\n";
-            solver.Iterate (parameters->max_iterations, parameters->linear_residual);
-            break;
-          }
-          case Parameters::Solver::AZ_DD:
-          {
-            solver.Iterate (parameters->max_iterations, parameters->linear_residual);
             break;
           }
           default:
@@ -148,10 +144,18 @@ namespace NSFEMSolver
             AssertThrow (false, ExcNotImplemented());
             break;
           }
-          }
+          } //End of switch (parameters->prec_type)
+
+        solver.SetUserMatrix (const_cast<Epetra_CrsMatrix *>
+                              (&system_matrix.trilinos_matrix()));
+        solver.Iterate (parameters->max_iterations, parameters->linear_residual);
 
         return std::pair<unsigned int, double> (solver.NumIters(),
                                                 solver.TrueResidual());
+        if (!preconditioner_ptr)
+          {
+            delete preconditioner_ptr;
+          }
       }
       }
 
