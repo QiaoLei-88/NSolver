@@ -114,6 +114,8 @@ namespace NSFEMSolver
       predictor = interpolated_predictor;
       current_solution = old_solution;
     }
+
+    return;
   }
 
 #include "NSolver.inst"
