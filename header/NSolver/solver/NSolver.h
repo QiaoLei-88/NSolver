@@ -68,6 +68,10 @@
 // algebra structures.
 #include <deal.II/lac/trilinos_sparse_matrix.h>
 #include <deal.II/lac/trilinos_precondition.h>
+// For Trilinos multi-grid preconditioner
+DEAL_II_DISABLE_EXTRA_DIAGNOSTICS
+#include <ml_MultiLevelPreconditioner.h>
+DEAL_II_ENABLE_EXTRA_DIAGNOSTICS
 #include <deal.II/lac/trilinos_solver.h>
 
 //MMS

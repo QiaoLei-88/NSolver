@@ -28,7 +28,7 @@ namespace NSFEMSolver
                            "The kind of solver for the linear system. "
                            "Choices are <gmres|direct>.");
         prm.declare_entry ("Preconditioner", "AZ_DD",
-                           Patterns::Selection ("NoPrec|AZ_DD|MDFILU"),
+                           Patterns::Selection ("NoPrec|AZ_DD|AZ_AMG|MDFILU"),
                            "Preconditioner for iterative solver.");
         prm.declare_entry ("ILU level", "0",
                            Patterns::Integer (0),
@@ -85,6 +85,10 @@ namespace NSFEMSolver
           else if (buff == "AZ_DD")
             {
               prec_type = AZ_DD;
+            }
+          else if (buff == "AZ_AMG")
+            {
+              prec_type = AZ_AMG;
             }
           else if (buff == "MDFILU")
             {

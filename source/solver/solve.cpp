@@ -119,6 +119,96 @@ namespace NSFEMSolver
             solver.SetAztecParam (AZ_rthresh,   parameters->ilut_rtol);
             break;
           }
+          case Parameters::Solver::AZ_AMG:
+          {
+            // for parameter_list.set ("null space: dimension", int)
+            const int n_components = EquationComponents<dim>::n_components;
+            // Build the AMG preconditioner.
+            Teuchos::ParameterList parameter_list;
+            // Equation is not elliptic
+            ML_Epetra::SetDefaults ("NSSA", parameter_list);
+            parameter_list.set ("aggregation: type", "Uncoupled");
+            parameter_list.set ("aggregation: block scaling", true);
+
+            parameter_list.set ("smoother: type", "Chebyshev");
+            parameter_list.set ("coarse: type", "Amesos-KLU");
+
+            parameter_list.set ("smoother: sweeps", 2);
+            parameter_list.set ("cycle applications", 1);
+            // W-cycle
+            // parameter_list.set ("prec type", "MGW");
+            // V-cycle
+            parameter_list.set ("prec type", "MGV");
+
+            parameter_list.set ("smoother: Chebyshev alpha",10.);
+            parameter_list.set ("smoother: ifpack overlap", 0);
+            parameter_list.set ("aggregation: threshold", 1.0e-4);
+            parameter_list.set ("coarse: max size", 2000);
+            // No detail output
+            parameter_list.set ("ML output", 0);
+
+            parameter_list.set ("null space: type", "pre-computed");
+            parameter_list.set ("null space: dimension", n_components);
+
+            // Setup constant modes
+            const Epetra_CrsMatrix &matrix = system_matrix.trilinos_matrix();
+            const Epetra_Map &domain_map = matrix.OperatorDomainMap();
+
+            Epetra_MultiVector distributed_constant_modes (domain_map, n_components);
+            std::vector<TrilinosScalar> dummy (n_components);
+
+
+            const dealii::types::global_dof_index my_size = system_matrix.local_size();
+            if (my_size > 0)
+              {
+                for (int ic=0; ic<n_components; ++ic)
+                  {
+                    TrilinosScalar *const begin = & (distributed_constant_modes[ic][0]);
+                    TrilinosScalar *const end = begin + my_size;
+                    std::fill (begin, end, 0);
+                  }
+
+                const UpdateFlags update_flags = update_default;
+                FEValues<dim> fe_v (*mapping_ptr, fe, quadrature, update_flags);
+                const unsigned int dofs_per_cell = fe_v.get_fe().dofs_per_cell;
+                std::vector<dealii::types::global_dof_index> dof_indices (dofs_per_cell);
+
+                typename DoFHandler<dim>::active_cell_iterator
+                cell = dof_handler.begin_active();
+                const typename DoFHandler<dim>::active_cell_iterator
+                endc = dof_handler.end();
+                for (; cell!=endc; ++cell)
+                  if (cell->is_locally_owned())
+                    {
+                      fe_v.reinit (cell);
+                      cell->get_dof_indices (dof_indices);
+                      for (unsigned int i=0; i<dofs_per_cell; ++i)
+                        {
+                          const unsigned int component_index
+                            = fe_v.get_fe().system_to_component_index (i).first;
+                          const long long int global_dof_index = dof_indices[i];
+                          const int local_dof_index
+                            = domain_map.LID (global_dof_index);
+                          Assert (local_dof_index != -1,
+                                  ExcMessage ("No access to DoF on remote processor!"));
+                          distributed_constant_modes[component_index][local_dof_index] = 1;
+                        }
+                    }
+                parameter_list.set ("null space: vectors",
+                                    distributed_constant_modes.Values());
+              }
+            else
+              {
+                // We need to set a valid pointer to data even if there is no data on
+                // the current processor. Therefore, pass a dummy in that case
+                parameter_list.set ("null space: vectors", &dummy[0]);
+              }
+            preconditioner_ptr =
+              new ML_Epetra::MultiLevelPreconditioner (matrix, parameter_list);
+            Assert (preconditioner_ptr, ExcMessage ("Preconditioner setup failed."));
+            solver.SetPrecOperator (preconditioner_ptr);
+            break;
+          }
           case Parameters::Solver::MDFILU:
           {
             std::cerr << "Initialize MDFILU\n";

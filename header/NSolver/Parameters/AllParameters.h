@@ -76,6 +76,7 @@ namespace NSFEMSolver
       {
         NoPrec,
         AZ_DD,
+        AZ_AMG,
         MDFILU
       };
       Preconditioner prec_type;
