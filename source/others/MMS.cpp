@@ -39,7 +39,7 @@ namespace NSFEMSolver
 
   MMS::MMS()
     :
-    Function<dim2> (EquationComponents<dim2>::n_components),
+    Function<dim2, double> (EquationComponents<dim2>::n_components),
     initialized (false),
     is_NS (false)
   {}
@@ -47,7 +47,7 @@ namespace NSFEMSolver
 
   MMS::MMS (const MMS &mms_in)
     :
-    Function<dim2> (EquationComponents<dim2>::n_components),
+    Function<dim2, double> (EquationComponents<dim2>::n_components),
     initialized (mms_in.initialized),
     is_NS (mms_in.is_NS)
     // TODO: It seems now the deal.II provided std_cxx11::array does not

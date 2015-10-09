@@ -55,7 +55,7 @@ namespace NSFEMSolver
    * By default, this class works in Euler mode, i.e., no viscous flux
    * will be involved.
    */
-  class MMS : public Function<dim2>
+  class MMS : public Function<dim2, double>
   {
   public:
     typedef Sacado::Fad::DFad<double> FADD;
