@@ -206,7 +206,6 @@ namespace NSFEMSolver
             preconditioner_ptr =
               new ML_Epetra::MultiLevelPreconditioner (matrix, parameter_list);
             Assert (preconditioner_ptr, ExcMessage ("Preconditioner setup failed."));
-            solver.SetPrecOperator (preconditioner_ptr);
             break;
           }
           case Parameters::Solver::MDFILU:
@@ -227,7 +226,6 @@ namespace NSFEMSolver
                       << static_cast<MDFILU *> (preconditioner_ptr)->number_of_new_fill_ins()
                       << std::endl;
             preconditioner_ptr->SetUseTranspose (false);
-            solver.SetPrecOperator (preconditioner_ptr);
             std::cerr << "Start Iterate\n";
             break;
           }
@@ -240,6 +238,12 @@ namespace NSFEMSolver
 
         solver.SetUserMatrix (const_cast<Epetra_CrsMatrix *>
                               (&system_matrix.trilinos_matrix()));
+        // SetUserMatrix will set up an internal preconditioner, switch
+        // to user defined preconditioner when available.
+        if (preconditioner_ptr)
+          {
+            solver.SetPrecOperator (preconditioner_ptr);
+          }
         solver.Iterate (parameters->max_iterations, parameters->linear_residual);
 
         return_value.first = solver.NumIters();
