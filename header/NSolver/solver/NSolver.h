@@ -177,7 +177,7 @@ namespace NSFEMSolver
     MPI_Comm                                  mpi_communicator;
     // Must appear before Triangulation to make it initialized before triangulation
     // and destroyed after triangulation.
-    const HyperBallBoundary<dim> spherical_boundary;
+    const HyperBallBoundary<dim> *spherical_boundary;
     const BndNaca4DigitSymm NACA_foil_boundary;
 
     parallel::distributed::Triangulation<dim> triangulation;

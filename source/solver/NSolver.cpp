@@ -53,7 +53,7 @@ namespace NSFEMSolver
   NSolver<dim>::NSolver (Parameters::AllParameters<dim> *const para_ptr_in)
     :
     mpi_communicator (MPI_COMM_WORLD),
-    spherical_boundary (Point<dim>()/*=(0,0,...)*/,/*radius=*/0.5),
+    spherical_boundary (0),
     NACA_foil_boundary (para_ptr_in->NACA_foil, 1.0),
     triangulation (mpi_communicator,
                    typename Triangulation<dim>::MeshSmoothing
@@ -196,6 +196,7 @@ namespace NSFEMSolver
   NSolver<dim>::~NSolver()
   {
     delete mapping_ptr;
+    delete spherical_boundary;
   }
 
 #include "NSolver.inst"

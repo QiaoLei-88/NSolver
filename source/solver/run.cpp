@@ -66,7 +66,7 @@ namespace NSFEMSolver
             }
         }
 
-      if (parameters->manifold_circle == 1)
+      if (parameters->manifold_circle > 0)
         {
           // Hard coded test case: ManifoldCircle
           Assert (parameters->n_mms != 1,
@@ -86,14 +86,24 @@ namespace NSFEMSolver
                       cell->face (f)->set_manifold_id (2);
                     }
                 }
-          triangulation.set_boundary (2, spherical_boundary);
+          if (parameters->manifold_circle == 1)
+            {
+              // Circle
+              spherical_boundary = new HyperBallBoundary<dim> (Point<dim>()/*=(0,0,...)*/,/*radius=*/0.5);
+            }
+          else if (parameters->manifold_circle == 2)
+            {
+              //GAMM Channel
+              spherical_boundary = new HyperBallBoundary<dim> (Point<dim> (0.0, -1.2), /*radius=*/1.3);
+            }
+          triangulation.set_boundary (2, *spherical_boundary);
         }
       if (parameters->NACA_foil > 0)
         {
           // Hard coded test case: NACA 4 digit foils
           Assert (parameters->n_mms != 1,
                   ExcMessage ("MMS and NACA_foil case can't play together!!!"));
-          Assert (parameters->manifold_circle != 1,
+          Assert (parameters->manifold_circle == 0,
                   ExcMessage ("NACA_foil and C1Circle case can't play together!!!"));
           for (typename Triangulation<dim>::active_cell_iterator
                cell = triangulation.begin_active();
