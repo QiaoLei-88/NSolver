@@ -168,9 +168,8 @@ namespace NSFEMSolver
                     std::fill (begin, end, 0);
                   }
 
-                const UpdateFlags update_flags = update_default;
-                FEValues<dim> fe_v (*mapping_ptr, fe, quadrature, update_flags);
-                const unsigned int dofs_per_cell = fe_v.get_fe().dofs_per_cell;
+                // here we assume constant FE among all cells
+                const unsigned int dofs_per_cell = fe.dofs_per_cell;
                 std::vector<dealii::types::global_dof_index> dof_indices (dofs_per_cell);
 
                 typename DoFHandler<dim>::active_cell_iterator
@@ -180,12 +179,11 @@ namespace NSFEMSolver
                 for (; cell!=endc; ++cell)
                   if (cell->is_locally_owned())
                     {
-                      fe_v.reinit (cell);
                       cell->get_dof_indices (dof_indices);
                       for (unsigned int i=0; i<dofs_per_cell; ++i)
                         {
                           const unsigned int component_index
-                            = fe_v.get_fe().system_to_component_index (i).first;
+                            = cell->get_fe().system_to_component_index (i).first;
                           const long long int global_dof_index = dof_indices[i];
                           const int local_dof_index
                             = domain_map.LID (global_dof_index);
