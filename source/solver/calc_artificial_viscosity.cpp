@@ -120,7 +120,7 @@ namespace NSFEMSolver
                     D_h1 = (entropy.val() - entroy_old)/dt;
                     D_h1 = 0.0;
                     D_h2 = (W[q][EquationComponents<dim>::density_component] - W_old[q][EquationComponents<dim>::density_component])/dt;
-
+                    D_h2 = 0.0;
                     //sum up divergence
                     for (unsigned int d=0; d<dim; d++)
                       {
@@ -152,11 +152,11 @@ namespace NSFEMSolver
                 * h * h * D_h_max;
                 const double miu_max
                 = parameters->entropy_visc_cLinear
-                * cell->diameter()
+                * h
                 * rho_max * characteristic_speed_max;
 
                 artificial_viscosity[cell->active_cell_index()] =
-                std::min (std::max (entropy_visc, viscos_coeff), 1.0);
+                std::max (std::min (entropy_visc, miu_max), viscos_coeff);
               } // End if cell is locally owned
           } // End for active cells
         break;
