@@ -1,0 +1,118 @@
+# Listing of Parameters
+# ---------------------
+subsection FE Parameters
+  set mapping type = MappingC1
+  set fe degree    = 1
+end
+
+subsection physical parameters
+  # Free stream Mach number
+  set Mach                  = 0.675
+
+  # Coordinate x of moment center
+  set moment center x       = 0.0
+
+  set angle of attack       = 0.0
+end
+
+set ManifoldCircle = 2
+
+# The input grid 
+set mesh = Gamm_Channel.msh
+set mesh format = gmsh
+set scale mesh = 1.0
+
+# Stabilization parameter
+set diffusion type  = const # residual # cell size | const | entropy
+set entropy visc cLinear = 0.5
+set entropy visc cE = 5.0
+set diffusion power = 2.0
+set diffusion coefficient = 0.0002
+
+# --------------------------------------------------
+# Boundary conditions
+# We may specify boundary conditions for up to MAX_BD boundaries.
+# Your .inp file should have these boundaries designated.
+
+subsection boundary_1
+  set integrate force = false
+  set type = SlipWall
+end
+
+subsection boundary_2
+  set integrate force = true
+  set type = SlipWall
+end
+
+subsection boundary_3
+  set integrate force = false
+  set type = SlipWall
+end
+
+subsection boundary_4
+  set integrate force = false
+  set type = FarField
+end
+
+subsection boundary_5
+  set integrate force = false
+  set type = FarField
+end
+
+# --------------------------------------------------
+# Initial Conditions
+
+subsection initial condition
+  set init method = FreeStream
+end
+
+# --------------------------------------------------
+# Time stepping control
+subsection time stepping
+  set rigid reference time step     = false
+  set CFL number                    = 1e+2
+  set CFL number max                = 1e+16
+  set final time                    = 1.0e100 # simulation end time
+  set reference time step           = -1 # simulation time step
+  set theta scheme value            = 1.0
+  set iter in stage1                = 5
+  set minimum step increasing ratio stage2 = 1.0
+  set solution extrapolation length = 0.0
+  set nonlinear tolerance           = -2
+  set local time step               = true
+end
+
+subsection linear solver
+  set output         = quiet  
+  set method         = direct
+  set ilut fill      = 1.5
+  set ilut drop tolerance = 1e-7
+  set ilut absolute tolerance = 1e-7
+  set ilut relative tolerance = 1.0
+end
+
+# --------------------------------------------------
+# Output frequency and kind
+subsection output
+  set step           = 0.0
+  set schlieren plot = true
+end
+
+# --------------------------------------------------
+# Refinement control
+subsection refinement
+  set max refine time  = 20
+  set refinement indicator = Kelly
+  set shock value = 1.5
+  set max cells        = 1500
+  set refine fraction  = 0.2
+  set coarsen fraction = 0.2
+  set max refine level = 3
+  set min cell size    = -1
+end
+
+# --------------------------------------------------
+# Flux parameters
+subsection flux
+  set flux type = Roe
+end
