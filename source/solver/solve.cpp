@@ -185,11 +185,12 @@ namespace NSFEMSolver
                           const unsigned int component_index
                             = cell->get_fe().system_to_component_index (i).first;
                           const long long int global_dof_index = dof_indices[i];
-                          const int local_dof_index
-                            = domain_map.LID (global_dof_index);
-                          Assert (local_dof_index != -1,
-                                  ExcMessage ("No access to DoF on remote processor!"));
-                          distributed_constant_modes[component_index][local_dof_index] = 1;
+                          const int local_dof_index = domain_map.LID (global_dof_index);
+                          if (local_dof_index != -1)
+                            {
+                              // For locally owned DoFs
+                              distributed_constant_modes[component_index][local_dof_index] = 1;
+                            }
                         }
                     }
                 parameter_list.set ("null space: vectors",
