@@ -248,10 +248,10 @@ namespace NSFEMSolver
 
         return_value.first = solver.NumIters();
         return_value.second = solver.TrueResidual();
-        if (!preconditioner_ptr)
-          {
-            delete preconditioner_ptr;
-          }
+
+        // Safety of deleting NULL pointer is assured by C++ standard
+        delete preconditioner_ptr;
+        preconditioner_ptr = 0;
         break;
         // End case Parameters::Solver::gmres:
       }
