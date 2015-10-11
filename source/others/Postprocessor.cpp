@@ -64,7 +64,7 @@ namespace NSFEMSolver
     Assert (computed_quantities.size() == n_quadrature_points,ExcInternalError());
     Assert (uh[0].size() == EquationComponents<dim>::n_components,ExcInternalError());
 
-    //MMS: Extra memmory space
+    //MMS: Extra memory space
     Vector<double>::size_type expected_size = dim+1;
     if (do_schlieren_plot)
       {
@@ -85,17 +85,22 @@ namespace NSFEMSolver
     // <code>density_component</code> information:
     for (unsigned int q=0; q<n_quadrature_points; ++q)
       {
-        const double density = uh[q] (EquationComponents<dim>::density_component);
+        int i_out = 0;
+        const double density = uh[q][EquationComponents<dim>::density_component];
 
-        for (unsigned int d=0; d<dim; ++d)
-          computed_quantities[q] (d)
-            = uh[q] (EquationComponents<dim>::first_momentum_component+d) * density;
+        for (unsigned int d=0; d<dim; ++d, ++i_out)
+          computed_quantities[q][i_out]
+            = uh[q][EquationComponents<dim>::first_momentum_component+d] * density;
 
-        computed_quantities[q] (dim) = EulerEquations<dim>::compute_energy_density (uh[q]);
+        computed_quantities[q][i_out] = EulerEquations<dim>::compute_energy_density (uh[q]);
+        ++i_out;
 
         if (do_schlieren_plot)
-          computed_quantities[q] (dim+1) = duh[q][EquationComponents<dim>::density_component] *
-                                           duh[q][EquationComponents<dim>::density_component];
+          {
+            computed_quantities[q][i_out] = duh[q][EquationComponents<dim>::density_component] *
+                                            duh[q][EquationComponents<dim>::density_component];
+            ++i_out;
+          }
 
         if (output_mms)
           {
@@ -104,7 +109,6 @@ namespace NSFEMSolver
             MMS::F_T grad;
             mms_x->evaluate (points[q],sol,grad,src,true);
 
-            int i_out = dim + 2;
             for (unsigned int ic = 0; ic < EquationComponents<dim>::n_components; ++ic, ++i_out)
               {
                 computed_quantities[q][i_out] = src[ic];
@@ -173,10 +177,11 @@ namespace NSFEMSolver
   Postprocessor<dim>::
   get_data_component_interpretation() const
   {
+    // "momentum"
     std::vector<DataComponentInterpretation::DataComponentInterpretation>
     interpretation (dim,
                     DataComponentInterpretation::component_is_part_of_vector);
-
+    // "energy_density"
     interpretation.push_back (DataComponentInterpretation::
                               component_is_scalar);
 
