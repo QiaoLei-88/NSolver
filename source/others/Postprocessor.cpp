@@ -65,7 +65,7 @@ namespace NSFEMSolver
     Assert (uh[0].size() == EquationComponents<dim>::n_components,ExcInternalError());
 
     //MMS: Extra memory space
-    Vector<double>::size_type expected_size = dim+1;
+    Vector<double>::size_type expected_size = dim+2;
     if (do_schlieren_plot)
       {
         expected_size += 1;
@@ -93,6 +93,9 @@ namespace NSFEMSolver
             = uh[q][EquationComponents<dim>::first_momentum_component+d] * density;
 
         computed_quantities[q][i_out] = EulerEquations<dim>::compute_energy_density (uh[q]);
+        ++i_out;
+        computed_quantities[q][i_out] = EulerEquations<dim>::compute_velocity_magnitude (uh[q]) /
+                                        EulerEquations<dim>::compute_sound_speed (uh[q]);
         ++i_out;
 
         if (do_schlieren_plot)
@@ -137,6 +140,7 @@ namespace NSFEMSolver
         names.push_back ("momentum");
       }
     names.push_back ("energy_density");
+    names.push_back ("Mach");
 
     if (do_schlieren_plot)
       {
@@ -182,6 +186,9 @@ namespace NSFEMSolver
     interpretation (dim,
                     DataComponentInterpretation::component_is_part_of_vector);
     // "energy_density"
+    interpretation.push_back (DataComponentInterpretation::
+                              component_is_scalar);
+    // "Mach"
     interpretation.push_back (DataComponentInterpretation::
                               component_is_scalar);
 
