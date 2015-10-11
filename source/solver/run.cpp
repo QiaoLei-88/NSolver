@@ -727,6 +727,14 @@ namespace NSFEMSolver
     // Timer initialized with TimerOutput::summary will print summery information
     // on its destruction.
     // computing_timer.print_summary();
+
+    // Clean run time allocated HyperBallBoundary object.
+    if (parameters->manifold_circle > 0)
+      {
+        triangulation.set_boundary (2, straight_boundary);
+        delete spherical_boundary;
+        spherical_boundary = 0;
+      }
   }
 
 #include "NSolver.inst"

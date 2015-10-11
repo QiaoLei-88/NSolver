@@ -196,7 +196,6 @@ namespace NSFEMSolver
   NSolver<dim>::~NSolver()
   {
     delete mapping_ptr;
-    delete spherical_boundary;
   }
 
 #include "NSolver.inst"
