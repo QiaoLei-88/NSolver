@@ -30,17 +30,15 @@ namespace NSFEMSolver
         cell->set_user_index (cell->active_cell_index());
       }
 
-    // NOTE: deal.II puts placeholders in namespace 'dealii::std_cxx11'. This is not
-    // like C++11 standard library which puts placeholders in namespace 'std::placeholders'
     tria_in.signals.pre_coarsening_on_cell.connect
     (std_cxx11::bind (&CellDataTransfer<dim, Number>::children_to_parent,
                       this,
-                      std_cxx11::_1));
+                      std_cxx11::placeholders::_1));
 
     tria_in.signals.post_refinement_on_cell.connect
     (std_cxx11::bind (&CellDataTransfer<dim, Number>::parent_to_children,
                       this,
-                      std_cxx11::_1));
+                      std_cxx11::placeholders::_1));
   }
 
 
