@@ -21,9 +21,9 @@ namespace NSFEMSolver
             ExcMessage ("Do not attach empty triangulation to CellDataTransfer object."));
 
     // Initial data is assumed to have the same order as active cells
-    const typename Triangulation<dim>::cell_iterator
+    const typename Triangulation<dim>::active_cell_iterator
     endc = tria_in.end();
-    typename Triangulation<dim>::cell_iterator
+    typename Triangulation<dim>::active_cell_iterator
     cell = tria_in.begin_active();
     for (; cell != endc; ++cell)
       {

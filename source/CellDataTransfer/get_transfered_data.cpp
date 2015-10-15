@@ -23,9 +23,9 @@ namespace NSFEMSolver
     Assert (! (active_data_size > tria.n_active_cells()),
             ExcMessage ("Tracked active cell number is greater than actual value"));
 
-    const typename Triangulation<dim>::cell_iterator
+    const typename Triangulation<dim>::active_cell_iterator
     endc = tria.end();
-    typename Triangulation<dim>::cell_iterator
+    typename Triangulation<dim>::active_cell_iterator
     cell = tria.begin_active();
     for (; cell != endc; ++cell, ++data_dest)
       {
