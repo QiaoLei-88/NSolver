@@ -26,6 +26,8 @@ namespace NSFEMSolver
     std::vector<Number> children_sum (n_vector, 0.0);
     for (unsigned int i_child=0; i_child < cell->n_children(); ++i_child)
       {
+        Assert (cell->child (i_child)->active(),
+                ExcMessage ("A cell is going to coarsen should have active children."));
         const size_type child_index = cell->child (i_child)->user_index();
         for (size_type i=0; i<n_vector; ++i)
           {
