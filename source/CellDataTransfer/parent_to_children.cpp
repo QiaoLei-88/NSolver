@@ -17,6 +17,12 @@ namespace NSFEMSolver
   {
     // Distribute parent values to children
     const size_type n_vector = vector_data_ptr.size();
+    if (n_vector == 0)
+      {
+        // Nothing to do when no vector attached.
+        return;
+      }
+
     const size_type parent_index = cell->user_index();
     const Number parent_measure = cell->measure();
     std::vector<Number> parent_mean (n_vector);

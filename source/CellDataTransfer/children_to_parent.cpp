@@ -17,6 +17,12 @@ namespace NSFEMSolver
   {
     // Collect children values to parent cell
     const size_type n_vector = vector_data_ptr.size();
+    if (n_vector == 0)
+      {
+        // Nothing to do when no vector attached.
+        return;
+      }
+
     std::vector<Number> children_sum (n_vector, 0.0);
     for (unsigned int i_child=0; i_child < cell->n_children(); ++i_child)
       {
