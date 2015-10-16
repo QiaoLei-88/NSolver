@@ -272,24 +272,36 @@ namespace NSFEMSolver
         result += t.cx  * std::sin (t.ax  * Pi * x);
         result += t.cy  * std::cos (t.ay  * Pi * y);
         result += t.cxy * std::cos (t.axy * Pi * x * y);
+        result += 0.4 * std::exp (-Pi*0.5*0.4*0.4*
+                                  ((x-0.5)* (x-0.5) + (y-0.5)* (y-0.5)))
+                  - 0.3111070717;
         break;
       case EquationComponents<dim>::first_momentum_component + 1:
         result += t.c0;
         result += t.cx  * std::cos (t.ax  * Pi * x);
         result += t.cy  * std::sin (t.ay  * Pi * y);
         result += t.cxy * std::cos (t.axy * Pi * x * y);
+        result += 0.4 * std::exp (-Pi*0.5*0.4*0.4*
+                                  ((x-0.5)* (x-0.5) + (y-0.5)* (y-0.5)))
+                  - 0.3111070717;
         break;
       case EquationComponents<dim>::density_component:
         result += t.c0;
         result += t.cx  * std::sin (t.ax  * Pi * x);
         result += t.cy  * std::cos (t.ay  * Pi * y);
         result += t.cxy * std::cos (t.axy * Pi * x * y);
+        result += (0.4 * std::exp (-Pi*0.5*0.4*0.4*
+                                   ((x-0.5)* (x-0.5) + (y-0.5)* (y-0.5)))
+                   - 0.3111070717) * 2.0;
         break;
       case EquationComponents<dim>::pressure_component:
         result += t.c0;
         result += t.cx  * std::cos (t.ax  * Pi * x);
         result += t.cy  * std::sin (t.ay  * Pi * y);
         result += t.cxy * std::sin (t.axy * Pi * x * y);
+        result += (0.4 * std::exp (-Pi*0.5*0.4*0.4*
+                                   ((x-0.5)* (x-0.5) + (y-0.5)* (y-0.5)))
+                   - 0.3111070717) * 3.0;
         break;
       default:
         Assert (false, ExcNotImplemented());
