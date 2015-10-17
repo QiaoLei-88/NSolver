@@ -16,6 +16,10 @@ namespace NSFEMSolver
     {
       prm.enter_subsection ("physical parameters");
       {
+        prm.declare_entry ("space dimension", "2",
+                           Patterns::Integer (2,4),
+                           "Problem space dimension");
+
         prm.declare_entry ("Mach", "0.5",
                            Patterns::Double (0),
                            "Free stream Mach number");
@@ -79,6 +83,9 @@ namespace NSFEMSolver
       prm.enter_subsection ("physical parameters");
       {
         double const deg_to_rad = std::atan (1.0)/45.0;
+
+        space_dimension = prm.get_integer ("space dimension");
+
         Mach = prm.get_double ("Mach");
         Reynolds = prm.get_double ("Reynolds");
 

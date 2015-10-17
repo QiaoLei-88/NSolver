@@ -21,6 +21,7 @@ namespace NSFEMSolver
 
     struct PhysicalParameters
     {
+      unsigned int space_dimension;
       double Mach;
       double Reynolds;
 
