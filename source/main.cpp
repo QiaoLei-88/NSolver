@@ -36,8 +36,12 @@ int main (int argc, char *argv[])
           input_file = argv[1];
         }
 
+      bool need_try_2d = true;
       {
-        const unsigned int dimension (2);
+        // Try 3D case first because in 3D case there are more boundary and
+        // initial condition components declared. Then there will be no
+        // warning of 'No such entry was declared' we parsing input file.
+        const unsigned int dimension (3);
         Parameters::AllParameters<dimension> solver_parameters;
         {
           ParameterHandler prm;
@@ -46,9 +50,31 @@ int main (int argc, char *argv[])
           prm.read_input (input_file);
           solver_parameters.parse_parameters (prm);
         }
-        NSolver<dimension> cons (&solver_parameters);
-        cons.run();
+        if (solver_parameters.space_dimension == dimension)
+          {
+            need_try_2d = false;
+            NSolver<dimension> cons (&solver_parameters);
+            cons.run();
+          }
       }
+
+      if (need_try_2d)
+        {
+          const unsigned int dimension (2);
+          Parameters::AllParameters<dimension> solver_parameters;
+          {
+            ParameterHandler prm;
+
+            solver_parameters.declare_parameters (prm);
+            prm.read_input (input_file);
+            solver_parameters.parse_parameters (prm);
+          }
+          if (solver_parameters.space_dimension == dimension)
+            {
+              NSolver<dimension> cons (&solver_parameters);
+              cons.run();
+            }
+        }
     }
   catch (std::exception &exc)
     {
