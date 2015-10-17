@@ -33,7 +33,8 @@ namespace NSFEMSolver
 {
   using namespace dealii;
 
-  class BndNaca4DigitSymm: public StraightBoundary<2>
+  template<int dim>
+  class BndNaca4DigitSymm: public StraightBoundary<dim, dim>
   {
   public:
     BndNaca4DigitSymm (const unsigned int number,
@@ -46,8 +47,8 @@ namespace NSFEMSolver
      * the base class for more information.
      */
     virtual
-    Point<2>
-    get_new_point_on_line (const typename Triangulation<2,2>::line_iterator &line) const;
+    Point<dim>
+    get_new_point_on_line (const typename Triangulation<dim>::line_iterator &line) const;
 
     // /**
     //  * Gives <tt>n=points.size()</tt> points that splits the StraightBoundary
@@ -68,9 +69,9 @@ namespace NSFEMSolver
       * the base class.
       */
     virtual
-    Tensor<1,2>
-    normal_vector (const typename Triangulation<2,2>::face_iterator &face,
-                   const Point<2> &p) const;
+    Tensor<1,dim>
+    normal_vector (const typename Triangulation<dim>::face_iterator &face,
+                   const Point<dim> &p) const;
 
     /**
      * Compute the normals to the boundary at the vertices of the given face.
@@ -80,8 +81,8 @@ namespace NSFEMSolver
      */
     virtual
     void
-    get_normals_at_vertices (const typename Triangulation<2,2>::face_iterator &face,
-                             typename Boundary<2,2>::FaceVertexNormals &face_vertex_normals) const;
+    get_normals_at_vertices (const typename Triangulation<dim>::face_iterator &face,
+                             typename dealii::Boundary<dim, dim>::FaceVertexNormals &face_vertex_normals) const;
 
     /**
      * Given a candidate point and a line segment characterized by the iterator,
@@ -110,7 +111,7 @@ namespace NSFEMSolver
   private:
     typedef Sacado::Fad::DFad<double> Fad_db;
     typedef Sacado::Fad::DFad<Fad_db> FFad_db;
-    double solve_mid_curve (const Point<2> &candidate) const;
+    double solve_mid_curve (const Point<dim> &candidate) const;
     template<typename Number>
     Number thickness (const Number &x) const;
 
@@ -122,9 +123,10 @@ namespace NSFEMSolver
   };
 
 
+  template<int dim>
   template<typename Number>
   inline
-  Number BndNaca4DigitSymm::thickness (const Number &x) const
+  Number BndNaca4DigitSymm<dim>::thickness (const Number &x) const
   {
     Assert (x>=0.0, ExcMessage ("Point not on airfoil camber"));
     Assert (x<=1.0, ExcMessage ("Point not on airfoil camber"));
@@ -133,8 +135,9 @@ namespace NSFEMSolver
                                  ));
   }
 
+  template<int dim>
   template<typename Number>
-  Number BndNaca4DigitSymm::fitted_curve_length (const Number &x) const
+  Number BndNaca4DigitSymm<dim>::fitted_curve_length (const Number &x) const
   {
     // This function is hard coded according NACA0012 foil formula.
     if (x<0.059)
@@ -145,6 +148,23 @@ namespace NSFEMSolver
       {
         return (0.01526608872+x);
       }
+  }
+
+  template<>
+  template<typename Number>
+  inline
+  Number BndNaca4DigitSymm<3>::thickness (const Number &x) const
+  {
+    AssertThrow (false, ExcNotImplemented());
+    return (x);
+  }
+
+  template<>
+  template<typename Number>
+  Number BndNaca4DigitSymm<3>::fitted_curve_length (const Number &x) const
+  {
+    AssertThrow (false, ExcNotImplemented());
+    return (x);
   }
 }
 #endif

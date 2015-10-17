@@ -13,20 +13,23 @@ namespace NSFEMSolver
 {
   using namespace dealii;
 
-  BndNaca4DigitSymm::BndNaca4DigitSymm (const unsigned int /*number*/,
-                                        const double chord_length_in)
+  template<int dim>
+  BndNaca4DigitSymm<dim>::BndNaca4DigitSymm (const unsigned int /*number*/,
+                                             const double chord_length_in)
     :
     // max_thickness (static_cast<double> (number%100)/100.0),
     max_thickness (0.12),
     chord_length (chord_length_in)
   {}
 
-  BndNaca4DigitSymm::~BndNaca4DigitSymm()
+  template<int dim>
+  BndNaca4DigitSymm<dim>::~BndNaca4DigitSymm()
   {}
 
 
+  template<>
   Point<2>
-  BndNaca4DigitSymm::get_new_point_on_line (const typename Triangulation<2,2>::line_iterator &line) const
+  BndNaca4DigitSymm<2>::get_new_point_on_line (const typename Triangulation<2>::line_iterator &line) const
   {
 
 #ifdef DEBUG_BndNaca4DigitSymm
@@ -123,9 +126,10 @@ namespace NSFEMSolver
   }
 
 
+  template<>
   Tensor<1,2>
-  BndNaca4DigitSymm::normal_vector (const typename Triangulation<2,2>::face_iterator &face,
-                                    const Point<2> &p) const
+  BndNaca4DigitSymm<2>::normal_vector (const typename Triangulation<2>::face_iterator &face,
+                                       const Point<2> &p) const
   {
     const double x = std::max (p[0], 1e-16);
     Assert (p[0] > -1e-6, ExcMessage ("Point not on foil"));
@@ -172,9 +176,10 @@ namespace NSFEMSolver
     return (return_value/return_value.norm());
   }
 
+  template<>
   void
-  BndNaca4DigitSymm::get_normals_at_vertices (const typename Triangulation<2,2>::face_iterator &face,
-                                              typename Boundary<2,2>::FaceVertexNormals &face_vertex_normals) const
+  BndNaca4DigitSymm<2>::get_normals_at_vertices (const typename Triangulation<2>::face_iterator &face,
+                                                 typename dealii::Boundary<2,2>::FaceVertexNormals &face_vertex_normals) const
   {
     for (unsigned int v=0; v<GeometryInfo<2>::vertices_per_face; ++v)
       {
@@ -225,4 +230,33 @@ namespace NSFEMSolver
   }
 
 
+  template<>
+  Point<3>
+  BndNaca4DigitSymm<3>::get_new_point_on_line (const typename Triangulation<3>::line_iterator &) const
+  {
+    AssertThrow (false, ExcNotImplemented());
+    return (Point<3>());
+  }
+
+  template<>
+  Tensor<1,3>
+  BndNaca4DigitSymm<3>::normal_vector (const typename Triangulation<3>::face_iterator &,
+                                       const Point<3> &) const
+  {
+    AssertThrow (false, ExcNotImplemented());
+    return (Tensor<1,3>());
+  }
+
+  template<>
+  void
+  BndNaca4DigitSymm<3>::get_normals_at_vertices (const typename Triangulation<3>::face_iterator &,
+                                                 typename dealii::Boundary<3,3>::FaceVertexNormals &) const
+  {
+    AssertThrow (false, ExcNotImplemented());
+    return;
+  }
+
+
+  template class BndNaca4DigitSymm<2>;
+  template class BndNaca4DigitSymm<3>;
 }

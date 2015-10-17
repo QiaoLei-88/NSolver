@@ -13,7 +13,9 @@ namespace NSFEMSolver
 {
   using namespace dealii;
 
-  void BndNaca4DigitSymm::test() const
+
+  template<>
+  void BndNaca4DigitSymm<2>::test() const
   {
     const double Pi = std::atan (1.0) * 4.0;
     std::ofstream foil_gmsh ("NACA0012.geo");
@@ -132,4 +134,15 @@ namespace NSFEMSolver
     return;
   }
 
+
+  template<>
+  void BndNaca4DigitSymm<3>::test() const
+  {
+    AssertThrow (false, ExcNotImplemented());
+    return;
+  }
+
+
+  template class BndNaca4DigitSymm<2>;
+  template class BndNaca4DigitSymm<3>;
 }
