@@ -701,9 +701,11 @@ namespace NSFEMSolver
       Parameters::FEParameters::parse_parameters (prm);
     }
 
+    template struct Refinement<2>;
+    template struct Refinement<3>;
+
     template struct AllParameters<2>;
     template struct AllParameters<3>;
-
   } /* End namespace Parameters */
 
 } /* End of namespace NSFEMSolver */

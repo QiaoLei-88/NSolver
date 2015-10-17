@@ -253,4 +253,5 @@ namespace NSFEMSolver
   }
 
   template class Postprocessor<2>;
+  template class Postprocessor<3>;
 }

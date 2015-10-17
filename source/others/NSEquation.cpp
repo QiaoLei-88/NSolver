@@ -85,5 +85,5 @@ namespace NSFEMSolver
   EulerEquations<dim>::parameters = 0;
 
   template class EulerEquations<2>;
-//  template struct EulerEquations<3>;
+  template class EulerEquations<3>;
 }
