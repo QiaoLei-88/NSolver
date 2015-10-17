@@ -149,8 +149,7 @@ namespace NSFEMSolver
     bool is_NS;
 
     template<typename Number>
-    void value_at_point (const Number &x,
-                         const Number &y,
+    void value_at_point (const std_cxx11::array<Number, dim> &p,
                          const unsigned int component,
                          Number &result) const;
   };
