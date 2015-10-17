@@ -17,7 +17,7 @@ int main()
     grid_in.read_msh (input_file);
   }
 
-  const BndNaca4DigitSymm NACA_foil_boundary (0012, 1.0);
+  const BndNaca4DigitSymm<dim> NACA_foil_boundary (0012, 1.0);
   std::ofstream fout ("output.out");
   Assert (fout, ExcFileNotOpen ("output.out"));
   fout << std::scientific;
