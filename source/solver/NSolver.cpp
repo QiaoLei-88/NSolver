@@ -116,77 +116,126 @@ namespace NSFEMSolver
       {
         // Setup coefficients for MMS
         std_cxx11::array<Coeff, EquationComponents<dim>::n_components> coeffs;
-        // // component u:
-        coeffs[0].c0  = 0.2;
-        coeffs[0].cx  = 0.01;
-        coeffs[0].cy  = -0.02;
-        coeffs[0].cxy = 0;
-        coeffs[0].ax  = 1.5;
-        coeffs[0].ay  = 0.6;
-        coeffs[0].axy = 0;
+        if (dim == 2)
+          {
+            // // component u:
+            coeffs[0].c0  = 0.2;
+            coeffs[0].cx  = 0.01;
+            coeffs[0].cy  = -0.02;
+            coeffs[0].cxy = 0;
+            coeffs[0].ax  = 1.5;
+            coeffs[0].ay  = 0.6;
+            coeffs[0].axy = 0;
 
-        // component v:
-        coeffs[1].c0  = 0.4;
-        coeffs[1].cx  = -0.01;
-        coeffs[1].cy  = 0.04;
-        coeffs[1].cxy = 0;
-        coeffs[1].ax  = 0.5;
-        coeffs[1].ay  = 2.0/3.0;
-        coeffs[1].axy = 0;
+            // component v:
+            coeffs[1].c0  = 0.4;
+            coeffs[1].cx  = -0.01;
+            coeffs[1].cy  = 0.04;
+            coeffs[1].cxy = 0;
+            coeffs[1].ax  = 0.5;
+            coeffs[1].ay  = 2.0/3.0;
+            coeffs[1].axy = 0;
 
-        // component density:
-        coeffs[2].c0  = 1.0;
-        coeffs[2].cx  = 0.15;
-        coeffs[2].cy  = -0.1;
-        coeffs[2].cxy = 0;
-        coeffs[2].ax  = 1.0;
-        coeffs[2].ay  = 0.5;
-        coeffs[2].axy = 0;
+            // component density:
+            coeffs[2].c0  = 1.0;
+            coeffs[2].cx  = 0.15;
+            coeffs[2].cy  = -0.1;
+            coeffs[2].cxy = 0;
+            coeffs[2].ax  = 1.0;
+            coeffs[2].ay  = 0.5;
+            coeffs[2].axy = 0;
 
-        // component pressure:
-        coeffs[3].c0  = 1.0/1.4;
-        coeffs[3].cx  = 0.2;
-        coeffs[3].cy  = 0.5;
-        coeffs[3].cxy = 0;
-        coeffs[3].ax  = 2.0;
-        coeffs[3].ay  = 1.0;
-        coeffs[3].axy = 0;
-        // component u:
-        // coeffs[0].c0  = 2.0;
-        // coeffs[0].cx  = 0.2;
-        // coeffs[0].cy  = -0.1;
-        // coeffs[0].cxy = 0;
-        // coeffs[0].ax  = 1.5;
-        // coeffs[0].ay  = 0.6;
-        // coeffs[0].axy = 0;
+            // component pressure:
+            coeffs[3].c0  = 1.0/1.4;
+            coeffs[3].cx  = 0.2;
+            coeffs[3].cy  = 0.5;
+            coeffs[3].cxy = 0;
+            coeffs[3].ax  = 2.0;
+            coeffs[3].ay  = 1.0;
+            coeffs[3].axy = 0;
+            // component u:
+            // coeffs[0].c0  = 2.0;
+            // coeffs[0].cx  = 0.2;
+            // coeffs[0].cy  = -0.1;
+            // coeffs[0].cxy = 0;
+            // coeffs[0].ax  = 1.5;
+            // coeffs[0].ay  = 0.6;
+            // coeffs[0].axy = 0;
 
-        // // component v:
-        // coeffs[1].c0  = 2.0;
-        // coeffs[1].cx  = -0.25;
-        // coeffs[1].cy  = 0.125;
-        // coeffs[1].cxy = 0;
-        // coeffs[1].ax  = 0.5;
-        // coeffs[1].ay  = 2.0/3.0;
-        // coeffs[1].axy = 0;
+            // // component v:
+            // coeffs[1].c0  = 2.0;
+            // coeffs[1].cx  = -0.25;
+            // coeffs[1].cy  = 0.125;
+            // coeffs[1].cxy = 0;
+            // coeffs[1].ax  = 0.5;
+            // coeffs[1].ay  = 2.0/3.0;
+            // coeffs[1].axy = 0;
 
-        // // component density:
-        // coeffs[2].c0  = 1.0;
-        // coeffs[2].cx  = 0.15;
-        // coeffs[2].cy  = -0.1;
-        // coeffs[2].cxy = 0;
-        // coeffs[2].ax  = 1.0;
-        // coeffs[2].ay  = 0.5;
-        // coeffs[2].axy = 0;
+            // // component density:
+            // coeffs[2].c0  = 1.0;
+            // coeffs[2].cx  = 0.15;
+            // coeffs[2].cy  = -0.1;
+            // coeffs[2].cxy = 0;
+            // coeffs[2].ax  = 1.0;
+            // coeffs[2].ay  = 0.5;
+            // coeffs[2].axy = 0;
 
-        // // component pressure:
-        // coeffs[3].c0  = 0.72;
-        // coeffs[3].cx  = 0.2;
-        // coeffs[3].cy  = 0.5;
-        // coeffs[3].cxy = 0;
-        // coeffs[3].ax  = 2.0;
-        // coeffs[3].ay  = 1.0;
-        // coeffs[3].axy = 0;
+            // // component pressure:
+            // coeffs[3].c0  = 0.72;
+            // coeffs[3].cx  = 0.2;
+            // coeffs[3].cy  = 0.5;
+            // coeffs[3].cxy = 0;
+            // coeffs[3].ax  = 2.0;
+            // coeffs[3].ay  = 1.0;
+            // coeffs[3].axy = 0;
+          }
+        else if (dim == 3)
+          {
+            // component u:
+            coeffs[0].c0 = 0.2;
+            coeffs[0].cx = 0.001;
+            coeffs[0].cy = -0.0035;
+            coeffs[0].cz = 0.002;
+            coeffs[0].ax = 1.5;
+            coeffs[0].ay = 0.6;
+            coeffs[0].az = 0.5;
 
+            // component v:
+            coeffs[1].c0 = 0.2;
+            coeffs[1].cx = -0.001;
+            coeffs[1].cy = 0.004;
+            coeffs[1].cz = -0.0015;
+            coeffs[1].ax = 0.5;
+            coeffs[1].ay = 2.0/3.0;
+            coeffs[1].az = 1.25;
+
+            // component w:
+            coeffs[2].c0 = 0.2;
+            coeffs[2].cx = 0.0036;
+            coeffs[2].cy = -0.002;
+            coeffs[2].cz = -0.0011;
+            coeffs[2].ax = 1.0/3.0;
+            coeffs[2].ay = 1.5;
+            coeffs[2].az = 1.0;
+
+            // component density:
+            coeffs[3].c0 = 1.0;
+            coeffs[3].cx = 0.0015;
+            coeffs[3].cy = -0.001;
+            coeffs[3].cz = -0.0012;
+            coeffs[3].ax = 1.0;
+            coeffs[3].ay = 0.5;
+            coeffs[3].az = 1.5;
+
+            // component pressure:
+            coeffs[4].c0 = 1.0/1.4;
+            coeffs[4].cx = 0.0013;
+            coeffs[4].cy = 0.005;
+            coeffs[4].cz = -0.002;
+            coeffs[4].ax = 2.0;
+            coeffs[4].ay = 1.0;
+            coeffs[4].az = 1.0/3.0;
+          }
         // Initialize MMS
         mms.reinit (coeffs);
       }

@@ -167,6 +167,10 @@ namespace NSFEMSolver
 //      {
         names.push_back ("mms_error_velocity_x");
         names.push_back ("mms_error_velocity_y");
+        if (dim == 3)
+          {
+            names.push_back ("mms_error_velocity_z");
+          }
 //      }
         names.push_back ("mms_error_density");
         names.push_back ("mms_error_pressure");
