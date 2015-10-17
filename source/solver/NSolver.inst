@@ -1,2 +1,2 @@
     template class NSolver<2>;
-//  template class NSolver<3>;
+    template class NSolver<3>;

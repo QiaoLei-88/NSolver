@@ -554,9 +554,9 @@ namespace NSFEMSolver
                   fe_v.get_function_gradients (current_solution, solution_grad);
                   fe_v.get_function_values (old_solution, old_solution_values);
 
-                  std::vector <MMS::F_V> mms_source (n_q_points);
-                  std::vector <MMS::F_V> mms_value (n_q_points);
-                  std::vector <MMS::F_T> mms_grad (n_q_points);
+                  std::vector <typename MMS<dim>::F_V> mms_source (n_q_points);
+                  std::vector <typename MMS<dim>::F_V> mms_value (n_q_points);
+                  std::vector <typename MMS<dim>::F_T> mms_grad (n_q_points);
 
                   for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
                     {

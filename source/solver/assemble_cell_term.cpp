@@ -188,9 +188,9 @@ namespace NSFEMSolver
     std::vector < std_cxx11::array< double, EquationComponents<dim>::n_components> > forcing_old (n_q_points);
 
     //MMS: evaluate source term
-    std::vector <MMS::F_V> mms_source (n_q_points);
-    std::vector <MMS::F_V> mms_value (n_q_points);
-    std::vector <MMS::F_T> mms_grad (n_q_points);
+    std::vector <typename MMS<dim>::F_V> mms_source (n_q_points);
+    std::vector <typename MMS<dim>::F_V> mms_value (n_q_points);
+    std::vector <typename MMS<dim>::F_T> mms_grad (n_q_points);
     if (parameters->n_mms == 1)
       {
         for (unsigned int q=0; q<n_q_points; ++q)

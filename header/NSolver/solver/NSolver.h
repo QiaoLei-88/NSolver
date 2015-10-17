@@ -254,9 +254,9 @@ namespace NSFEMSolver
     TimerOutput                     computing_timer;
 
     //Introduce MMS
-    MMS mms;
-    MMS::F_V mms_error_l2;
-    MMS::F_V mms_error_H1_semi;
+    MMS<dim> mms;
+    typename MMS<dim>::F_V mms_error_l2;
+    typename MMS<dim>::F_V mms_error_H1_semi;
     double mms_error_linfty;
 
     // Runtime parameters, not specified in input file

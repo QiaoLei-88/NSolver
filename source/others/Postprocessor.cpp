@@ -14,7 +14,7 @@ namespace NSFEMSolver
   template <int dim>
   Postprocessor<dim>::
   Postprocessor (Parameters::AllParameters<dim>const *const para_ptr_in,
-                 MMS const *const mms_ptr_in)
+                 MMS<dim> const *const mms_ptr_in)
     :
     parameters (para_ptr_in),
     mms_x (mms_ptr_in),
@@ -107,9 +107,9 @@ namespace NSFEMSolver
 
         if (output_mms)
           {
-            MMS::F_V sol;
-            MMS::F_V src;
-            MMS::F_T grad;
+            typename MMS<dim>::F_V sol;
+            typename MMS<dim>::F_V src;
+            typename MMS<dim>::F_T grad;
             mms_x->evaluate (points[q],sol,grad,src,true);
 
             for (unsigned int ic = 0; ic < EquationComponents<dim>::n_components; ++ic, ++i_out)

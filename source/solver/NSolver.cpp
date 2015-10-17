@@ -115,7 +115,7 @@ namespace NSFEMSolver
     if (parameters->n_mms == 1)
       {
         // Setup coefficients for MMS
-        std_cxx11::array<Coeff_2D, EquationComponents<dim>::n_components> coeffs;
+        std_cxx11::array<Coeff, EquationComponents<dim>::n_components> coeffs;
         // // component u:
         coeffs[0].c0  = 0.2;
         coeffs[0].cx  = 0.01;

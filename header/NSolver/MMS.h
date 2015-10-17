@@ -16,23 +16,24 @@ namespace NSFEMSolver
 {
   using namespace dealii;
 
-// MMS
-  struct Coeff_2D
+// Code for manufactured solutions
+
+  struct Coeff
   {
     /**
      * Default constructor
      */
-    Coeff_2D();
+    Coeff();
 
     /**
      * Copy constructor
      */
-    Coeff_2D (const Coeff_2D &value_in);
+    Coeff (const Coeff &value_in);
 
     /**
      * Overload assign operator
      */
-    Coeff_2D &operator= (const Coeff_2D &r);
+    Coeff &operator= (const Coeff &r);
 
     /**
      * Value list
@@ -40,13 +41,19 @@ namespace NSFEMSolver
     double c0;
     double cx;
     double cy;
+    double cz;
     double cxy;
+    double cxz;
+    double cxyz;
     double ax;
     double ay;
+    double az;
     double axy;
+    double axz;
+    double axyz;
   };
 
-#define dim2 2
+
   /**
    * Class for carrying out code verification by the method of manufactured
    * solutions (MMS). For now, the test function is hard coded and only the
@@ -55,21 +62,22 @@ namespace NSFEMSolver
    * By default, this class works in Euler mode, i.e., no viscous flux
    * will be involved.
    */
-  class MMS : public Function<dim2, double>
+  template<int dim>
+  class MMS : public Function<dim, double>
   {
   public:
     typedef Sacado::Fad::DFad<double> FADD;
     // Fluid vector
-    typedef std_cxx11::array<double, EquationComponents<dim2>::n_components>  F_V;
+    typedef std_cxx11::array<double, EquationComponents<dim>::n_components>  F_V;
     // Fluid tensor
-    typedef std_cxx11::array <std_cxx11::array <double, dim2>,
-            EquationComponents<dim2>::n_components > F_T;
+    typedef std_cxx11::array <std_cxx11::array <double, dim>,
+            EquationComponents<dim>::n_components > F_T;
 
-    typedef std_cxx11::array<FADD, EquationComponents<dim2>::n_components> FADD_V;
-    typedef std_cxx11::array <std_cxx11::array <FADD, dim2>,
-            EquationComponents<dim2>::n_components > FADD_T;
+    typedef std_cxx11::array<FADD, EquationComponents<dim>::n_components> FADD_V;
+    typedef std_cxx11::array <std_cxx11::array <FADD, dim>,
+            EquationComponents<dim>::n_components > FADD_T;
     // coefficient vector
-    typedef std_cxx11::array<Coeff_2D, EquationComponents<dim2>::n_components> C_V;
+    typedef std_cxx11::array<Coeff, EquationComponents<dim>::n_components> C_V;
   public:
     /**
      * Default constructor
@@ -79,7 +87,7 @@ namespace NSFEMSolver
     /**
      * Copy constructor
      */
-    MMS (const MMS &mms_in);
+    MMS (const MMS<dim> &mms_in);
 
     /**
      * Initialize the object with provided coefficients. This has nothing to
@@ -108,7 +116,7 @@ namespace NSFEMSolver
      * The source term is the divergence of the flux of the governing equation.
      * The divergence is evaluated by automatic differentiation with Sacado::FAD.
      */
-    void evaluate (const Point<dim2>   &p,
+    void evaluate (const Point<dim>   &p,
                    F_V &value,
                    F_T &grad,
                    F_V &source,
@@ -116,24 +124,24 @@ namespace NSFEMSolver
     /**
      * access to one component at one point
      */
-    virtual double value (const Point<dim2>  &p,
+    virtual double value (const Point<dim>  &p,
                           const unsigned int component = 0) const;
     /**
      * return all components at one point
      */
-    virtual void vector_value (const Point<dim2> &p,
+    virtual void vector_value (const Point<dim> &p,
                                Vector<double>   &value) const;
 
     /**
      * access to one component at several points
      */
-    virtual void value_list (const std::vector<Point<dim2> > &point_list,
+    virtual void value_list (const std::vector<Point<dim> > &point_list,
                              std::vector<double>             &value_list,
                              const unsigned int  component = 0) const;
     /**
      * return all components at several points
      */
-    virtual void vector_value_list (const std::vector<Point<dim2> > &point_list,
+    virtual void vector_value_list (const std::vector<Point<dim> > &point_list,
                                     std::vector<Vector<double> >    &value_list) const;
   private:
     C_V c;

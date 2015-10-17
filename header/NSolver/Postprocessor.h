@@ -61,7 +61,7 @@ namespace NSFEMSolver
   {
   public:
     Postprocessor (Parameters::AllParameters<dim> const *const para_ptr_in,
-                   MMS const *const mms_ptr_in);
+                   MMS<dim> const *const mms_ptr_in);
 
     virtual
     void
@@ -82,7 +82,7 @@ namespace NSFEMSolver
 
   private:
     Parameters::AllParameters<dim>const *const parameters;
-    MMS const *const mms_x;
+    MMS<dim> const *const mms_x;
     bool const do_schlieren_plot;
     bool const output_mms;
   };
