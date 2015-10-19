@@ -299,6 +299,7 @@ namespace NSFEMSolver
       double entropy_visc_cE;
       double entropy_visc_cLinear;
       double diffusion_factor[EquationComponents<dim>::n_components];
+      double laplacian_continuation;
 
       enum RenumberDofs
       {

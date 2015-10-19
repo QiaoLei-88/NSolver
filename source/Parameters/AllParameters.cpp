@@ -409,6 +409,9 @@ namespace NSFEMSolver
       prm.declare_entry ("entropy visc cLinear", "0.25",
                          Patterns::Double (0.0),
                          "Scale factor on linear limit of entropy viscosity");
+      prm.declare_entry ("Laplacian continuation", "-1.0",
+                         Patterns::Double(),
+                         "Coefficient for Laplacian continuation");
 
       prm.declare_entry ("renumber dofs", "None",
                          Patterns::Selection ("None|RCM|RCM_WithStartPoint"),
@@ -556,6 +559,7 @@ namespace NSFEMSolver
       diffusion_coefficoent = prm.get_double ("diffusion coefficient");
       entropy_visc_cE = prm.get_double ("entropy visc cE");
       entropy_visc_cLinear = prm.get_double ("entropy visc cLinear");
+      laplacian_continuation = prm.get_double ("Laplacian continuation");
 
       {
         const std::string prm_buf = prm.get ("renumber dofs");

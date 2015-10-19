@@ -268,6 +268,9 @@ namespace NSFEMSolver
     unsigned int n_time_step;
     unsigned int n_total_iter;
     unsigned int nonlin_iter;
+
+    // laplacian_coefficient
+    double laplacian_coefficient;
   };
 
 }

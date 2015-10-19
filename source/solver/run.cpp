@@ -513,6 +513,18 @@ namespace NSFEMSolver
                 CFL_number_increased = true;
                 index_linear_search_length = 0;
               }
+            if (res_norm_total < laplacian_coefficient)
+              {
+                laplacian_coefficient = std::min (res_norm_total, 0.5 * laplacian_coefficient);
+              }
+
+            if (laplacian_coefficient < 1e-7)
+              {
+                laplacian_coefficient = 0.0;
+              }
+
+            std::cerr << "res_norm_total = " << res_norm_total << std::endl;
+            std::cerr << "laplacian_coefficient = " << laplacian_coefficient << std::endl;
 
             std_cxx11::array<double, EquationComponents<dim>::n_components> time_advance_l2_norm;
             for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
@@ -630,6 +642,8 @@ namespace NSFEMSolver
             bool time_march_converged =
               ! (swith_flux &&
                  parameters->tolerance_to_switch_flux > parameters->time_march_tolerance);
+            time_march_converged = time_march_converged &&
+                                   (laplacian_coefficient < 1e-100);
 
             pcout << "  Order of time advancing L_2  norm\n   ";
             double total_time_march_norm = 0.0;
