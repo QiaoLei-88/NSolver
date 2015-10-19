@@ -123,6 +123,7 @@ namespace NSFEMSolver
             if (cell->is_locally_owned())
               {
                 artificial_viscosity[cell->active_cell_index()] =
+                  parameters->diffusion_coefficoent *
                   std::pow (cell->diameter(), parameters->diffusion_power);
               } // End if cell is locally owned
           } // End for active cells
