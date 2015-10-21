@@ -54,15 +54,10 @@ namespace NSFEMSolver
 
     if (do_schlieren_plot)
       {
-        Assert (duh.size() == n_quadrature_points,ExcInternalError());
+        Assert (duh.size() == n_quadrature_points, ExcInternalError());
       }
-    else
-      {
-        Assert (duh.size() == 0,ExcInternalError());
-      }
-
-    Assert (computed_quantities.size() == n_quadrature_points,ExcInternalError());
-    Assert (uh[0].size() == EquationComponents<dim>::n_components,ExcInternalError());
+    Assert (computed_quantities.size() == n_quadrature_points, ExcInternalError());
+    Assert (uh[0].size() == EquationComponents<dim>::n_components, ExcInternalError());
 
     //MMS: Extra memory space
     Vector<double>::size_type expected_size = dim+2;
