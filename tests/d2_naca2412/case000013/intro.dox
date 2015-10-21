@@ -1,0 +1,2 @@
+Run case000007 with global Laplacian continuation.
+Also switch to Roe flux.
