@@ -37,6 +37,10 @@ namespace NSFEMSolver
         prm.declare_entry ("Laplacian continuation", "-1.0",
                            Patterns::Double(),
                            "Coefficient for Laplacian continuation");
+        prm.declare_entry ("Laplacian zero", "1e-9",
+                           Patterns::Double(),
+                           "Threshold of Laplacian Coefficient to be force to zero");
+
         for (unsigned int di=0; di<EquationComponents<dim>::n_components; ++di)
           {
             prm.declare_entry ("diffusion factor for w_" + Utilities::int_to_string (di),
@@ -77,6 +81,7 @@ namespace NSFEMSolver
         entropy_visc_cE = prm.get_double ("entropy visc cE");
         entropy_visc_cLinear = prm.get_double ("entropy visc cLinear");
         laplacian_continuation = prm.get_double ("Laplacian continuation");
+        laplacian_zero = prm.get_double ("Laplacian zero");
 
         for (unsigned int di=0; di<EquationComponents<dim>::n_components; ++di)
           {

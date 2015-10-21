@@ -363,6 +363,12 @@ namespace NSFEMSolver
             // Check result.
             newton_iter_converged
               = (std::log10 (res_norm) < parameters->nonlinear_tolerance);
+            if (parameters->laplacian_continuation > 0.0 &&
+                laplacian_coefficient > 0.0)
+              {
+                newton_iter_converged = newton_iter_converged &&
+                                        (res_norm < 0.1 * laplacian_coefficient);
+              }
 
             if (linear_solver_diverged)
               {
@@ -518,7 +524,7 @@ namespace NSFEMSolver
                 laplacian_coefficient = std::min (res_norm_total, 0.5 * laplacian_coefficient);
               }
 
-            if (laplacian_coefficient < 1e-7)
+            if (laplacian_coefficient < parameters->laplacian_zero)
               {
                 laplacian_coefficient = 0.0;
               }

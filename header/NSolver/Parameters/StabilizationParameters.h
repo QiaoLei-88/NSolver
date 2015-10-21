@@ -35,6 +35,12 @@ namespace NSFEMSolver
       double diffusion_factor[EquationComponents<dim>::n_components];
       double laplacian_continuation;
 
+      /**
+       * When doing Laplacian continuation, the Laplacian coefficient will be
+       * set to zero if its value is less than this parameter.
+       */
+      double laplacian_zero;
+
       static void declare_parameters (ParameterHandler &prm);
       void parse_parameters (ParameterHandler &prm);
     };
