@@ -14,10 +14,9 @@ set mesh = 2412.msh
 set mesh format = gmsh
 set scale mesh = 0.001
 
-# Stabilization parameter
-set diffusion type  = cell size
-set diffusion power = 2.0
-set diffusion coefficient = 0.0008
+subsection stabilization parameters
+  set diffusion type  = cell size
+end
 
 # --------------------------------------------------
 # Boundary conditions

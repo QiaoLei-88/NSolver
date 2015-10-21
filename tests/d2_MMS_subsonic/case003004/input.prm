@@ -35,10 +35,10 @@ set MMS use strong BC = true
 # Doesn't need input grid
 set global refinement = 3
 
-# Stabilization parameter
-set diffusion type  = const # <cell size|entropy|const>
-set diffusion power = 2.0
-set diffusion coefficient = 0.0
+subsection stabilization parameters
+  set diffusion type  = const
+  set diffusion coefficient = 0.0
+end
 
 # --------------------------------------------------
 # Boundary conditions

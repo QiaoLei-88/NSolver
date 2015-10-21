@@ -9,9 +9,9 @@ end
 set mesh = slide.inp
 set mesh format = ucd
 
-# Stabilization parameter
-set diffusion type  = entropy
-set diffusion power = 2.0
+subsection stabilization parameters
+  set diffusion type  = entropy
+end
 
 # --------------------------------------------------
 # Boundary conditions

@@ -22,12 +22,10 @@ set mesh = Gamm_Channel.msh
 set mesh format = gmsh
 set scale mesh = 1.0
 
-# Stabilization parameter
-set diffusion type  = const # residual # cell size | const | entropy
-set entropy visc cLinear = 0.5
-set entropy visc cE = 5.0
-set diffusion power = 2.0
-set diffusion coefficient = 0.0002
+subsection stabilization parameters
+  set diffusion type  = const
+  set diffusion coefficient = 0.0002
+end
 
 # --------------------------------------------------
 # Boundary conditions

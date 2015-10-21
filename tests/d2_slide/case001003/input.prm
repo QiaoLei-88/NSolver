@@ -9,9 +9,10 @@ end
 set mesh = slide.inp
 set mesh format = ucd
 
-# Stabilization parameter
-set diffusion type  = cell size
-set diffusion power = 1.5
+subsection stabilization parameters
+  set diffusion type  = cell size
+  set diffusion power = 1.5
+end
 
 # --------------------------------------------------
 # Boundary conditions

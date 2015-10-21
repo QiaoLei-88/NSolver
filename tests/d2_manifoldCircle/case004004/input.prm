@@ -71,10 +71,10 @@ set mesh format = gmsh
 set scale mesh = 1.0
 set global refinement = 1
 
-# Stabilization parameter
-set diffusion type  =  const # cell size | const | entropy
-set diffusion power = 2.0
-set diffusion coefficient = 0.0001
+subsection stabilization parameters
+  set diffusion type  =  const
+  set diffusion coefficient = 0.0001
+end
 
 # DOF Renumbering
 set renumber dofs = RCM # RCM_WithStartPoint # RCM # None
