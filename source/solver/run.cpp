@@ -366,8 +366,10 @@ namespace NSFEMSolver
             if (parameters->laplacian_continuation > 0.0 &&
                 laplacian_coefficient > 0.0)
               {
-                newton_iter_converged = newton_iter_converged &&
-                                        (res_norm < 0.1 * laplacian_coefficient);
+                newton_iter_converged =
+                  newton_iter_converged &&
+                  (res_norm <
+                   parameters->laplacian_newton_tolerance * laplacian_coefficient);
               }
 
             if (linear_solver_diverged)

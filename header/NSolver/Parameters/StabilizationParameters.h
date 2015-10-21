@@ -41,6 +41,11 @@ namespace NSFEMSolver
        */
       double laplacian_zero;
 
+      /**
+       * Relative Newton iteration tolerance comparing with Laplacian coefficient.
+       */
+      double laplacian_newton_tolerance;
+
       static void declare_parameters (ParameterHandler &prm);
       void parse_parameters (ParameterHandler &prm);
     };
