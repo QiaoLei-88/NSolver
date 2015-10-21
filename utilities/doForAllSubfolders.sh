@@ -6,9 +6,10 @@
 WPATH=`pwd`
 
 for fold in $(ls -d */); do
-  pushd .
+  pushd . > /dev/null
   cd $fold
-#  patch input.prm < ../input.patch
-  popd
+    echo $fold
+#    patch input.prm < ../input.patch
+  popd > /dev/null
 done
 
