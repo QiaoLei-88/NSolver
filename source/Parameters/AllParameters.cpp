@@ -391,28 +391,6 @@ namespace NSFEMSolver
                          Patterns::Anything(),
                          "output file for all iteration history.");
 
-
-      prm.declare_entry ("diffusion type", "cell size",
-                         Patterns::Anything(),
-                         "How to calculate diffusion");
-
-      prm.declare_entry ("diffusion power", "2.0",
-                         Patterns::Double(),
-                         "power of mesh size for diffusion");
-
-      prm.declare_entry ("diffusion coefficient", "0.001",
-                         Patterns::Double(),
-                         "predefined diffusion coefficient");
-      prm.declare_entry ("entropy visc cE", "1.0",
-                         Patterns::Double (0.0),
-                         "Scale factor on entropy viscosity");
-      prm.declare_entry ("entropy visc cLinear", "0.25",
-                         Patterns::Double (0.0),
-                         "Scale factor on linear limit of entropy viscosity");
-      prm.declare_entry ("Laplacian continuation", "-1.0",
-                         Patterns::Double(),
-                         "Coefficient for Laplacian continuation");
-
       prm.declare_entry ("renumber dofs", "None",
                          Patterns::Selection ("None|RCM|RCM_WithStartPoint"),
                          "How to renumber dofs");
@@ -432,15 +410,6 @@ namespace NSFEMSolver
       prm.declare_entry ("output system matrix", "false",
                          Patterns::Bool(),
                          "output system matrix or not");
-
-
-      for (unsigned int di=0; di<EquationComponents<dim>::n_components; ++di)
-        {
-          prm.declare_entry ("diffusion factor for w_" + Utilities::int_to_string (di),
-                             "1.0",
-                             Patterns::Double (0),
-                             "diffusion factor for component w_" + Utilities::int_to_string (di));
-        }
 
       for (unsigned int b=0; b<max_n_boundaries; ++b)
         {
@@ -496,6 +465,7 @@ namespace NSFEMSolver
       Parameters::Flux::declare_parameters (prm);
       Parameters::Output::declare_parameters (prm);
       Parameters::FEParameters::declare_parameters (prm);
+      Parameters::StabilizationParameters<dim>::declare_parameters (prm);
     }
 
 
@@ -536,32 +506,6 @@ namespace NSFEMSolver
       n_global_refinement = prm.get_integer ("global refinement");
 
       {
-        const std::string prm_buf = prm.get ("diffusion type");
-        if (prm_buf == "entropy")
-          {
-            diffusion_type = diffu_entropy;
-          }
-        else if (prm_buf == "cell size")
-          {
-            diffusion_type = diffu_cell_size;
-          }
-        else if (prm_buf == "const")
-          {
-            diffusion_type = diffu_const;
-          }
-        else
-          {
-            AssertThrow (false, ExcNotImplemented());
-          }
-      }
-
-      diffusion_power = prm.get_double ("diffusion power");
-      diffusion_coefficoent = prm.get_double ("diffusion coefficient");
-      entropy_visc_cE = prm.get_double ("entropy visc cE");
-      entropy_visc_cLinear = prm.get_double ("entropy visc cLinear");
-      laplacian_continuation = prm.get_double ("Laplacian continuation");
-
-      {
         const std::string prm_buf = prm.get ("renumber dofs");
         if (prm_buf == "None")
           {
@@ -586,12 +530,6 @@ namespace NSFEMSolver
         output_sparsity_pattern = prm.get_bool ("output sparsity pattern");
         output_system_matrix    = prm.get_bool ("output system matrix");
       }
-
-      for (unsigned int di=0; di<EquationComponents<dim>::n_components; ++di)
-        {
-          diffusion_factor[di] = prm.get_double ("diffusion factor for w_"
-                                                 + Utilities::int_to_string (di));
-        }
 
       for (unsigned int boundary_id=0; boundary_id<max_n_boundaries;
            ++boundary_id)
@@ -703,6 +641,7 @@ namespace NSFEMSolver
       Parameters::Flux::parse_parameters (prm);
       Parameters::Output::parse_parameters (prm);
       Parameters::FEParameters::parse_parameters (prm);
+      Parameters::StabilizationParameters<dim>::parse_parameters (prm);
     }
 
     template struct Refinement<2>;

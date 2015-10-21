@@ -30,6 +30,7 @@
 #include <NSolver/EquationComponents.h>
 #include <NSolver/NumericalFlux.h>
 #include <NSolver/Parameters/TimeSteppingParameters.h>
+#include <NSolver/Parameters/StabilizationParameters.h>
 #include <deal.II/base/subscriptor.h>
 
 namespace NSFEMSolver
@@ -258,6 +259,7 @@ namespace NSFEMSolver
       public Flux,
       public Output,
       public FEParameters,
+      public StabilizationParameters<dim>,
       public Subscriptor
     {
       static const unsigned int max_n_boundaries = 10;
@@ -273,8 +275,6 @@ namespace NSFEMSolver
 
       AllParameters();
 
-      double diffusion_power;
-
       std::string mesh_filename;
       std::string time_advance_history_filename;
       std::string iteration_history_filename;
@@ -287,19 +287,6 @@ namespace NSFEMSolver
       MeshFormat mesh_format;
       double scale_mesh;
       int n_global_refinement;
-
-      enum DiffusionType
-      {
-        diffu_entropy,
-        diffu_cell_size,
-        diffu_const
-      };
-      DiffusionType diffusion_type;
-      double diffusion_coefficoent;
-      double entropy_visc_cE;
-      double entropy_visc_cLinear;
-      double diffusion_factor[EquationComponents<dim>::n_components];
-      double laplacian_continuation;
 
       enum RenumberDofs
       {
