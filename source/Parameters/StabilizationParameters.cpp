@@ -25,7 +25,7 @@ namespace NSFEMSolver
                            Patterns::Double(),
                            "power of mesh size for diffusion");
 
-        prm.declare_entry ("diffusion coefficient", "0.001",
+        prm.declare_entry ("diffusion coefficient", "1.0",
                            Patterns::Double(),
                            "predefined diffusion coefficient");
         prm.declare_entry ("entropy visc cE", "1.0",
