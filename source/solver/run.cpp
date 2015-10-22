@@ -118,6 +118,65 @@ namespace NSFEMSolver
                     }
                 }
           triangulation.set_boundary (1, NACA_foil_boundary);
+
+          if (parameters->NACA_cheating_refinement)
+            {
+              for (int n=0; n<2; ++n)
+                {
+                  // Refine cell in a elliptic around the foil twice
+                  for (typename Triangulation<dim>::active_cell_iterator
+                       cell = triangulation.begin_active();
+                       cell != triangulation.end();
+                       ++cell)
+                    {
+                      const double center_x=0.5;
+                      const double center_y=0.0;
+                      const double half_axi_long  = 0.7;
+                      const double half_axi_short = 0.2;
+                      const double a = (cell->center()[0] - center_x)/half_axi_long;
+                      const double b = (cell->center()[1] - center_y)/half_axi_short;
+                      if ((a*a+b*b) < 1.0)
+                        {
+                          cell->set_refine_flag();
+                        }
+                    }
+                  triangulation.execute_coarsening_and_refinement();
+                }
+
+              for (typename Triangulation<dim>::active_cell_iterator
+                   cell = triangulation.begin_active();
+                   cell != triangulation.end();
+                   ++cell)
+                {
+                  const Point<dim> zero;
+                  Point<dim> one;
+                  one[0] = 1.0;
+                  if (zero.distance (cell->center()) < 0.15
+                      ||
+                      one.distance (cell->center()) < 0.1)
+                    {
+                      cell->set_refine_flag();
+                    }
+                }
+              triangulation.execute_coarsening_and_refinement();
+
+              for (typename Triangulation<dim>::active_cell_iterator
+                   cell = triangulation.begin_active();
+                   cell != triangulation.end();
+                   ++cell)
+                {
+                  const Point<dim> zero;
+                  Point<dim> one;
+                  one[0] = 1.0;
+                  if (zero.distance (cell->center()) < 0.05
+                      ||
+                      one.distance (cell->center()) < 0.03)
+                    {
+                      cell->set_refine_flag();
+                    }
+                }
+              triangulation.execute_coarsening_and_refinement();
+            }
         }
 
       if (parameters->n_global_refinement > 0)
