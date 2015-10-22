@@ -278,6 +278,7 @@ namespace NSFEMSolver
     double res_norm_total (0.0);
     double res_norm_total_previous (0.0);
     double res_norm_infty_total (0.0);
+    double old_laplacian_coefficient = laplacian_coefficient;
     while (!terminate_time_stepping)
       {
         computing_timer.enter_subsection ("2:Prepare Newton iteration");
@@ -332,6 +333,7 @@ namespace NSFEMSolver
         nonlin_iter = 0;
         current_solution = predictor;
         bool linear_solver_diverged (true);
+        bool solution_diverged (true);
         unsigned int const nonlin_iter_threshold (parameters->max_Newton_iter);
 
         double res_norm;
@@ -375,6 +377,7 @@ namespace NSFEMSolver
               }
 
             res_norm = right_hand_side.l2_norm();
+            solution_diverged = std::isnan (res_norm);
             res_norm_total += res_norm;
             const double physical_res_norm = physical_residual.l2_norm();
 
@@ -397,7 +400,10 @@ namespace NSFEMSolver
             computing_timer.leave_subsection ("3:Assemble Newton system");
 
             computing_timer.enter_subsection ("4:Solve Newton system");
-            convergence = solve (newton_update);
+            if (!solution_diverged)
+              {
+                convergence = solve (newton_update);
+              }
             computing_timer.leave_subsection ("4:Solve Newton system");
 
             computing_timer.enter_subsection ("5:Postprocess Newton solution");
@@ -438,18 +444,25 @@ namespace NSFEMSolver
             // Check result.
             newton_iter_converged
               = (std::log10 (res_norm) < parameters->nonlinear_tolerance);
+
             if (parameters->laplacian_continuation > 0.0 &&
-                laplacian_coefficient > 0.0)
+                (!linear_solver_diverged))
               {
+                const double physical_res_tolerance = 1e-10;
                 newton_iter_converged =
                   newton_iter_converged &&
-                  (res_norm <
-                   parameters->laplacian_newton_tolerance * physical_res_norm);
+                  (newton_update_norm <
+                   parameters->laplacian_newton_tolerance *
+                   std::max (physical_res_norm, physical_res_tolerance));
               }
 
             if (linear_solver_diverged)
               {
                 pcout << "  Linear solver diverged..\n";
+              }
+            if (solution_diverged)
+              {
+                pcout << "  Solution diverged..\n";
               }
             // May 'newton_iter_converged' and 'linear_solver_diverged' be true
             // together? I don't think so but not sure.
@@ -462,14 +475,17 @@ namespace NSFEMSolver
 
             //                                 Using '>='  here because this condition
             //                                 is evaluated after '++nonlin_iter'.
-            if (linear_solver_diverged || nonlin_iter >= nonlin_iter_threshold)
+            if (linear_solver_diverged
+                || solution_diverged
+                || nonlin_iter >= nonlin_iter_threshold)
               {
                 newton_iter_converged = false;
                 pcout << "  Newton iteration not converge in " << nonlin_iter_threshold << " steps.\n";
               }
             computing_timer.leave_subsection ("5:Postprocess Newton solution");
           }
-        while ((!newton_iter_converged)
+        while ((!solution_diverged)
+               && (!newton_iter_converged)
                && nonlin_iter < nonlin_iter_threshold
                && (!linear_solver_diverged));
 
@@ -604,6 +620,7 @@ namespace NSFEMSolver
             //     laplacian_coefficient = std::min (res_norm_total, 0.5 * laplacian_coefficient);
             //     laplacian_coefficient = std::max (laplacian_coefficient, laplacian_coefficient_min);
             //   }
+            old_laplacian_coefficient = laplacian_coefficient;
             {
               double laplacian_ratio_min = 0.5;
               if (quadratic_converge)
@@ -621,8 +638,8 @@ namespace NSFEMSolver
                 }
             }
 
-            std::cerr << "res_norm_total = " << res_norm_total << std::endl;
-            std::cerr << "laplacian_coefficient = " << laplacian_coefficient << std::endl;
+            pcout << "res_norm_total = " << res_norm_total << std::endl;
+            pcout << "laplacian_coefficient = " << laplacian_coefficient << std::endl;
 
             std_cxx11::array<double, EquationComponents<dim>::n_components> time_advance_l2_norm;
             for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
@@ -788,10 +805,22 @@ namespace NSFEMSolver
           {
             computing_timer.enter_subsection ("6:Rolling back time step");
             // Newton iteration not converge in reasonable steps
-
-            if ((index_linear_search_length <
-                 parameters->newton_linear_search_length_try_limit)
-                && (!CFL_number_increased))
+            if (parameters->laplacian_continuation > 0.0)
+              {
+                if (laplacian_coefficient > 0.0)
+                  {
+                    laplacian_coefficient =
+                      std::sqrt (old_laplacian_coefficient * laplacian_coefficient);
+                  }
+                else
+                  {
+                    laplacian_coefficient = 0.5 * old_laplacian_coefficient;
+                  }
+                pcout << "reseted laplacian_coefficient = " << laplacian_coefficient << std::endl;
+              }
+            else if ((index_linear_search_length <
+                      parameters->newton_linear_search_length_try_limit)
+                     && (!CFL_number_increased))
               {
                 // Try to adjust linear_search_length first
                 ++index_linear_search_length;
