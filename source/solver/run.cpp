@@ -528,7 +528,9 @@ namespace NSFEMSolver
               (laplacian_coefficient < 1e-100);
             if (res_norm_total < laplacian_coefficient)
               {
+                const double laplacian_coefficient_min = 0.1 * laplacian_coefficient;
                 laplacian_coefficient = std::min (res_norm_total, 0.5 * laplacian_coefficient);
+                laplacian_coefficient = std::max (laplacian_coefficient, laplacian_coefficient_min);
               }
 
             if (laplacian_coefficient < parameters->laplacian_zero)
