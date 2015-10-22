@@ -18,6 +18,8 @@ subsection stabilization parameters
   set diffusion type         = const
   set diffusion coefficient  = 0.0
   set Laplacian continuation = 0.1
+  set Laplacian zero         = 1e-16
+  #set Laplacian Newton tolerance = 0.01
 end
 
 # --------------------------------------------------
@@ -61,6 +63,7 @@ end
 # --------------------------------------------------
 # Time stepping control
 subsection time stepping
+  set turn off time marching        = true
   set rigid reference time step     = true
   set CFL number                    = 1e+100
   set minimum step increasing ratio stage2 = 1.0
