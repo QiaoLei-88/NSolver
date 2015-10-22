@@ -316,13 +316,10 @@ namespace NSFEMSolver
               }
           }
 
-        // At the end of the loop, we have to add the sensitivities to the
-        // matrix and subtract the residual from the right hand side. Trilinos
-        // FAD data type gives us access to the derivatives using
-        // <code>R_i.fastAccessDx(k)</code>, so we store the data in a
-        // temporary array. This information about the whole row of local dofs
-        // is then added to the Trilinos matrix at once (which supports the
-        // data types we have chosen).
+        // At the end of the loop, we add the sensitivities to the matrix and
+        // subtract the residual from the right hand side.
+        // Trilinos FAD data type stores all the derivatives in an array.
+        // We can pass them to the system matrix directly.
         system_matrix.add (dof_indices[i], dof_indices.size(),
                            & (dof_indices[0]), & (R_i.fastAccessDx (0)));
         right_hand_side (dof_indices[i]) -= R_i.val();
