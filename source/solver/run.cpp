@@ -348,6 +348,8 @@ namespace NSFEMSolver
         res_norm_infty_total = 0.0;
         double physical_residual_first = 0.0;
         double physical_residual_ratio = 0.0;
+        double log_res_last = 0.0;
+        bool quadratic_converge = true;
         calc_artificial_viscosity();
         do // Newton iteration
           {
@@ -380,10 +382,17 @@ namespace NSFEMSolver
             res_norm_infty_total += res_norm_infty;
             if (nonlin_iter == 0)
               {
-                physical_residual_first = res_norm;
+                log_res_last = std::log (res_norm);
+                physical_residual_first = physical_res_norm;
                 residual_for_output = right_hand_side;
               }
-            physical_residual_ratio = res_norm/physical_residual_first;
+            else
+              {
+                const double log_res = std::log (res_norm);
+                quadratic_converge = (log_res < log_res_last * 1.5);
+                log_res_last = log_res;
+              }
+            physical_residual_ratio = physical_res_norm/physical_residual_first;
 
             computing_timer.leave_subsection ("3:Assemble Newton system");
 
@@ -596,8 +605,14 @@ namespace NSFEMSolver
             //     laplacian_coefficient = std::max (laplacian_coefficient, laplacian_coefficient_min);
             //   }
             {
+              double laplacian_ratio_min = 0.5;
+              if (quadratic_converge)
+                {
+                  laplacian_ratio_min = std::min (0.1, std::sqrt (laplacian_coefficient));
+                }
               const double laplacian_ratio =
-                std::min (0.5, 0.9 * physical_residual_ratio * physical_residual_ratio);
+                std::min (laplacian_ratio_min,
+                          0.9 * physical_residual_ratio * physical_residual_ratio);
 
               laplacian_coefficient *= laplacian_ratio;
               if (laplacian_coefficient < parameters->laplacian_zero)
