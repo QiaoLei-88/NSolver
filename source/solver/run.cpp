@@ -346,6 +346,8 @@ namespace NSFEMSolver
         res_norm_total_previous = res_norm_total;
         res_norm_total = 0.0;
         res_norm_infty_total = 0.0;
+        double physical_residual_first = 0.0;
+        double physical_residual_ratio = 0.0;
         calc_artificial_viscosity();
         do // Newton iteration
           {
@@ -378,8 +380,10 @@ namespace NSFEMSolver
             res_norm_infty_total += res_norm_infty;
             if (nonlin_iter == 0)
               {
+                physical_residual_first = res_norm;
                 residual_for_output = right_hand_side;
               }
+            physical_residual_ratio = res_norm/physical_residual_first;
 
             computing_timer.leave_subsection ("3:Assemble Newton system");
 
@@ -431,7 +435,7 @@ namespace NSFEMSolver
                 newton_iter_converged =
                   newton_iter_converged &&
                   (res_norm <
-                   parameters->laplacian_newton_tolerance * laplacian_coefficient);
+                   parameters->laplacian_newton_tolerance * physical_res_norm);
               }
 
             if (linear_solver_diverged)
@@ -585,17 +589,22 @@ namespace NSFEMSolver
               }
             const bool laplacian_coefficient_vanished =
               (laplacian_coefficient < 1e-100);
-            if (res_norm_total < laplacian_coefficient)
-              {
-                const double laplacian_coefficient_min = 0.1 * laplacian_coefficient;
-                laplacian_coefficient = std::min (res_norm_total, 0.5 * laplacian_coefficient);
-                laplacian_coefficient = std::max (laplacian_coefficient, laplacian_coefficient_min);
-              }
+            // if (res_norm_total < laplacian_coefficient)
+            //   {
+            //     const double laplacian_coefficient_min = 0.1 * laplacian_coefficient;
+            //     laplacian_coefficient = std::min (res_norm_total, 0.5 * laplacian_coefficient);
+            //     laplacian_coefficient = std::max (laplacian_coefficient, laplacian_coefficient_min);
+            //   }
+            {
+              const double laplacian_ratio =
+                std::min (0.5, 0.9 * physical_residual_ratio * physical_residual_ratio);
 
-            if (laplacian_coefficient < parameters->laplacian_zero)
-              {
-                laplacian_coefficient = 0.0;
-              }
+              laplacian_coefficient *= laplacian_ratio;
+              if (laplacian_coefficient < parameters->laplacian_zero)
+                {
+                  laplacian_coefficient = 0.0;
+                }
+            }
 
             std::cerr << "res_norm_total = " << res_norm_total << std::endl;
             std::cerr << "laplacian_coefficient = " << laplacian_coefficient << std::endl;
