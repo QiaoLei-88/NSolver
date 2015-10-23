@@ -279,18 +279,19 @@ namespace NSFEMSolver
             EulerEquations<dim>::compute_conservative_vector (W_old[point], w_conservative_old);
 
             // TODO: accumulate R_i first and the multiply with shape_value_component * JxW together.
-            {
-              const Sacado::Fad::DFad<double> tmp =
-                1.0 / dt *
-                (w_conservative[component_i] - w_conservative_old[component_i]) *
-                fe_v.shape_value_component (i, point, component_i) *
-                fe_v.JxW (point);
-              R_i += tmp;
-              if (!parameters->is_steady)
-                {
-                  cell_physical_residual += tmp.val();
-                }
-            }
+            if (!parameters->turn_off_time_marching)
+              {
+                const Sacado::Fad::DFad<double> tmp =
+                  1.0 / dt *
+                  (w_conservative[component_i] - w_conservative_old[component_i]) *
+                  fe_v.shape_value_component (i, point, component_i) *
+                  fe_v.JxW (point);
+                R_i += tmp;
+                if (!parameters->is_steady)
+                  {
+                    cell_physical_residual += tmp.val();
+                  }
+              }
 
             for (unsigned int d=0; d<dim; d++)
               {
