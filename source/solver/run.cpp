@@ -392,7 +392,9 @@ namespace NSFEMSolver
             else
               {
                 const double log_res = std::log (res_norm);
-                quadratic_converge = (log_res < log_res_last * 1.5);
+                // This only works when log_res<0 && log_res_last<0.
+                quadratic_converge =
+                  (log_res < log_res_last * parameters->laplacian_newton_quadratic);
                 log_res_last = log_res;
               }
             physical_residual_ratio = physical_res_norm/physical_residual_first;

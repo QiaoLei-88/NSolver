@@ -42,6 +42,12 @@ namespace NSFEMSolver
       double laplacian_zero;
 
       /**
+       * If Newton iteration achieved a convergence rate larger or equal than
+       * this parameter, it be recognized as quadratic convergence.
+       */
+      double laplacian_newton_quadratic;
+
+      /**
        * Relative Newton iteration tolerance comparing with Laplacian coefficient.
        */
       double laplacian_newton_tolerance;
