@@ -34,6 +34,9 @@ namespace NSFEMSolver
         prm.declare_entry ("entropy visc cLinear", "0.25",
                            Patterns::Double (0.0),
                            "Scale factor on linear limit of entropy viscosity");
+        prm.declare_entry ("entropy use global h min", "false",
+                           Patterns::Bool(),
+                           "Use global minimum cell size for entropy viscosity");
         prm.declare_entry ("Laplacian continuation", "-1.0",
                            Patterns::Double(),
                            "Coefficient for Laplacian continuation");
@@ -89,6 +92,7 @@ namespace NSFEMSolver
         diffusion_coefficoent = prm.get_double ("diffusion coefficient");
         entropy_visc_cE = prm.get_double ("entropy visc cE");
         entropy_visc_cLinear = prm.get_double ("entropy visc cLinear");
+        entropy_use_global_h_min = prm.get_bool ("entropy use global h min");
         laplacian_continuation = prm.get_double ("Laplacian continuation");
         laplacian_zero = prm.get_double ("Laplacian zero");
         laplacian_newton_quadratic = prm.get_double ("Laplacian Newton quadratic");

@@ -32,6 +32,7 @@ namespace NSFEMSolver
       double diffusion_coefficoent;
       double entropy_visc_cE;
       double entropy_visc_cLinear;
+      bool   entropy_use_global_h_min;
       double diffusion_factor[EquationComponents<dim>::n_components];
       double laplacian_continuation;
 
