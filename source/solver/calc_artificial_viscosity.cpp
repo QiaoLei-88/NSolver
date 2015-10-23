@@ -18,6 +18,25 @@ namespace NSFEMSolver
       case Parameters::AllParameters<dim>::diffu_entropy:
       {
         // Entropy viscosity
+        double local_h_min (std::numeric_limits<double>::max());
+        if (parameters->entropy_use_global_h_min)
+          {
+            typename DoFHandler<dim>::active_cell_iterator cell =
+              dof_handler.begin_active();
+            const typename DoFHandler<dim>::active_cell_iterator endc =
+              dof_handler.end();
+            for (; cell!=endc; ++cell)
+              {
+                if (cell->is_locally_owned())
+                  {
+                    local_h_min = std::min (cell->diameter(), local_h_min);
+                  }
+              }
+          }
+        const double global_h_min = Utilities::MPI::min (local_h_min, mpi_communicator);
+        // This is to say local_h_min will never be used here after.
+        (void)local_h_min;
+
         FEValues<dim> fe_values (fe,
                                  quadrature,
                                  update_values |
@@ -98,12 +117,15 @@ namespace NSFEMSolver
                     = EulerEquations<dim>::template compute_velocity_magnitude (W[q]);
                     characteristic_speed_max = std::max (characteristic_speed_max, velocity + sound_speed);
                   }
+
+                const double h = parameters->entropy_use_global_h_min
+                ? global_h_min : cell->diameter();
                 const double entropy_visc
                 = parameters->entropy_visc_cE * rho_max
-                * std::pow (cell->diameter(), 2.0) * D_h_max;
+                * std::pow (h, 2.0) * D_h_max;
                 const double miu_max
                 = parameters->entropy_visc_cLinear
-                * cell->diameter()
+                * h
                 * rho_max * characteristic_speed_max;
 
                 artificial_viscosity[cell->active_cell_index()] =
