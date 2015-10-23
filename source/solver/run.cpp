@@ -225,7 +225,8 @@ namespace NSFEMSolver
     setup_system();
 
     initialize();
-    if (parameters->max_refine_time > 0)
+    if ((parameters->max_refine_time > 0) &&
+        parameters->do_refine_on_initial_field)
       {
         compute_refinement_indicators();
         refine_grid();
