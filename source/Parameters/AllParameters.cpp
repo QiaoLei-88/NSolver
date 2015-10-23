@@ -141,6 +141,9 @@ namespace NSFEMSolver
         prm.declare_entry ("refinement indicator", "Gradient",
                            Patterns::Selection ("Gradient|Kelly"),
                            "type of refinement indicator");
+        prm.declare_entry ("do initial refine", "true",
+                           Patterns::Bool(),
+                           "Do refine on initial field or not");
         prm.declare_entry ("refine fraction", "0.1",
                            Patterns::Double(),
                            "Fraction of gird refinement");
@@ -192,6 +195,7 @@ namespace NSFEMSolver
               AssertThrow (false, ExcNotImplemented());
             }
         }
+        do_refine_on_initial_field = prm.get_bool ("do initial refine");
         refine_fraction  = prm.get_double ("refine fraction");
         coarsen_fraction = prm.get_double ("coarsen fraction");
         max_cells        = prm.get_double ("max cells");

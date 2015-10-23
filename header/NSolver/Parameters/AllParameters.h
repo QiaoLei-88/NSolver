@@ -113,6 +113,7 @@ namespace NSFEMSolver
 
       Indicator refinement_indicator;
 
+      bool   do_refine_on_initial_field;
       double shock_val;
       double refine_fraction;
       double coarsen_fraction;
