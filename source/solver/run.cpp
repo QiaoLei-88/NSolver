@@ -616,18 +616,18 @@ namespace NSFEMSolver
               }
             const bool laplacian_coefficient_vanished =
               (laplacian_coefficient < 1e-100);
-            // if (res_norm_total < laplacian_coefficient)
-            //   {
-            //     const double laplacian_coefficient_min = 0.1 * laplacian_coefficient;
-            //     laplacian_coefficient = std::min (res_norm_total, 0.5 * laplacian_coefficient);
-            //     laplacian_coefficient = std::max (laplacian_coefficient, laplacian_coefficient_min);
-            //   }
+
+            // TODO: refactoring needed.
             old_laplacian_coefficient = laplacian_coefficient;
             {
               double laplacian_ratio_min = 0.5;
               if (quadratic_converge)
                 {
-                  laplacian_ratio_min = std::min (0.1, std::sqrt (laplacian_coefficient));
+                  laplacian_ratio_min =
+                    std::min (0.1,
+                              std::pow (laplacian_coefficient,
+                                        parameters->laplacian_decrease_rate - 1.0)
+                             );
                 }
               const double laplacian_ratio =
                 std::min (laplacian_ratio_min,

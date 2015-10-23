@@ -52,6 +52,12 @@ namespace NSFEMSolver
        */
       double laplacian_newton_tolerance;
 
+      /**
+       * If Newton iteration achieved quadratic convergence, decrease
+       * Laplacian coefficient with this rate.
+       */
+      double laplacian_decrease_rate;
+
       static void declare_parameters (ParameterHandler &prm);
       void parse_parameters (ParameterHandler &prm);
     };

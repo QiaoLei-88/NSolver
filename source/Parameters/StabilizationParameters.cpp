@@ -46,6 +46,9 @@ namespace NSFEMSolver
         prm.declare_entry ("Laplacian Newton quadratic", "1.5",
                            Patterns::Double (0.0),
                            "Threshold of Newton convergence rate to be recognized as quadratic convergence.");
+        prm.declare_entry ("Laplacian decrease rate", "1.5",
+                           Patterns::Double (1.0),
+                           "Laplacian decrease rate.");
 
         for (unsigned int di=0; di<EquationComponents<dim>::n_components; ++di)
           {
@@ -90,6 +93,7 @@ namespace NSFEMSolver
         laplacian_zero = prm.get_double ("Laplacian zero");
         laplacian_newton_quadratic = prm.get_double ("Laplacian Newton quadratic");
         laplacian_newton_tolerance = prm.get_double ("Laplacian Newton tolerance");
+        laplacian_decrease_rate = prm.get_double ("Laplacian decrease rate");
 
         for (unsigned int di=0; di<EquationComponents<dim>::n_components; ++di)
           {
