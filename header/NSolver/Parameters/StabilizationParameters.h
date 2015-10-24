@@ -23,6 +23,15 @@ namespace NSFEMSolver
       enum DiffusionType
       {
         diffu_entropy,
+        /**
+         * Refer to
+         * Marc O. Delchini and Jean C. Ragusa and Ray A. Berry,
+         * Entropy-based viscous regularization for the multi-dimensional
+         * Euler equations in low-Mach and transonic flows,
+         * Computers & Fluids 118 (2015) 225–244.
+         * for details.
+         */
+        diffu_entropy_DRB,
         diffu_cell_size,
         diffu_const
       };

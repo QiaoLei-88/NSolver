@@ -203,20 +203,24 @@ namespace NSFEMSolver
     // Vector for viscosity should be sized to n_dof rather than n_active_cell, only entropy viscosity is
     // cellwise, while physical viscosity is per-dof.
 
-    const double mu =
-      artificial_viscosity[fe_v.get_cell()->active_cell_index()];
-    const double prandtlNumber = 0.72;
-    const double kappa = mu / (prandtlNumber * (parameters->gas_gamma - 1.0));
-
-    for (unsigned int q=0; q<n_q_points; ++q)
-      {
-        EulerEquations<dim>::compute_inviscid_flux (W_old[q], flux_old[q]);
-        EulerEquations<dim>::compute_forcing_vector (W_old[q], forcing_old[q]);
-        EulerEquations<dim>::compute_inviscid_flux (W[q], flux[q]);
-        EulerEquations<dim>::compute_viscous_flux (W[q], grad_W[q], visc_flux[q], mu, kappa);
-        EulerEquations<dim>::compute_forcing_vector (W[q], forcing[q]);
-      }
-
+    {
+      const double mu =
+        artificial_viscosity[fe_v.get_cell()->active_cell_index()];
+      const double prandtlNumber = 0.72;
+      double kappa = mu / (prandtlNumber * (parameters->gas_gamma - 1.0));
+      if (parameters->diffusion_type == Parameters::AllParameters<dim>::diffu_entropy_DRB)
+        {
+          kappa = artificial_thermal_conductivity[fe_v.get_cell()->active_cell_index()];
+        }
+      for (unsigned int q=0; q<n_q_points; ++q)
+        {
+          EulerEquations<dim>::compute_inviscid_flux (W_old[q], flux_old[q]);
+          EulerEquations<dim>::compute_forcing_vector (W_old[q], forcing_old[q]);
+          EulerEquations<dim>::compute_inviscid_flux (W[q], flux[q]);
+          EulerEquations<dim>::compute_viscous_flux (W[q], grad_W[q], visc_flux[q], mu, kappa);
+          EulerEquations<dim>::compute_forcing_vector (W[q], forcing[q]);
+        }
+    }
     // Avoid waring on unused parameter
     (void)nonlin_iter;
 

@@ -134,6 +134,344 @@ namespace NSFEMSolver
           } // End for active cells
         break;
       }
+      case Parameters::AllParameters<dim>::diffu_entropy_DRB:
+      {
+        // Declare constants used in this method
+        const double Mach_threshold = 0.05;
+        const double Mach_width = 0.005;
+        const unsigned int &icp = EquationComponents<dim>::pressure_component;
+        const unsigned int &icr = EquationComponents<dim>::density_component;
+        const unsigned int &iv0 = EquationComponents<dim>::first_velocity_component;
+
+        // Compute global min cell size
+        double local_h_min (std::numeric_limits<double>::max());
+        if (parameters->entropy_use_global_h_min)
+          {
+            typename DoFHandler<dim>::active_cell_iterator cell =
+              dof_handler.begin_active();
+            const typename DoFHandler<dim>::active_cell_iterator endc =
+              dof_handler.end();
+            for (; cell!=endc; ++cell)
+              {
+                if (cell->is_locally_owned())
+                  {
+                    local_h_min = std::min (std::pow (cell->diameter(), 1.0/dim), local_h_min);
+                  }
+              }
+          }
+        const double global_h_min = Utilities::MPI::min (local_h_min, mpi_communicator);
+        // This is to say local_h_min will never be used here after.
+        (void)local_h_min;
+
+        const UpdateFlags update_flags               = update_values
+                                                       | update_gradients
+                                                       | update_JxW_values;
+
+        const UpdateFlags face_update_flags          = update_values
+                                                       | update_normal_vectors
+                                                       | update_gradients;
+        const UpdateFlags neighbor_face_update_flags = update_gradients;
+
+        FEValues<dim>        fe_v (*mapping_ptr, fe, quadrature,
+                                   update_flags);
+        FEFaceValues<dim>    fe_v_face (*mapping_ptr, fe, face_quadrature,
+                                        face_update_flags);
+        FESubfaceValues<dim> fe_v_subface (*mapping_ptr, fe, face_quadrature,
+                                           face_update_flags);
+        FEFaceValues<dim>    fe_v_face_neighbor (*mapping_ptr, fe, face_quadrature,
+                                                 neighbor_face_update_flags);
+        FESubfaceValues<dim> fe_v_subface_neighbor (*mapping_ptr, fe, face_quadrature,
+                                                    neighbor_face_update_flags);
+
+        typename DoFHandler<dim>::active_cell_iterator cell =
+          dof_handler.begin_active();
+        const typename DoFHandler<dim>::active_cell_iterator endc =
+          dof_handler.end();
+        for (; cell!=endc; ++cell)
+          {
+            if (! (cell->is_locally_owned()))
+              {
+                continue;
+              }
+
+            // viscosity_seed is the value that eventually used for evaluation
+            // of entropy viscosity. It value is the maximum among
+            // entropy production on all cell quadrature points and density
+            // and pressure gradient jump on face quadratures.
+            double viscosity_seed = std::numeric_limits<double>::min();
+            double scale_factor_viscous = 0.0;
+            double scale_factor_thermal = 0.0;
+            double first_order_viscosity = 0.0;
+
+            // h: effective cell size. In context of mesh adaptation and
+            // external aerodynamics problem, there are always very large
+            // cells. Square there diameter will disturb the distribution
+            // of artificial viscosity. Mean while, numerical examples in
+            // literatures usually carried out on uniform mesh, thus h is
+            // equivalent to its global min.
+            const double h = parameters->entropy_use_global_h_min
+                             ?
+                             global_h_min
+                             :
+                             std::pow (cell->diameter(), 1.0/dim);
+            {
+              // Here we start evaluation of cell entropy production,
+              // first order viscosity as upper bound of artificial viscosity,
+              // and Mach number based scale factor.
+              const unsigned int n_q_points = quadrature.size();
+              std::vector<Vector<double> > W (n_q_points, Vector<double> (EquationComponents<dim>::n_components));
+              std::vector<std::vector<Tensor<1,dim> > > grad_W (n_q_points,
+                                                                std::vector<Tensor<1,dim> > (EquationComponents<dim>::n_components));
+              fe_v.reinit (cell);
+              fe_v.get_function_values (current_solution, W);
+              fe_v.get_function_gradients (current_solution, grad_W);
+
+              // Compute maximum entropy production among all cell volume quadrature points
+              double max_entropy_production = std::numeric_limits<double>::min();
+
+              // Cell average of Mach number
+              double Mach = 0;
+              // Cell average of \rho*u*u
+              double ruu = 0.0;
+              // Cell average of \rho*a*a
+              double raa = 0.0;
+
+              // max_characteristic_speed is used for evaluation of first order
+              // viscosity
+              double max_characteristic_speed = std::numeric_limits<double>::min();
+              for (unsigned int q=0; q<n_q_points; ++q)
+                {
+                  const double sound_speed_suqare =
+                    parameters->gas_gamma * W[q][icp]/W[q][icr];
+
+                  double entropy_production = 0.0;
+                  // uu means square of velocity magnitude.
+                  double uu = 0.0;
+                  for (unsigned int d=0, vd=iv0; d<dim; ++d, ++vd)
+                    {
+                      entropy_production +=
+                        W[q][vd] *
+                        (grad_W[q][icp][d] -
+                         sound_speed_suqare * grad_W[q][icr][d]);
+                      uu += W[q][vd] * W[q][vd];
+                    }
+                  // TODO: check negative entropy production.
+                  max_entropy_production = std::max (max_entropy_production,
+                                                     std::abs (entropy_production));
+                  ruu += W[q][icr] * uu * fe_v.JxW (q);
+                  raa += W[q][icr] * sound_speed_suqare * fe_v.JxW (q);
+                  const double velocity_magnitude = std::sqrt (uu);
+                  const double sound_speed = std::sqrt (sound_speed_suqare);
+                  Mach += velocity_magnitude/sound_speed * fe_v.JxW (q);
+
+                  max_characteristic_speed =
+                    std::max (max_characteristic_speed,
+                              velocity_magnitude + sound_speed);
+                }
+              viscosity_seed = std::max (viscosity_seed,
+                                         max_entropy_production);
+
+              // Compute scale factor
+              const double cell_measure = cell->measure();
+              Mach /= cell_measure;
+              ruu /= cell_measure;
+              raa /= cell_measure;
+              if (Mach <= Mach_threshold-Mach_width)
+                {
+                  scale_factor_viscous = raa;
+                }
+              else if (Mach >= Mach_threshold+Mach_width)
+                {
+                  scale_factor_viscous = ruu;
+                }
+              else
+                {
+                  using dealii::numbers::PI;
+                  const double x = (Mach-Mach_threshold)/Mach_width;
+                  const double sigma = 0.5 * (1.0 + x + std::sin (PI*x)/PI);
+                  scale_factor_viscous = sigma * ruu + (1.0-sigma) * raa;
+                }
+              scale_factor_thermal = raa;
+              // First order viscosity
+              first_order_viscosity = 0.5 * h * max_characteristic_speed;
+            } // End entropy production, scale factor and first order viscosity.
+
+            {
+              // Here we start evaluation of face gradient jump.
+              const unsigned int n_q_points = face_quadrature.size();
+              std::vector<Vector<double> > W (n_q_points, Vector<double> (EquationComponents<dim>::n_components));
+              std::vector<std::vector<Tensor<1,dim> > > grad_W (n_q_points,
+                                                                std::vector<Tensor<1,dim> > (EquationComponents<dim>::n_components));
+              std::vector<std::vector<Tensor<1,dim> > > grad_W_neighbor (n_q_points,
+                                                                         std::vector<Tensor<1,dim> > (EquationComponents<dim>::n_components));
+
+              // Compute maximum density and pressure gradient jump among all
+              // cell face quadrature points.
+              double max_gradient_jump = std::numeric_limits<double>::min();
+              for (unsigned int face_no=0; face_no<GeometryInfo<dim>::faces_per_cell; ++face_no)
+                {
+                  // We assume zero gradient jump on boundary
+                  if (cell->at_boundary (face_no))
+                    {
+                      continue;
+                    }
+                  // The neighboring cell may not at the same refine level as the current
+                  // cell, we have to handle different cases properly.
+                  // First, the simplest case, neighboring cell is at the same refine
+                  // level as the current one.
+                  const typename DoFHandler<dim>::active_cell_iterator neighbor_cell
+                    = cell->neighbor (face_no);
+                  if (neighbor_cell->level() == cell->level())
+                    {
+                      const unsigned int face_no_neighbor = cell->neighbor_of_neighbor (face_no);
+
+                      fe_v_face.reinit (cell, face_no);
+                      fe_v_face_neighbor.reinit (neighbor_cell, face_no_neighbor);
+
+                      fe_v_face.get_function_values (current_solution, W);
+                      fe_v_face.get_function_gradients (current_solution, grad_W);
+                      fe_v_face_neighbor.get_function_gradients (current_solution, grad_W_neighbor);
+
+                      // Gradient jump evaluation is the same for all three cases.
+                      for (unsigned int q=0; q<n_q_points; ++q)
+                        {
+                          const double sound_speed_suqare =
+                            parameters->gas_gamma * W[q][icp]/W[q][icr];
+
+                          const Tensor<1,dim> normal_vector = fe_v_face.normal_vector (q);
+                          const double pressure_gradient_jump
+                            = std::abs (normal_vector *
+                                        (grad_W[q][icp] - grad_W_neighbor[q][icp]));
+                          const double density_gradient_jump
+                            = std::abs (normal_vector *
+                                        (grad_W[q][icr] - grad_W_neighbor[q][icr]));
+                          const double jump_this_q =
+                            EulerEquations<dim>::compute_velocity_magnitude (W[q]) *
+                            std::max (
+                              pressure_gradient_jump,
+                              sound_speed_suqare * density_gradient_jump);
+
+                          max_gradient_jump = std::max (max_gradient_jump,
+                                                        jump_this_q);
+                        }
+                    }
+                  else if (neighbor_cell->level() > cell->level())
+                    {
+                      Assert (neighbor_cell->level() == cell->level() + 1,
+                              ExcMessage ("Refine level difference can't larger than 1 across cell interface."));
+                      // Neighbor cell is refiner than this cell, we have
+                      // to loop through all subfaces of this face.
+                      const unsigned int face_no_neighbor = cell->neighbor_of_neighbor (face_no);
+
+                      for (unsigned int subface_no=0;
+                           subface_no < cell->face (face_no)->n_children();
+                           ++subface_no)
+                        {
+                          const typename DoFHandler<dim>::active_cell_iterator
+                          neighbor_child
+                            = cell->neighbor_child_on_subface (face_no, subface_no);
+
+                          Assert (neighbor_child->face (face_no_neighbor) ==
+                                  cell->face (face_no)->child (subface_no),
+                                  ExcInternalError());
+                          Assert (neighbor_child->has_children() == false,
+                                  ExcInternalError());
+
+                          fe_v_subface.reinit (cell, face_no, subface_no);
+                          fe_v_face_neighbor.reinit (neighbor_child, face_no_neighbor);
+
+                          fe_v_subface.get_function_values (current_solution, W);
+                          fe_v_subface.get_function_gradients (current_solution, grad_W);
+                          fe_v_face_neighbor.get_function_gradients (current_solution, grad_W_neighbor);
+
+                          // Gradient jump evaluation is the same for all three cases.
+                          for (unsigned int q=0; q<n_q_points; ++q)
+                            {
+                              const double sound_speed_suqare =
+                                parameters->gas_gamma * W[q][icp]/W[q][icr];
+
+                              const Tensor<1,dim> normal_vector = fe_v_face.normal_vector (q);
+                              const double pressure_gradient_jump
+                                = std::abs (normal_vector *
+                                            (grad_W[q][icp] - grad_W_neighbor[q][icp]));
+                              const double density_gradient_jump
+                                = std::abs (normal_vector *
+                                            (grad_W[q][icr] - grad_W_neighbor[q][icr]));
+                              const double jump_this_q =
+                                EulerEquations<dim>::compute_velocity_magnitude (W[q]) *
+                                std::max (
+                                  pressure_gradient_jump,
+                                  sound_speed_suqare * density_gradient_jump);
+
+                              max_gradient_jump = std::max (max_gradient_jump,
+                                                            jump_this_q);
+                            }
+                        }
+                    }
+                  else // if (neighbor_cell->level() < cell->level())
+                    {
+                      Assert (neighbor_cell->level() + 1 == cell->level(),
+                              ExcMessage ("Refine level difference can't larger than 1 across cell interface."));
+                      // Here, the neighbor cell is coarser than current cell.
+                      // So we are on a subface of neighbor cell.
+
+                      const std::pair<unsigned int, unsigned int>
+                      faceno_subfaceno = cell->neighbor_of_coarser_neighbor (face_no);
+                      const unsigned int &neighbor_face_no    = faceno_subfaceno.first;
+                      const unsigned int &neighbor_subface_no = faceno_subfaceno.second;
+
+                      Assert (neighbor_cell->neighbor_child_on_subface (neighbor_face_no,
+                                                                        neighbor_subface_no)
+                              == cell,
+                              ExcInternalError());
+
+                      fe_v_face.reinit (cell, face_no);
+                      fe_v_subface_neighbor.reinit (neighbor_cell,
+                                                    neighbor_face_no,
+                                                    neighbor_subface_no);
+
+                      fe_v_face.get_function_values (current_solution, W);
+                      fe_v_face.get_function_gradients (current_solution, grad_W);
+                      fe_v_subface_neighbor.get_function_gradients (current_solution, grad_W_neighbor);
+
+                      // Gradient jump evaluation is the same for all three cases.
+                      for (unsigned int q=0; q<n_q_points; ++q)
+                        {
+                          const double sound_speed_suqare =
+                            parameters->gas_gamma * W[q][icp]/W[q][icr];
+
+                          const Tensor<1,dim> normal_vector = fe_v_face.normal_vector (q);
+                          const double pressure_gradient_jump
+                            = std::abs (normal_vector *
+                                        (grad_W[q][icp] - grad_W_neighbor[q][icp]));
+                          const double density_gradient_jump
+                            = std::abs (normal_vector *
+                                        (grad_W[q][icr] - grad_W_neighbor[q][icr]));
+                          const double jump_this_q =
+                            EulerEquations<dim>::compute_velocity_magnitude (W[q]) *
+                            std::max (
+                              pressure_gradient_jump,
+                              sound_speed_suqare * density_gradient_jump);
+
+                          max_gradient_jump = std::max (max_gradient_jump,
+                                                        jump_this_q);
+                        }
+                    }
+                } // End loop for all faces
+              viscosity_seed = std::max (viscosity_seed,
+                                         max_gradient_jump);
+            } // End gradient jump block
+
+            // With all building blocks at hand, finally evaluate the artificial viscosity.
+            const double second_order_viscosity = h*h * viscosity_seed / scale_factor_viscous;
+            artificial_viscosity[cell->active_cell_index()] =
+              std::min (first_order_viscosity, second_order_viscosity);
+            const double second_order_thermal_conductivity = h*h * viscosity_seed / scale_factor_thermal;
+            artificial_thermal_conductivity[cell->active_cell_index()] =
+              std::min (first_order_viscosity, second_order_thermal_conductivity);
+          } // End loop for all cells
+        break;
+      }
       case Parameters::AllParameters<dim>::diffu_cell_size:
       {
         typename DoFHandler<dim>::active_cell_iterator cell =
@@ -164,6 +502,8 @@ namespace NSFEMSolver
         break;
       }
       } // End switch case
+
+    return;
   } // End function
 
 #include "NSolver.inst"

@@ -226,6 +226,7 @@ namespace NSFEMSolver
 
     Vector<double>       local_time_step_size;
     Vector<double>       artificial_viscosity;
+    Vector<double>       artificial_thermal_conductivity;
     Vector<float>        refinement_indicators;
 
     // This final set of member variables (except for the object holding all
