@@ -12,6 +12,20 @@ namespace NSFEMSolver
 {
   using namespace dealii;
 
+  // Declare the static members so they can be referenced in other source files.
+  template <int dim>
+  const unsigned int EquationComponents<dim>::n_components;
+  template <int dim>
+  const unsigned int EquationComponents<dim>::first_momentum_component;
+  template <int dim>
+  const unsigned int EquationComponents<dim>::first_velocity_component;
+  template <int dim>
+  const unsigned int EquationComponents<dim>::density_component;
+  template <int dim>
+  const unsigned int EquationComponents<dim>::energy_component;
+  template <int dim>
+  const unsigned int EquationComponents<dim>::pressure_component;
+
   template <int dim>
   std::vector<std::string>
   EquationComponents<dim>::component_names()
