@@ -24,17 +24,9 @@ namespace NSFEMSolver
     // @sect4{Component description}
 
     // First a few variables that describe the various components of our
-    // solution vector in a generic way. This includes the number of
-    // components in the system (Euler's equations have one entry for momenta
-    // in each spatial direction, plus the energy and density components, for
-    // a total of <code>dim+2</code> components), as well as functions that
-    // describe the index within the solution vector of the first momentum
-    // component, the density component, and the energy density
-    // component. Note that all these %numbers depend on the space dimension;
-    // defining them in a generic way (rather than by implicit convention)
-    // makes our code more flexible and makes it easier to later extend it,
-    // for example by adding more components to the equations.
-    static const unsigned int n_components             = dim + 2;
+    // solution vector in a generic way. They have to be initialized in
+    // header files in order to be used as constant expressions.
+    static const unsigned int n_components             = dim+2;
     static const unsigned int first_momentum_component = 0;
     static const unsigned int first_velocity_component = 0;
     static const unsigned int density_component        = dim;
