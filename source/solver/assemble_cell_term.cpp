@@ -198,25 +198,27 @@ namespace NSFEMSolver
             mms.evaluate (fe_v.quadrature_point (q), mms_value[q], mms_grad[q], mms_source[q], /* const bool need_source = */ true);
           }
       }
+    // TODO:
+    // viscosity_old needed here.
+    // Vector for viscosity should be sized to n_dof rather than n_active_cell, only entropy viscosity is
+    // cellwise, while physical viscosity is per-dof.
+
+    const double mu =
+      artificial_viscosity[fe_v.get_cell()->active_cell_index()];
+    const double prandtlNumber = 0.72;
+    const double kappa = mu / (prandtlNumber * (parameters->gas_gamma - 1.0));
 
     for (unsigned int q=0; q<n_q_points; ++q)
       {
         EulerEquations<dim>::compute_inviscid_flux (W_old[q], flux_old[q]);
         EulerEquations<dim>::compute_forcing_vector (W_old[q], forcing_old[q]);
         EulerEquations<dim>::compute_inviscid_flux (W[q], flux[q]);
-        EulerEquations<dim>::compute_viscous_flux (W[q], grad_W[q], visc_flux[q]);
+        EulerEquations<dim>::compute_viscous_flux (W[q], grad_W[q], visc_flux[q], mu, kappa);
         EulerEquations<dim>::compute_forcing_vector (W[q], forcing[q]);
       }
 
     // Avoid waring on unused parameter
     (void)nonlin_iter;
-    // TODO:
-    // viscosity_old needed here.
-    // Vector for viscosity should be sized to n_dof rather than n_active_cell, only entropy viscosity is
-    // cellwise, while physical viscosity is per-dof.
-
-    const double viscos_coeff =
-      artificial_viscosity[fe_v.get_cell()->active_cell_index()];
 
     // We now have all of the pieces in place, so perform the assembly.  We
     // have an outer loop through the components of the system, and an inner
@@ -305,7 +307,7 @@ namespace NSFEMSolver
                   cell_physical_residual -= tmp.val();
                 }
 
-                R_i += visc_flux[point][component_i][d] * viscos_coeff *
+                R_i += visc_flux[point][component_i][d] *
                        fe_v.shape_grad_component (i, point, component_i)[d] *
                        fe_v.JxW (point);
               }

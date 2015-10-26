@@ -241,7 +241,7 @@ namespace NSFEMSolver
 
             FADD_T visc_flux;
 
-            EulerEquations<dim>::compute_viscous_flux (value_ad, grad_value, visc_flux);
+            EulerEquations<dim>::compute_viscous_flux (value_ad, grad_value, visc_flux, 0, 0);
 
             for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
               for (unsigned int d=0; d<dim; ++d)

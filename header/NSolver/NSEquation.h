@@ -165,9 +165,12 @@ namespace NSFEMSolver
                                 <typename InputVector::value_type, dim>,
                                 EquationComponents<dim>::n_components> &flux);
 
-    // Compute viscous flux as if viscosity coefficient is 1. Viscosity coefficient
-    // is a linear factor of viscous flux, so you can scale the viscous flux before
-    // add it to system matrix. If you want to bring sensitivity of viscosity
+    // Compute viscous flux according to provided @p extra_dynamic_viscosity.
+    // @p extra_thermal_conductivity. If equation is in Euler mode, no physical
+    // dynamic viscosity and thermal conductivity will be added.
+    // If equation is in NavierStokes mode, an exception will be triggered.
+    //
+    // If you want to bring sensitivity of viscosity
     // coefficient into Newton matrix, you can declare the viscosity coefficient
     // as a Sacado::FAD:DFAD<> type, otherwise you can declare the viscosity
     // as a regular double type.
@@ -177,7 +180,9 @@ namespace NSFEMSolver
                                const InputMatrix &grad_w,
                                std_cxx11::array <std_cxx11::array
                                <typename InputVector::value_type, dim>,
-                               EquationComponents<dim>::n_components> &flux);
+                               EquationComponents<dim>::n_components> &flux,
+                               const double artificial_dynamic_viscosity,
+                               const double artificial_thermal_conductivity);
 
     // @sect4{EulerEquations::compute_normal_flux}
 

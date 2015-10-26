@@ -179,32 +179,49 @@ void EulerEquations<dim>::compute_viscous_flux (const InputVector &W,
                                                 const InputMatrix &grad_w,
                                                 std_cxx11::array <std_cxx11::array
                                                 <typename InputVector::value_type, dim>,
-                                                EquationComponents<dim>::n_components> &flux)
+                                                EquationComponents<dim>::n_components> &flux,
+                                                const double artificial_dynamic_viscosity,
+                                                const double artificial_thermal_conductivity)
 {
   Assert (parameters, ExcMessage ("Null pointer encountered!"));
-  // First evaluate viscous flux's contribution to momentum equations.
+  // Set up viscous and thermal conductivity coefficients
+  const double prandtlNumber = 0.72;
+  double physical_dynamic_viscosity = 0.0;
+  double physical_thermal_conductivity =
+    physical_dynamic_viscosity / (prandtlNumber * (gas_gamma - 1.0));
 
+  if (parameters->equation_type == Parameters::PhysicalParameters::NavierStokes)
+    {
+      AssertThrow (false, ExcNotImplemented());
+    }
+  const double dynamic_viscosity = std::max (artificial_dynamic_viscosity,
+                                             physical_dynamic_viscosity);
+  const double thermal_conductivity = std::max (artificial_thermal_conductivity,
+                                                physical_thermal_conductivity);
+  const double bolk_viscosity = -2.0*dynamic_viscosity/3.0;
+
+  // First evaluate viscous flux's contribution to momentum equations.
   // At the first of first we evaluate shear stress tensor
-  std_cxx11::array <std_cxx11::array <typename InputVector::value_type, dim>, dim>
-  stress_tensor;
-  typename InputVector::value_type bolk_stress = 0;
+  std_cxx11::array <std_cxx11::array <typename InputVector::value_type, dim>, dim> stress_tensor;
+
+  typename InputVector::value_type bolk_strain = 0;
   for (unsigned int k=0; k<dim; ++k)
     {
-      bolk_stress += 2.0/3.0 * grad_w[first_velocity_component+k][k];
+      bolk_strain += grad_w[first_velocity_component+k][k];
     }
 
   for (unsigned int i=0; i<dim; ++i)
     {
-      for (unsigned int j=0; j<=i; ++j)
+      for (unsigned int j=0; j<i; ++j)
         {
-          stress_tensor[i][j] = (grad_w[first_velocity_component+i][j] +
+          stress_tensor[i][j] =
+            dynamic_viscosity * (grad_w[first_velocity_component+i][j] +
                                  grad_w[first_velocity_component+j][i]);
-          if (j != i)
-            {
-              stress_tensor[j][i] = stress_tensor[i][j];
-            }
+          stress_tensor[j][i] = stress_tensor[i][j];
         }
-      stress_tensor[i][i] -= bolk_stress;
+      stress_tensor[i][i] =
+        dynamic_viscosity * 2.0 * grad_w[first_velocity_component+i][i] +
+        bolk_viscosity * bolk_strain;
     }
   // Submit viscosity stress to momentum equations.
   for (unsigned int d=0; d<dim; ++d)
@@ -215,15 +232,14 @@ void EulerEquations<dim>::compute_viscous_flux (const InputVector &W,
         }
     }
 
-  // Viscous flux for mass equation, just gradient of density
+  // Viscous flux for mass equation.
+  const double mass_diffusion = dynamic_viscosity;
   for (unsigned int d=0; d<dim; ++d)
     {
-      flux[density_component][d] = grad_w[density_component][d];
+      flux[density_component][d] = mass_diffusion * grad_w[density_component][d];
     }
 
-  // At last deal with energy equation
-  const double prandtlNumber = 0.72;
-  const double heat_conductivity = 1.0 / (prandtlNumber * (gas_gamma - 1.0));
+  // At last deal with energy equation.
   const typename InputVector::value_type rho_inverse = 1.0/W[density_component];
   const typename InputVector::value_type p_over_rho_square =
     W[pressure_component]*rho_inverse*rho_inverse;
@@ -239,18 +255,13 @@ void EulerEquations<dim>::compute_viscous_flux (const InputVector &W,
         }
       // Calculate gradient of temperature. Notice that T=gamma*p/rho, then wo do
       // d_T = gamma / rho * d_p - gamma * p/(rho^2) * d_rho on every space dimension.
-      flux[energy_component][d] += heat_conductivity * gas_gamma *
+      flux[energy_component][d] += thermal_conductivity * gas_gamma *
                                    rho_inverse * grad_w[pressure_component][d];
-      flux[energy_component][d] -= heat_conductivity * gas_gamma *
+      flux[energy_component][d] -= thermal_conductivity * gas_gamma *
                                    p_over_rho_square * grad_w[density_component][d];
     }
 
-  // Scale with parameter
-  for (unsigned int ic = 0; ic < n_components; ++ic)
-    for (unsigned int id = 0; id < dim; ++id)
-      {
-        flux[ic][id] *= parameters->diffusion_factor[ic];
-      }
+  return;
 }
 
 
