@@ -25,6 +25,13 @@ namespace NSFEMSolver
       double Mach;
       double Reynolds;
 
+      enum EqautionType
+      {
+        Euler,
+        NavierStokes
+      };
+      EqautionType equation_type;
+
       // Parameters for Sutherland's law, in Kelvin.
       double reference_temperature;
       double Sutherland_constant;

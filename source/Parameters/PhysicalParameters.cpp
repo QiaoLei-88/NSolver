@@ -27,6 +27,10 @@ namespace NSFEMSolver
                            Patterns::Double (0),
                            "Free stream Reynolds number");
 
+        prm.declare_entry ("equation type", "Euler",
+                           Patterns::Anything(),
+                           "Choose governing equation from <Euler|NavierStokes>");
+
         prm.declare_entry ("reference temperature", "273.15",
                            Patterns::Double (0),
                            "Reference temperature for Sutherland's law, in Kelvin");
@@ -88,7 +92,21 @@ namespace NSFEMSolver
 
         Mach = prm.get_double ("Mach");
         Reynolds = prm.get_double ("Reynolds");
-
+        {
+          const std::string prm_buf = prm.get ("equation type");
+          if (prm_buf == "Euler")
+            {
+              equation_type = Euler;
+            }
+          else if (prm_buf == "NavierStokes")
+            {
+              equation_type = NavierStokes;
+            }
+          else
+            {
+              AssertThrow (false, ExcNotImplemented());
+            }
+        }
         reference_temperature = prm.get_double ("reference temperature");
         Sutherland_constant = prm.get_double ("Sutherland constant");
 
