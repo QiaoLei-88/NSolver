@@ -4,6 +4,7 @@
 #
 
 WPATH=`pwd`
+Category=`echo "${PWD##*/}"`
 
 for fold in $(ls -d */); do
   pushd . > /dev/null
