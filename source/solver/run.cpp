@@ -280,6 +280,7 @@ namespace NSFEMSolver
     double res_norm_total_previous (0.0);
     double res_norm_infty_total (0.0);
     double old_laplacian_coefficient = laplacian_coefficient;
+    unsigned int n_step_laplacian_vanished = parameters->max_refine_level;
     while (!terminate_time_stepping)
       {
         computing_timer.enter_subsection ("2:Prepare Newton iteration");
@@ -560,13 +561,21 @@ namespace NSFEMSolver
             terminate_time_stepping = terminate_time_stepping ||
                                       (parameters->is_steady &&
                                        n_time_step > parameters->final_time);
-            const bool do_refine = (
-                                     (parameters->is_steady)
-                                     ?
-                                     (static_cast<unsigned int> (parameters->max_refine_time) >= n_time_step)
-                                     :
-                                     (parameters->max_refine_time >= time)
-                                   );
+            bool do_refine = (
+                               (parameters->is_steady)
+                               ?
+                               (static_cast<unsigned int> (parameters->max_refine_time) >= n_time_step)
+                               :
+                               (parameters->max_refine_time >= time)
+                             );
+            if (parameters->laplacian_continuation > 0.0)
+              {
+                do_refine = do_refine &&
+                            laplacian_coefficient > 0.0;
+                do_refine = do_refine &&
+                            n_time_step <= n_step_laplacian_vanished;
+              }
+
             if (do_refine)
               {
                 compute_refinement_indicators();
@@ -621,6 +630,7 @@ namespace NSFEMSolver
             // TODO: refactoring needed.
             old_laplacian_coefficient = laplacian_coefficient;
             {
+              n_step_laplacian_vanished += (laplacian_coefficient>0.0);
               double laplacian_ratio_min = 0.5;
               if (quadratic_converge)
                 {
