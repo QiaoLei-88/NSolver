@@ -168,6 +168,7 @@ namespace NSFEMSolver
                                                  boundary_values[q],
                                                  Wminus_old[q]);
           }
+
       }
 
     // Now that we have $\mathbf w^+$ and $\mathbf w^-$, we can go about
@@ -194,17 +195,43 @@ namespace NSFEMSolver
         Assert (false, ExcNotImplemented());
         alpha = 1;
       }
-
-    for (unsigned int q=0; q<n_q_points; ++q)
+    if (external_face && parameters->laplacian_continuation > 0.0)
       {
-        EulerEquations<dim>::numerical_normal_flux (fe_v.normal_vector (q),
-                                                    Wplus[q], Wminus[q], alpha,
-                                                    normal_fluxes[q],
-                                                    parameters->numerical_flux_type);
-        EulerEquations<dim>::numerical_normal_flux (fe_v.normal_vector (q),
-                                                    Wplus_old[q], Wminus_old[q], alpha,
-                                                    normal_fluxes_old[q],
-                                                    parameters->numerical_flux_type);
+        for (unsigned int q=0; q<n_q_points; ++q)
+          {
+            typedef Sacado::Fad::DFad<double> DFAD;
+            const Tensor<1,dim> &normal_vector = fe_v.normal_vector (q);
+            std_cxx11::array <std_cxx11::array <DFAD, dim>, EquationComponents<dim>::n_components > oflux;
+            EulerEquations<dim>::compute_inviscid_flux (Wminus[q], oflux);
+
+            std_cxx11::array <std_cxx11::array <double, dim>, EquationComponents<dim>::n_components > oflux_old;
+            EulerEquations<dim>::compute_inviscid_flux (Wminus_old[q], oflux_old);
+
+            for (unsigned int c=0; c<EquationComponents<dim>::n_components; ++c)
+              {
+                normal_fluxes[q][c] = 0.0;
+                normal_fluxes_old[q][c] = 0.0;
+                for (unsigned int d=0; d<dim; ++d)
+                  {
+                    normal_fluxes[q][c] += oflux[c][d] * normal_vector[d];
+                    normal_fluxes_old[q][c] += oflux_old[c][d] * normal_vector[d];
+                  }
+              }
+          }
+      }
+    else
+      {
+        for (unsigned int q=0; q<n_q_points; ++q)
+          {
+            EulerEquations<dim>::numerical_normal_flux (fe_v.normal_vector (q),
+                                                        Wplus[q], Wminus[q], alpha,
+                                                        normal_fluxes[q],
+                                                        parameters->numerical_flux_type);
+            EulerEquations<dim>::numerical_normal_flux (fe_v.normal_vector (q),
+                                                        Wplus_old[q], Wminus_old[q], alpha,
+                                                        normal_fluxes_old[q],
+                                                        parameters->numerical_flux_type);
+          }
       }
 
     // Now assemble the face term in exactly the same way as for the cell
