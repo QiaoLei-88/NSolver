@@ -155,7 +155,7 @@ namespace NSFEMSolver
               {
                 if (cell->is_locally_owned())
                   {
-                    local_h_min = std::min (std::pow (cell->diameter(), 1.0/dim), local_h_min);
+                    local_h_min = std::min (std::pow (cell->measure(), 1.0/dim), local_h_min);
                   }
               }
           }
@@ -213,7 +213,7 @@ namespace NSFEMSolver
                              ?
                              global_h_min
                              :
-                             std::pow (cell->diameter(), 1.0/dim);
+                             std::pow (cell->measure(), 1.0/dim);
             {
               // Here we start evaluation of cell entropy production,
               // first order viscosity as upper bound of artificial viscosity,
