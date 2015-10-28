@@ -97,6 +97,57 @@ namespace NSFEMSolver
               spherical_boundary = new HyperBallBoundary<dim> (Point<dim> (0.0, -1.2), /*radius=*/1.3);
             }
           triangulation.set_boundary (2, *spherical_boundary);
+
+          if (parameters->manifold_circle == 2
+              &&
+              // Borrow a parameter. This is not good. And I know its not good. Only this one time.
+              parameters->NACA_cheating_refinement)
+            {
+              for (int n=0; n<2; ++n)
+                {
+                  for (typename Triangulation<dim>::active_cell_iterator
+                       cell = triangulation.begin_active();
+                       cell != triangulation.end();
+                       ++cell)
+                    {
+                      // Refine a elliptic region twice
+                      const double center_x=0.0;
+                      const double center_y=0.0;
+                      const double half_axi_long  = 0.75;
+                      const double half_axi_short = 0.5;
+                      const double a = (cell->center()[0] - center_x)/half_axi_long;
+                      const double b = (cell->center()[1] - center_y)/half_axi_short;
+                      if ((a*a+b*b) < 1.0)
+                        {
+                          cell->set_refine_flag();
+                        }
+                      // And the downstream floor region
+                      if (cell->center()[0] > 0.5 && cell->center()[1] < 0.2)
+                        {
+                          cell->set_refine_flag();
+                        }
+                    }
+                  triangulation.execute_coarsening_and_refinement();
+                }
+              // refine the two stagnation points once more
+              for (typename Triangulation<dim>::active_cell_iterator
+                   cell = triangulation.begin_active();
+                   cell != triangulation.end();
+                   ++cell)
+                {
+                  Point<dim> front;
+                  front[0] = -0.5;
+                  Point<dim> rear;
+                  rear[0] = 0.5;
+                  if (front.distance (cell->center()) < 0.2
+                      ||
+                      rear.distance (cell->center()) < 0.2)
+                    {
+                      cell->set_refine_flag();
+                    }
+                }
+              triangulation.execute_coarsening_and_refinement();
+            } // End if (parameters->manifold_circle == 2 /* && cheating refinement == true*/)
         }
       if (parameters->NACA_foil > 0)
         {
@@ -238,10 +289,10 @@ namespace NSFEMSolver
     calc_laplacian_indicator();
     output_results();
 
-    // We then enter into the main time stepping loop. At the top we simply
-    // output some status information so one can keep track of where a
-    // computation is, as well as the header for a table that indicates
-    // progress of the nonlinear inner iteration:
+// We then enter into the main time stepping loop. At the top we simply
+// output some status information so one can keep track of where a
+// computation is, as well as the header for a table that indicates
+// progress of the nonlinear inner iteration:
 
     double time = 0;
     double next_output = time + parameters->output_step;
@@ -870,11 +921,11 @@ namespace NSFEMSolver
         time_advance_history_file_std.close();
         iteration_history_file_std.close();
       }
-    // Timer initialized with TimerOutput::summary will print summery information
-    // on its destruction.
-    // computing_timer.print_summary();
+// Timer initialized with TimerOutput::summary will print summery information
+// on its destruction.
+// computing_timer.print_summary();
 
-    // Clean run time allocated HyperBallBoundary object.
+// Clean run time allocated HyperBallBoundary object.
     if (parameters->manifold_circle > 0)
       {
         triangulation.set_boundary (2, straight_boundary);
