@@ -41,23 +41,14 @@ namespace NSFEMSolver
               }
           return;
         }
-      // Coarsen all
-      if (target_n_cell_drop >=
-          ((tria.n_global_active_cells() * (GeometryInfo<dim>::max_children_per_cell - 1))
-           / GeometryInfo<dim>::max_children_per_cell))
-        {
-          typename TypeTria::active_cell_iterator
-          cell = tria.begin_active();
-          const typename TypeTria::active_cell_iterator
-          endc = tria.end();
-          for (; cell != endc; ++cell)
-            if (cell->is_locally_owned())
-              {
-                cell->clear_refine_flag();
-                cell->set_coarsen_flag();
-              }
-          return;
-        }
+      // Coarsen all short cut is removed because the original code is erroneous.
+      // If we define maximum coarsening as removing all fine all refine flags
+      // and setting all coarsen flags. The old code used maximum coarsening
+      // when @p target_n_cell_drop exceeded the number of cell drop expectation
+      // on coarsening all cells, but actually it also cleared all refine flags
+      // which would cause over coarsening. And there is not short cut in this
+      // case since we have to count on the contribution of canceling refinements,
+      // and only part of refinements are needed to be canceled in most cases.
 
       // Here we go
       const MPI_Comm mpi_communicator = tria.get_communicator();
