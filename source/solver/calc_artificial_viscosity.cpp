@@ -319,7 +319,7 @@ namespace NSFEMSolver
                   // cell, we have to handle different cases properly.
                   // First, the simplest case, neighboring cell is at the same refine
                   // level as the current one.
-                  const typename DoFHandler<dim>::active_cell_iterator neighbor_cell
+                  const typename DoFHandler<dim>::cell_iterator neighbor_cell
                     = cell->neighbor (face_no);
                   if (neighbor_cell->level() == cell->level())
                     {
