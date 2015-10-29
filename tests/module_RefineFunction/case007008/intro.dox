@@ -1,0 +1,2 @@
+This test is introduced for a bug fix.
+To trigger the bug, internal loop in main.cc is removed and refine fraction is increased.
