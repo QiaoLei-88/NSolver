@@ -503,14 +503,23 @@ namespace NSFEMSolver
               = (std::log10 (res_norm) < parameters->nonlinear_tolerance);
 
             if (parameters->laplacian_continuation > 0.0 &&
-                (!linear_solver_diverged))
+                !linear_solver_diverged)
               {
                 const double physical_res_tolerance = 1e-10;
-                newton_iter_converged =
-                  newton_iter_converged &&
-                  (newton_update_norm <
-                   parameters->laplacian_newton_tolerance *
-                   std::max (physical_res_norm, physical_res_tolerance));
+                if (laplacian_coefficient > 0.0)
+                  {
+                    newton_iter_converged =
+                      newton_iter_converged &&
+                      (newton_update_norm <
+                       parameters->laplacian_newton_tolerance *
+                       std::max (physical_res_norm, physical_res_tolerance));
+                  }
+                else
+                  {
+                    newton_iter_converged =
+                      newton_iter_converged &&
+                      res_norm < 1e-12;
+                  }
               }
 
             if (linear_solver_diverged)
@@ -623,8 +632,6 @@ namespace NSFEMSolver
                              );
             if (parameters->laplacian_continuation > 0.0)
               {
-                do_refine = do_refine &&
-                            laplacian_coefficient > 0.0;
                 do_refine = do_refine &&
                             n_time_step <= n_step_laplacian_vanished;
               }
