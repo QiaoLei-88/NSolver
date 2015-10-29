@@ -850,6 +850,14 @@ namespace NSFEMSolver
                                       << std::sqrt (total_time_march_norm) << '\n';
             pcout << std::endl;
 
+            if (parameters->laplacian_continuation > 0.0)
+              {
+                time_march_converged =
+                  (n_time_step > n_step_laplacian_vanished)
+                  &&
+                  (res_norm < 1e-11);
+              }
+
             if (swith_flux)
               {
                 parameters_modifier->numerical_flux_type = parameters->flux_type_switch_to;
