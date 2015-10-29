@@ -137,8 +137,6 @@ namespace NSFEMSolver
       case Parameters::AllParameters<dim>::diffu_entropy_DRB:
       {
         // Declare constants used in this method
-        const double Mach_threshold = 0.05;
-        const double Mach_width = 0.005;
         const unsigned int &icp = EquationComponents<dim>::pressure_component;
         const unsigned int &icr = EquationComponents<dim>::density_component;
         const unsigned int &iv0 = EquationComponents<dim>::first_velocity_component;
@@ -163,6 +161,7 @@ namespace NSFEMSolver
         // This is to say local_h_min will never be used here after.
         (void)local_h_min;
 
+        // Begin computing artificial viscosity.
         const UpdateFlags update_flags               = update_values
                                                        | update_gradients
                                                        | update_JxW_values;
@@ -194,14 +193,16 @@ namespace NSFEMSolver
                 continue;
               }
 
+            // The following three variables will be set in next block and
+            // be used in next next block. So we have to declare them here.
+            //
             // viscosity_seed is the value that eventually used for evaluation
             // of entropy viscosity. It value is the maximum among
             // entropy production on all cell quadrature points and density
             // and pressure gradient jump on face quadratures.
             double viscosity_seed = std::numeric_limits<double>::min();
-            double scale_factor_viscous = 0.0;
-            double scale_factor_thermal = 0.0;
-            double first_order_viscosity = 0.0;
+            double first_order_viscosity = -1;
+            double scale_factor = -1;
 
             // h: effective cell size. In context of mesh adaptation and
             // external aerodynamics problem, there are always very large
@@ -230,11 +231,7 @@ namespace NSFEMSolver
               double max_entropy_production = std::numeric_limits<double>::min();
 
               // Cell average of Mach number
-              double Mach = 0;
-              // Cell average of \rho*u*u
-              double ruu = 0.0;
-              // Cell average of \rho*a*a
-              double raa = 0.0;
+              double local_Mach = 0;
 
               // max_characteristic_speed is used for evaluation of first order
               // viscosity
@@ -258,11 +255,9 @@ namespace NSFEMSolver
                   // TODO: check negative entropy production.
                   max_entropy_production = std::max (max_entropy_production,
                                                      std::abs (entropy_production));
-                  ruu += W[q][icr] * uu * fe_v.JxW (q);
-                  raa += W[q][icr] * sound_speed_suqare * fe_v.JxW (q);
                   const double velocity_magnitude = std::sqrt (uu);
                   const double sound_speed = std::sqrt (sound_speed_suqare);
-                  Mach += velocity_magnitude/sound_speed * fe_v.JxW (q);
+                  local_Mach += velocity_magnitude/sound_speed * fe_v.JxW (q);
 
                   max_characteristic_speed =
                     std::max (max_characteristic_speed,
@@ -270,28 +265,11 @@ namespace NSFEMSolver
                 }
               viscosity_seed = std::max (viscosity_seed,
                                          max_entropy_production);
+              // compute scale factor
+              local_Mach /= cell->measure();
+              const double Mach = std::max (local_Mach, parameters->Mach);
+              scale_factor = Mach * Mach;
 
-              // Compute scale factor
-              const double cell_measure = cell->measure();
-              Mach /= cell_measure;
-              ruu /= cell_measure;
-              raa /= cell_measure;
-              if (Mach <= Mach_threshold-Mach_width)
-                {
-                  scale_factor_viscous = raa;
-                }
-              else if (Mach >= Mach_threshold+Mach_width)
-                {
-                  scale_factor_viscous = ruu;
-                }
-              else
-                {
-                  using dealii::numbers::PI;
-                  const double x = (Mach-Mach_threshold)/Mach_width;
-                  const double sigma = 0.5 * (1.0 + x + std::sin (PI*x)/PI);
-                  scale_factor_viscous = sigma * ruu + (1.0-sigma) * raa;
-                }
-              scale_factor_thermal = raa;
               // First order viscosity
               first_order_viscosity = 0.5 * h * max_characteristic_speed;
             } // End entropy production, scale factor and first order viscosity.
@@ -463,10 +441,11 @@ namespace NSFEMSolver
             } // End gradient jump block
 
             // With all building blocks at hand, finally evaluate the artificial viscosity.
-            const double second_order_viscosity = h*h * viscosity_seed / scale_factor_viscous;
+            Assert (scale_factor>0.0, ExcMessage ("scale_factor is negative"));
+            const double second_order_viscosity = h*h * viscosity_seed * scale_factor;
             artificial_viscosity[cell->active_cell_index()] =
               std::min (first_order_viscosity, second_order_viscosity);
-            const double second_order_thermal_conductivity = h*h * viscosity_seed / scale_factor_thermal;
+            const double second_order_thermal_conductivity = h*h * viscosity_seed;
             artificial_thermal_conductivity[cell->active_cell_index()] =
               std::min (first_order_viscosity, second_order_thermal_conductivity);
           } // End loop for all cells
