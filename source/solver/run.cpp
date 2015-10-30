@@ -855,7 +855,7 @@ namespace NSFEMSolver
             if (parameters->laplacian_continuation > 0.0)
               {
                 time_march_converged =
-                  (n_time_step > n_step_laplacian_vanished)
+                  (n_time_step > n_step_laplacian_vanished + 2)
                   &&
                   (res_norm < 1e-11);
               }
