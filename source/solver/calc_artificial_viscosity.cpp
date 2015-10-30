@@ -450,8 +450,15 @@ namespace NSFEMSolver
           } // End loop for all cells
 
         // blend refinement indicators with previous time step
+        const double old_mu_l2 = old_artificial_viscosity.l2_norm();
+        const double this_mu_l2 = artificial_viscosity.l2_norm();
+        pcout << "old_mu_l2 = " << old_mu_l2 << std::endl
+              << "this_mu_l2 = " << this_mu_l2 << std::endl
+              << std::endl;
         // Scaling and simple addition, i.e. *this.sadd(s,a,V) = s*(*this)+a*V.
         artificial_viscosity.sadd (0.5, 0.5, old_artificial_viscosity);
+        pcout << "l2_blended_mu = " << artificial_viscosity.l2_norm() << std::endl
+              << std::endl;
         break;
       }
       case Parameters::AllParameters<dim>::diffu_cell_size:
