@@ -448,6 +448,10 @@ namespace NSFEMSolver
             artificial_thermal_conductivity[cell->active_cell_index()] =
               std::min (first_order_viscosity, second_order_thermal_conductivity);
           } // End loop for all cells
+
+        // blend refinement indicators with previous time step
+        // Scaling and simple addition, i.e. *this.sadd(s,a,V) = s*(*this)+a*V.
+        artificial_viscosity.sadd (0.5, 0.5, old_artificial_viscosity);
         break;
       }
       case Parameters::AllParameters<dim>::diffu_cell_size:

@@ -93,6 +93,9 @@ namespace NSFEMSolver
     transfer_in.push_back (&tmp_vector);
 
     parallel::distributed::SolutionTransfer<dim, NSVector> soltrans (dof_handler);
+    CellDataTransfer<dim> cell_data_transfer (triangulation);
+    cell_data_transfer.push_back (&artificial_viscosity[0],
+                                  artificial_viscosity.size());
 
     triangulation.prepare_coarsening_and_refinement();
     soltrans.prepare_for_coarsening_and_refinement (transfer_in);
@@ -102,6 +105,7 @@ namespace NSFEMSolver
     setup_system();
 
     // Transfer data out
+    cell_data_transfer.get_transfered_data (0, &artificial_viscosity[0]);
     {
       std::vector<NSVector * > transfer_out;
       NSVector interpolated_old_solution (predictor);

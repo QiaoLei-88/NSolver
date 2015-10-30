@@ -108,6 +108,7 @@ DEAL_II_ENABLE_EXTRA_DIAGNOSTICS
 #include <NSolver/MDFILU/MDFILU.h>
 #include <NSolver/Tools.h>
 #include <NSolver/BoundaryManifold/BndNaca4DigitSymm.h>
+#include <NSolver/CellDataTransfer.h>
 
 // Here finally comes the class that actually does something with all the
 // Euler equation and parameter specifics we've defined above. The public
@@ -245,6 +246,7 @@ namespace NSFEMSolver
 
     Vector<double>       local_time_step_size;
     Vector<double>       artificial_viscosity;
+    Vector<double>       old_artificial_viscosity;
     Vector<double>       artificial_thermal_conductivity;
     Vector<float>        refinement_indicators;
 
