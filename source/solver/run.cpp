@@ -874,7 +874,7 @@ namespace NSFEMSolver
               {
                 refine_grid();
               }
-
+            old_artificial_viscosity = artificial_viscosity;
             old_time_step_size = global_time_step_size;
             check_negative_density_pressure();
             calc_time_step();
