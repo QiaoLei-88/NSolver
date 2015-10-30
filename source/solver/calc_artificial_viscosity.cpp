@@ -279,6 +279,7 @@ namespace NSFEMSolver
               // Here we start evaluation of face gradient jump.
               const unsigned int n_q_points = face_quadrature.size();
               std::vector<Vector<double> > W (n_q_points, Vector<double> (EquationComponents<dim>::n_components));
+              std::vector<Vector<double> > W_neighbor (n_q_points, Vector<double> (EquationComponents<dim>::n_components));
               std::vector<std::vector<Tensor<1,dim> > > grad_W (n_q_points,
                                                                 std::vector<Tensor<1,dim> > (EquationComponents<dim>::n_components));
               std::vector<std::vector<Tensor<1,dim> > > grad_W_neighbor (n_q_points,
@@ -304,6 +305,7 @@ namespace NSFEMSolver
                   const int neighbor_active_cell_level = neighbor_cell->level() + neighbor_cell->has_children();
                   if (this_cell_level == neighbor_active_cell_level)
                     {
+                      // In CG mode, penalize against gradient jump
                       const unsigned int face_no_neighbor = cell->neighbor_of_neighbor (face_no);
 
                       fe_v_face.reinit (cell, face_no);
@@ -313,7 +315,7 @@ namespace NSFEMSolver
                       fe_v_face.get_function_gradients (current_solution, grad_W);
                       fe_v_face_neighbor.get_function_gradients (current_solution, grad_W_neighbor);
 
-                      // Gradient jump evaluation is the same for all three cases.
+                      // Gradient jump evaluation.
                       for (unsigned int q=0; q<n_q_points; ++q)
                         {
                           const double sound_speed_suqare =
@@ -338,6 +340,7 @@ namespace NSFEMSolver
                     }
                   else if (neighbor_active_cell_level > this_cell_level)
                     {
+                      // In DG mode, penalize against solution jump
                       Assert (neighbor_active_cell_level == this_cell_level + 1,
                               ExcMessage ("Refine level difference can't larger than 1 across cell interface."));
                       // Neighbor cell is refiner than this cell, we have
@@ -362,27 +365,23 @@ namespace NSFEMSolver
                           fe_v_face_neighbor.reinit (neighbor_child, face_no_neighbor);
 
                           fe_v_subface.get_function_values (current_solution, W);
-                          fe_v_subface.get_function_gradients (current_solution, grad_W);
-                          fe_v_face_neighbor.get_function_gradients (current_solution, grad_W_neighbor);
+                          fe_v_face_neighbor.get_function_values (current_solution, W_neighbor);
 
-                          // Gradient jump evaluation is the same for all three cases.
+                          // Solution jump evaluation.
                           for (unsigned int q=0; q<n_q_points; ++q)
                             {
                               const double sound_speed_suqare =
                                 parameters->gas_gamma * W[q][icp]/W[q][icr];
 
-                              const Tensor<1,dim> normal_vector = fe_v_face.normal_vector (q);
-                              const double pressure_gradient_jump
-                                = std::abs (normal_vector *
-                                            (grad_W[q][icp] - grad_W_neighbor[q][icp]));
-                              const double density_gradient_jump
-                                = std::abs (normal_vector *
-                                            (grad_W[q][icr] - grad_W_neighbor[q][icr]));
+                              const double pressure_value_jump
+                                = std::abs (W[q][icp] - W_neighbor[q][icp]);
+                              const double density_value_jump
+                                = std::abs (W[q][icr] - W_neighbor[q][icr]);
                               const double jump_this_q =
                                 EulerEquations<dim>::compute_velocity_magnitude (W[q]) *
                                 std::max (
-                                  pressure_gradient_jump,
-                                  sound_speed_suqare * density_gradient_jump);
+                                  pressure_value_jump,
+                                  sound_speed_suqare * density_value_jump);
 
                               max_gradient_jump = std::max (max_gradient_jump,
                                                             jump_this_q);
@@ -391,6 +390,7 @@ namespace NSFEMSolver
                     }
                   else // if (neighbor_cell->level() < cell->level())
                     {
+                      // In DG mode, penalize against solution jump
                       Assert (neighbor_active_cell_level + 1 == this_cell_level,
                               ExcMessage ("Refine level difference can't larger than 1 across cell interface."));
                       // Here, the neighbor cell is coarser than current cell.
@@ -412,27 +412,23 @@ namespace NSFEMSolver
                                                     neighbor_subface_no);
 
                       fe_v_face.get_function_values (current_solution, W);
-                      fe_v_face.get_function_gradients (current_solution, grad_W);
-                      fe_v_subface_neighbor.get_function_gradients (current_solution, grad_W_neighbor);
+                      fe_v_subface_neighbor.get_function_values (current_solution, W_neighbor);
 
-                      // Gradient jump evaluation is the same for all three cases.
+                      // Solution jump evaluation.
                       for (unsigned int q=0; q<n_q_points; ++q)
                         {
                           const double sound_speed_suqare =
                             parameters->gas_gamma * W[q][icp]/W[q][icr];
 
-                          const Tensor<1,dim> normal_vector = fe_v_face.normal_vector (q);
-                          const double pressure_gradient_jump
-                            = std::abs (normal_vector *
-                                        (grad_W[q][icp] - grad_W_neighbor[q][icp]));
-                          const double density_gradient_jump
-                            = std::abs (normal_vector *
-                                        (grad_W[q][icr] - grad_W_neighbor[q][icr]));
+                          const double pressure_value_jump
+                            = std::abs (W[q][icp] - W_neighbor[q][icp]);
+                          const double density_value_jump
+                            = std::abs (W[q][icr] - W_neighbor[q][icr]);
                           const double jump_this_q =
                             EulerEquations<dim>::compute_velocity_magnitude (W[q]) *
                             std::max (
-                              pressure_gradient_jump,
-                              sound_speed_suqare * density_gradient_jump);
+                              pressure_value_jump,
+                              sound_speed_suqare * density_value_jump);
 
                           max_gradient_jump = std::max (max_gradient_jump,
                                                         jump_this_q);
