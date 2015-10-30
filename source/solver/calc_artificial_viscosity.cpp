@@ -299,7 +299,9 @@ namespace NSFEMSolver
                   // level as the current one.
                   const typename DoFHandler<dim>::cell_iterator neighbor_cell
                     = cell->neighbor (face_no);
-                  if (neighbor_cell->level() == cell->level())
+                  const int this_cell_level = cell->level();
+                  const int neighbor_active_cell_level = neighbor_cell->level() + neighbor_cell->has_children();
+                  if (this_cell_level == neighbor_active_cell_level)
                     {
                       const unsigned int face_no_neighbor = cell->neighbor_of_neighbor (face_no);
 
@@ -333,9 +335,9 @@ namespace NSFEMSolver
                                                         jump_this_q);
                         }
                     }
-                  else if (neighbor_cell->level() > cell->level())
+                  else if (neighbor_active_cell_level > this_cell_level)
                     {
-                      Assert (neighbor_cell->level() == cell->level() + 1,
+                      Assert (neighbor_active_cell_level == this_cell_level + 1,
                               ExcMessage ("Refine level difference can't larger than 1 across cell interface."));
                       // Neighbor cell is refiner than this cell, we have
                       // to loop through all subfaces of this face.
@@ -388,7 +390,7 @@ namespace NSFEMSolver
                     }
                   else // if (neighbor_cell->level() < cell->level())
                     {
-                      Assert (neighbor_cell->level() + 1 == cell->level(),
+                      Assert (neighbor_active_cell_level + 1 == this_cell_level,
                               ExcMessage ("Refine level difference can't larger than 1 across cell interface."));
                       // Here, the neighbor cell is coarser than current cell.
                       // So we are on a subface of neighbor cell.
