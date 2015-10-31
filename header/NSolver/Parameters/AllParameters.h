@@ -108,7 +108,8 @@ namespace NSFEMSolver
       enum Indicator
       {
         Gradient,
-        Kelly
+        Kelly,
+        ErrorAndJump
       };
 
       Indicator refinement_indicator;

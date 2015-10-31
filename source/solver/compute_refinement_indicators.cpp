@@ -42,6 +42,11 @@ namespace NSFEMSolver
                                             parameters->component_mask);
         break;
       }
+      case Parameters::Refinement<dim>::ErrorAndJump:
+      {
+        // Nothing needs to do here. The indicator vector is set during system assembling.
+        break;
+      }
       default:
       {
         Assert (false, ExcNotImplemented());
