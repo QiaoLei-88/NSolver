@@ -16,7 +16,7 @@ int main (int argc, char *argv[])
   using namespace dealii;
   using namespace NSFEMSolver;
 
-  Utilities::MPI::MPI_InitFinalize mpi_initialization (argc, argv, /* int max_num_threads */ 1);
+  Utilities::MPI::MPI_InitFinalize mpi_initialization (argc, argv /*, int max_num_threads = 1 */);
   try
     {
       if (Utilities::MPI::this_mpi_process (MPI_COMM_WORLD) == 0)
