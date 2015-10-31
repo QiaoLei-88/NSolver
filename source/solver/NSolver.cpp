@@ -64,6 +64,7 @@ namespace NSFEMSolver
     dof_handler (triangulation),
     quadrature (para_ptr_in->quadrature_degree),
     face_quadrature (para_ptr_in->face_quadrature_degree),
+    blend_artificial_viscosity (false),
     I_am_host (Utilities::MPI::this_mpi_process (mpi_communicator) == 0),
     myid (Utilities::MPI::this_mpi_process (mpi_communicator)),
     parameters (para_ptr_in),
