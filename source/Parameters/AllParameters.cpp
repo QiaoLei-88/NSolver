@@ -139,7 +139,7 @@ namespace NSFEMSolver
       prm.enter_subsection ("refinement");
       {
         prm.declare_entry ("refinement indicator", "Gradient",
-                           Patterns::Selection ("Gradient|Kelly"),
+                           Patterns::Selection ("Gradient|Kelly|ErrorAndJump"),
                            "type of refinement indicator");
         prm.declare_entry ("do initial refine", "true",
                            Patterns::Bool(),
@@ -189,6 +189,10 @@ namespace NSFEMSolver
           else if (buff == "Kelly")
             {
               refinement_indicator = Kelly;
+            }
+          else if (buff == "ErrorAndJump")
+            {
+              refinement_indicator = ErrorAndJump;
             }
           else
             {
