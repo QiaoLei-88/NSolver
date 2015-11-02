@@ -50,6 +50,7 @@ namespace NSFEMSolver
                                                    | update_JxW_values
                                                    | update_quadrature_points;
     const UpdateFlags face_update_flags          = update_values
+                                                   | update_gradients
                                                    | update_q_points
                                                    | update_JxW_values
                                                    | update_normal_vectors

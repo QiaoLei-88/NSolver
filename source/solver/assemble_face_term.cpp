@@ -80,6 +80,18 @@ namespace NSFEMSolver
     Table<2,double>
     Wminus_old (n_q_points, EquationComponents<dim>::n_components);
 
+    Table<3,Sacado::Fad::DFad<double> >
+    grad_W (n_q_points, EquationComponents<dim>::n_components, dim);
+
+    {
+      const Sacado::Fad::DFad<double> FADD_zero = 0.0;
+      Wplus.fill (FADD_zero);
+      Wminus.fill (FADD_zero);
+      Wplus_old.fill (0.0);
+      Wminus_old.fill (0.0);
+      grad_W.fill (FADD_zero);
+    }
+
     for (unsigned int q=0; q<n_q_points; ++q)
       for (unsigned int i=0; i<dofs_per_cell; ++i)
         {
@@ -88,6 +100,11 @@ namespace NSFEMSolver
                                     fe_v.shape_value_component (i, q, component_i);
           Wplus_old[q][component_i] +=  old_solution (dof_indices[i]) *
                                         fe_v.shape_value_component (i, q, component_i);
+          for (unsigned int d = 0; d < dim; ++d)
+            {
+              grad_W[q][component_i][d] += independent_local_dof_values[i] *
+                                           fe_v.shape_grad_component (i, q, component_i)[d];
+            }
         }
 
     // Computing "opposite side" is a bit more complicated. If this is
@@ -242,6 +259,32 @@ namespace NSFEMSolver
           }
       }
 
+    // Compute boundary normal viscous flux
+    if (external_face)
+      {
+        const double mu =
+          artificial_viscosity[fe_v.get_cell()->active_cell_index()];
+        const double prandtlNumber = 0.72;
+        double kappa = mu / (prandtlNumber * (parameters->gas_gamma - 1.0));
+        if (parameters->diffusion_type == Parameters::AllParameters<dim>::diffu_entropy_DRB)
+          {
+            kappa = artificial_thermal_conductivity[fe_v.get_cell()->active_cell_index()];
+          }
+        for (unsigned int q=0; q<n_q_points; ++q)
+          {
+            typedef Sacado::Fad::DFad<double> DFAD;
+            const Tensor<1,dim> &normal_vector = fe_v.normal_vector (q);
+            std_cxx11::array <std_cxx11::array <DFAD, dim>, EquationComponents<dim>::n_components > visc_flux;
+            EulerEquations<dim>::compute_viscous_flux (Wminus[q], grad_W[q], visc_flux, mu, kappa);
+            for (unsigned int c=0; c<EquationComponents<dim>::n_components; ++c)
+              {
+                for (unsigned int d=0; d<dim; ++d)
+                  {
+                    normal_fluxes[q][c] -= visc_flux[c][d] * normal_vector[d];
+                  }
+              }
+          }
+      }
     // Now assemble the face term in exactly the same way as for the cell
     // contributions in the previous function. The only difference is that if
     // this is an internal face, we also have to take into account the
