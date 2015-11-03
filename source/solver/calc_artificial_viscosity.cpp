@@ -447,7 +447,7 @@ namespace NSFEMSolver
             const double second_order_viscosity = h*h * viscosity_seed * scale_factor;
             artificial_viscosity[cell->active_cell_index()] =
               std::min (first_order_viscosity, second_order_viscosity);
-            const double second_order_thermal_conductivity = h*h * viscosity_seed;
+            const double second_order_thermal_conductivity = h*h * viscosity_seed * scale_factor;
             artificial_thermal_conductivity[cell->active_cell_index()] =
               std::min (first_order_viscosity, second_order_thermal_conductivity);
           } // End loop for all cells
@@ -461,8 +461,9 @@ namespace NSFEMSolver
         blend_artificial_viscosity = blend_artificial_viscosity || (this_mu_l2 < old_mu_l2);
         if (blend_artificial_viscosity && Mach_max > 0.95)
           {
-            // Scaling and simple addition, i.e. *this.sadd(s,a,V) = s*(*this)+a*V.
+            // Scaling and addition of vector, i.e. *this.sadd(s,a,V) = s*(*this)+a*V.
             artificial_viscosity.sadd (0.5, 0.5, old_artificial_viscosity);
+            artificial_thermal_conductivity = artificial_viscosity;
           }
         pcout << "l2_blended_mu = " << artificial_viscosity.l2_norm() << std::endl
               << std::endl;
