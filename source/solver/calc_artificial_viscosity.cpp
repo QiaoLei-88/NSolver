@@ -184,6 +184,9 @@ namespace NSFEMSolver
         FESubfaceValues<dim> fe_v_subface_neighbor (*mapping_ptr, fe, face_quadrature,
                                                     neighbor_face_update_flags);
 
+        Vector<double> entropy (triangulation.n_active_cells());
+        double entropy_max = std::numeric_limits<double>::min();
+        double entropy_min = std::numeric_limits<double>::max();
         typename DoFHandler<dim>::active_cell_iterator cell =
           dof_handler.begin_active();
         const typename DoFHandler<dim>::active_cell_iterator endc =
@@ -442,6 +445,10 @@ namespace NSFEMSolver
                                          max_gradient_jump);
             } // End gradient jump block
 
+            entropy[cell->active_cell_index()] = viscosity_seed;
+            entropy_min = std::min (viscosity_seed, entropy_min);
+            entropy_max = std::max (viscosity_seed, entropy_max);
+
             // With all building blocks at hand, finally evaluate the artificial viscosity.
             Assert (scale_factor>0.0, ExcMessage ("scale_factor is negative"));
             const double second_order_viscosity = h*h * viscosity_seed * scale_factor;
@@ -466,6 +473,11 @@ namespace NSFEMSolver
             artificial_thermal_conductivity = artificial_viscosity;
           }
         pcout << "l2_blended_mu = " << artificial_viscosity.l2_norm() << std::endl
+              << std::endl;
+        const double entropy_mean = entropy.mean_value();
+        const double scale_Guermond = std::max (entropy_mean-entropy_min,
+                                                entropy_max-entropy_mean);
+        pcout << "scale_Guermond = " << scale_Guermond << std::endl
               << std::endl;
         break;
       }
