@@ -162,6 +162,7 @@ namespace NSFEMSolver
         // This is to say local_h_min will never be used here after.
         (void)local_h_min;
 
+        double Mach_max (std::numeric_limits<double>::min());
         // Begin computing artificial viscosity.
         const UpdateFlags update_flags               = update_values
                                                        | update_gradients
@@ -268,8 +269,10 @@ namespace NSFEMSolver
                                          max_entropy_production);
               // compute scale factor
               local_Mach /= cell->measure();
-              const double Mach = std::max (local_Mach, parameters->Mach);
-              scale_factor = Mach * Mach;
+              Mach_max = std::max (Mach_max, local_Mach);
+              (void)local_Mach;
+              const double Mach = parameters->Mach;
+              scale_factor = 1.0/ (Mach*Mach);
 
               // First order viscosity
               first_order_viscosity = 0.5 * h * max_characteristic_speed;
@@ -456,7 +459,7 @@ namespace NSFEMSolver
               << "this_mu_l2 = " << this_mu_l2 << std::endl
               << std::endl;
         blend_artificial_viscosity = blend_artificial_viscosity || (this_mu_l2 < old_mu_l2);
-        if (blend_artificial_viscosity)
+        if (blend_artificial_viscosity && Mach_max > 0.95)
           {
             // Scaling and simple addition, i.e. *this.sadd(s,a,V) = s*(*this)+a*V.
             artificial_viscosity.sadd (0.5, 0.5, old_artificial_viscosity);
