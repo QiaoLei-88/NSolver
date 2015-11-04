@@ -261,6 +261,12 @@ void EulerEquations<dim>::compute_viscous_flux (const InputVector &W,
                                    p_over_rho_square * grad_w[density_component][d];
     }
 
+  // Scale with parameter
+  for (unsigned int ic = 0; ic < n_components; ++ic)
+    for (unsigned int id = 0; id < dim; ++id)
+      {
+        flux[ic][id] *= parameters->diffusion_factor[ic];
+      }
   return;
 }
 
