@@ -112,24 +112,25 @@ namespace NSFEMSolver
                     rho_max = std::max (rho_max, W[q][EquationComponents<dim>::density_component]);
 
                     const double sound_speed
-                      = EulerEquations<dim>::template compute_sound_speed (W[q]);
+                      = EulerEquations<dim>::compute_sound_speed (W[q]);
                     const double velocity
-                    = EulerEquations<dim>::template compute_velocity_magnitude (W[q]);
+                      = EulerEquations<dim>::compute_velocity_magnitude (W[q]);
                     characteristic_speed_max = std::max (characteristic_speed_max, velocity + sound_speed);
                   }
 
                 const double h = parameters->entropy_use_global_h_min
-                ? global_h_min : cell->diameter();
+                                 ? global_h_min
+                                 : cell->diameter();
                 const double entropy_visc
-                = parameters->entropy_visc_cE * rho_max
-                * std::pow (h, 2.0) * D_h_max;
+                  = parameters->entropy_visc_cE * rho_max *
+                    std::pow (h, 2.0) * D_h_max;
                 const double miu_max
-                = parameters->entropy_visc_cLinear
-                * h
-                * rho_max * characteristic_speed_max;
+                  = parameters->entropy_visc_cLinear *
+                    h *
+                    rho_max * characteristic_speed_max;
 
                 artificial_viscosity[cell->active_cell_index()] =
-                std::min (miu_max, entropy_visc);
+                  std::min (miu_max, entropy_visc);
               } // End if cell is locally owned
           } // End for active cells
         break;
