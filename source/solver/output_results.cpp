@@ -63,6 +63,12 @@ namespace NSFEMSolver
                                 DataOut<dim>::type_cell_data);
     }
     {
+      const std::string data_name ("dominant_viscosity");
+      data_out.add_data_vector (dominant_viscosity,
+                                data_name,
+                                DataOut<dim>::type_cell_data);
+    }
+    {
       AssertThrow (dim <= 3, ExcNotImplemented());
       char prefix[3][4] = {"1st", "2nd", "3rd"};
 
