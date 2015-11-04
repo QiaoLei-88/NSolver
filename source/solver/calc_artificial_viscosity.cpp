@@ -106,7 +106,15 @@ namespace NSFEMSolver
                                 * grad_W[q][EquationComponents<dim>::density_component][d];
                       }
                     D_h2 *= entropy.val()/W[q][EquationComponents<dim>::density_component];
+                    if (std::abs (D_h1) >= D_h_max)
+                      {
+                        dominant_viscosity[cell->active_cell_index()] = 2.0;
+                      }
                     D_h_max = std::max (D_h_max, std::abs (D_h1));
+                    if (std::abs (D_h2) >= D_h_max)
+                      {
+                        dominant_viscosity[cell->active_cell_index()] = 3.0;
+                      }
                     D_h_max = std::max (D_h_max, std::abs (D_h2));
 
                     rho_max = std::max (rho_max, W[q][EquationComponents<dim>::density_component]);
@@ -131,8 +139,14 @@ namespace NSFEMSolver
 
                 artificial_viscosity[cell->active_cell_index()] =
                   std::min (miu_max, entropy_visc);
+                if (miu_max < entropy_visc)
+                  {
+                    dominant_viscosity[cell->active_cell_index()] = 1.0;
+                  }
               } // End if cell is locally owned
           } // End for active cells
+        std::cerr << "mean artificial_viscosity = " << artificial_viscosity.mean_value() << std::endl
+                  << std::endl;
         break;
       }
       case Parameters::AllParameters<dim>::diffu_entropy_DRB:
