@@ -270,6 +270,10 @@ namespace NSFEMSolver
                 }
               viscosity_seed = std::max (viscosity_seed,
                                          max_entropy_production);
+              if (max_entropy_production>=viscosity_seed)
+                {
+                  dominant_viscosity[cell->active_cell_index()] = 1.0;
+                }
               // compute scale factor
               local_Mach /= cell->measure();
               Mach_max = std::max (Mach_max, local_Mach);
@@ -294,6 +298,7 @@ namespace NSFEMSolver
               // Compute maximum density and pressure gradient jump among all
               // cell face quadrature points.
               double max_gradient_jump = std::numeric_limits<double>::min();
+              float dominant_jump = 1.5;
               for (unsigned int face_no=0; face_no<GeometryInfo<dim>::faces_per_cell; ++face_no)
                 {
                   // We assume zero gradient jump on boundary
@@ -339,6 +344,10 @@ namespace NSFEMSolver
                             std::max (
                               pressure_gradient_jump,
                               sound_speed_suqare * density_gradient_jump);
+                          if (pressure_gradient_jump < sound_speed_suqare * density_gradient_jump)
+                            {
+                              dominant_jump = 2.5;
+                            }
 
                           max_gradient_jump = std::max (max_gradient_jump,
                                                         jump_this_q);
@@ -388,7 +397,10 @@ namespace NSFEMSolver
                                 std::max (
                                   pressure_value_jump,
                                   sound_speed_suqare * density_value_jump);
-
+                              if (pressure_value_jump < sound_speed_suqare * density_value_jump)
+                                {
+                                  dominant_jump = 2.5;
+                                }
                               max_gradient_jump = std::max (max_gradient_jump,
                                                             jump_this_q);
                             }
@@ -435,7 +447,10 @@ namespace NSFEMSolver
                             std::max (
                               pressure_value_jump,
                               sound_speed_suqare * density_value_jump);
-
+                          if (pressure_value_jump < sound_speed_suqare * density_value_jump)
+                            {
+                              dominant_jump = 2.5;
+                            }
                           max_gradient_jump = std::max (max_gradient_jump,
                                                         jump_this_q);
                         }
@@ -443,6 +458,10 @@ namespace NSFEMSolver
                 } // End loop for all faces
               viscosity_seed = std::max (viscosity_seed,
                                          max_gradient_jump);
+              if (max_gradient_jump>=viscosity_seed)
+                {
+                  dominant_viscosity[cell->active_cell_index()] = dominant_jump;
+                }
             } // End gradient jump block
 
             entropy[cell->active_cell_index()] = viscosity_seed;
@@ -452,6 +471,10 @@ namespace NSFEMSolver
             // With all building blocks at hand, finally evaluate the artificial viscosity.
             Assert (scale_factor>0.0, ExcMessage ("scale_factor is negative"));
             const double second_order_viscosity = h*h * viscosity_seed * scale_factor;
+            if (first_order_viscosity <= second_order_viscosity)
+              {
+                dominant_viscosity[cell->active_cell_index()] = 3.0;
+              }
             artificial_viscosity[cell->active_cell_index()] =
               std::min (first_order_viscosity, second_order_viscosity);
             const double second_order_thermal_conductivity = h*h * viscosity_seed * scale_factor;
