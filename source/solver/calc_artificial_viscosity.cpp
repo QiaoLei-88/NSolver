@@ -88,8 +88,11 @@ namespace NSFEMSolver
                     const double entroy_old = EulerEquations<dim>::template compute_entropy (W_old[q]);
 
                     double D_h1 (0.0),D_h2 (0.0);
-                    D_h1 = (entropy.val() - entroy_old)/dt;
-                    D_h2 = (W[q][EquationComponents<dim>::density_component] - W_old[q][EquationComponents<dim>::density_component])/dt;
+                    if (!parameters->turn_off_time_marching)
+                      {
+                        D_h1 = (entropy.val() - entroy_old)/dt;
+                        D_h2 = (W[q][EquationComponents<dim>::density_component] - W_old[q][EquationComponents<dim>::density_component])/dt;
+                      }
 
                     //sum up divergence
                     for (unsigned int d=0; d<dim; d++)
