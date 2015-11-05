@@ -97,14 +97,16 @@ namespace NSFEMSolver
     DoFTools::extract_locally_relevant_dofs (dof_handler,
                                              locally_relevant_dofs);
 
-    TrilinosWrappers::SparsityPattern sparsity_pattern (locally_owned_dofs,
-                                                        mpi_communicator);
+    DynamicSparsityPattern sparsity_pattern (locally_relevant_dofs);
     DoFTools::make_sparsity_pattern (dof_handler,
                                      sparsity_pattern,
                                      /*const ConstraintMatrix constraints = */ ConstraintMatrix(),
                                      /*const bool keep_constrained_dofs = */ true,
                                      Utilities::MPI::this_mpi_process (mpi_communicator));
-    sparsity_pattern.compress();
+    SparsityTools::distribute_sparsity_pattern (sparsity_pattern,
+                                                dof_handler.n_locally_owned_dofs_per_processor(),
+                                                mpi_communicator,
+                                                locally_relevant_dofs);
     if (parameters->output_sparsity_pattern &&
         parameters->renumber_dofs != Parameters::AllParameters<dim>::None)
       {
@@ -114,11 +116,16 @@ namespace NSFEMSolver
         std::ofstream out (file_name.c_str());
         sparsity_pattern.print_gnuplot (out);
       }
-    system_matrix.reinit (sparsity_pattern);
+    system_matrix.reinit (locally_owned_dofs,
+                          locally_owned_dofs,
+                          sparsity_pattern,
+                          mpi_communicator);
 
     // Initialize vectors
     locally_owned_solution.reinit (locally_owned_dofs, mpi_communicator);
-    current_solution.reinit (locally_relevant_dofs, mpi_communicator);
+    current_solution.reinit (locally_owned_dofs,
+                             locally_relevant_dofs,
+                             mpi_communicator);
 
     // const bool fast = true means leave its content untouched.
     old_solution.reinit (current_solution, /*const bool fast = */ true);
