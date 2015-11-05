@@ -18,6 +18,8 @@ namespace NSFEMSolver
       case Parameters::AllParameters<dim>::diffu_entropy:
       {
         // Entropy viscosity
+        dominant_viscosity = -1.0;
+
         double local_h_min (std::numeric_limits<double>::max());
         if (parameters->entropy_use_global_h_min)
           {
@@ -150,6 +152,38 @@ namespace NSFEMSolver
           } // End for active cells
         std::cerr << "mean artificial_viscosity = " << artificial_viscosity.mean_value() << std::endl
                   << std::endl;
+        {
+          double visc_max = std::numeric_limits<double>::min();
+          double visc_min = std::numeric_limits<double>::max();
+          for (unsigned int i=0; i<artificial_viscosity.size(); ++i)
+            {
+              if (dominant_viscosity[i] > 1.0 && artificial_viscosity[i]>0.0)
+                {
+                  visc_max=std::max (visc_max,artificial_viscosity[i]);
+                  visc_min=std::min (visc_min,artificial_viscosity[i]);
+                }
+            }
+          const double upper_threshold = 0.9*visc_max+0.1*visc_min;
+          const double lower_threshold = 0.0*visc_max+1.0*visc_min;
+          std::cout << "visc_max = " << visc_max << std::endl
+                    << "visc_min = " << visc_min << std::endl
+                    << "upper_threshold = " << upper_threshold << std::endl
+                    << "lower_threshold = " << lower_threshold << std::endl;
+          double midd_sum = 0.0;
+          double midd_count = 1e-100;
+          for (unsigned int i=0; i<artificial_viscosity.size(); ++i)
+            {
+              if (artificial_viscosity[i] >= lower_threshold &&
+                  artificial_viscosity[i] <= upper_threshold)
+                {
+                  midd_sum += artificial_viscosity[i];
+                  ++midd_count;
+                }
+            }
+          const double midd_avg = midd_sum/midd_count;
+          std::cout << "midd_avg artificial_viscosity = " << midd_avg << std::endl
+                    << std::endl;
+        }
         break;
       }
       case Parameters::AllParameters<dim>::diffu_entropy_DRB:
