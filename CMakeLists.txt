@@ -48,6 +48,14 @@ SET(PRJ_NAME "NSolver")
 
 INCLUDE_DIRECTORIES(BEFORE ${CMAKE_SOURCE_DIR}/header)
 DEAL_II_INITIALIZE_CACHED_VARIABLES()
+
+# Set CMAKE_BUILD_TYPE=Debug if both Debug and Release mode are given
+IF("${CMAKE_BUILD_TYPE}" STREQUAL "DebugRelease")
+  SET(CMAKE_BUILD_TYPE "Debug" CACHE STRING
+    "Choose the type of build, options are: Debug, Release"
+    FORCE)
+ENDIF()
+
 PROJECT(${PRJ_NAME})
 
 
