@@ -341,7 +341,8 @@ namespace NSFEMSolver
                   {
                     R_i += laplacian_coefficient *
                            grad_W[point][component_i][d] *
-                           fe_v.shape_grad_component (i, point, component_i)[d];
+                           fe_v.shape_grad_component (i, point, component_i)[d] *
+                           fe_v.JxW (point);
                   }
               }
           }
