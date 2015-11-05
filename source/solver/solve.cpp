@@ -41,11 +41,14 @@ namespace NSFEMSolver
       case Parameters::Solver::direct:
       {
         SolverControl solver_control (1,0);
-
+#ifdef USE_PETSC_LA
+        PETScWrappers::SparseDirectMUMPS direct (solver_control, mpi_communicator);
+        direct.set_symmetric_mode (false);
+#else
         TrilinosWrappers::SolverDirect::AdditionalData
         solver_data (parameters->output == Parameters::Solver::verbose);
         TrilinosWrappers::SolverDirect direct (solver_control, solver_data);
-
+#endif
         direct.solve (system_matrix, newton_update, right_hand_side);
 
         return_value.first = solver_control.last_step();
@@ -80,6 +83,9 @@ namespace NSFEMSolver
       // const_cast.
       case Parameters::Solver::gmres:
       {
+#ifdef USE_PETSC_LA
+        AssertThrow (false, ExcMessage ("PETSc GMRES solver is not implemented."));
+#else
         Epetra_Vector x (View, system_matrix.trilinos_matrix().DomainMap(),
                          newton_update.begin());
         Epetra_Vector b (View, system_matrix.trilinos_matrix().RangeMap(),
@@ -251,6 +257,7 @@ namespace NSFEMSolver
         // Safety of deleting NULL pointer is assured by C++ standard
         delete preconditioner_ptr;
         preconditioner_ptr = 0;
+#endif
         break;
         // End case Parameters::Solver::gmres:
       }

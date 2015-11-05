@@ -16,7 +16,7 @@ DEAL_II_ENABLE_EXTRA_DIAGNOSTICS
 #include <NSolver/types.h>
 #include <NSolver/MDFILU/MapMatrix.h>
 
-
+#ifndef USE_PETSC_LA
 // #define VERBOSE_OUTPUT
 
 using namespace dealii;
@@ -266,5 +266,7 @@ const Epetra_Map &MDFILU::OperatorRangeMap() const
     }
 }
 
+#endif
+//     of #ifndef USE_PETSC_LA
 #endif
 //     of #ifndef __MDFILU__H__

@@ -12,17 +12,6 @@
 
 #include <deal.II/lac/generic_linear_algebra.h>
 
-//#define USE_PETSC_LA
-
-namespace LA
-{
-#ifdef USE_PETSC_LA
-  using namespace dealii::LinearAlgebraPETSc;
-#else
-  using namespace dealii::LinearAlgebraTrilinos;
-#endif
-}
-
 #include <deal.II/lac/vector.h>
 #include <deal.II/lac/full_matrix.h>
 #include <deal.II/lac/solver_cg.h>
@@ -56,8 +45,8 @@ namespace LA
 
 #include <deal.II/base/smartpointer.h>
 
-
 #include <NSolver/Parameters/AllParameters.h>
+#include <NSolver/types.h>
 
 #include <fstream>
 #include <iostream>
