@@ -78,7 +78,7 @@ ADD_CUSTOM_TARGET(distclean
   COMMAND ${CMAKE_COMMAND} -E remove_directory bin
   COMMAND ${CMAKE_COMMAND} -E remove_directory source
   COMMAND ${CMAKE_COMMAND} -E remove_directory tests
-  COMMAND ${CMAKE_COMMAND} -E remove CMakeCache.txt cmake_install.cmake Makefile CTestTestfile.cmake
+  COMMAND ${CMAKE_COMMAND} -E remove CMakeCache.txt cmake_install.cmake Makefile CTestTestfile.cmake version.info
   COMMENT "distclean invoked"
   )
 
@@ -92,7 +92,7 @@ ADD_CUSTOM_TARGET(reset
   COMMAND ${CMAKE_COMMAND} -E remove_directory bin
   COMMAND ${CMAKE_COMMAND} -E remove_directory source
   COMMAND ${CMAKE_COMMAND} -E remove_directory tests
-  COMMAND ${CMAKE_COMMAND} -E remove CMakeCache.txt cmake_install.cmake Makefile CTestTestfile.cmake
+  COMMAND ${CMAKE_COMMAND} -E remove CMakeCache.txt cmake_install.cmake Makefile CTestTestfile.cmake version.info
   COMMAND ${CMAKE_COMMAND} ${CMAKE_SOURCE_DIR}
   COMMENT "reset invoked"
   )
