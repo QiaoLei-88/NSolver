@@ -155,18 +155,26 @@ namespace NSFEMSolver
 
         for (unsigned int q = 0; q < n_q_points; q++)
           {
+            // If We call this function with <code>Wminus[q]</code> as last argument,
+            // subscripting a 2d table yields a temporary accessor object representing
+            // a 1d vector.
+            // The problem is that a temporary accessor object can't be bound to
+            // a non-const reference argument of a function. So we have to store the
+            // non-const accessor object explicitly.
+            dealii::internal::TableBaseAccessors::Accessor<2, Sacado::Fad::DFad<double>, false, 1> Wminus_q = Wminus[q];
             EulerEquations<dim>::compute_Wminus (parameters->boundary_conditions[boundary_id].kind,
                                                  fe_v.normal_vector (q),
                                                  Wplus[q],
                                                  boundary_values[q],
-                                                 Wminus[q]);
+                                                 Wminus_q);
             // Here we assume that boundary type, boundary normal vector and boundary data values
             // maintain the same during time advancing.
+            dealii::internal::TableBaseAccessors::Accessor<2, double, false, 1> Wminus_old_q = Wminus_old[q];
             EulerEquations<dim>::compute_Wminus (parameters->boundary_conditions[boundary_id].kind,
                                                  fe_v.normal_vector (q),
                                                  Wplus_old[q],
                                                  boundary_values[q],
-                                                 Wminus_old[q]);
+                                                 Wminus_old_q);
           }
       }
 

@@ -238,30 +238,6 @@ namespace NSFEMSolver
     // marked for inflow, then $w^-_c = j_c$. If it is an outflow, then $w^-_c
     // = w^+_c$. These two simple cases are handled first in the function
     // below.
-    //
-    // There is a little snag that makes this function unpleasant from a C++
-    // language viewpoint: The output vector <code>Wminus</code> will of
-    // course be modified, so it shouldn't be a <code>const</code>
-    // argument. Yet it is in the implementation below, and needs to be in
-    // order to allow the code to compile. The reason is that we call this
-    // function at a place where <code>Wminus</code> is of type
-    // <code>Table@<2,Sacado::Fad::DFad@<double@> @></code>, this being 2d
-    // table with indices representing the quadrature point and the vector
-    // component, respectively. We call this function with
-    // <code>Wminus[q]</code> as last argument; subscripting a 2d table yields
-    // a temporary accessor object representing a 1d vector, just what we want
-    // here. The problem is that a temporary accessor object can't be bound to
-    // a non-const reference argument of a function, as we would like here,
-    // according to the C++ 1998 and 2003 standards (something that will be
-    // fixed with the next standard in the form of rvalue references).  We get
-    // away with making the output argument here a constant because it is the
-    // <i>accessor</i> object that's constant, not the table it points to:
-    // that one can still be written to. The hack is unpleasant nevertheless
-    // because it restricts the kind of data types that may be used as
-    // template argument to this function: a regular vector isn't going to do
-    // because that one can not be written to when marked
-    // <code>const</code>. With no good solution around at the moment, we'll
-    // go with the pragmatic, even if not pretty, solution shown here:
     template <typename DataVector>
     static
     void
@@ -269,7 +245,7 @@ namespace NSFEMSolver
                     const Tensor<1,dim>  &normal_vector,
                     const DataVector     &Wplus,
                     const Vector<double> &boundary_values,
-                    const DataVector     &Wminus);
+                    DataVector           &Wminus);
 
     // @sect4{EulerEquations::compute_refinement_indicators}
 
