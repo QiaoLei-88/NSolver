@@ -142,6 +142,15 @@ namespace NSFEMSolver
     void assemble_cell_term (const FEValues<dim>             &fe_v,
                              const std::vector<types::global_dof_index> &dofs);
     /**
+     * Compute infinity norm of solution and/or gradient jumps across all faces in &p cell.
+     */
+    double calc_jumps (const FEFaceValuesBase<dim>                          &fe_v_face_this,
+                       const FEFaceValuesBase<dim>                          &fe_v_face_neighbor,
+                       const unsigned int                                    boundary_id,
+                       const bool                                            accumulate_grad_jump,
+                       const bool                                            accumulate_value_jump);
+
+    /**
      * Apply Laplacian continuation to system matrix and residual. The coefficients
      * are depending to system residual and solution jump. So this procedure can
      * not be embedded into assemble_system().
