@@ -141,6 +141,12 @@ namespace NSFEMSolver
     void assemble_system();
     void assemble_cell_term (const FEValues<dim>             &fe_v,
                              const std::vector<types::global_dof_index> &dofs);
+    /**
+     * Apply Laplacian continuation to system matrix and residual. The coefficients
+     * are depending to system residual and solution jump. So this procedure can
+     * not be embedded into assemble_system().
+     */
+    void apply_laplacian_continuation();
     void assemble_face_term (const unsigned int               face_no,
                              const FEFaceValuesBase<dim>     &fe_v,
                              const FEFaceValuesBase<dim>     &fe_v_neighbor,
