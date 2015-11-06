@@ -235,6 +235,7 @@ namespace NSFEMSolver
 
     check_negative_density_pressure();
     calc_time_step();
+    calc_laplacian_indicator();
     output_results();
 
     // We then enter into the main time stepping loop. At the top we simply
@@ -354,6 +355,7 @@ namespace NSFEMSolver
         double log_res_last = 0.0;
         bool quadratic_converge = true;
         calc_artificial_viscosity();
+        calc_laplacian_indicator();
         do // Newton iteration
           {
             computing_timer.enter_subsection ("3:Assemble Newton system");

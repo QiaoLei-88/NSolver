@@ -260,8 +260,9 @@ namespace NSFEMSolver
     // sense, so that we don't need to negative the Jacobian entries.  Then,
     // when we sum into the <code>right_hand_side</code> vector, we negate
     // this residual.
+    const unsigned int i_cell = fe_v.get_cell()->active_cell_index();
     const double dt = parameters->use_local_time_step_size ?
-                      local_time_step_size[fe_v.get_cell()->active_cell_index()]
+                      local_time_step_size[i_cell]
                       :
                       global_time_step_size;
 
