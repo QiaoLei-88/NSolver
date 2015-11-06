@@ -57,6 +57,12 @@ namespace NSFEMSolver
                                 DataOut<dim>::type_cell_data);
     }
     {
+      const std::string data_name ("laplacian_indicator");
+      data_out.add_data_vector (laplacian_indicator,
+                                data_name,
+                                DataOut<dim>::type_cell_data);
+    }
+    {
       AssertThrow (dim <= 3, ExcNotImplemented());
       char prefix[3][4] = {"1st", "2nd", "3rd"};
 
