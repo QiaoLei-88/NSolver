@@ -416,16 +416,7 @@ namespace NSFEMSolver
                 R_i_q -= tmp;
                 cell_physical_residual_q -= tmp.val();
               }
-            if (parameters->laplacian_continuation > 0.0 &&
-                laplacian_coefficient > 0.0)
-              {
-                for (unsigned int d=0; d<dim; d++)
-                  {
-                    R_i_q += laplacian_coefficient *
-                             grad_W[point][component_i][d] *
-                             fe_v.shape_grad_component (i, point, component_i)[d];
-                  }
-              }
+
             R_i_q *= fe_v.JxW (point);
             cell_physical_residual_q *= fe_v.JxW (point);
 
