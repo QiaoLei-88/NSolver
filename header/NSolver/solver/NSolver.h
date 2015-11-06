@@ -279,6 +279,7 @@ namespace NSFEMSolver
 
     // laplacian_coefficient
     double laplacian_coefficient;
+    Vector<double> laplacian_indicator;
   };
 
 }
