@@ -260,7 +260,7 @@ namespace NSFEMSolver
       }
 
     // Compute boundary normal viscous flux
-    if (external_face)
+    if (false && external_face)
       {
         const double mu =
           artificial_viscosity[fe_v.get_cell()->active_cell_index()];
