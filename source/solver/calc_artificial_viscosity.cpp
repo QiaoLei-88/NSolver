@@ -499,6 +499,35 @@ namespace NSFEMSolver
               std::min (first_order_viscosity, second_order_thermal_conductivity);
           } // End loop for all cells
 
+        // Investigate max, min and average of artificial_viscosity
+        {
+          double local_max_v = std::numeric_limits<double>::min();
+          double local_min_v = std::numeric_limits<double>::max();
+          double local_sum_v = 0.0;
+          {
+            typename DoFHandler<dim>::active_cell_iterator
+            cell = dof_handler.begin_active(),
+            endc = dof_handler.end();
+            for (; cell!=endc; ++cell)
+              if (cell->is_locally_owned())
+                {
+                  const double &v= artificial_viscosity[cell->active_cell_index()];
+                  local_max_v = std::max (local_max_v, v);
+                  local_min_v = std::min (local_min_v, v);
+                  local_sum_v += v;
+                }
+          }
+          const double max_v = Utilities::MPI::max (local_max_v, mpi_communicator);
+          const double min_v = Utilities::MPI::min (local_min_v, mpi_communicator);
+          const double avg_v = Utilities::MPI::sum (local_sum_v, mpi_communicator) /
+                               static_cast<double> (triangulation.n_global_active_cells());
+          const double viscosity_threshold = avg_v*2.0 - min_v;
+          pcout << "viscosity min = " << min_v << std::endl
+                << "viscosity max = " << max_v << std::endl
+                << "viscosity avg = " << avg_v << std::endl
+                << "viscosity threshold = " << viscosity_threshold << std::endl;
+        }
+
         // blend refinement indicators with previous time step
         const double old_mu_l2 = old_artificial_viscosity.l2_norm();
         const double this_mu_l2 = artificial_viscosity.l2_norm();
