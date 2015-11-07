@@ -142,6 +142,10 @@ namespace NSFEMSolver
     void assemble_cell_term (const FEValues<dim>             &fe_v,
                              const std::vector<types::global_dof_index> &dofs);
     /**
+     * This function set proper value for laplacian_indicator and laplacian_threshold.
+     */
+    void calc_laplacian_indicator();
+    /**
      * Compute infinity norm of solution and/or gradient jumps across all faces in &p cell.
      */
     double calc_jumps (const FEFaceValuesBase<dim>                          &fe_v_face_this,
@@ -289,6 +293,7 @@ namespace NSFEMSolver
     // laplacian_coefficient
     double laplacian_coefficient;
     Vector<double> laplacian_indicator;
+    double laplacian_threshold;
   };
 
 }
