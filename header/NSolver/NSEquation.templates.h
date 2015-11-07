@@ -630,7 +630,7 @@ EulerEquations<dim>::compute_Wminus (const Boundary::Type &boundary_kind,
         }
       for (unsigned int ic = first_velocity_component, id=0; id<dim; ++ic, ++id)
         {
-          requested_boundary_values[ic] = Wplus[ic] - 2.0*vdotn*normal_vector[id];
+          requested_boundary_values[ic] = Wplus[ic] - vdotn*normal_vector[id];
         }
       requested_boundary_values[density_component] = Wplus[density_component];
       requested_boundary_values[pressure_component] = Wplus[pressure_component];
