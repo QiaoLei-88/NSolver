@@ -37,7 +37,9 @@ namespace NSFEMSolver
     for (; cell!=endc; ++cell)
       if (cell->is_locally_owned())
         {
-          const bool use_laplacian = laplacian_indicator[cell->active_cell_index()] >= laplacian_threshold;
+          const bool use_laplacian =
+            n_time_step == 0 ||
+            laplacian_indicator[cell->active_cell_index()] >= laplacian_threshold;
           n_laplacian += use_laplacian;
           const double factor = use_laplacian
                                 ? 1.0
