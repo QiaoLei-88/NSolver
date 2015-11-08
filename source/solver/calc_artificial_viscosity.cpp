@@ -493,6 +493,7 @@ namespace NSFEMSolver
                 dominant_viscosity[cell->active_cell_index()] = 3.0;
               }
             artificial_viscosity[cell->active_cell_index()] =
+              parameters->entropy_visc_cE *
               std::min (first_order_viscosity, second_order_viscosity);
             const double second_order_thermal_conductivity = h*h * viscosity_seed * scale_factor;
             artificial_thermal_conductivity[cell->active_cell_index()] =
