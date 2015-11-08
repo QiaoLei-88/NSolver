@@ -53,6 +53,10 @@ namespace NSFEMSolver
                            Patterns::Double (1.0),
                            "Laplacian decrease rate.");
 
+        prm.declare_entry ("SUPG factor", "-1.0",
+                           Patterns::Double(),
+                           "SUPG stabilization factor.");
+
         for (unsigned int di=0; di<EquationComponents<dim>::n_components; ++di)
           {
             prm.declare_entry ("diffusion factor for w_" + Utilities::int_to_string (di),
@@ -108,6 +112,8 @@ namespace NSFEMSolver
             diffusion_factor[di] = prm.get_double ("diffusion factor for w_"
                                                    + Utilities::int_to_string (di));
           }
+
+        SUPG_factor = prm.get_double ("SUPG factor");
       }
       prm.leave_subsection();
       return;

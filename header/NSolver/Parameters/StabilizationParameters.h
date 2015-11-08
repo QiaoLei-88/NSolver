@@ -68,6 +68,11 @@ namespace NSFEMSolver
        */
       double laplacian_decrease_rate;
 
+      /**
+       * SUPG stabilization factor. A non-positive value will disable the SUPG term.
+       */
+      double SUPG_factor;
+
       static void declare_parameters (ParameterHandler &prm);
       void parse_parameters (ParameterHandler &prm);
     };
