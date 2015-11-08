@@ -43,7 +43,7 @@ namespace NSFEMSolver
           n_laplacian += use_laplacian;
           const double factor = use_laplacian
                                 ? 1.0
-                                : 0.01;
+                                : 0.1;
 
           fe_v.reinit (cell);
           cell->get_dof_indices (dof_indices);
