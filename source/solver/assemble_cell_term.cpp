@@ -264,9 +264,93 @@ namespace NSFEMSolver
                       local_time_step_size[fe_v.get_cell()->active_cell_index()]
                       :
                       global_time_step_size;
+
+    Sacado::Fad::DFad<double> SUPG_residual = 0.0;
+    if (parameters->SUPG_factor > 0.0 &&
+        n_time_step != 0)
+      {
+        typedef Sacado::Fad::DFad<double> FADD;
+        const unsigned int nc = EquationComponents<dim>::n_components;
+        const unsigned int v0c = EquationComponents<dim>::first_momentum_component;
+        const unsigned int rc = EquationComponents<dim>::density_component;
+        const unsigned int pc = EquationComponents<dim>::pressure_component;
+
+        for (unsigned int q=0; q<fe_v.n_quadrature_points; ++q)
+          {
+            std_cxx11::array <FADD, nc> w;
+            std_cxx11::array <FADD, dim> flux_c;
+            for (unsigned int ic=0; ic<nc; ++ic)
+              {
+                w[ic] = W[q][ic].val();
+                w[ic].diff (ic,nc);
+              }
+            // I don't want to compute the entire flux matrix.
+            {
+              const unsigned int c = rc;
+              for (unsigned int d=0; d<dim; ++d)
+                {
+                  flux_c[d] = w[c] * w[v0c+d];
+                }
+            }
+            {
+              const unsigned int c = pc;
+              for (unsigned int d=0; d<dim; ++d)
+                {
+                  flux_c[d] =
+                    (EulerEquations<dim>::compute_energy_density (w) + w[c]) *
+                    w[v0c+d];
+                }
+            }
+            for (unsigned int c=v0c; c<v0c+dim; ++c)
+              {
+                for (unsigned int d=0; d<dim; ++d)
+                  {
+                    flux_c[d] = w[c] * w[rc] * w[v0c+d];
+                  }
+                flux_c[c-v0c] += w[pc];
+              }
+
+            FADD flux_divergence;
+            FADD streamwise_grad;
+            FADD SUPG_residual_q = 0.0;
+            for (unsigned int ic=0; ic<nc; ++ic)
+              {
+                flux_divergence = 0.0;
+                streamwise_grad = 0.0;
+                for (unsigned int d=0; d<dim; ++d)
+                  {
+                    flux_divergence +=
+                      flux_c[d].fastAccessDx (ic) *
+                      grad_W[q][ic][d];
+                    streamwise_grad +=
+                      W[q][v0c+d] *
+                      fe_v.shape_grad_component (ic, q, ic)[d];
+                  }
+                SUPG_residual_q +=
+                  flux_divergence * streamwise_grad;
+              }
+
+            double velocity_magnitude = 0.0;
+            for (unsigned int d=0; d<dim; ++d)
+              {
+                velocity_magnitude +=
+                  w[v0c+d].val() * w[v0c+d].val();
+              }
+            SUPG_residual +=
+              SUPG_residual_q /
+              (std::sqrt (velocity_magnitude) + 1e-6) *
+              fe_v.JxW (q);
+          } // End for all quadrature points
+
+        SUPG_residual *=
+          parameters->SUPG_factor *
+          fe_v.get_cell()->diameter();
+      } // End of if (parameters->SUPG_factor > 0.0)
+
     for (unsigned int i=0; i<fe_v.dofs_per_cell; ++i)
       {
         Sacado::Fad::DFad<double> R_i = 0;
+        R_i += SUPG_residual;
         double cell_physical_residual = 0.0;
 
         const unsigned int
@@ -315,6 +399,7 @@ namespace NSFEMSolver
                        fe_v.shape_grad_component (i, point, component_i)[d] *
                        fe_v.JxW (point);
               }
+
             {
               const Sacado::Fad::DFad<double> tmp =
                 (parameters->theta  * forcing[point][component_i] +
