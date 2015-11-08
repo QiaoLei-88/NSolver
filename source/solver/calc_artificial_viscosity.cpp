@@ -52,6 +52,7 @@ namespace NSFEMSolver
 
         std::vector<types::global_dof_index> global_indices_of_local_dofs (dofs_per_cell);
 
+        double Mach_max = 0.0;
         typename DoFHandler<dim>::active_cell_iterator cell =
           dof_handler.begin_active();
         const typename DoFHandler<dim>::active_cell_iterator endc =
@@ -127,6 +128,7 @@ namespace NSFEMSolver
                     const double velocity
                       = EulerEquations<dim>::compute_velocity_magnitude (W[q]);
                     characteristic_speed_max = std::max (characteristic_speed_max, velocity + sound_speed);
+                    Mach_max = std::max (Mach_max, velocity/sound_speed);
                   }
 
                 const double h = parameters->entropy_use_global_h_min
@@ -148,6 +150,23 @@ namespace NSFEMSolver
                   }
               } // End if cell is locally owned
           } // End for active cells
+
+        // blend refinement indicators with previous time step
+        const double old_mu_l2 = old_artificial_viscosity.l2_norm();
+        const double this_mu_l2 = artificial_viscosity.l2_norm();
+        pcout << "old_mu_l2 = " << old_mu_l2 << std::endl
+              << "this_mu_l2 = " << this_mu_l2 << std::endl
+              << std::endl;
+        blend_artificial_viscosity = blend_artificial_viscosity || (this_mu_l2 < old_mu_l2);
+        if (blend_artificial_viscosity && Mach_max > 0.95)
+          {
+            // Scaling and addition of vector, i.e. *this.sadd(s,a,V) = s*(*this)+a*V.
+            artificial_viscosity.sadd (0.5, 0.5, old_artificial_viscosity);
+            artificial_thermal_conductivity = artificial_viscosity;
+          }
+        pcout << "l2_blended_mu = " << artificial_viscosity.l2_norm() << std::endl
+              << std::endl;
+
         pcout << "mean artificial_viscosity = " << artificial_viscosity.mean_value() << std::endl
               << std::endl;
         break;
