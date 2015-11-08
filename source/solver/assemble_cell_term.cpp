@@ -208,10 +208,10 @@ namespace NSFEMSolver
         artificial_viscosity[fe_v.get_cell()->active_cell_index()];
       const double prandtlNumber = 0.72;
       double kappa = mu / (prandtlNumber * (parameters->gas_gamma - 1.0));
-      if (parameters->diffusion_type == Parameters::AllParameters<dim>::diffu_entropy_DRB)
-        {
-          kappa = artificial_thermal_conductivity[fe_v.get_cell()->active_cell_index()];
-        }
+      // if (parameters->diffusion_type == Parameters::AllParameters<dim>::diffu_entropy_DRB)
+      //   {
+      //     kappa = artificial_thermal_conductivity[fe_v.get_cell()->active_cell_index()];
+      //   }
       for (unsigned int q=0; q<n_q_points; ++q)
         {
           EulerEquations<dim>::compute_inviscid_flux (W_old[q], flux_old[q]);
