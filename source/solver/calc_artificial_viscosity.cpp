@@ -526,6 +526,27 @@ namespace NSFEMSolver
                 << "viscosity max = " << max_v << std::endl
                 << "viscosity avg = " << avg_v << std::endl
                 << "viscosity threshold = " << viscosity_threshold << std::endl;
+
+          {
+            unsigned int n_small_mu = 0;
+            typename DoFHandler<dim>::active_cell_iterator
+            cell = dof_handler.begin_active(),
+            endc = dof_handler.end();
+            for (; cell!=endc; ++cell)
+              if (cell->is_locally_owned())
+                {
+                  double &v= artificial_viscosity[cell->active_cell_index()];
+                  if (v<= viscosity_threshold)
+                    {
+                      ++n_small_mu;
+                      v = viscosity_threshold;
+                    }
+                }
+            pcout << "n_small_mu = "
+                  << Utilities::MPI::sum (n_small_mu, mpi_communicator)
+                  << std::endl;
+          }
+
         }
 
         // blend refinement indicators with previous time step
