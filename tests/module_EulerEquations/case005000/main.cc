@@ -32,9 +32,9 @@ int main (int argc, char *argv[])
   EulerEquations<dim>::set_parameter (&solver_parameters);
 
   Tensor<1,dim>       normal_vector;
-  Table<2,double>     Wplus (1,EquationComponents<dim>::n_components);
+  Vector<double>      Wplus (EquationComponents<dim>::n_components);
   Vector<double>      boundary_values (EquationComponents<dim>::n_components);
-  Table<2,double>     Wminus (1,EquationComponents<dim>::n_components);
+  Vector<double>      Wminus (EquationComponents<dim>::n_components);
 
   std::ofstream fout ("output.out");
 
@@ -42,27 +42,27 @@ int main (int argc, char *argv[])
     normal_vector[0] = 0.0;
     normal_vector[1] = 1.0;
 
-    Wplus[0][0] = 0.29999;
-    Wplus[0][1] = -1.00746e-06;
-    Wplus[0][2] = 1.0;
-    Wplus[0][3] = 0.714286;
+    Wplus[0] = 0.29999;
+    Wplus[1] = -1.00746e-06;
+    Wplus[2] = 1.0;
+    Wplus[3] = 0.714286;
 
     fout << "Face norm: [" << normal_vector[0] << ", " << normal_vector[1] << "]\n";
     fout << "Wplus:\n";
     for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
       {
-        fout << Wplus[0][ic] << ", ";
+        fout << Wplus[ic] << ", ";
       }
     fout << std::endl;
     EulerEquations<dim>::compute_Wminus (NSFEMSolver::Boundary::FarField,
                                          normal_vector,
-                                         Wplus[0],
+                                         Wplus,
                                          boundary_values,
-                                         Wminus[0]);
+                                         Wminus);
     fout << "Wminus:\n";
     for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
       {
-        fout << Wminus[0][ic] << ", ";
+        fout << Wminus[ic] << ", ";
       }
     fout << std::endl;
     fout << std::endl;
@@ -72,27 +72,27 @@ int main (int argc, char *argv[])
     normal_vector[0] = 1.0;
     normal_vector[1] = 0.0;
 
-    Wplus[0][0] = 0.29999;
-    Wplus[0][1] = -1.00746e-06;
-    Wplus[0][2] = 1.0;
-    Wplus[0][3] = 0.714286;
+    Wplus[0] = 0.29999;
+    Wplus[1] = -1.00746e-06;
+    Wplus[2] = 1.0;
+    Wplus[3] = 0.714286;
 
     fout << "Face norm: [" << normal_vector[0] << ", " << normal_vector[1] << "]\n";
     fout << "Wplus:\n";
     for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
       {
-        fout << Wplus[0][ic] << ", ";
+        fout << Wplus[ic] << ", ";
       }
     fout << std::endl;
     EulerEquations<dim>::compute_Wminus (NSFEMSolver::Boundary::FarField,
                                          normal_vector,
-                                         Wplus[0],
+                                         Wplus,
                                          boundary_values,
-                                         Wminus[0]);
+                                         Wminus);
     fout << "Wminus:\n";
     for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
       {
-        fout << Wminus[0][ic] << ", ";
+        fout << Wminus[ic] << ", ";
       }
     fout << std::endl;
     fout << std::endl;
@@ -102,27 +102,27 @@ int main (int argc, char *argv[])
     normal_vector[0] = 0.0;
     normal_vector[1] = 1.0;
 
-    Wplus[0][0] = 0.3;
-    Wplus[0][1] = -1.00746e-06;
-    Wplus[0][2] = 1.0;
-    Wplus[0][3] = 0.714286;
+    Wplus[0] = 0.3;
+    Wplus[1] = -1.00746e-06;
+    Wplus[2] = 1.0;
+    Wplus[3] = 0.714286;
 
     fout << "Face norm: [" << normal_vector[0] << ", " << normal_vector[1] << "]\n";
     fout << "Wplus:\n";
     for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
       {
-        fout << Wplus[0][ic] << ", ";
+        fout << Wplus[ic] << ", ";
       }
     fout << std::endl;
     EulerEquations<dim>::compute_Wminus (NSFEMSolver::Boundary::FarField,
                                          normal_vector,
-                                         Wplus[0],
+                                         Wplus,
                                          boundary_values,
-                                         Wminus[0]);
+                                         Wminus);
     fout << "Wminus:\n";
     for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
       {
-        fout << Wminus[0][ic] << ", ";
+        fout << Wminus[ic] << ", ";
       }
     fout << std::endl;
     fout << std::endl;
@@ -132,27 +132,27 @@ int main (int argc, char *argv[])
     normal_vector[0] = 0.0;
     normal_vector[1] = 1.0;
 
-    Wplus[0][0] = 0.29999;
-    Wplus[0][1] = 0.0;
-    Wplus[0][2] = 1.0;
-    Wplus[0][3] = 0.714286;
+    Wplus[0] = 0.29999;
+    Wplus[1] = 0.0;
+    Wplus[2] = 1.0;
+    Wplus[3] = 0.714286;
 
     fout << "Face norm: [" << normal_vector[0] << ", " << normal_vector[1] << "]\n";
     fout << "Wplus:\n";
     for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
       {
-        fout << Wplus[0][ic] << ", ";
+        fout << Wplus[ic] << ", ";
       }
     fout << std::endl;
     EulerEquations<dim>::compute_Wminus (NSFEMSolver::Boundary::FarField,
                                          normal_vector,
-                                         Wplus[0],
+                                         Wplus,
                                          boundary_values,
-                                         Wminus[0]);
+                                         Wminus);
     fout << "Wminus:\n";
     for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
       {
-        fout << Wminus[0][ic] << ", ";
+        fout << Wminus[ic] << ", ";
       }
     fout << std::endl;
     fout << std::endl;
@@ -162,27 +162,27 @@ int main (int argc, char *argv[])
     normal_vector[0] = -1.0;
     normal_vector[1] = 0.0;
 
-    Wplus[0][0] = 0.7;
-    Wplus[0][1] = -1.00746e-06;
-    Wplus[0][2] = 1.0;
-    Wplus[0][3] = 0.714286;
+    Wplus[0] = 0.7;
+    Wplus[1] = -1.00746e-06;
+    Wplus[2] = 1.0;
+    Wplus[3] = 0.714286;
 
     fout << "Face norm: [" << normal_vector[0] << ", " << normal_vector[1] << "]\n";
     fout << "Wplus:\n";
     for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
       {
-        fout << Wplus[0][ic] << ", ";
+        fout << Wplus[ic] << ", ";
       }
     fout << std::endl;
     EulerEquations<dim>::compute_Wminus (NSFEMSolver::Boundary::FarField,
                                          normal_vector,
-                                         Wplus[0],
+                                         Wplus,
                                          boundary_values,
-                                         Wminus[0]);
+                                         Wminus);
     fout << "Wminus:\n";
     for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
       {
-        fout << Wminus[0][ic] << ", ";
+        fout << Wminus[ic] << ", ";
       }
     fout << std::endl;
     fout << std::endl;
@@ -192,27 +192,27 @@ int main (int argc, char *argv[])
     normal_vector[0] = 0.0;
     normal_vector[1] = -1.0;
 
-    Wplus[0][0] = 0.29999;
-    Wplus[0][1] = -1.00746e-06;
-    Wplus[0][2] = 1.0;
-    Wplus[0][3] = 0.714286;
+    Wplus[0] = 0.29999;
+    Wplus[1] = -1.00746e-06;
+    Wplus[2] = 1.0;
+    Wplus[3] = 0.714286;
 
     fout << "Face norm: [" << normal_vector[0] << ", " << normal_vector[1] << "]\n";
     fout << "Wplus:\n";
     for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
       {
-        fout << Wplus[0][ic] << ", ";
+        fout << Wplus[ic] << ", ";
       }
     fout << std::endl;
     EulerEquations<dim>::compute_Wminus (NSFEMSolver::Boundary::FarField,
                                          normal_vector,
-                                         Wplus[0],
+                                         Wplus,
                                          boundary_values,
-                                         Wminus[0]);
+                                         Wminus);
     fout << "Wminus:\n";
     for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
       {
-        fout << Wminus[0][ic] << ", ";
+        fout << Wminus[ic] << ", ";
       }
     fout << std::endl;
     fout << std::endl;
@@ -222,27 +222,27 @@ int main (int argc, char *argv[])
     normal_vector[0] = -1.0;
     normal_vector[1] = 0.0;
 
-    Wplus[0][0] = 0.29999;
-    Wplus[0][1] = -1.00746e-06;
-    Wplus[0][2] = 1.0;
-    Wplus[0][3] = 0.714286;
+    Wplus[0] = 0.29999;
+    Wplus[1] = -1.00746e-06;
+    Wplus[2] = 1.0;
+    Wplus[3] = 0.714286;
 
     fout << "Face norm: [" << normal_vector[0] << ", " << normal_vector[1] << "]\n";
     fout << "Wplus:\n";
     for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
       {
-        fout << Wplus[0][ic] << ", ";
+        fout << Wplus[ic] << ", ";
       }
     fout << std::endl;
     EulerEquations<dim>::compute_Wminus (NSFEMSolver::Boundary::FarField,
                                          normal_vector,
-                                         Wplus[0],
+                                         Wplus,
                                          boundary_values,
-                                         Wminus[0]);
+                                         Wminus);
     fout << "Wminus:\n";
     for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
       {
-        fout << Wminus[0][ic] << ", ";
+        fout << Wminus[ic] << ", ";
       }
     fout << std::endl;
     fout << std::endl;
