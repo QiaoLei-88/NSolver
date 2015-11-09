@@ -692,7 +692,7 @@ namespace NSFEMSolver
             {
               n_step_laplacian_vanished += (laplacian_coefficient>0.0);
               double laplacian_ratio_min = 0.5;
-              if (quadratic_converge)
+              if (quadratic_converge && parameters->Mach < 0.5)
                 {
                   laplacian_ratio_min =
                     std::min (0.1,
@@ -702,7 +702,7 @@ namespace NSFEMSolver
                 }
               const double laplacian_ratio =
                 std::min (laplacian_ratio_min,
-                          0.9 * physical_residual_ratio * physical_residual_ratio);
+                          0.9 * physical_residual_ratio);
 
               laplacian_coefficient *= laplacian_ratio;
               if (laplacian_coefficient < parameters->laplacian_zero)
