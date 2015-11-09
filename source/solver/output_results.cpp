@@ -83,7 +83,7 @@ namespace NSFEMSolver
     }
 
     Vector<float> subdomain (triangulation.n_active_cells());
-    std::fill (subdomain.begin(), subdomain.begin(), myid);
+    std::fill (subdomain.begin(), subdomain.end(), myid);
     data_out.add_data_vector (subdomain, "subdomain");
 
     data_out.build_patches();
