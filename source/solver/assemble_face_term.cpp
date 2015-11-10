@@ -247,15 +247,43 @@ namespace NSFEMSolver
             {
               std::vector<types::global_dof_index> neighbor_effective_dof_indices;
               std::vector<double> neighbor_effective_values;
+              std::vector<unsigned int> neighbor_effective_local_indicies;
               for (unsigned int j=0; j<fe_v_neighbor.dofs_per_cell; ++j)
                 if (fe_v_neighbor.get_fe().has_support_on_face (j, neighbor_face_no))
                   {
+                    neighbor_effective_local_indicies.push_back (j);
                     neighbor_effective_dof_indices.push_back (dof_indices_neighbor[j]);
                     neighbor_effective_values.push_back (R_i.fastAccessDx (fe_v.dofs_per_cell + j));
                   }
               if (myid == 1)
                 {
                   std::cerr << myid << " neighbor add before\n";
+                  if (neighbor_effective_dof_indices[0] == 1640)
+                    {
+                      std::cerr << "face_no = " << face_no << std::endl;
+                      std::cerr << "neighbor_face_no = " << neighbor_face_no << std::endl;
+                      std::cerr << "subdomain id this cell " << fe_v.get_cell()->subdomain_id()  << std::endl;
+                      std::cerr << "Is this cell locally owned? " << fe_v.get_cell()->is_locally_owned() << std::endl;
+                      std::cerr << "subdomain id neighbor cell " << fe_v_neighbor.get_cell()->subdomain_id()  << std::endl;
+                      Quadrature<dim> q (fe.get_unit_support_points());
+                      FEValues<dim> dof_position (fe, q, update_q_points);
+                      std::cerr << "center of this cell " << fe_v.get_cell()->center() << std::endl;
+                      std::cerr << "center of this face " << fe_v.get_cell()->face (face_no)->center() << std::endl;
+                      std::cerr << "center of neighboring cell " << fe_v_neighbor.get_cell()->center() << std::endl;
+                      std::cerr << "center of neighboring face " << fe_v_neighbor.get_cell()->face (neighbor_face_no)->center() << std::endl;
+                      std::cerr << "local dof index on this cell: " << i <<  std::endl;
+                      dof_position.reinit (fe_v.get_cell());
+                      std::cerr << "position of dof on this cell: "
+                                << dof_position.quadrature_point (i) <<  std::endl;
+                      std::cerr << "local dof indices on neighboring cell: " << std::endl;
+                      dof_position.reinit (fe_v_neighbor.get_cell());
+                      for (unsigned int k=0; k<neighbor_effective_local_indicies.size(); ++k)
+                        {
+                          std::cerr << neighbor_effective_local_indicies[k] << ", "
+                                    << dof_position.quadrature_point (neighbor_effective_local_indicies[k]) << std::endl;
+                        }
+                      std::cerr << std::endl;
+                    }
                 }
               system_matrix.add (dof_indices[i], neighbor_effective_dof_indices.size(),
                                  & (neighbor_effective_dof_indices[0]), & (neighbor_effective_values[0]));
