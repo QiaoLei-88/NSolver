@@ -705,7 +705,7 @@ namespace NSFEMSolver
                           0.9 * physical_residual_ratio);
 
               laplacian_coefficient *= laplacian_ratio;
-              if (laplacian_coefficient < parameters->laplacian_zero)
+              if (laplacian_coefficient < parameters->laplacian_zero * mean_artificial_viscosity)
                 {
                   laplacian_coefficient = 0.0;
                 }
