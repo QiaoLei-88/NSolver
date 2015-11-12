@@ -248,6 +248,7 @@ namespace NSFEMSolver
     Vector<double>       artificial_viscosity;
     Vector<double>       old_artificial_viscosity;
     bool                 blend_artificial_viscosity;
+    double               mean_artificial_viscosity;
     Vector<double>       artificial_thermal_conductivity;
     Vector<float>        dominant_viscosity;
     Vector<float>        refinement_indicators;
