@@ -188,6 +188,11 @@ namespace NSFEMSolver
           << "laplacian max = " << max_v << std::endl
           << "laplacian avg = " << avg_v << std::endl
           << "laplacian threshold = " << laplacian_threshold << std::endl;
+
+    if (parameters->refinement_indicator == Parameters::Refinement<dim>::ErrorAndJump)
+      {
+        refinement_indicators = laplacian_indicator;
+      }
     return;
   } // End function
 
