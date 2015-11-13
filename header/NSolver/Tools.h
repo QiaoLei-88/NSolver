@@ -82,7 +82,7 @@ namespace NSFEMSolver
      * Mark enough number of cell to coarsen to achieve a total cell number
      * decrease of @p target_n_cell_drop.
      * The result is generated with consideration of deal.II mesh smoothing and
-     * @p refine_mask.
+     * @p coarsen_mask.
      *
      * Because deal.II mesh smoothing is considered, marked cells are guaranteed
      * to coarsen.
