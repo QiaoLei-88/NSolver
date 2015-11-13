@@ -62,34 +62,7 @@ namespace NSFEMSolver
 
       // prepare refine and coarsen masks
       std::vector<short int> refine_mask (tria.n_active_cells(), 0);
-      {
-        typename TypeTria::active_cell_iterator
-        cell = tria.begin_active();
-        const typename TypeTria::active_cell_iterator
-        endc = tria.end();
-        for (; cell != endc; ++cell)
-          if (cell->is_locally_owned())
-            {
-              if (cell->minimum_vertex_distance() > parameters->max_cell_size)
-                {
-                  // must refine
-                  refine_mask[cell->active_cell_index()] = 1;
-                  continue;
-                }
-              if (cell->minimum_vertex_distance() < parameters->min_cell_size * 2.0)
-                {
-                  // must not refine
-                  refine_mask[cell->active_cell_index()] = -1;
-                  continue;
-                }
-              if (cell->level() >= parameters->max_refine_level)
-                {
-                  // must not refine
-                  refine_mask[cell->active_cell_index()] = -1;
-                  continue;
-                }
-            }
-      }
+      set_refine_mask (tria, parameters, refine_mask);
 
       std::vector<short int> coarsen_mask (tria.n_active_cells(), 0);
       {

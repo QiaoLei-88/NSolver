@@ -18,13 +18,28 @@ namespace NSFEMSolver
     void write_matrix_MTX (std::ostream &out, const Matrix &matrix);
 
     /**
-     * Mark @p target_fraction fraction number of cells to refine.
-     * The result is generated with consideration of deal.II mesh smoothing and
-     * @p refine_mask. Values in @p refine_mask are assumed to be stored in
-     * active_cell_index order.  @p refine_mask[i] > 0 means cell @p i is forced
-     * to refine, @p refine_mask[i] < 0 means cell @p i is forced to not refine,
+     * Set up refine mask vector for triangulation @p tria according to runtime
+     * parameter @parameters.
+     *
+     * The meaning of values in @p refine_mask are defined as following.
+     * @p refine_mask[i] > 0 means cell @p i is forced to refine,
+     * @p refine_mask[i] < 0 means cell @p i is forced to not refine,
      * @p refine_mask[i] == 0 means refinement cell @p i is determined by
      * its value in @p criteria.
+     *
+     * Values in @p refine_mask will be stored in active_cell_index order.
+     *
+     * @note @p refine_mask is expected has already been sized to tria.n_active_cells().
+     */
+    template <int dim>
+    void set_refine_mask (const parallel::distributed::Triangulation<dim>          &tria,
+                          const SmartPointer<Parameters::AllParameters<dim> const> &parameters,
+                          std::vector<short int>                                   &refine_mask);
+
+    /**
+     * Mark @p target_fraction fraction number of cells to refine.
+     * The result is generated with consideration of deal.II mesh smoothing and
+     * @p refine_mask.
      *
      * The return value is the cell number that are finally marked to refine.
      *
