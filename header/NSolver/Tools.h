@@ -146,6 +146,22 @@ namespace NSFEMSolver
       parallel::distributed::Triangulation<dim>           &tria,
       const Vector                                        &criteria,
       const SmartPointer<Parameters::AllParameters<dim> const> &parameters);
+
+    /**
+     * Mark cell with criteria equal or greater than threshold to refine,
+     * then coarsen appropriate number of cells to maintain the max cell
+     * number limit.
+     *
+     * @note refine and coarsening limits specified by @p parameters are considered,
+     * such as max and min cells size, max refine level.
+     */
+    template <int dim, class Vector>
+    void
+    refine_on_threshold (
+      parallel::distributed::Triangulation<dim>           &tria,
+      const Vector                                        &criteria,
+      const SmartPointer<Parameters::AllParameters<dim> const> &parameters,
+      const typename Vector::value_type                         threshold);
   }
 }
 #endif
