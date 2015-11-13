@@ -239,6 +239,10 @@ namespace NSFEMSolver
 
           system_matrix.add (dof_indices[i], dof_indices.size(),
                              &dof_indices[0], & (R_i.fastAccessDx (0)));
+          if (myid == 1)
+            {
+              std::cerr << myid << " this add done\n";
+            }
           if (external_face == false)
             {
               std::vector<types::global_dof_index> neighbor_effective_dof_indices;
@@ -249,8 +253,16 @@ namespace NSFEMSolver
                     neighbor_effective_dof_indices.push_back (dof_indices_neighbor[j]);
                     neighbor_effective_values.push_back (R_i.fastAccessDx (fe_v.dofs_per_cell + j));
                   }
+              if (myid == 1)
+                {
+                  std::cerr << myid << " neighbor add before\n";
+                }
               system_matrix.add (dof_indices[i], neighbor_effective_dof_indices.size(),
                                  & (neighbor_effective_dof_indices[0]), & (neighbor_effective_values[0]));
+              if (myid == 1)
+                {
+                  std::cerr << myid << " neighbor add done\n";
+                }
             }
 
           right_hand_side (dof_indices[i]) -= R_i.val();
