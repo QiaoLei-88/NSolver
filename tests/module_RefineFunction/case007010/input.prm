@@ -1,0 +1,10 @@
+# Listing of Parameters
+# ---------------------
+
+# Refinement control
+subsection refinement
+  set max cells        = 1000
+  set max refine level = 127
+  set min cell size    = 0.02
+end
+
