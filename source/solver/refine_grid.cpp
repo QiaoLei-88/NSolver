@@ -56,6 +56,15 @@ namespace NSFEMSolver
                                          parameters);
         break;
       }
+      case Parameters::Refinement<dim>::ErrorAndJump:
+      {
+        NSFEMSolver::Tools::
+        refine_on_threshold (triangulation,
+                             refinement_indicators,
+                             parameters,
+                             laplacian_threshold);
+        break;
+      }
       default:
       {
         Assert (false, ExcNotImplemented());
