@@ -60,14 +60,29 @@ namespace NSFEMSolver
                             const std::vector<short int>              &refine_mask);
 
     /**
+     * Set up coarsen mask vector for triangulation @p tria according to runtime
+     * parameter @parameters.
+     *
+     * The meaning of values in @p coarsen_mask are defined as following.
+     * @p coarsen_mask[i] > 0 means cell @p i is forced to coarsen,
+     * @p coarsen_mask[i] < 0 means cell @p i is forced to not coarsen,
+     * @p coarsen_mask [i] == 0 means refinement cell @p i is determined by
+     * its value in @p criteria.
+     *
+     * Values in @p refine_mask will be stored in active_cell_index order.
+     *
+     * @note @p refine_mask is expected has already been sized to tria.n_active_cells().
+     */
+    template <int dim>
+    void set_coarsen_mask (const parallel::distributed::Triangulation<dim>          &tria,
+                           const SmartPointer<Parameters::AllParameters<dim> const> &parameters,
+                           std::vector<short int>                                   &coarsen_mask);
+
+    /**
      * Mark enough number of cell to coarsen to achieve a total cell number
      * decrease of @p target_n_cell_drop.
      * The result is generated with consideration of deal.II mesh smoothing and
-     * @p refine_mask. Values in @p coarsen_mask are assumed to be stored in
-     * active_cell_index order.  @p coarsen_mask[i] > 0 means cell @p i is forced
-     * to coarsen, @p coarsen_mask[i] < 0 means cell @p i is forced to not coarsen,
-     * @p coarsen_mask [i] == 0 means refinement cell @p i is determined by
-     * its value in @p criteria.
+     * @p refine_mask.
      *
      * Because deal.II mesh smoothing is considered, marked cells are guaranteed
      * to coarsen.

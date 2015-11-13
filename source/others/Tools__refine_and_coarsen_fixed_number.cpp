@@ -60,41 +60,11 @@ namespace NSFEMSolver
           static_cast<double> (Utilities::MPI::max (local_max, mpi_communicator));
       }
 
-      // prepare refine and coarsen masks
       std::vector<short int> refine_mask (tria.n_active_cells(), 0);
       set_refine_mask (tria, parameters, refine_mask);
 
       std::vector<short int> coarsen_mask (tria.n_active_cells(), 0);
-      {
-        typename TypeTria::active_cell_iterator
-        cell = tria.begin_active();
-        const typename TypeTria::active_cell_iterator
-        endc = tria.end();
-        for (; cell != endc; ++cell)
-          if (cell->is_locally_owned())
-            {
-              // Note: "must coarsen" is not guaranteed because coarsen a cell
-              // is not always feasible depending on status of its neighbors.
-              if (cell->minimum_vertex_distance() >= parameters->max_cell_size)
-                {
-                  // must not coarsen.
-                  coarsen_mask[cell->active_cell_index()] = -1;
-                  continue;
-                }
-              if (cell->minimum_vertex_distance() < parameters->min_cell_size)
-                {
-                  // must coarsen
-                  coarsen_mask[cell->active_cell_index()] = 1;
-                  continue;
-                }
-              if (cell->level() > parameters->max_refine_level)
-                {
-                  // must coarsen
-                  coarsen_mask[cell->active_cell_index()] = 1;
-                  continue;
-                }
-            }
-      }
+      set_coarsen_mask (tria, parameters, coarsen_mask);
 
       const unsigned int n_refined =
         mark_refine_guaranteed<dim, VType> (tria,
