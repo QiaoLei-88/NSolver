@@ -22,6 +22,7 @@ namespace NSFEMSolver
   template <int dim>
   void
   NSolver<dim>::assemble_face_term (const unsigned int           face_no,
+                                    const unsigned int           neighbor_face_no,
                                     const FEFaceValuesBase<dim> &fe_v,
                                     const FEFaceValuesBase<dim> &fe_v_neighbor,
                                     const std::vector<types::global_dof_index>   &dof_indices,
@@ -240,8 +241,16 @@ namespace NSFEMSolver
                              &dof_indices[0], & (R_i.fastAccessDx (0)));
           if (external_face == false)
             {
-              system_matrix.add (dof_indices[i], dof_indices_neighbor.size(),
-                                 &dof_indices_neighbor[0], & (R_i.fastAccessDx (dof_indices.size())));
+              std::vector<types::global_dof_index> neighbor_effective_dof_indices;
+              std::vector<double> neighbor_effective_values;
+              for (unsigned int j=0; j<fe_v_neighbor.dofs_per_cell; ++j)
+                if (fe_v_neighbor.get_fe().has_support_on_face (j, neighbor_face_no))
+                  {
+                    neighbor_effective_dof_indices.push_back (dof_indices_neighbor[j]);
+                    neighbor_effective_values.push_back (R_i.fastAccessDx (fe_v.dofs_per_cell + j));
+                  }
+              system_matrix.add (dof_indices[i], neighbor_effective_dof_indices.size(),
+                                 & (neighbor_effective_dof_indices[0]), & (neighbor_effective_values[0]));
             }
 
           right_hand_side (dof_indices[i]) -= R_i.val();

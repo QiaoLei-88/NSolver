@@ -142,6 +142,7 @@ namespace NSFEMSolver
     void assemble_cell_term (const FEValues<dim>             &fe_v,
                              const std::vector<types::global_dof_index> &dofs);
     void assemble_face_term (const unsigned int               face_no,
+                             const unsigned int               neighbor_face_no,
                              const FEFaceValuesBase<dim>     &fe_v,
                              const FEFaceValuesBase<dim>     &fe_v_neighbor,
                              const std::vector<types::global_dof_index> &dofs,

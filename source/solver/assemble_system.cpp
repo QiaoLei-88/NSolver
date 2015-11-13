@@ -91,6 +91,7 @@ namespace NSFEMSolver
               const bool face_is_at_boundary = cell->at_boundary (face_no);
               FEFaceValuesBase<dim> *ptr_fe_v_face_this = 0;
               FEFaceValuesBase<dim> *ptr_fe_v_face_neighbor = 0;
+              unsigned int neighbor_face_no = numbers::invalid_unsigned_int;
               unsigned int boundary_id = numbers::invalid_unsigned_int;
               double face_diameter = -1.0;
               bool need_to_compute_face_flux = true;
@@ -114,6 +115,7 @@ namespace NSFEMSolver
                       std::fill (dof_indices_neighbor.begin(),
                                  dof_indices_neighbor.end(),
                                  numbers::invalid_unsigned_int);
+                      neighbor_face_no = numbers::invalid_unsigned_int;
                       boundary_id = cell->face (face_no)->boundary_id();
                       face_diameter = cell->face (face_no)->diameter();
                     }
@@ -161,6 +163,7 @@ namespace NSFEMSolver
                       // Make sure not subtracting two unsigned integers.
                       const int this_cell_level = cell->level();
                       const int neighbor_active_cell_level = neighbor->level() + neighbor->has_children();
+
                       switch (this_cell_level-neighbor_active_cell_level)
                         {
                         case -1:
@@ -168,7 +171,7 @@ namespace NSFEMSolver
                           need_to_compute_face_flux = true;
                           // This cell is one level coarser than neighbor. So we have several subfaces
                           // to deal with. The outer loop will take care of the walking.
-                          const unsigned int neighbor_face_no = cell->neighbor_of_neighbor (face_no);
+                          neighbor_face_no = cell->neighbor_of_neighbor (face_no);
 
                           const typename DoFHandler<dim>::active_cell_iterator neighbor_child =
                             cell->neighbor_child_on_subface (face_no, subface_no);
@@ -202,7 +205,7 @@ namespace NSFEMSolver
                           // on a subface of neighbor cell.
                           const std::pair<unsigned int, unsigned int>
                           faceno_subfaceno = cell->neighbor_of_coarser_neighbor (face_no);
-                          const unsigned int &neighbor_face_no    = faceno_subfaceno.first;
+                          neighbor_face_no = faceno_subfaceno.first;
                           const unsigned int &neighbor_subface_no = faceno_subfaceno.second;
 
                           // Make sure we are talking about the same subface.
@@ -235,6 +238,7 @@ namespace NSFEMSolver
                   if (need_to_compute_face_flux)
                     {
                       assemble_face_term (face_no,
+                                          neighbor_face_no,
                                           *ptr_fe_v_face_this,
                                           *ptr_fe_v_face_neighbor,
                                           dof_indices,
