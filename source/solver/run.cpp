@@ -332,7 +332,8 @@ namespace NSFEMSolver
     double res_norm_total_previous (0.0);
     double res_norm_infty_total (0.0);
     double old_laplacian_coefficient = laplacian_coefficient;
-    unsigned int n_step_laplacian_vanished = parameters->max_refine_level;
+    unsigned int n_step_laplacian_vanished = 65535;
+    bool is_refine_step = false;
     while (!terminate_time_stepping)
       {
         computing_timer.enter_subsection ("2:Prepare Newton iteration");
@@ -408,6 +409,14 @@ namespace NSFEMSolver
         bool quadratic_converge = true;
         calc_artificial_viscosity();
         calc_laplacian_indicator();
+        if (! (parameters->dodge_mesh_adaptation) || is_refine_step)
+          {
+            pcout << " *** refine step ***" << std::endl;
+          }
+        if (! (parameters->dodge_mesh_adaptation) || !is_refine_step)
+          {
+            pcout << " *** laplacian step ***" << std::endl;
+          }
         do // Newton iteration
           {
             computing_timer.enter_subsection ("3:Assemble Newton system");
@@ -558,6 +567,7 @@ namespace NSFEMSolver
         if (newton_iter_converged)
           {
             computing_timer.enter_subsection ("6:Postprocess time step");
+            is_refine_step = !is_refine_step;
 
             WallForce wall_force;
             integrate_force (wall_force);
@@ -630,10 +640,12 @@ namespace NSFEMSolver
                                :
                                (parameters->max_refine_time >= time)
                              );
+            do_refine = do_refine &&
+                        (! (parameters->dodge_mesh_adaptation) || is_refine_step);
             if (parameters->laplacian_continuation > 0.0)
               {
                 do_refine = do_refine &&
-                            n_time_step <= n_step_laplacian_vanished;
+                            n_time_step <= n_step_laplacian_vanished + parameters->max_refine_level;
               }
 
             if (do_refine)
@@ -688,28 +700,36 @@ namespace NSFEMSolver
               (laplacian_coefficient < 1e-100);
 
             // TODO: refactoring needed.
-            old_laplacian_coefficient = laplacian_coefficient;
-            {
-              n_step_laplacian_vanished += (laplacian_coefficient>0.0);
-              double laplacian_ratio_min = 0.5;
-              if (quadratic_converge && parameters->Mach < 0.5)
+            // Never decease laplacian_coefficient and do mesh refine together.
+            if (! (parameters->dodge_mesh_adaptation) || !is_refine_step)
+              {
+                old_laplacian_coefficient = laplacian_coefficient;
                 {
-                  laplacian_ratio_min =
-                    std::min (0.1,
-                              std::pow (laplacian_coefficient,
-                                        parameters->laplacian_decrease_rate - 1.0)
-                             );
-                }
-              const double laplacian_ratio =
-                std::min (laplacian_ratio_min,
-                          0.9 * physical_residual_ratio);
+                  n_step_laplacian_vanished += (laplacian_coefficient>0.0);
+                  double laplacian_ratio_min = 0.5;
+                  if (quadratic_converge && parameters->Mach < 0.5)
+                    {
+                      laplacian_ratio_min =
+                        std::min (0.1,
+                                  std::pow (laplacian_coefficient,
+                                            parameters->laplacian_decrease_rate - 1.0)
+                                 );
+                    }
+                  const double laplacian_ratio =
+                    std::min (laplacian_ratio_min,
+                              0.9 * physical_residual_ratio);
 
-              laplacian_coefficient *= laplacian_ratio;
-              if (laplacian_coefficient < parameters->laplacian_zero * mean_artificial_viscosity)
-                {
-                  laplacian_coefficient = 0.0;
+                  laplacian_coefficient *= laplacian_ratio;
+                  if (laplacian_coefficient < parameters->laplacian_zero * mean_artificial_viscosity)
+                    {
+                      if (n_step_laplacian_vanished > 65500)
+                        {
+                          n_step_laplacian_vanished = n_time_step;
+                        }
+                      laplacian_coefficient = 0.0;
+                    }
                 }
-            }
+              }
 
             pcout << "res_norm_total = " << res_norm_total << std::endl;
             pcout << "laplacian_coefficient = " << laplacian_coefficient << std::endl;
@@ -855,7 +875,7 @@ namespace NSFEMSolver
             if (parameters->laplacian_continuation > 0.0)
               {
                 time_march_converged =
-                  (n_time_step > n_step_laplacian_vanished + 2)
+                  (n_time_step > n_step_laplacian_vanished + parameters->max_refine_level + 2)
                   &&
                   (res_norm < 1e-11);
               }
