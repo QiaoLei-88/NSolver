@@ -44,6 +44,12 @@ namespace NSFEMSolver
       bool   entropy_use_global_h_min;
       double diffusion_factor[EquationComponents<dim>::n_components];
       double laplacian_continuation;
+      /**
+       * When this flag is set, laplacian refinement and mesh adaptation will be
+       * done alternatively to increase stability when they are both enabled.
+       * Default value is false.
+       */
+      bool dodge_mesh_adaptation;
 
       /**
        * When doing Laplacian continuation, the Laplacian coefficient will be
