@@ -672,18 +672,21 @@ namespace NSFEMSolver
 
             if (parameters-> is_steady)
               {
-                if (n_time_step <= parameters-> n_iter_stage1)
+                if (! (parameters->dodge_mesh_adaptation) || is_refine_step)
                   {
-                    CFL_number *= parameters->step_increasing_ratio_stage1;
+                    if (n_time_step <= parameters-> n_iter_stage1)
+                      {
+                        CFL_number *= parameters->step_increasing_ratio_stage1;
+                      }
+                    else
+                      {
+                        double const
+                        ratio = std::max (parameters->minimum_step_increasing_ratio_stage2,
+                                          std::pow (res_norm_total_previous/res_norm_total, parameters->step_increasing_power_stage2));
+                        CFL_number *= ratio;
+                      }
+                    CFL_number = std::min (CFL_number, parameters->CFL_number_max);
                   }
-                else
-                  {
-                    double const
-                    ratio = std::max (parameters->minimum_step_increasing_ratio_stage2,
-                                      std::pow (res_norm_total_previous/res_norm_total, parameters->step_increasing_power_stage2));
-                    CFL_number *= ratio;
-                  }
-                CFL_number = std::min (CFL_number, parameters->CFL_number_max);
               }
             else if ((converged_newton_iters%10 == 0) &&
                      parameters->allow_increase_CFL &&
