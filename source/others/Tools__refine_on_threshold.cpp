@@ -18,21 +18,9 @@ namespace NSFEMSolver
     {
       typedef typename parallel::distributed::Triangulation<dim> TypeTria;
       typedef typename Vector::value_type VType;
-      const double top_fraction_of_cells = parameters->refine_fraction;
-      const double bottom_fraction_of_cells = parameters->coarsen_fraction;
 
       Assert (criteria.size() == tria.n_active_cells(),
               ExcDimensionMismatch (criteria.size(), tria.n_active_cells()));
-      Assert (top_fraction_of_cells>=0.0,
-              dealii::GridRefinement::ExcInvalidParameterValue());
-      Assert (top_fraction_of_cells<=1.0,
-              dealii::GridRefinement::ExcInvalidParameterValue());
-      Assert (bottom_fraction_of_cells>=0.0,
-              dealii::GridRefinement::ExcInvalidParameterValue());
-      Assert (bottom_fraction_of_cells<=1.0,
-              dealii::GridRefinement::ExcInvalidParameterValue());
-      Assert (top_fraction_of_cells+bottom_fraction_of_cells <= 1.0,
-              dealii::GridRefinement::ExcInvalidParameterValue());
       Assert (criteria.is_non_negative(),
               dealii::GridRefinement::ExcNegativeCriteria());
 
