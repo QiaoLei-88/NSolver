@@ -235,7 +235,7 @@ namespace NSFEMSolver
 
     check_negative_density_pressure();
     calc_time_step();
-    output_results();
+    // output_results();
 
     // We then enter into the main time stepping loop. At the top we simply
     // output some status information so one can keep track of where a
@@ -354,6 +354,7 @@ namespace NSFEMSolver
         double log_res_last = 0.0;
         bool quadratic_converge = true;
         calc_artificial_viscosity();
+        output_results();
         do // Newton iteration
           {
             computing_timer.enter_subsection ("3:Assemble Newton system");
@@ -572,22 +573,22 @@ namespace NSFEMSolver
                 compute_refinement_indicators();
               }
 
-            if (parameters->is_steady)
-              {
-                if (n_time_step >= next_output_time_step)
-                  {
-                    output_results();
-                    next_output_time_step += int_output_step;
-                  }
-              }
-            else
-              {
-                if (time >= next_output)
-                  {
-                    output_results();
-                    next_output += parameters->output_step;
-                  }
-              }
+            // if (parameters->is_steady)
+            //   {
+            //     if (n_time_step >= next_output_time_step)
+            //       {
+            //         output_results();
+            //         next_output_time_step += int_output_step;
+            //       }
+            //   }
+            // else
+            //   {
+            //     if (time >= next_output)
+            //       {
+            //         output_results();
+            //         next_output += parameters->output_step;
+            //       }
+            //   }
 
             if (parameters-> is_steady)
               {
