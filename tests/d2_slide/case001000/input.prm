@@ -54,7 +54,7 @@ end
 # Time stepping control
 subsection time stepping
   set rigid reference time step = true
-  set final time                = 10.0 # simulation end time
+  set final time                = 0.4  # simulation end time
   set reference time step       = 0.02 # simulation time step
   set CFL number max            = 1.0
   set theta scheme value        = 0.5
