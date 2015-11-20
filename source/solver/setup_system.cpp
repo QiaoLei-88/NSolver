@@ -102,7 +102,7 @@ namespace NSFEMSolver
                                      sparsity_pattern,
                                      /*const ConstraintMatrix constraints = */ ConstraintMatrix(),
                                      /*const bool keep_constrained_dofs = */ true,
-                                     Utilities::MPI::this_mpi_process (mpi_communicator));
+                                     myid);
     if (parameters->max_refine_time > 0.0)
       {
         // If we will do adaptive mesh refinement, then we will create hanging
