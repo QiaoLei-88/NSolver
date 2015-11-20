@@ -103,6 +103,20 @@ namespace NSFEMSolver
                                      /*const ConstraintMatrix constraints = */ ConstraintMatrix(),
                                      /*const bool keep_constrained_dofs = */ true,
                                      Utilities::MPI::this_mpi_process (mpi_communicator));
+    if (parameters->max_refine_time > 0.0)
+      {
+        // If we will do adaptive mesh refinement, then we will create hanging
+        // node and we will need face fluxes.
+        //
+        // TODO: We need make_flux_sparsity_pattern only on faces with hanging nodes.
+        // But currently this function will create cross face connections for all faces.
+        //
+        // TODO: For Euler equation, we only need to couple DoFs that have
+        // support on faces because face flux in weak form is (\phi, F(u) \cdot n),
+        // where only values but no gradient of solution are involved.
+        DoFTools::make_flux_sparsity_pattern (dof_handler, sparsity_pattern);
+      }
+
     SparsityTools::distribute_sparsity_pattern (sparsity_pattern,
                                                 dof_handler.n_locally_owned_dofs_per_processor(),
                                                 mpi_communicator,
