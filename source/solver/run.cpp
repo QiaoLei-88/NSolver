@@ -519,7 +519,7 @@ namespace NSFEMSolver
                   {
                     newton_iter_converged =
                       newton_iter_converged &&
-                      (newton_update_norm <
+                      (res_norm <
                        parameters->laplacian_newton_tolerance *
                        std::max (physical_res_norm, physical_res_tolerance));
                   }
