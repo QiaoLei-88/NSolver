@@ -42,6 +42,10 @@ namespace NSFEMSolver
                            Patterns::Anything(),
                            "continuation type");
 
+        prm.declare_entry ("switch threshold","10.0",
+                           Patterns::Double(),
+                           "Ratio threshold to switch from laplacian to time continuation");
+
         prm.declare_entry ("Laplacian continuation", "-1.0",
                            Patterns::Double(),
                            "Coefficient for Laplacian continuation");
@@ -138,6 +142,9 @@ namespace NSFEMSolver
               AssertThrow (false, ExcNotImplemented());
             }
         }
+
+        continuation_switch_threshold = prm.get_double ("switch threshold");
+
         laplacian_continuation = prm.get_double ("Laplacian continuation");
         dodge_mesh_adaptation = prm.get_bool ("dodge mesh adaptation");
         laplacian_zero = prm.get_double ("Laplacian zero");
