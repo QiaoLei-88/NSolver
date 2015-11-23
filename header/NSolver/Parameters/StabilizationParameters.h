@@ -46,6 +46,7 @@ namespace NSFEMSolver
         CT_blend
       };
       ContinuationType continuation_type;
+      double continuation_switch_threshold;
 
       double diffusion_power;
       double diffusion_coefficoent;
