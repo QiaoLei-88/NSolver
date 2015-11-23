@@ -372,9 +372,17 @@ namespace NSFEMSolver
                   R_i_q -= tmp;
                   cell_physical_residual_q -= tmp.val();
                 }
-
-                R_i_q += visc_flux[point][component_i][d] *
-                         fe_v.shape_grad_component (i, point, component_i)[d];
+                // viscous flux
+                {
+                  const Sacado::Fad::DFad<double> tmp =
+                    visc_flux[point][component_i][d] *
+                    fe_v.shape_grad_component (i, point, component_i)[d];
+                  R_i_q += tmp;
+                  if (parameters->count_artificial_visc_term_in_phisical_residual)
+                    {
+                      cell_physical_residual_q += tmp.val();
+                    }
+                }
               }
 
             {
