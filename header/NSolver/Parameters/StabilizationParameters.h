@@ -48,6 +48,8 @@ namespace NSFEMSolver
       ContinuationType continuation_type;
       double continuation_switch_threshold;
 
+      bool count_artificial_visc_term_in_phisical_residual;
+
       double diffusion_power;
       double diffusion_coefficoent;
       double entropy_visc_cE;
