@@ -328,7 +328,7 @@ namespace NSFEMSolver
       bool mms_use_strong_BC;
       int manifold_circle;
       int NACA_foil;
-      bool NACA_cheating_refinement;
+      int NACA_cheating_refinement;
     };
 
   } /* End of namespace Parameters */

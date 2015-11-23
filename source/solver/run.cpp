@@ -101,7 +101,7 @@ namespace NSFEMSolver
           if (parameters->manifold_circle == 2
               &&
               // Borrow a parameter. This is not good. And I know its not good. Only this one time.
-              parameters->NACA_cheating_refinement)
+              parameters->NACA_cheating_refinement == 1)
             {
               for (int n=0; n<2; ++n)
                 {
@@ -170,7 +170,7 @@ namespace NSFEMSolver
                 }
           triangulation.set_boundary (1, NACA_foil_boundary);
 
-          if (parameters->NACA_cheating_refinement)
+          if (parameters->NACA_cheating_refinement == 1)
             {
               for (int n=0; n<2; ++n)
                 {

@@ -374,8 +374,8 @@ namespace NSFEMSolver
       prm.declare_entry ("NACA_foil", "0",
                          Patterns::Integer(),
                          "Use NACA 4 digit foil as boundary manifold.");
-      prm.declare_entry ("NACA cheating refinement", "false",
-                         Patterns::Bool(),
+      prm.declare_entry ("NACA cheating refinement", "0",
+                         Patterns::Integer(),
                          "Refinement vicinity cells of airfoil");
 
       prm.declare_entry ("mesh", "grid.inp",
@@ -491,7 +491,7 @@ namespace NSFEMSolver
       mms_use_strong_BC = prm.get_bool ("MMS use strong BC");
       manifold_circle = prm.get_integer ("ManifoldCircle");
       NACA_foil = prm.get_integer ("NACA_foil");
-      NACA_cheating_refinement = prm.get_bool ("NACA cheating refinement");
+      NACA_cheating_refinement = prm.get_integer ("NACA cheating refinement");
 
       mesh_filename = prm.get ("mesh");
       time_advance_history_filename = prm.get ("time history");
