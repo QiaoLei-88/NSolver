@@ -248,7 +248,7 @@ namespace NSFEMSolver
             } // End for all faces
         } // End for all active cells
     if (parameters->laplacian_continuation > 0.0 &&
-        laplacian_coefficient > 0.0)
+        continuation_coeff_laplacian > 0.0)
       {
         apply_laplacian_continuation();
       }

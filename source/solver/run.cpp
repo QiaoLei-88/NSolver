@@ -417,6 +417,65 @@ namespace NSFEMSolver
           {
             pcout << " *** laplacian step ***" << std::endl;
           }
+        // Set up continuation coefficients for pseudo time component and laplacian component
+        switch (parameters->continuation_type)
+          {
+          case Parameters::StabilizationParameters<dim>::CT_time:
+          {
+            //TODO: Implement CFL evolution and local time step size.
+            continuation_coeff_time = laplacian_coefficient;
+            continuation_coeff_laplacian = 0.0;
+            break;
+          }
+          case Parameters::StabilizationParameters<dim>::CT_laplacian:
+          {
+            continuation_coeff_time = 0.0;
+            continuation_coeff_laplacian = laplacian_coefficient;
+            break;
+          }
+          case Parameters::StabilizationParameters<dim>::CT_switch:
+          {
+            if (laplacian_coefficient > mean_artificial_viscosity * parameters->continuation_switch_threshold)
+              {
+                continuation_coeff_time = 0.0;
+                continuation_coeff_laplacian = laplacian_coefficient;
+              }
+            else
+              {
+                continuation_coeff_time = laplacian_coefficient;
+                continuation_coeff_laplacian = 0.0;
+              }
+            break;
+          }
+          case Parameters::StabilizationParameters<dim>::CT_alternative:
+          {
+            if (n_time_step%2 == 0)
+              {
+                continuation_coeff_time = 0.0;
+                continuation_coeff_laplacian = laplacian_coefficient;
+              }
+            else
+              {
+                continuation_coeff_time = laplacian_coefficient;
+                continuation_coeff_laplacian = 0.0;
+              }
+            break;
+          }
+          case Parameters::StabilizationParameters<dim>::CT_blend:
+          {
+            // TODO: risk of dividing zero.
+            const double weight
+              = laplacian_coefficient / (laplacian_coefficient + mean_artificial_viscosity);
+            continuation_coeff_time      = (1.0-weight) * laplacian_coefficient;
+            continuation_coeff_laplacian = weight       * laplacian_coefficient;
+            break;
+          }
+          default:
+          {
+            Assert (false, ExcNotImplemented());
+            break;
+          }
+          }
         do // Newton iteration
           {
             computing_timer.enter_subsection ("3:Assemble Newton system");

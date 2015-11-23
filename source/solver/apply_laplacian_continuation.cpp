@@ -30,6 +30,29 @@ namespace NSFEMSolver
 
     std::vector<std::vector<Tensor<1,dim> > > grad_W (n_q_points,
                                                       std::vector<Tensor<1,dim> > (EquationComponents<dim>::n_components));
+    std::vector<Vector<double> > W (n_q_points,
+                                    Vector<double> (EquationComponents<dim>::n_components));
+    std::vector<Vector<double> > W_old (n_q_points,
+                                        Vector<double> (EquationComponents<dim>::n_components));
+
+    // Find out global minimum cell size
+    double local_h_min = std::numeric_limits<double>::max();
+    if (parameters->use_local_time_step_size)
+      {
+        typename DoFHandler<dim>::active_cell_iterator cell =
+          dof_handler.begin_active();
+        const typename DoFHandler<dim>::active_cell_iterator endc =
+          dof_handler.end();
+        for (; cell!=endc; ++cell)
+          {
+            if (cell->is_locally_owned())
+              {
+                local_h_min = std::min (cell->diameter(), local_h_min);
+              }
+          }
+      }
+    const double global_h_min = Utilities::MPI::min (local_h_min, mpi_communicator);
+
     unsigned int n_laplacian = 0;
     typename DoFHandler<dim>::active_cell_iterator
     cell = dof_handler.begin_active(),
@@ -37,46 +60,110 @@ namespace NSFEMSolver
     for (; cell!=endc; ++cell)
       if (cell->is_locally_owned())
         {
-          const bool use_laplacian =
-            n_time_step == 0 ||
-            laplacian_indicator[cell->active_cell_index()] >= laplacian_threshold;
-          n_laplacian += use_laplacian;
-          const double factor = use_laplacian
-                                ? 1.0
-                                : 0.1;
+          ++n_laplacian;
 
           fe_v.reinit (cell);
           cell->get_dof_indices (dof_indices);
-          fe_v.get_function_gradients (current_solution, grad_W);
-          for (unsigned int i=0; i<dofs_per_cell; ++i)
+
+          // Set and adjust coefficients of pseudo and laplacian operators.
+          double local_laplacian_coeff = continuation_coeff_laplacian;
+          double local_time_coeff = continuation_coeff_time;
+          // No adjust need on first step. Use laplacian continuation globally.
+          if ((n_time_step > 0) && parameters->enable_partial_laplacian)
             {
-              double residual = 0.0;
-              const unsigned int c = fe_v.get_fe().system_to_component_index (i).first;
-              for (unsigned int q=0; q<n_q_points; ++q)
+              if (laplacian_indicator[cell->active_cell_index()] < laplacian_threshold)
                 {
-                  residual += laplacian_coefficient * factor *
-                              (grad_W[q][c] *
-                               fe_v.shape_grad_component (i, q, c)) *
-                              fe_v.JxW (q);
+                  // In smooth region, use pseudo time continuation only.
+                  local_laplacian_coeff = 0.0;
+                  local_time_coeff = laplacian_coefficient;
+                  --n_laplacian;
                 }
-              std::vector<double> matrix_row (dofs_per_cell, 0.0);
-              for (unsigned int j=0; j<dofs_per_cell; ++j)
+            }
+
+          if (parameters->use_local_time_step_size && (local_time_coeff > 0.0))
+            {
+              local_time_coeff *= (global_h_min/cell->diameter());
+            }
+
+          if (local_laplacian_coeff > 0.0)
+            {
+              // Use laplacian term
+              fe_v.get_function_gradients (current_solution, grad_W);
+              for (unsigned int i=0; i<dofs_per_cell; ++i)
                 {
-                  if (c == fe_v.get_fe().system_to_component_index (j).first)
+                  double residual = 0.0;
+                  const unsigned int c = fe_v.get_fe().system_to_component_index (i).first;
+                  for (unsigned int q=0; q<n_q_points; ++q)
                     {
-                      for (unsigned int q=0; q<n_q_points; ++q)
+                      residual += local_laplacian_coeff *
+                                  (grad_W[q][c] *
+                                   fe_v.shape_grad_component (i, q, c)) *
+                                  fe_v.JxW (q);
+                    }
+                  std::vector<double> matrix_row (dofs_per_cell, 0.0);
+                  for (unsigned int j=0; j<dofs_per_cell; ++j)
+                    {
+                      if (c == fe_v.get_fe().system_to_component_index (j).first)
                         {
-                          matrix_row[j]  += laplacian_coefficient * factor *
-                                            (fe_v.shape_grad_component (j, q, c)
-                                             * fe_v.shape_grad_component (i, q, c)) *
-                                            fe_v.JxW (q);
+                          for (unsigned int q=0; q<n_q_points; ++q)
+                            {
+                              matrix_row[j]  += local_laplacian_coeff *
+                                                (fe_v.shape_grad_component (j, q, c)
+                                                 * fe_v.shape_grad_component (i, q, c)) *
+                                                fe_v.JxW (q);
+                            }
                         }
                     }
+                  system_matrix.add (dof_indices[i], dof_indices.size(),
+                                     & (dof_indices[0]), & (matrix_row[0]));
+                  right_hand_side (dof_indices[i]) -= residual;
                 }
-              system_matrix.add (dof_indices[i], dof_indices.size(),
-                                 & (dof_indices[0]), & (matrix_row[0]));
-              right_hand_side (dof_indices[i]) -= residual;
             }
+          if (local_time_coeff > 0.0)
+            {
+              // Use mass matrix, i.e., pseudo time continuation
+              fe_v.get_function_values (current_solution, W);
+              fe_v.get_function_values (current_solution, W_old);
+
+              std_cxx11::array<double, EquationComponents<dim>::n_components> w_conservative;
+              std_cxx11::array<double, EquationComponents<dim>::n_components> w_conservative_old;
+
+              for (unsigned int i=0; i<dofs_per_cell; ++i)
+                {
+                  double residual = 0.0;
+                  const unsigned int c = fe_v.get_fe().system_to_component_index (i).first;
+                  for (unsigned int q=0; q<n_q_points; ++q)
+                    {
+                      EulerEquations<dim>::compute_conservative_vector (W[q], w_conservative);
+                      EulerEquations<dim>::compute_conservative_vector (W_old[q], w_conservative_old);
+                      residual += local_time_coeff *
+                                  (w_conservative[c] - w_conservative_old[c]) *
+                                  fe_v.shape_value_component (i, q, c) *
+                                  fe_v.JxW (q);
+                    }
+                  std::vector<double> matrix_row (dofs_per_cell, 0.0);
+                  for (unsigned int j=0; j<dofs_per_cell; ++j)
+                    {
+                      if (c == fe_v.get_fe().system_to_component_index (j).first)
+                        {
+                          for (unsigned int q=0; q<n_q_points; ++q)
+                            {
+                              matrix_row[j]  += local_time_coeff *
+                                                fe_v.shape_value_component (j, q, c) *
+                                                fe_v.shape_value_component (i, q, c) *
+                                                fe_v.JxW (q);
+                            }
+                        }
+                    }
+                  system_matrix.add (dof_indices[i], dof_indices.size(),
+                                     & (dof_indices[0]), & (matrix_row[0]));
+                  right_hand_side (dof_indices[i]) -= residual;
+                  if (!parameters->is_steady)
+                    {
+                      physical_residual (dof_indices[i]) -= residual;
+                    }
+                }
+            } // End of if (use_laplacian) .. else
         }
     pcout << "n_laplacian = "
           << Utilities::MPI::sum (n_laplacian, mpi_communicator)
