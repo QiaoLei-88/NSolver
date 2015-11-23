@@ -260,11 +260,6 @@ namespace NSFEMSolver
     // sense, so that we don't need to negative the Jacobian entries.  Then,
     // when we sum into the <code>right_hand_side</code> vector, we negate
     // this residual.
-    const unsigned int i_cell = fe_v.get_cell()->active_cell_index();
-    const double dt = parameters->use_local_time_step_size ?
-                      local_time_step_size[i_cell]
-                      :
-                      global_time_step_size;
 
     Sacado::Fad::DFad<double> SUPG_residual = 0.0;
     if (parameters->SUPG_factor > 0.0 &&
@@ -366,24 +361,6 @@ namespace NSFEMSolver
           {
             Sacado::Fad::DFad<double> R_i_q = 0.0;
             double cell_physical_residual_q = 0.0;
-
-            std_cxx11::array<Sacado::Fad::DFad<double> , EquationComponents<dim>::n_components> w_conservative;
-            std_cxx11::array<double, EquationComponents<dim>::n_components> w_conservative_old;
-            EulerEquations<dim>::compute_conservative_vector (W[point], w_conservative);
-            EulerEquations<dim>::compute_conservative_vector (W_old[point], w_conservative_old);
-
-            if (!parameters->turn_off_time_marching)
-              {
-                const Sacado::Fad::DFad<double> tmp =
-                  1.0 / dt *
-                  (w_conservative[component_i] - w_conservative_old[component_i]) *
-                  fe_v.shape_value_component (i, point, component_i);
-                R_i_q += tmp;
-                if (!parameters->is_steady)
-                  {
-                    cell_physical_residual_q += tmp.val();
-                  }
-              }
 
             for (unsigned int d=0; d<dim; d++)
               {

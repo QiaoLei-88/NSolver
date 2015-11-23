@@ -299,6 +299,9 @@ namespace NSFEMSolver
     double laplacian_coefficient;
     Vector<double> laplacian_indicator;
     double laplacian_threshold;
+
+    double continuation_coeff_time;
+    double continuation_coeff_laplacian;
   };
 
 }
