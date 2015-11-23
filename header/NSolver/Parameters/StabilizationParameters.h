@@ -35,8 +35,18 @@ namespace NSFEMSolver
         diffu_cell_size,
         diffu_const
       };
-
       DiffusionType diffusion_type;
+
+      enum ContinuationType
+      {
+        CT_time,
+        CT_laplacian,
+        CT_switch,
+        CT_alternative,
+        CT_blend
+      };
+      ContinuationType continuation_type;
+
       double diffusion_power;
       double diffusion_coefficoent;
       double entropy_visc_cE;

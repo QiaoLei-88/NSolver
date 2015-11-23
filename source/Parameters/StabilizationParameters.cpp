@@ -37,6 +37,11 @@ namespace NSFEMSolver
         prm.declare_entry ("entropy use global h min", "false",
                            Patterns::Bool(),
                            "Use global minimum cell size for entropy viscosity");
+
+        prm.declare_entry ("continuation type", "time",
+                           Patterns::Anything(),
+                           "continuation type");
+
         prm.declare_entry ("Laplacian continuation", "-1.0",
                            Patterns::Double(),
                            "Coefficient for Laplacian continuation");
@@ -77,33 +82,62 @@ namespace NSFEMSolver
     {
       prm.enter_subsection ("stabilization parameters");
       {
-        const std::string prm_buf = prm.get ("diffusion type");
-        if (prm_buf == "entropy")
-          {
-            diffusion_type = diffu_entropy;
-          }
-        else if (prm_buf == "entropy_DRB")
-          {
-            diffusion_type = diffu_entropy_DRB;
-          }
-        else if (prm_buf == "cell size")
-          {
-            diffusion_type = diffu_cell_size;
-          }
-        else if (prm_buf == "const")
-          {
-            diffusion_type = diffu_const;
-          }
-        else
-          {
-            AssertThrow (false, ExcNotImplemented());
-          }
-
+        {
+          const std::string prm_buf = prm.get ("diffusion type");
+          if (prm_buf == "entropy")
+            {
+              diffusion_type = diffu_entropy;
+            }
+          else if (prm_buf == "entropy_DRB")
+            {
+              diffusion_type = diffu_entropy_DRB;
+            }
+          else if (prm_buf == "cell size")
+            {
+              diffusion_type = diffu_cell_size;
+            }
+          else if (prm_buf == "const")
+            {
+              diffusion_type = diffu_const;
+            }
+          else
+            {
+              AssertThrow (false, ExcNotImplemented());
+            }
+        }
         diffusion_power = prm.get_double ("diffusion power");
         diffusion_coefficoent = prm.get_double ("diffusion coefficient");
         entropy_visc_cE = prm.get_double ("entropy visc cE");
         entropy_visc_cLinear = prm.get_double ("entropy visc cLinear");
         entropy_use_global_h_min = prm.get_bool ("entropy use global h min");
+
+        {
+          const std::string prm_buf = prm.get ("continuation type");
+          if (prm_buf == "time")
+            {
+              continuation_type = CT_time;
+            }
+          else if (prm_buf == "laplacian")
+            {
+              continuation_type = CT_laplacian;
+            }
+          else if (prm_buf == "switch")
+            {
+              continuation_type = CT_switch;
+            }
+          else if (prm_buf == "alternative")
+            {
+              continuation_type = CT_alternative;
+            }
+          else if (prm_buf == "blend")
+            {
+              continuation_type = CT_blend;
+            }
+          else
+            {
+              AssertThrow (false, ExcNotImplemented());
+            }
+        }
         laplacian_continuation = prm.get_double ("Laplacian continuation");
         dodge_mesh_adaptation = prm.get_bool ("dodge mesh adaptation");
         laplacian_zero = prm.get_double ("Laplacian zero");
