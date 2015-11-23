@@ -228,8 +228,117 @@ namespace NSFEMSolver
                 }
               triangulation.execute_coarsening_and_refinement();
             }
-        }
+          if (parameters->NACA_cheating_refinement == 2)
+            {
+              for (int n=0; n<1; ++n)
+                {
+                  // Refine cell in a elliptic around the foil twice
+                  for (typename Triangulation<dim>::active_cell_iterator
+                       cell = triangulation.begin_active();
+                       cell != triangulation.end();
+                       ++cell)
+                    {
+                      const double center_x=0.5;
+                      const double center_y=0.0;
+                      const double half_axi_long  = 0.7;
+                      const double half_axi_short = 0.2;
+                      const double a = (cell->center()[0] - center_x)/half_axi_long;
+                      const double b = (cell->center()[1] - center_y)/half_axi_short;
+                      if ((a*a+b*b) < 1.0)
+                        {
+                          cell->set_refine_flag();
+                        }
+                    }
+                  triangulation.execute_coarsening_and_refinement();
+                }
 
+              for (typename Triangulation<dim>::active_cell_iterator
+                   cell = triangulation.begin_active();
+                   cell != triangulation.end();
+                   ++cell)
+                {
+                  // Refine LE and TE zone once more
+                  const Point<dim> zero;
+                  Point<dim> one;
+                  one[0] = 1.0;
+                  if (zero.distance (cell->center()) < 0.15
+                      ||
+                      one.distance (cell->center()) < 0.1)
+                    {
+                      cell->set_refine_flag();
+                    }
+                  const Point<dim> &p = cell->center();
+                  // refine upper surface shock zone
+                  {
+                    bool refine = true;
+                    refine = refine && (p[0] > 0.5);
+                    refine = refine && (p[0] < 0.7);
+                    refine = refine && (p[1] > 0.0);
+                    refine = refine && (p[1] < 1.0);
+                    if (refine)
+                      {
+                        cell->set_refine_flag();
+                      }
+                  }
+                  // refine lower surface shock zone
+                  {
+                    bool refine = true;
+                    refine = refine && (p[0] > 0.3);
+                    refine = refine && (p[0] < 0.40);
+                    refine = refine && (p[1] > -0.25);
+                    refine = refine && (p[1] < 0.0);
+                    if (refine)
+                      {
+                        cell->set_refine_flag();
+                      }
+                  }
+                }
+              triangulation.execute_coarsening_and_refinement();
+
+              for (typename Triangulation<dim>::active_cell_iterator
+                   cell = triangulation.begin_active();
+                   cell != triangulation.end();
+                   ++cell)
+                {
+                  const Point<dim> zero;
+                  Point<dim> one;
+                  one[0] = 1.0;
+                  // Refine LE and TE zone once more in a smaller region
+                  if (zero.distance (cell->center()) < 0.05
+                      ||
+                      one.distance (cell->center()) < 0.03)
+                    {
+                      cell->set_refine_flag();
+                    }
+                  // refine upper surface shock zone
+                  const Point<dim> &p = cell->center();
+                  {
+                    bool refine = true;
+                    refine = refine && (p[0] > 0.58);
+                    refine = refine && (p[0] < 0.68);
+                    refine = refine && (p[1] > 0.0);
+                    refine = refine && (p[1] < 0.8);
+                    if (refine)
+                      {
+                        cell->set_refine_flag();
+                      }
+                  }
+                  // refine lower surface shock zone
+                  {
+                    bool refine = true;
+                    refine = refine && (p[0] > 0.32);
+                    refine = refine && (p[0] < 0.38);
+                    refine = refine && (p[1] > -0.2);
+                    refine = refine && (p[1] < 0.0);
+                    if (refine)
+                      {
+                        cell->set_refine_flag();
+                      }
+                  }
+                }
+              triangulation.execute_coarsening_and_refinement();
+            }
+        }
       if (parameters->n_global_refinement > 0)
         {
           triangulation.refine_global (parameters->n_global_refinement);
