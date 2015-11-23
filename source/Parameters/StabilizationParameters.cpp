@@ -41,6 +41,9 @@ namespace NSFEMSolver
         prm.declare_entry ("continuation type", "timeCFL",
                            Patterns::Anything(),
                            "continuation type");
+        prm.declare_entry ("CountArtiViscInResPhy", "false",
+                           Patterns::Bool(),
+                           "Count artificial viscosity term in physical residual");
 
         prm.declare_entry ("switch threshold","10.0",
                            Patterns::Double(),
@@ -151,6 +154,9 @@ namespace NSFEMSolver
         }
 
         continuation_switch_threshold = prm.get_double ("switch threshold");
+
+        count_artificial_visc_term_in_phisical_residual
+          = prm.get_bool ("CountArtiViscInResPhy");
 
         laplacian_continuation = prm.get_double ("Laplacian continuation");
         enable_partial_laplacian = prm.get_bool ("enable partial laplacian");
