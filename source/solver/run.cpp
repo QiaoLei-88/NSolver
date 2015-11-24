@@ -580,7 +580,7 @@ namespace NSFEMSolver
           {
             // TODO: risk of dividing zero.
             const double weight
-              = laplacian_coefficient / (laplacian_coefficient + mean_artificial_viscosity);
+              = (0.5 * laplacian_coefficient) / ((0.5 * laplacian_coefficient) + mean_artificial_viscosity);
             continuation_coeff_time      = (1.0-weight) * laplacian_coefficient;
             continuation_coeff_laplacian = weight       * laplacian_coefficient;
             break;
