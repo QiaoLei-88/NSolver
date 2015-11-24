@@ -56,6 +56,10 @@ namespace NSFEMSolver
       double diffusion_factor[EquationComponents<dim>::n_components];
       double laplacian_continuation;
       /**
+       * Use laplacian continuation only in region with large indicators.
+       */
+      bool enable_partial_laplacian;
+      /**
        * When this flag is set, laplacian refinement and mesh adaptation will be
        * done alternatively to increase stability when they are both enabled.
        * Default value is false.

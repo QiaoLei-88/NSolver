@@ -49,6 +49,9 @@ namespace NSFEMSolver
         prm.declare_entry ("Laplacian continuation", "-1.0",
                            Patterns::Double(),
                            "Coefficient for Laplacian continuation");
+        prm.declare_entry ("enable partial laplacian", "false",
+                           Patterns::Bool(),
+                           "Enable partial laplacian");
         prm.declare_entry ("dodge mesh adaptation", "false",
                            Patterns::Bool(),
                            "Avoid doing mesh refinement and decreasing Laplacian continuation on same time step.");
@@ -146,6 +149,7 @@ namespace NSFEMSolver
         continuation_switch_threshold = prm.get_double ("switch threshold");
 
         laplacian_continuation = prm.get_double ("Laplacian continuation");
+        enable_partial_laplacian = prm.get_bool ("enable partial laplacian");
         dodge_mesh_adaptation = prm.get_bool ("dodge mesh adaptation");
         laplacian_zero = prm.get_double ("Laplacian zero");
         laplacian_newton_quadratic = prm.get_double ("Laplacian Newton quadratic");
