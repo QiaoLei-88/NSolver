@@ -295,8 +295,8 @@ namespace NSFEMSolver
     unsigned int n_total_iter;
     unsigned int nonlin_iter;
 
-    // laplacian_coefficient
-    double laplacian_coefficient;
+    // continuation_coefficient
+    double continuation_coefficient;
     Vector<double> laplacian_indicator;
     double laplacian_threshold;
 

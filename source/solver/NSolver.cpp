@@ -83,7 +83,7 @@ namespace NSFEMSolver
   {
     Assert (parameters, ExcMessage ("Null pointer encountered!"));
 
-    laplacian_coefficient = std::max (0.0, parameters->laplacian_continuation);
+    continuation_coefficient = std::max (0.0, parameters->laplacian_continuation);
 
     switch (parameters->mapping_type)
       {
