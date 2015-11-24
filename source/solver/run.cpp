@@ -493,6 +493,7 @@ namespace NSFEMSolver
 
 
         newton_iter_converged = false;
+        double terminal_res = 0.0;
 
         nonlin_iter = 0;
         current_solution = predictor;
@@ -625,6 +626,21 @@ namespace NSFEMSolver
                 log_res_last = std::log (res_norm);
                 physical_residual_first = physical_res_norm;
                 residual_for_output = right_hand_side;
+                terminal_res =
+                  res_norm * std::pow (10.0, parameters->nonlinear_tolerance);
+                if (parameters->laplacian_continuation > 0.0)
+                  {
+                    if (laplacian_coefficient > 0.0)
+                      {
+                        terminal_res =
+                          std::max (res_norm * 0.1,
+                                    physical_res_norm * parameters->laplacian_newton_tolerance);
+                      }
+                    else
+                      {
+                        terminal_res = 1e-11;
+                      }
+                  }
               }
             else
               {
@@ -681,28 +697,7 @@ namespace NSFEMSolver
                 << std::setw (19) << newton_update_norm
                 << '\n';
             // Check result.
-            newton_iter_converged
-              = (std::log10 (res_norm) < parameters->nonlinear_tolerance);
-
-            if (parameters->laplacian_continuation > 0.0 &&
-                !linear_solver_diverged)
-              {
-                const double physical_res_tolerance = 1e-10;
-                if (laplacian_coefficient > 0.0)
-                  {
-                    newton_iter_converged =
-                      newton_iter_converged &&
-                      (res_norm <
-                       parameters->laplacian_newton_tolerance *
-                       std::max (physical_res_norm, physical_res_tolerance));
-                  }
-                else
-                  {
-                    newton_iter_converged =
-                      newton_iter_converged &&
-                      res_norm < 1e-12;
-                  }
-              }
+            newton_iter_converged = (res_norm < terminal_res);
 
             if (linear_solver_diverged)
               {
