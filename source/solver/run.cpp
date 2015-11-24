@@ -440,7 +440,7 @@ namespace NSFEMSolver
     double res_norm_total (0.0);
     double res_norm_total_previous (0.0);
     double res_norm_infty_total (0.0);
-    double old_laplacian_coefficient = laplacian_coefficient;
+    double old_continuation_coefficient = continuation_coefficient;
     unsigned int n_step_laplacian_vanished = 65535;
     bool is_refine_step = false;
     while (!terminate_time_stepping)
@@ -538,26 +538,26 @@ namespace NSFEMSolver
           }
           case Parameters::StabilizationParameters<dim>::CT_time:
           {
-            continuation_coeff_time = laplacian_coefficient;
+            continuation_coeff_time = continuation_coefficient;
             continuation_coeff_laplacian = 0.0;
             break;
           }
           case Parameters::StabilizationParameters<dim>::CT_laplacian:
           {
             continuation_coeff_time = 0.0;
-            continuation_coeff_laplacian = laplacian_coefficient;
+            continuation_coeff_laplacian = continuation_coefficient;
             break;
           }
           case Parameters::StabilizationParameters<dim>::CT_switch:
           {
-            if (laplacian_coefficient > mean_artificial_viscosity * parameters->continuation_switch_threshold)
+            if (continuation_coefficient > mean_artificial_viscosity * parameters->continuation_switch_threshold)
               {
                 continuation_coeff_time = 0.0;
-                continuation_coeff_laplacian = laplacian_coefficient;
+                continuation_coeff_laplacian = continuation_coefficient;
               }
             else
               {
-                continuation_coeff_time = laplacian_coefficient;
+                continuation_coeff_time = continuation_coefficient;
                 continuation_coeff_laplacian = 0.0;
               }
             break;
@@ -567,11 +567,11 @@ namespace NSFEMSolver
             if (n_time_step%2 == 0)
               {
                 continuation_coeff_time = 0.0;
-                continuation_coeff_laplacian = laplacian_coefficient;
+                continuation_coeff_laplacian = continuation_coefficient;
               }
             else
               {
-                continuation_coeff_time = laplacian_coefficient;
+                continuation_coeff_time = continuation_coefficient;
                 continuation_coeff_laplacian = 0.0;
               }
             break;
@@ -580,9 +580,9 @@ namespace NSFEMSolver
           {
             // TODO: risk of dividing zero.
             const double weight
-              = (0.5 * laplacian_coefficient) / ((0.5 * laplacian_coefficient) + mean_artificial_viscosity);
-            continuation_coeff_time      = (1.0-weight) * laplacian_coefficient;
-            continuation_coeff_laplacian = weight       * laplacian_coefficient;
+              = (0.5 * continuation_coefficient) / ((0.5 * continuation_coefficient) + mean_artificial_viscosity);
+            continuation_coeff_time      = (1.0-weight) * continuation_coefficient;
+            continuation_coeff_laplacian = weight       * continuation_coefficient;
             break;
           }
           default:
@@ -630,7 +630,7 @@ namespace NSFEMSolver
                   res_norm * std::pow (10.0, parameters->nonlinear_tolerance);
                 if (parameters->laplacian_continuation > 0.0)
                   {
-                    if (laplacian_coefficient > 0.0)
+                    if (continuation_coefficient > 0.0)
                       {
                         terminal_res =
                           std::max (res_norm * 0.1,
@@ -867,22 +867,22 @@ namespace NSFEMSolver
                 CFL_number_increased = true;
                 index_linear_search_length = 0;
               }
-            const bool laplacian_coefficient_vanished =
-              (laplacian_coefficient < 1e-100);
+            const bool continuation_coefficient_vanished =
+              (continuation_coefficient < 1e-100);
 
             // TODO: refactoring needed.
-            // Never decease laplacian_coefficient and do mesh refine together.
+            // Never decease continuation_coefficient and do mesh refine together.
             if (! (parameters->dodge_mesh_adaptation) || !is_refine_step)
               {
-                old_laplacian_coefficient = laplacian_coefficient;
+                old_continuation_coefficient = continuation_coefficient;
                 {
-                  n_step_laplacian_vanished += (laplacian_coefficient>0.0);
+                  n_step_laplacian_vanished += (continuation_coefficient>0.0);
                   double laplacian_ratio_min = 0.5;
                   if (quadratic_converge && parameters->Mach < 0.5)
                     {
                       laplacian_ratio_min =
                         std::min (0.1,
-                                  std::pow (laplacian_coefficient,
+                                  std::pow (continuation_coefficient,
                                             parameters->laplacian_decrease_rate - 1.0)
                                  );
                     }
@@ -890,20 +890,20 @@ namespace NSFEMSolver
                     std::min (laplacian_ratio_min,
                               0.9 * physical_residual_ratio);
 
-                  laplacian_coefficient *= laplacian_ratio;
-                  if (laplacian_coefficient < parameters->laplacian_zero * mean_artificial_viscosity)
+                  continuation_coefficient *= laplacian_ratio;
+                  if (continuation_coefficient < parameters->laplacian_zero * mean_artificial_viscosity)
                     {
                       if (n_step_laplacian_vanished > 65500)
                         {
                           n_step_laplacian_vanished = n_time_step;
                         }
-                      laplacian_coefficient = 0.0;
+                      continuation_coefficient = 0.0;
                     }
                 }
               }
 
             pcout << "res_norm_total = " << res_norm_total << std::endl;
-            pcout << "laplacian_coefficient = " << laplacian_coefficient << std::endl;
+            pcout << "continuation_coefficient = " << continuation_coefficient << std::endl;
 
             std_cxx11::array<double, EquationComponents<dim>::n_components> time_advance_l2_norm;
             for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
@@ -1022,7 +1022,7 @@ namespace NSFEMSolver
               ! (swith_flux &&
                  parameters->tolerance_to_switch_flux > parameters->time_march_tolerance);
             time_march_converged = time_march_converged &&
-                                   laplacian_coefficient_vanished;
+                                   continuation_coefficient_vanished;
 
             pcout << "  Order of time advancing L_2  norm\n   ";
             double total_time_march_norm = 0.0;
@@ -1079,16 +1079,16 @@ namespace NSFEMSolver
             // Newton iteration not converge in reasonable steps
             if (parameters->laplacian_continuation > 0.0)
               {
-                if (laplacian_coefficient > 0.0)
+                if (continuation_coefficient > 0.0)
                   {
-                    laplacian_coefficient =
-                      std::sqrt (old_laplacian_coefficient * laplacian_coefficient);
+                    continuation_coefficient =
+                      std::sqrt (old_continuation_coefficient * continuation_coefficient);
                   }
                 else
                   {
-                    laplacian_coefficient = 0.5 * old_laplacian_coefficient;
+                    continuation_coefficient = 0.5 * old_continuation_coefficient;
                   }
-                pcout << "reseted laplacian_coefficient = " << laplacian_coefficient << std::endl;
+                pcout << "reseted continuation_coefficient = " << continuation_coefficient << std::endl;
               }
             else if ((index_linear_search_length <
                       parameters->newton_linear_search_length_try_limit)

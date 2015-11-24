@@ -75,7 +75,7 @@ namespace NSFEMSolver
                 {
                   // In smooth region, use pseudo time continuation only.
                   local_laplacian_coeff = 0.0;
-                  local_time_coeff = laplacian_coefficient;
+                  local_time_coeff = continuation_coefficient;
                   --n_laplacian;
                 }
             }
