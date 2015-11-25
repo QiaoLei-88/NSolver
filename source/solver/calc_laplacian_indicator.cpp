@@ -184,6 +184,66 @@ namespace NSFEMSolver
     const double avg_v = Utilities::MPI::sum (local_sum_v, mpi_communicator) /
                          static_cast<double> (triangulation.n_global_active_cells());
     laplacian_threshold = avg_v*2.0 - min_v;
+
+    // Find threshold for a fixed cell number fraction;
+    const bool laplacian_fix_number_fraction = true;
+    if (laplacian_fix_number_fraction)
+      {
+        const double fraction
+          = (1.0 * continuation_coefficient)/ ((1.0 * continuation_coefficient) + mean_artificial_viscosity);
+
+        const unsigned int n_target_cells = triangulation.n_global_active_cells() * fraction;
+        const unsigned int master_mpi_rank = 0;
+        double interesting_range[2] = {min_v, max_v};
+        unsigned int total_count = 0;
+        // Bisection search
+        unsigned max_n_loop = 3;
+        for (unsigned int error_range = triangulation.n_global_active_cells();
+             error_range != 0;
+             error_range /= 2)
+          {
+            ++max_n_loop;
+          }
+        for (unsigned int n = 0; n<max_n_loop; ++n)
+          {
+            laplacian_threshold
+              = (interesting_range[0] + interesting_range[1]) * 0.5;
+
+
+            // count cell number according to current test_threshold.
+            unsigned int my_count = 0;
+            {
+              typename DoFHandler<dim>::active_cell_iterator
+              cell = dof_handler.begin_active();
+              const typename DoFHandler<dim>::active_cell_iterator
+              endc = dof_handler.end();
+              for (; cell != endc; ++cell)
+                if (cell->is_locally_owned())
+                  {
+                    my_count +=
+                      (laplacian_indicator[cell->active_cell_index()] > laplacian_threshold);
+                  }
+            }
+
+            MPI_Reduce (&my_count, &total_count, 1, MPI_UNSIGNED,
+                        MPI_SUM, master_mpi_rank, mpi_communicator);
+            if (total_count >= n_target_cells)
+              {
+                interesting_range[0] = laplacian_threshold;
+              }
+            if (total_count <= n_target_cells)
+              {
+                interesting_range[1] = laplacian_threshold;
+              }
+            MPI_Bcast (&interesting_range[0], 2, MPI_DOUBLE,
+                       master_mpi_rank, mpi_communicator);
+            if (interesting_range[1] == interesting_range[0])
+              {
+                break;
+              }
+          } // bisection iteration
+      } // End if (laplacian_fix_number_fraction)
+
     pcout << "laplacian min = " << min_v << std::endl
           << "laplacian max = " << max_v << std::endl
           << "laplacian avg = " << avg_v << std::endl
