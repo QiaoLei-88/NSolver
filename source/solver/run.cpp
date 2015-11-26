@@ -440,6 +440,7 @@ namespace NSFEMSolver
     double res_norm_total (0.0);
     double res_norm_total_previous (0.0);
     double res_norm_infty_total (0.0);
+    double physical_residual_first (0.0);
     double old_continuation_coefficient = continuation_coefficient;
     unsigned int n_step_laplacian_vanished = 65535;
     bool is_refine_step = false;
@@ -513,7 +514,7 @@ namespace NSFEMSolver
         res_norm_total_previous = res_norm_total;
         res_norm_total = 0.0;
         res_norm_infty_total = 0.0;
-        double physical_residual_first = 0.0;
+
         double physical_residual_ratio = 0.0;
         double log_res_last = 0.0;
         bool quadratic_converge = true;
@@ -624,7 +625,10 @@ namespace NSFEMSolver
             if (nonlin_iter == 0)
               {
                 log_res_last = std::log (res_norm);
-                physical_residual_first = physical_res_norm;
+                if (n_time_step == 0)
+                  {
+                    physical_residual_first = physical_res_norm;
+                  }
                 residual_for_output = right_hand_side;
                 terminal_res =
                   res_norm * std::pow (10.0, parameters->nonlinear_tolerance);
@@ -886,11 +890,11 @@ namespace NSFEMSolver
                                             parameters->laplacian_decrease_rate - 1.0)
                                  );
                     }
-                  const double laplacian_ratio =
-                    std::min (laplacian_ratio_min,
-                              0.9 * physical_residual_ratio);
 
-                  continuation_coefficient *= laplacian_ratio;
+                  continuation_coefficient =
+                    std::min (laplacian_ratio_min * continuation_coefficient,
+                              parameters->laplacian_continuation * physical_residual_ratio * physical_residual_ratio);
+
                   if (continuation_coefficient < parameters->laplacian_zero * mean_artificial_viscosity)
                     {
                       if (n_step_laplacian_vanished > 65500)
