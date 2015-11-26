@@ -135,12 +135,11 @@ namespace NSFEMSolver
                                  ? global_h_min
                                  : cell->diameter();
                 const double entropy_visc
-                  = parameters->entropy_visc_cE * rho_max *
-                    std::pow (h, 2.0) * D_h_max;
+                  = parameters->entropy_visc_cE *
+                    h * h * D_h_max;
                 const double miu_max
                   = parameters->entropy_visc_cLinear *
-                    h *
-                    rho_max * characteristic_speed_max;
+                    h * characteristic_speed_max;
 
                 artificial_viscosity[cell->active_cell_index()] =
                   std::min (miu_max, entropy_visc);
