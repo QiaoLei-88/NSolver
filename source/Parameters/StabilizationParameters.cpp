@@ -41,6 +41,11 @@ namespace NSFEMSolver
         prm.declare_entry ("continuation type", "time",
                            Patterns::Anything(),
                            "continuation type");
+
+        prm.declare_entry ("use local laplacian coefficient", "false",
+                           Patterns::Bool(),
+                           "use local (cell size related) laplacian coefficient");
+
         prm.declare_entry ("CountArtiViscInResPhy", "false",
                            Patterns::Bool(),
                            "Count artificial viscosity term in physical residual");
@@ -157,6 +162,9 @@ namespace NSFEMSolver
         continuation_min_decrease_rate = prm.get_double ("continuation min decrease rate");
         continuation_decrease_residual_power = prm.get_double ("continuation decrease residual power");
         continuation_switch_threshold = prm.get_double ("switch threshold");
+
+        use_local_laplacian_coefficient
+          = prm.get_bool ("use local laplacian coefficient");
 
         count_artificial_visc_term_in_phisical_residual
           = prm.get_bool ("CountArtiViscInResPhy");
