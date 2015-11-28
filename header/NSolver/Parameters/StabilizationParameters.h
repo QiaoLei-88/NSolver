@@ -51,6 +51,7 @@ namespace NSFEMSolver
       double continuation_decrease_residual_power;
       double continuation_switch_threshold;
 
+      bool use_local_laplacian_coefficient;
       bool count_artificial_visc_term_in_phisical_residual;
 
       double diffusion_power;
