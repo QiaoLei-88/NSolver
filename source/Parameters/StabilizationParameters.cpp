@@ -45,6 +45,9 @@ namespace NSFEMSolver
                            Patterns::Bool(),
                            "Count artificial viscosity term in physical residual");
 
+        prm.declare_entry ("continuation min decrease rate","0.5",
+                           Patterns::Double(),
+                           "Ratio that continuation coefficient at least to decrease on each step");
         prm.declare_entry ("switch threshold","10.0",
                            Patterns::Double(),
                            "Ratio threshold to switch from laplacian to time continuation");
@@ -148,7 +151,7 @@ namespace NSFEMSolver
               AssertThrow (false, ExcNotImplemented());
             }
         }
-
+        continuation_min_decrease_rate = prm.get_double ("continuation min decrease rate");
         continuation_switch_threshold = prm.get_double ("switch threshold");
 
         count_artificial_visc_term_in_phisical_residual

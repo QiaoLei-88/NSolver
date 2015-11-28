@@ -46,6 +46,7 @@ namespace NSFEMSolver
         CT_blend
       };
       ContinuationType continuation_type;
+      double continuation_min_decrease_rate;
       double continuation_switch_threshold;
 
       bool count_artificial_visc_term_in_phisical_residual;
