@@ -37,7 +37,8 @@ namespace NSFEMSolver
 
     // Find out global minimum cell size
     double local_h_min = std::numeric_limits<double>::max();
-    if (parameters->use_local_time_step_size)
+    if (parameters->use_local_time_step_size ||
+        parameters->use_local_laplacian_coefficient)
       {
         typename DoFHandler<dim>::active_cell_iterator cell =
           dof_handler.begin_active();
@@ -78,6 +79,11 @@ namespace NSFEMSolver
                   local_time_coeff = continuation_coefficient;
                   --n_laplacian;
                 }
+            }
+
+          if (parameters->use_local_laplacian_coefficient && (local_laplacian_coeff > 0.0))
+            {
+              local_laplacian_coeff *= (global_h_min/cell->diameter());
             }
 
           if (parameters->use_local_time_step_size && (local_time_coeff > 0.0))
