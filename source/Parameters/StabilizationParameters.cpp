@@ -46,6 +46,9 @@ namespace NSFEMSolver
                            Patterns::Bool(),
                            "use local (cell size related) laplacian coefficient");
 
+        prm.declare_entry ("CountSolDiffInRes", "false",
+                           Patterns::Bool(),
+                           "Count solution difference term in residual");
         prm.declare_entry ("CountArtiViscInResPhy", "false",
                            Patterns::Bool(),
                            "Count artificial viscosity term in physical residual");
@@ -165,6 +168,9 @@ namespace NSFEMSolver
 
         use_local_laplacian_coefficient
           = prm.get_bool ("use local laplacian coefficient");
+
+        count_solution_diff_in_residual
+          = prm.get_bool ("CountSolDiffInRes");
 
         count_artificial_visc_term_in_phisical_residual
           = prm.get_bool ("CountArtiViscInResPhy");
