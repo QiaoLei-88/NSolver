@@ -358,6 +358,11 @@ namespace NSFEMSolver
                                                    static_cast<double> (triangulation.n_global_active_cells()));
       }
 
+    // Always count solution difference in residual in time accurate run.
+    parameters_modifier->count_solution_diff_in_residual =
+      parameters->count_solution_diff_in_residual ||
+      (!parameters->is_steady);
+
     std::ofstream iteration_history_file_std;
     std::ofstream time_advance_history_file_std;
     if (I_am_host)
