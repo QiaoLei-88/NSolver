@@ -128,24 +128,30 @@ namespace NSFEMSolver
           if (local_time_coeff > 0.0)
             {
               // Use mass matrix, i.e., pseudo time continuation
-              fe_v.get_function_values (current_solution, W);
-              fe_v.get_function_values (current_solution, W_old);
-
               std_cxx11::array<double, EquationComponents<dim>::n_components> w_conservative;
               std_cxx11::array<double, EquationComponents<dim>::n_components> w_conservative_old;
+
+              if (parameters->count_solution_diff_in_residual)
+                {
+                  fe_v.get_function_values (current_solution, W);
+                  fe_v.get_function_values (current_solution, W_old);
+                }
 
               for (unsigned int i=0; i<dofs_per_cell; ++i)
                 {
                   double residual = 0.0;
                   const unsigned int c = fe_v.get_fe().system_to_component_index (i).first;
-                  for (unsigned int q=0; q<n_q_points; ++q)
+                  if (parameters->count_solution_diff_in_residual)
                     {
-                      EulerEquations<dim>::compute_conservative_vector (W[q], w_conservative);
-                      EulerEquations<dim>::compute_conservative_vector (W_old[q], w_conservative_old);
-                      residual += local_time_coeff *
-                                  (w_conservative[c] - w_conservative_old[c]) *
-                                  fe_v.shape_value_component (i, q, c) *
-                                  fe_v.JxW (q);
+                      for (unsigned int q=0; q<n_q_points; ++q)
+                        {
+                          EulerEquations<dim>::compute_conservative_vector (W[q], w_conservative);
+                          EulerEquations<dim>::compute_conservative_vector (W_old[q], w_conservative_old);
+                          residual += local_time_coeff *
+                                      (w_conservative[c] - w_conservative_old[c]) *
+                                      fe_v.shape_value_component (i, q, c) *
+                                      fe_v.JxW (q);
+                        }
                     }
                   std::vector<double> matrix_row (dofs_per_cell, 0.0);
                   for (unsigned int j=0; j<dofs_per_cell; ++j)
