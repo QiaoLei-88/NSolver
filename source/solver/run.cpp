@@ -881,11 +881,11 @@ namespace NSFEMSolver
                 old_continuation_coefficient = continuation_coefficient;
                 {
                   n_step_laplacian_vanished += (continuation_coefficient>0.0);
-                  double laplacian_ratio_min = 0.5;
+                  double laplacian_ratio_min = parameters->continuation_min_decrease_rate;
                   if (quadratic_converge && parameters->Mach < 0.5)
                     {
                       laplacian_ratio_min =
-                        std::min (0.1,
+                        std::min (laplacian_ratio_min,
                                   std::pow (continuation_coefficient,
                                             parameters->laplacian_decrease_rate - 1.0)
                                  );
