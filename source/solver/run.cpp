@@ -893,7 +893,8 @@ namespace NSFEMSolver
 
                   continuation_coefficient =
                     std::min (laplacian_ratio_min * continuation_coefficient,
-                              parameters->laplacian_continuation * physical_residual_ratio * physical_residual_ratio);
+                              parameters->laplacian_continuation *
+                              std::pow (physical_residual_ratio, parameters->continuation_decrease_residual_power));
 
                   if (continuation_coefficient < parameters->laplacian_zero * mean_artificial_viscosity)
                     {
