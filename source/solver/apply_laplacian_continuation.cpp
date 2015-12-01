@@ -81,7 +81,7 @@ namespace NSFEMSolver
                 }
             }
 
-          if (parameters->use_local_laplacian_coefficient && (local_laplacian_coeff > 0.0))
+          if (parameters->use_local_laplacian_coefficient && (local_laplacian_coeff > 0.0) && (n_time_step > 0))
             {
               local_laplacian_coeff *= (global_h_min/cell->diameter());
             }
