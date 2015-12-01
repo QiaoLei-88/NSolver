@@ -120,7 +120,11 @@ namespace NSFEMSolver
 
         {
           const std::string prm_buf = prm.get ("continuation type");
-          if (prm_buf == "time")
+          if (prm_buf == "timeCFL")
+            {
+              continuation_type = CT_timeCFL;
+            }
+          else if (prm_buf == "time")
             {
               continuation_type = CT_time;
             }
