@@ -557,9 +557,14 @@ namespace NSFEMSolver
         // Set up continuation coefficients for pseudo time component and laplacian component
         switch (parameters->continuation_type)
           {
+          case Parameters::StabilizationParameters<dim>::CT_timeCFL:
+          {
+            // Works are done by calc_time_step().
+            // Nothing needs to do here.
+            break;
+          }
           case Parameters::StabilizationParameters<dim>::CT_time:
           {
-            //TODO: Implement CFL evolution and local time step size.
             continuation_coeff_time = continuation_coefficient;
             continuation_coeff_laplacian = 0.0;
             break;
