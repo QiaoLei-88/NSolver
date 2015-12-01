@@ -103,7 +103,7 @@ namespace NSFEMSolver
               // Borrow a parameter. This is not good. And I know its not good. Only this one time.
               parameters->NACA_cheating_refinement == 1)
             {
-              for (int n=0; n<2; ++n)
+              for (int n=0; n<1; ++n)
                 {
                   for (typename Triangulation<dim>::active_cell_iterator
                        cell = triangulation.begin_active();
@@ -122,7 +122,9 @@ namespace NSFEMSolver
                           cell->set_refine_flag();
                         }
                       // And the downstream floor region
-                      if (cell->center()[0] > 0.5 && cell->center()[1] < 0.2)
+                      if (cell->center()[0] > 0.5 &&
+                          cell->center()[0] < 1.2 &&
+                          cell->center()[1] < 0.2)
                         {
                           cell->set_refine_flag();
                         }
