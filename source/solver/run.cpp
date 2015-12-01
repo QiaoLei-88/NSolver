@@ -98,58 +98,77 @@ namespace NSFEMSolver
             }
           triangulation.set_boundary (2, *spherical_boundary);
 
-          if (parameters->manifold_circle == 2
-              &&
-              // Borrow a parameter. This is not good. And I know its not good. Only this one time.
-              parameters->NACA_cheating_refinement == 1)
+          if (parameters->manifold_circle == 2)
             {
-              for (int n=0; n<1; ++n)
+              // Borrow a parameter. This is not good. And I know its not good. Only this one time.
+              if (parameters->NACA_cheating_refinement == 1 ||
+                  parameters->NACA_cheating_refinement == 2)
                 {
+                  for (int n=0; n<1; ++n)
+                    {
+                      for (typename Triangulation<dim>::active_cell_iterator
+                           cell = triangulation.begin_active();
+                           cell != triangulation.end();
+                           ++cell)
+                        {
+                          // Refine a elliptic region twice
+                          const double center_x=0.0;
+                          const double center_y=0.0;
+                          const double half_axi_long  = 0.75;
+                          const double half_axi_short = 0.5;
+                          const double a = (cell->center()[0] - center_x)/half_axi_long;
+                          const double b = (cell->center()[1] - center_y)/half_axi_short;
+                          if ((a*a+b*b) < 1.0)
+                            {
+                              cell->set_refine_flag();
+                            }
+                          // And the downstream floor region
+                          if (cell->center()[0] > 0.5 &&
+                              cell->center()[0] < 1.2 &&
+                              cell->center()[1] < 0.2)
+                            {
+                              cell->set_refine_flag();
+                            }
+                          // And the shock region
+                          if (parameters->NACA_cheating_refinement == 2)
+                            if (cell->center()[0] > 0.25 &&
+                                cell->center()[0] < 0.50 &&
+                                cell->center()[1] < 1.0)
+                              {
+                                cell->set_refine_flag();
+                              }
+                        }
+                      triangulation.execute_coarsening_and_refinement();
+                    }
+
                   for (typename Triangulation<dim>::active_cell_iterator
                        cell = triangulation.begin_active();
                        cell != triangulation.end();
                        ++cell)
                     {
-                      // Refine a elliptic region twice
-                      const double center_x=0.0;
-                      const double center_y=0.0;
-                      const double half_axi_long  = 0.75;
-                      const double half_axi_short = 0.5;
-                      const double a = (cell->center()[0] - center_x)/half_axi_long;
-                      const double b = (cell->center()[1] - center_y)/half_axi_short;
-                      if ((a*a+b*b) < 1.0)
+                      // refine the two stagnation points once more
+                      Point<dim> front;
+                      front[0] = -0.5;
+                      Point<dim> rear;
+                      rear[0] = 0.5;
+                      if (front.distance (cell->center()) < 0.2
+                          ||
+                          rear.distance (cell->center()) < 0.2)
                         {
                           cell->set_refine_flag();
                         }
-                      // And the downstream floor region
-                      if (cell->center()[0] > 0.5 &&
-                          cell->center()[0] < 1.2 &&
-                          cell->center()[1] < 0.2)
-                        {
-                          cell->set_refine_flag();
-                        }
+                      // And the shock region
+                      if (parameters->NACA_cheating_refinement == 2)
+                        if (cell->center()[0] > 0.30 &&
+                            cell->center()[0] < 0.45 &&
+                            cell->center()[1] < 1.0)
+                          {
+                            cell->set_refine_flag();
+                          }
                     }
                   triangulation.execute_coarsening_and_refinement();
                 }
-              // refine the two stagnation points once more
-              for (typename Triangulation<dim>::active_cell_iterator
-                   cell = triangulation.begin_active();
-                   cell != triangulation.end();
-                   ++cell)
-                {
-                  Point<dim> front;
-                  front[0] = -0.5;
-                  Point<dim> rear;
-                  rear[0] = 0.5;
-                  if (front.distance (cell->center()) < 0.2
-                      ||
-                      rear.distance (cell->center()) < 0.2)
-                    {
-                      cell->set_refine_flag();
-                    }
-                }
-              triangulation.execute_coarsening_and_refinement();
-            } // End if (parameters->manifold_circle == 2 /* && cheating refinement == true*/)
+            } // End if (parameters->manifold_circle == 2)
         }
       if (parameters->NACA_foil > 0)
         {
