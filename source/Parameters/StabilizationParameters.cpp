@@ -66,6 +66,9 @@ namespace NSFEMSolver
         prm.declare_entry ("Laplacian continuation", "-1.0",
                            Patterns::Double(),
                            "Coefficient for Laplacian continuation");
+        prm.declare_entry ("compute laplacian coeff from Mach max", "false",
+                           Patterns::Bool(),
+                           "Compute laplacian coefficient from maximum Mach number among entire flow field");
         prm.declare_entry ("enable partial laplacian", "false",
                            Patterns::Bool(),
                            "Enable partial laplacian");
@@ -180,6 +183,7 @@ namespace NSFEMSolver
           = prm.get_bool ("CountArtiViscInResPhy");
 
         laplacian_continuation = prm.get_double ("Laplacian continuation");
+        compute_laplacian_coeff_from_Mach_max = prm.get_bool ("compute laplacian coeff from Mach max");
         enable_partial_laplacian = prm.get_bool ("enable partial laplacian");
         dodge_mesh_adaptation = prm.get_bool ("dodge mesh adaptation");
         laplacian_zero = prm.get_double ("Laplacian zero");

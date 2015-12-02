@@ -62,6 +62,7 @@ namespace NSFEMSolver
       bool   entropy_use_global_h_min;
       double diffusion_factor[EquationComponents<dim>::n_components];
       double laplacian_continuation;
+      bool compute_laplacian_coeff_from_Mach_max;
       /**
        * Use laplacian continuation only in region with large indicators.
        */
