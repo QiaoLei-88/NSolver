@@ -302,6 +302,8 @@ namespace NSFEMSolver
 
     double continuation_coeff_time;
     double continuation_coeff_laplacian;
+
+    double global_Mach_max;
   };
 
 }
