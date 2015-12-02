@@ -23,7 +23,7 @@ namespace NSFEMSolver
     const size_type new_position = vector_data_ptr.size();
     const size_type active_size = std::min (size, tria.n_active_cells());
     // Allocate 30% more memory for future using.
-    vector_data_ptr.resize (new_position + 1, std::vector<Number> (active_size * 1.3));
+    vector_data_ptr.push_back (std::vector<Number> (active_size * 1.3));
     std::copy (data_src, data_src+active_size, vector_data_ptr[new_position].begin());
 
     return (new_position);
