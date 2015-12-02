@@ -247,11 +247,7 @@ namespace NSFEMSolver
                 } // End for all subfaces
             } // End for all faces
         } // End for all active cells
-    if (parameters->laplacian_continuation > 0.0 &&
-        continuation_coeff_laplacian > 0.0)
-      {
-        apply_laplacian_continuation();
-      }
+    apply_laplacian_continuation();
     // After all this assembling, notify the Trilinos matrix object that the
     // matrix is done:
     system_matrix.compress (VectorOperation::add);
