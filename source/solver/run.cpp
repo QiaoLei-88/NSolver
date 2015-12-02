@@ -956,6 +956,7 @@ namespace NSFEMSolver
             const QGauss<dim> quadrature_error (parameters->error_quadrature_degree);
             FEValues<dim>  fe_v (*mapping_ptr, fe, quadrature_error, update_flags);
 
+            double local_Mach_max = std::numeric_limits<double>::min();
             // Then integrate error over all cells,
             typename DoFHandler<dim>::active_cell_iterator
             cell = dof_handler.begin_active(),
@@ -975,6 +976,15 @@ namespace NSFEMSolver
                   fe_v.get_function_values (current_solution, solution_values);
                   fe_v.get_function_gradients (current_solution, solution_grad);
                   fe_v.get_function_values (old_solution, old_solution_values);
+
+                  for (unsigned int q=0; q<n_q_points; ++q)
+                    {
+                      local_Mach_max =
+                        std::max (local_Mach_max,
+                                  EulerEquations<dim>::compute_velocity_magnitude (solution_values[q]) /
+                                  EulerEquations<dim>::compute_sound_speed (solution_values[q])
+                                 );
+                    }
 
                   std::vector <typename MMS<dim>::F_V> mms_source (n_q_points);
                   std::vector <typename MMS<dim>::F_V> mms_value (n_q_points);
@@ -1016,6 +1026,9 @@ namespace NSFEMSolver
                         }
                     }
                 }
+
+            global_Mach_max = Utilities::MPI::max (local_Mach_max, mpi_communicator);
+
             if (parameters->n_mms == 1)
               {
                 pcout << "  Error Info:\n";
