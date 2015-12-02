@@ -900,39 +900,6 @@ namespace NSFEMSolver
             const bool continuation_coefficient_vanished =
               (continuation_coefficient < 1e-100);
 
-            // TODO: refactoring needed.
-            // Never decease continuation_coefficient and do mesh refine together.
-            if (! (parameters->dodge_mesh_adaptation) || !is_refine_step)
-              {
-                old_continuation_coefficient = continuation_coefficient;
-                {
-                  n_step_laplacian_vanished += (continuation_coefficient>0.0);
-                  double laplacian_ratio_min = parameters->continuation_min_decrease_rate;
-                  if (quadratic_converge && parameters->Mach < 0.5)
-                    {
-                      laplacian_ratio_min =
-                        std::min (laplacian_ratio_min,
-                                  std::pow (continuation_coefficient,
-                                            parameters->laplacian_decrease_rate - 1.0)
-                                 );
-                    }
-
-                  continuation_coefficient =
-                    std::min (laplacian_ratio_min * continuation_coefficient,
-                              parameters->laplacian_continuation *
-                              std::pow (physical_residual_ratio, parameters->continuation_decrease_residual_power));
-
-                  if (continuation_coefficient < parameters->laplacian_zero * mean_artificial_viscosity)
-                    {
-                      if (n_step_laplacian_vanished > 65500)
-                        {
-                          n_step_laplacian_vanished = n_time_step;
-                        }
-                      continuation_coefficient = 0.0;
-                    }
-                }
-              }
-
             pcout << "res_norm_total = " << res_norm_total << std::endl;
             pcout << "continuation_coefficient = " << continuation_coefficient << std::endl;
 
@@ -1053,6 +1020,52 @@ namespace NSFEMSolver
                     pcout << 0.5 * std::log10 (mms_error_H1_semi[ic]) << ' ';
                   }
                 pcout << std::endl;
+              }
+
+            // TODO: refactoring needed.
+            // Never decease continuation_coefficient and do mesh refine together.
+            if (! (parameters->dodge_mesh_adaptation) || !is_refine_step)
+              {
+                old_continuation_coefficient = continuation_coefficient;
+                {
+                  n_step_laplacian_vanished += (continuation_coefficient>0.0);
+                  double laplacian_ratio_min = parameters->continuation_min_decrease_rate;
+                  if (quadratic_converge && parameters->Mach < 0.5)
+                    {
+                      laplacian_ratio_min =
+                        std::min (laplacian_ratio_min,
+                                  std::pow (continuation_coefficient,
+                                            parameters->laplacian_decrease_rate - 1.0)
+                                 );
+                    }
+
+                  double referencing_continuation_coeff
+                    =  parameters->laplacian_continuation;
+                  if (parameters->compute_laplacian_coeff_from_Mach_max)
+                    {
+                      pcout << "global_Mach_max = " << global_Mach_max << std::endl;
+                      const double effective_Mach_max
+                        = std::min (1.0, global_Mach_max);
+                      const double &Mach_infty = parameters->Mach;
+                      referencing_continuation_coeff *=
+                        effective_Mach_max * effective_Mach_max /
+                        Mach_infty / Mach_infty;
+                    }
+
+                  continuation_coefficient =
+                    std::min (laplacian_ratio_min * continuation_coefficient,
+                              referencing_continuation_coeff *
+                              std::pow (physical_residual_ratio, parameters->continuation_decrease_residual_power));
+
+                  if (continuation_coefficient < parameters->laplacian_zero * mean_artificial_viscosity)
+                    {
+                      if (n_step_laplacian_vanished > 65500)
+                        {
+                          n_step_laplacian_vanished = n_time_step;
+                        }
+                      continuation_coefficient = 0.0;
+                    }
+                }
               }
 
             // Only try to switch flux type when current and target flux
