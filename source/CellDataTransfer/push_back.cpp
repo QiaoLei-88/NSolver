@@ -17,13 +17,14 @@ namespace NSFEMSolver
   CellDataTransfer<dim, Number>::push_back (ValueType *const data_src,
                                             const size_type  size)
   {
-    Assert (size <= active_data_size,
+    Assert (size <= tria.n_active_cells(),
             ExcMessage ("Not enough data."));
 
     const size_type new_position = vector_data_ptr.size();
+    const size_type active_size = std::min (size, tria.n_active_cells());
     // Allocate 30% more memory for future using.
-    vector_data_ptr.resize (new_position + 1, std::vector<Number> (size * 1.3));
-    std::copy (data_src, data_src+size, vector_data_ptr[new_position].begin());
+    vector_data_ptr.resize (new_position + 1, std::vector<Number> (active_size * 1.3));
+    std::copy (data_src, data_src+active_size, vector_data_ptr[new_position].begin());
 
     return (new_position);
   }
