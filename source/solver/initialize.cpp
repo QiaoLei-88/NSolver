@@ -59,7 +59,7 @@ namespace NSFEMSolver
         //   Y up
         //   Z side
 
-        // Compute all three velocity components no matter who may space dimensions there are.
+        // Compute all three velocity components no matter how may space dimensions there are.
         std_cxx11::array<double,3> velocity_infty;
         velocity_infty[2] = parameters->Mach * std::sin (parameters->angle_of_side_slip);
         const double velocity_in_symm_plan =

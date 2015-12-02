@@ -23,7 +23,7 @@ namespace NSFEMSolver
     typedef unsigned int size_type;
 
     /**
-     * The constructor first set all user indices on active cells if @p tria_in
+     * The constructor first set all user indices on active cells of @p tria_in
      * to @p active_cell_index, then connect proper member function to
      * corresponding signals of @p tria_in. So that data attached to active cells
      * could be transfered during cell refinement and coarsening.
@@ -37,11 +37,11 @@ namespace NSFEMSolver
 
     /**
      * Receive a vector via starting address @p data_src and length @size
-     * so that its contents could be transfer the new mesh during mesh adaptation.
+     * so that its contents could be transfered to the new mesh during mesh adaptation.
      * The vector handed in will be assigned an index automatically witch is the
      * return value of this function.
      * The index starts from 0 and increases 1 after another so assign multiple
-     * vectors is allowed and value types of the vectors don't have to be same.
+     * vectors is allowed and value types of the vectors don't have to be the same.
      * You need to provide correct index to get_transfered_data() to retrieve
      * the transfered data.
      *
@@ -50,7 +50,7 @@ namespace NSFEMSolver
      *
      * @note Value of @p size should be no less than @p tria.n_active_cell().
      * @p tria is the triangulation used to initialize the current object. All
-     * extra data in @p data_src will be ignored. Size check only performed in
+     * extra data in @p data_src will be ignored. Size check is only performed in
      * DEBUG mode.
      *
      * @note It is safe to destroy vector @p data_src after this function call.
@@ -64,7 +64,7 @@ namespace NSFEMSolver
     size_type push_back (ValueType *const data_src, const size_type size);
 
     /**
-     * Retrieve transfered data if index @index to vector with starting address @p data_src.
+     * Retrieve transfered data of index @index to vector with starting address @p data_src.
      *
      * @note Please make the receiving vector has enough space. No check is provided
      * in this function.
@@ -111,6 +111,7 @@ namespace NSFEMSolver
     /**
      * Internal cache for all handed-in data and transfered data.
      */
+    // TODO: use vector of pointer for efficiency.
     std::vector<std::vector<Number> > vector_data_ptr;
 
     /**
