@@ -61,7 +61,7 @@ namespace NSFEMSolver
      * type <tt>Number</tt>.
      */
     template <typename ValueType>
-    size_type push_back (ValueType *const data_src, const size_type size);
+    unsigned int push_back (ValueType *const data_src, const size_type size);
 
     /**
      * Retrieve transfered data of index @index to vector with starting address @p data_src.

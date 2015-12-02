@@ -13,7 +13,7 @@ namespace NSFEMSolver
 
   template<int dim, typename Number>
   template <typename ValueType>
-  typename CellDataTransfer<dim, Number>::size_type
+  unsigned int
   CellDataTransfer<dim, Number>::push_back (ValueType *const data_src,
                                             const size_type  size)
   {
@@ -30,19 +30,19 @@ namespace NSFEMSolver
 
 // Explicit instantiation
   template
-  typename CellDataTransfer<2, double>::size_type
+  unsigned int
   CellDataTransfer<2, double>::push_back<double> (double *const   data_src,
                                                   const size_type size);
   template
-  typename CellDataTransfer<2, double>::size_type
+  unsigned int
   CellDataTransfer<2, double>::push_back<float> (float *const    data_src,
                                                  const size_type size);
   template
-  typename CellDataTransfer<2, double>::size_type
+  unsigned int
   CellDataTransfer<3, double>::push_back<double> (double *const   data_src,
                                                   const size_type size);
   template
-  typename CellDataTransfer<2, double>::size_type
+  unsigned int
   CellDataTransfer<3, double>::push_back<float> (float *const    data_src,
                                                  const size_type size);
 #include "CellDataTransfer.inst"
