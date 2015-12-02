@@ -17,8 +17,7 @@ namespace NSFEMSolver
   CellDataTransfer<dim, Number>::push_back (ValueType *const data_src,
                                             const size_type  size)
   {
-    Assert (size <= tria.n_active_cells(),
-            ExcMessage ("Not enough data."));
+    Assert (size >= tria.n_active_cells(), ExcMessage ("Not enough data."));
 
     const size_type new_position = vector_data_ptr.size();
     const size_type active_size = std::min (size, tria.n_active_cells());
