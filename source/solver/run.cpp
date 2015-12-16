@@ -750,7 +750,7 @@ namespace NSFEMSolver
             //                                 is evaluated after '++nonlin_iter'.
             if (linear_solver_diverged
                 || solution_diverged
-                || nonlin_iter >= nonlin_iter_threshold)
+                || nonlin_iter > nonlin_iter_threshold)
               {
                 newton_iter_converged = false;
                 pcout << "  Newton iteration not converge in " << nonlin_iter_threshold << " steps.\n";
