@@ -193,7 +193,7 @@ namespace NSFEMSolver
 
           if (parameters->NACA_cheating_refinement == 1)
             {
-              for (int n=0; n<2; ++n)
+              for (int n=0; n<1; ++n)
                 {
                   // Refine cell in a elliptic around the foil twice
                   for (typename Triangulation<dim>::active_cell_iterator
