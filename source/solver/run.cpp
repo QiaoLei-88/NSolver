@@ -435,7 +435,6 @@ namespace NSFEMSolver
 
     predictor = old_solution;
 
-    bool newton_iter_converged (false);
     bool CFL_number_increased (false);
     int index_linear_search_length (0);
     const double linear_search_length[12] = {1.0, 0.8, 0.6, 0.4, 0.2, 0.1, 0.05, 0.025, 0.0125, 1.2, 1.5, 2.0};
@@ -518,8 +517,6 @@ namespace NSFEMSolver
         // happen; however, it is generally a very useful tool when one wants
         // to find out where an error occurred.
 
-
-        newton_iter_converged = false;
         double terminal_res = 0.0;
 
         nonlin_iter = 0;
@@ -618,7 +615,9 @@ namespace NSFEMSolver
             break;
           }
           }
-        do // Newton iteration
+
+        bool newton_iter_converged = false;
+        for (bool terminate_newton_iteration = false; !terminate_newton_iteration;)
           {
             computing_timer.enter_subsection ("3:Assemble Newton system");
             system_matrix = 0;
@@ -727,40 +726,36 @@ namespace NSFEMSolver
                 << std::setw (19) << newton_update_norm
                 << '\n';
             // Check result.
-            newton_iter_converged = (res_norm < terminal_res);
+            if (res_norm < terminal_res)
+              {
+                newton_iter_converged = true;
+                terminate_newton_iteration = true;
+              }
 
             if (linear_solver_diverged)
               {
                 pcout << "  Linear solver diverged..\n";
+                terminate_newton_iteration = true;
               }
             if (solution_diverged)
               {
                 pcout << "  Solution diverged..\n";
+                terminate_newton_iteration = true;
               }
             // May 'newton_iter_converged' and 'linear_solver_diverged' be true
             // together? I don't think so but not sure.
 
-
-            // If linear solver diverged or Newton iteration not converge in
-            // a reasonable number of iterations, we terminate this time step and set
-            // 'newton_iter_converged' to false. Then further action will be taken
-            // to handle this situation.
-
-            //                                 Using '>='  here because this condition
-            //                                 is evaluated after '++nonlin_iter'.
-            if (linear_solver_diverged
-                || solution_diverged
-                || nonlin_iter >= nonlin_iter_threshold)
+            //Using '>=' here because this condition is evaluated after '++nonlin_iter'.
+            if (nonlin_iter >= nonlin_iter_threshold)
               {
-                newton_iter_converged = false;
-                pcout << "  Newton iteration not converge in " << nonlin_iter_threshold << " steps.\n";
+                terminate_newton_iteration = true;
+                if (!newton_iter_converged)
+                  {
+                    pcout << "  Newton iteration not converge in " << nonlin_iter_threshold << " steps.\n";
+                  }
               }
             computing_timer.leave_subsection ("5:Postprocess Newton solution");
-          }
-        while ((!solution_diverged)
-               && (!newton_iter_converged)
-               && nonlin_iter < nonlin_iter_threshold
-               && (!linear_solver_diverged));
+          } // End of Newton iteration loop
 
         if (newton_iter_converged)
           {
