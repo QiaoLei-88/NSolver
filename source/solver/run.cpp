@@ -761,10 +761,9 @@ namespace NSFEMSolver
           {
             computing_timer.enter_subsection ("6:Postprocess time step");
             is_refine_step = !is_refine_step;
-
+            /*****************compute and output  wall force *******************/
             WallForce wall_force;
             integrate_force (wall_force);
-
 
             pcout << "  Lift and drag:" << std::endl
                   << "  " << wall_force.lift
@@ -786,8 +785,7 @@ namespace NSFEMSolver
               }
             pcout << std::endl;
 
-
-            //Output time marching history
+            /************************ Write iteration log **********************/
             time_advance_history_file
                 << std::setw (7) << n_total_iter << ' '
                 << std::setw (10) << triangulation.n_global_active_cells() << ' '
@@ -802,20 +800,7 @@ namespace NSFEMSolver
                 << std::setw (15) << global_time_step_size << ' '
                 << std::setw (13) << CFL_number << ' ';
 
-            // We only get to this point if the Newton iteration has converged, so
-            // do various post convergence tasks here:
-            //
-            // First, we update the time and produce graphical output if so
-            // desired. Then we update a predictor for the solution at the next
-            // time step by approximating $\mathbf w^{n+1}\approx \mathbf w^n +
-            // \delta t \frac{\partial \mathbf w}{\partial t} \approx \mathbf w^n
-            // + \delta t \; \frac{\mathbf w^n-\mathbf w^{n-1}}{\delta t} = 2
-            // \mathbf w^n - \mathbf w^{n-1}$ to try and make adaptivity work
-            // better.  The idea is to try and refine ahead of a front, rather
-            // than stepping into a coarse set of elements and smearing the
-            // old_solution.  This simple time extrapolation does the job. With
-            // this, we then refine the mesh if so desired by the user, and
-            // finally continue on with the next time step:
+            /********************** Update time and counter ********************/
             ++converged_newton_iters;
             if (!parameters->is_steady)
               {
@@ -826,6 +811,8 @@ namespace NSFEMSolver
             terminate_time_stepping = terminate_time_stepping ||
                                       (parameters->is_steady &&
                                        n_time_step > parameters->final_time);
+
+            /********************** Determine mesh adaption ********************/
             bool do_refine = (
                                (parameters->is_steady)
                                ?
@@ -846,6 +833,7 @@ namespace NSFEMSolver
                 compute_refinement_indicators();
               }
 
+            /********************* output field visualization ******************/
             if (parameters->is_steady)
               {
                 if (n_time_step >= next_output_time_step)
@@ -863,6 +851,7 @@ namespace NSFEMSolver
                   }
               }
 
+            /************************ Compute CFL number ***********************/
             if (parameters-> is_steady)
               {
                 if (! (parameters->dodge_mesh_adaptation) || is_refine_step)
@@ -892,12 +881,15 @@ namespace NSFEMSolver
                 CFL_number_increased = true;
                 index_linear_search_length = 0;
               }
+
+            /******************** Monitor continuation status *****************/
             const bool continuation_coefficient_vanished =
               (continuation_coefficient < 1e-100);
 
             pcout << "res_norm_total = " << res_norm_total << std::endl;
             pcout << "continuation_coefficient = " << continuation_coefficient << std::endl;
 
+            /******************** Integrate field error norm ******************/
             std_cxx11::array<double, EquationComponents<dim>::n_components> time_advance_l2_norm;
             for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
               {
@@ -1017,6 +1009,7 @@ namespace NSFEMSolver
                 pcout << std::endl;
               }
 
+            /****************** Update continuation coefficient ****************/
             // TODO: refactoring needed.
             // Never decease continuation_coefficient and do mesh refine together.
             if (! (parameters->dodge_mesh_adaptation) || !is_refine_step)
@@ -1063,6 +1056,7 @@ namespace NSFEMSolver
                 }
               }
 
+            /************************* Switch Flux type ************************/
             // Only try to switch flux type when current and target flux
             // types are different.
             bool swith_flux =
@@ -1111,6 +1105,7 @@ namespace NSFEMSolver
                                       (parameters->is_steady &&
                                        time_march_converged);
 
+            /************************* To next time step ***********************/
             old_old_solution = old_solution;
             old_solution = current_solution;
             if (do_refine)
