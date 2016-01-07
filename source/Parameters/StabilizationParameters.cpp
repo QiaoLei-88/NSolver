@@ -38,7 +38,7 @@ namespace NSFEMSolver
                            Patterns::Bool(),
                            "Use global minimum cell size for entropy viscosity");
 
-        prm.declare_entry ("continuation type", "time",
+        prm.declare_entry ("continuation type", "timeCFL",
                            Patterns::Anything(),
                            "continuation type");
 
