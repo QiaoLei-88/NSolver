@@ -655,8 +655,10 @@ namespace NSFEMSolver
                     physical_residual_first = physical_res_norm;
                   }
                 residual_for_output = right_hand_side;
-                terminal_res =
-                  res_norm * std::pow (10.0, parameters->nonlinear_tolerance);
+                terminal_res = parameters->nonlinear_tolerance >= 0.0 ?
+                               parameters->nonlinear_tolerance
+                               :
+                               res_norm * std::pow (10.0, parameters->nonlinear_tolerance);
                 if (parameters->laplacian_continuation > 0.0)
                   {
                     if (continuation_coefficient > 0.0)

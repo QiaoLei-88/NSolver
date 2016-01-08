@@ -36,6 +36,13 @@ namespace NSFEMSolver
       double final_time;
       unsigned int max_Newton_iter;
       double time_march_tolerance;
+
+      /**
+       * The tolerance to end Newton iteration. This parameter will be interpreted
+       * into different means according to its sign. If a positive value is passed in,
+       * it will be used as absolute tolerance. If a negative value is passed in,
+       * it will be used as a relative order to drop.
+       */
       double nonlinear_tolerance;
 
       /**

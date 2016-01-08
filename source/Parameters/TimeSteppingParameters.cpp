@@ -32,9 +32,9 @@ namespace NSFEMSolver
         prm.declare_entry ("time march tolerance", "-10.0",
                            Patterns::Double(),
                            "Terminate time marching when log10 of error L2 norm is less than this value");
-        prm.declare_entry ("nonlinear tolerance", "-10.0",
+        prm.declare_entry ("nonlinear tolerance", "1e-10",
                            Patterns::Double(),
-                           "Terminate Newton iteration log10 of error L2 norm is less than this value");
+                           "Error tolerance to terminate Newton iteration");
 
 
         prm.declare_entry ("theta scheme value", "0.5",
