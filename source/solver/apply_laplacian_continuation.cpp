@@ -127,59 +127,66 @@ namespace NSFEMSolver
             }
           if (local_time_coeff > 0.0)
             {
-              std::vector<Vector<double> > W (n_q_points,
-                                              Vector<double> (EquationComponents<dim>::n_components));
-              std::vector<Vector<double> > W_old (n_q_points,
-                                                  Vector<double> (EquationComponents<dim>::n_components));
+              Table<2,DFADD > W (n_q_points, EquationComponents<dim>::n_components);
+              Table<2,double> W_old (n_q_points, EquationComponents<dim>::n_components);
+              std::vector<DFADD> independent_local_dof_values (dofs_per_cell);
+              for (unsigned int i=0; i<dofs_per_cell; ++i)
+                {
+                  independent_local_dof_values[i] = current_solution[dof_indices[i]];
+                  independent_local_dof_values[i].diff (i, dofs_per_cell);
+                }
               // Use mass matrix, i.e., pseudo time continuation
-              std_cxx11::array<double, EquationComponents<dim>::n_components> w_conservative;
+              std_cxx11::array<DFADD, EquationComponents<dim>::n_components> w_conservative;
               std_cxx11::array<double, EquationComponents<dim>::n_components> w_conservative_old;
 
-              if (parameters->count_solution_diff_in_residual)
-                {
-                  fe_v.get_function_values (current_solution, W);
-                  fe_v.get_function_values (current_solution, W_old);
-                }
+              {
+                // Get function values
+                for (unsigned int q=0; q<n_q_points; ++q)
+                  for (unsigned int c=0; c<EquationComponents<dim>::n_components; ++c)
+                    {
+                      W[q][c] = 0.0;
+                      W_old[q][c] = 0.0;
+                    }
+
+                for (unsigned int q=0; q<n_q_points; ++q)
+                  for (unsigned int i=0; i<dofs_per_cell; ++i)
+                    {
+                      const unsigned int c = fe_v.get_fe().system_to_component_index (i).first;
+
+                      W[q][c] += independent_local_dof_values[i] *
+                                 fe_v.shape_value_component (i, q, c);
+                      W_old[q][c] += old_solution (dof_indices[i]) *
+                                     fe_v.shape_value_component (i, q, c);
+                    }
+              }
 
               for (unsigned int i=0; i<dofs_per_cell; ++i)
                 {
-                  double residual = 0.0;
+                  DFADD residual = 0.0;
                   const unsigned int c = fe_v.get_fe().system_to_component_index (i).first;
-                  if (parameters->count_solution_diff_in_residual)
+
+                  for (unsigned int q=0; q<n_q_points; ++q)
                     {
-                      for (unsigned int q=0; q<n_q_points; ++q)
-                        {
-                          EulerEquations<dim>::compute_conservative_vector (W[q], w_conservative);
-                          EulerEquations<dim>::compute_conservative_vector (W_old[q], w_conservative_old);
-                          residual += local_time_coeff *
-                                      (w_conservative[c] - w_conservative_old[c]) *
-                                      fe_v.shape_value_component (i, q, c) *
-                                      fe_v.JxW (q);
-                        }
+                      EulerEquations<dim>::compute_conservative_vector (W[q], w_conservative);
+                      EulerEquations<dim>::compute_conservative_vector (W_old[q], w_conservative_old);
+                      residual += local_time_coeff *
+                                  (w_conservative[c] - w_conservative_old[c]) *
+                                  fe_v.shape_value_component (i, q, c) *
+                                  fe_v.JxW (q);
                     }
-                  std::vector<double> matrix_row (dofs_per_cell, 0.0);
-                  for (unsigned int j=0; j<dofs_per_cell; ++j)
-                    {
-                      if (c == fe_v.get_fe().system_to_component_index (j).first)
-                        {
-                          for (unsigned int q=0; q<n_q_points; ++q)
-                            {
-                              matrix_row[j]  += local_time_coeff *
-                                                fe_v.shape_value_component (j, q, c) *
-                                                fe_v.shape_value_component (i, q, c) *
-                                                fe_v.JxW (q);
-                            }
-                        }
-                    }
+
                   system_matrix.add (dof_indices[i], dof_indices.size(),
-                                     & (dof_indices[0]), & (matrix_row[0]));
-                  right_hand_side (dof_indices[i]) -= residual;
+                                     & (dof_indices[0]), residual.dx());
+                  if (!parameters->is_steady || parameters->count_solution_diff_in_residual)
+                    {
+                      right_hand_side (dof_indices[i]) -= residual.val();
+                    }
                   if (!parameters->is_steady)
                     {
-                      physical_residual (dof_indices[i]) -= residual;
+                      physical_residual (dof_indices[i]) -= residual.val();
                     }
                 }
-            } // End of if (use_laplacian) .. else
+            } // End of if (local_time_coeff > 0.0)
         }
     pcout << "n_laplacian = "
           << Utilities::MPI::sum (n_laplacian, mpi_communicator)
