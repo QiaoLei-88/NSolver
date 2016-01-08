@@ -28,13 +28,6 @@ namespace NSFEMSolver
                                      | update_JxW_values;
     FEValues<dim> fe_v (*mapping_ptr, fe, quadrature, update_flags);
 
-    std::vector<std::vector<Tensor<1,dim> > > grad_W (n_q_points,
-                                                      std::vector<Tensor<1,dim> > (EquationComponents<dim>::n_components));
-    std::vector<Vector<double> > W (n_q_points,
-                                    Vector<double> (EquationComponents<dim>::n_components));
-    std::vector<Vector<double> > W_old (n_q_points,
-                                        Vector<double> (EquationComponents<dim>::n_components));
-
     // Find out global minimum cell size
     double local_h_min = std::numeric_limits<double>::max();
     if (parameters->use_local_time_step_size ||
@@ -98,6 +91,8 @@ namespace NSFEMSolver
             }
           if (local_laplacian_coeff > 0.0)
             {
+              std::vector<std::vector<Tensor<1,dim> > > grad_W (n_q_points,
+                                                                std::vector<Tensor<1,dim> > (EquationComponents<dim>::n_components));
               // Use laplacian term
               fe_v.get_function_gradients (current_solution, grad_W);
               for (unsigned int i=0; i<dofs_per_cell; ++i)
@@ -132,6 +127,10 @@ namespace NSFEMSolver
             }
           if (local_time_coeff > 0.0)
             {
+              std::vector<Vector<double> > W (n_q_points,
+                                              Vector<double> (EquationComponents<dim>::n_components));
+              std::vector<Vector<double> > W_old (n_q_points,
+                                                  Vector<double> (EquationComponents<dim>::n_components));
               // Use mass matrix, i.e., pseudo time continuation
               std_cxx11::array<double, EquationComponents<dim>::n_components> w_conservative;
               std_cxx11::array<double, EquationComponents<dim>::n_components> w_conservative_old;
