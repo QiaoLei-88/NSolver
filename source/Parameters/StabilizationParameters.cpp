@@ -46,7 +46,7 @@ namespace NSFEMSolver
                            Patterns::Bool(),
                            "use local (cell size related) laplacian coefficient");
 
-        prm.declare_entry ("CountSolDiffInRes", "false",
+        prm.declare_entry ("CountSolDiffInRes", "true",
                            Patterns::Bool(),
                            "Count solution difference term in residual");
         prm.declare_entry ("CountArtiViscInResPhy", "false",
