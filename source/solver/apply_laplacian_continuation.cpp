@@ -87,7 +87,10 @@ namespace NSFEMSolver
           if (parameters->continuation_type == Parameters::StabilizationParameters<dim>::CT_timeCFL)
             {
               local_laplacian_coeff = 0.0;
-              local_time_coeff = 1.0/local_time_step_size[cell->active_cell_index()];
+              local_time_coeff = parameters->use_local_time_step_size ?
+                                 1.0/local_time_step_size[cell->active_cell_index()]
+                                 :
+                                 1.0/global_time_step_size;
             }
           if (local_laplacian_coeff > 0.0)
             {
