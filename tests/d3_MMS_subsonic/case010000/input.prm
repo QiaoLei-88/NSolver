@@ -77,7 +77,7 @@ subsection time stepping
   set reference time step           = -1 # simulation time step
   set solution extrapolation length = 0.0
   set theta scheme value            = 1.0
-  set nonlinear tolerance           = -3
+  set nonlinear tolerance           = 1e-3
 end
 
 subsection linear solver
