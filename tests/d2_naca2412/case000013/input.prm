@@ -15,11 +15,19 @@ set mesh format = gmsh
 set scale mesh = 0.001
 
 subsection stabilization parameters
-  set diffusion type         = const
+  set diffusion type           = entropy # entropy # entropy_DRB # const
+  set entropy use global h min = false #false #true
+  set entropy visc cLinear = 1e+3 # 0.007
+  set entropy visc cE = 0.015
+  set diffusion power = 2.0
   set diffusion coefficient  = 0.0
+  set CountArtiViscInResPhy  = true
+  set continuation type      = laplacian
+  set enable partial laplacian = false
   set Laplacian continuation = 0.1
-  set Laplacian zero         = 1e-16
-  #set Laplacian Newton tolerance = 0.01
+  set Laplacian zero         = 1e-2
+  set continuation decrease residual power = 1.25
+  set Laplacian Newton tolerance = 0.1
 end
 
 # --------------------------------------------------
