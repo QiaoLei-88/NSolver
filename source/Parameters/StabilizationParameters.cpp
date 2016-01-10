@@ -37,6 +37,9 @@ namespace NSFEMSolver
         prm.declare_entry ("entropy use global h min", "false",
                            Patterns::Bool(),
                            "Use global minimum cell size for entropy viscosity");
+        prm.declare_entry ("entropy with rho max", "true",
+                           Patterns::Bool(),
+                           "Scale entropy viscosity with local maximum density");
 
         prm.declare_entry ("continuation type", "timeCFL",
                            Patterns::Anything(),
@@ -137,6 +140,7 @@ namespace NSFEMSolver
         entropy_visc_cE = prm.get_double ("entropy visc cE");
         entropy_visc_cLinear = prm.get_double ("entropy visc cLinear");
         entropy_use_global_h_min = prm.get_bool ("entropy use global h min");
+        entropy_with_rho_max = prm.get_bool ("entropy with rho max");
 
         {
           const std::string prm_buf = prm.get ("continuation type");
