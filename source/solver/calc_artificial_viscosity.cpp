@@ -147,6 +147,10 @@ namespace NSFEMSolver
                   {
                     dominant_viscosity[cell->active_cell_index()] = 1.0;
                   }
+                if (parameters->entropy_with_rho_max)
+                  {
+                    artificial_viscosity[cell->active_cell_index()] *= rho_max;
+                  }
               } // End if cell is locally owned
           } // End for active cells
 
