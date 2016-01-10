@@ -1,3 +1,2 @@
 Change linear solver form direct to gmres.
-Known to crash.
-
+Truncate end time to 20 to save test time.
