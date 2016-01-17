@@ -628,10 +628,24 @@ EulerEquations<dim>::compute_Wminus (const Boundary::Type &boundary_kind,
         {
           vdotn += Wplus[d]*normal_vector[d];
         }
-      for (unsigned int ic = first_velocity_component, id=0; id<dim; ++ic, ++id)
+      if (parameters->laplacian_continuation > 0.0)
         {
-          requested_boundary_values[ic] = Wplus[ic] - 2.0*vdotn*normal_vector[id];
+          for (unsigned int ic = first_velocity_component, id=0; id<dim; ++ic, ++id)
+            {
+              // With laplacian_continuation, boundary flux is computed from demanded
+              // boundary condition directly rather than from numerical flux.
+              // So here we need to use tangential velocity instead of mirrored velocity.
+              requested_boundary_values[ic] = Wplus[ic] - vdotn*normal_vector[id];
+            }
         }
+      else
+        {
+          for (unsigned int ic = first_velocity_component, id=0; id<dim; ++ic, ++id)
+            {
+              requested_boundary_values[ic] = Wplus[ic] - 2.0*vdotn*normal_vector[id];
+            }
+        }
+
       requested_boundary_values[density_component] = Wplus[density_component];
       requested_boundary_values[pressure_component] = Wplus[pressure_component];
 
