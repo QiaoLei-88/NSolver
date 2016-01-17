@@ -54,6 +54,7 @@ namespace NSFEMSolver
       bool use_local_laplacian_coefficient;
       bool count_solution_diff_in_residual;
       bool count_artificial_visc_term_in_phisical_residual;
+      bool use_conservative_variables_for_time_diff;
 
       double diffusion_power;
       double diffusion_coefficoent;

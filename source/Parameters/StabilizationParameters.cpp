@@ -55,6 +55,9 @@ namespace NSFEMSolver
         prm.declare_entry ("CountArtiViscInResPhy", "false",
                            Patterns::Bool(),
                            "Count artificial viscosity term in physical residual");
+        prm.declare_entry ("use conservative variables for time difference", "true",
+                           Patterns::Bool(),
+                           "Use conservative variables for time difference in time marching");
 
         prm.declare_entry ("continuation min decrease rate","0.5",
                            Patterns::Double(),
@@ -185,6 +188,9 @@ namespace NSFEMSolver
 
         count_artificial_visc_term_in_phisical_residual
           = prm.get_bool ("CountArtiViscInResPhy");
+
+        use_conservative_variables_for_time_diff
+          = prm.get_bool ("use conservative variables for time difference");
 
         laplacian_continuation = prm.get_double ("Laplacian continuation");
         compute_laplacian_coeff_from_Mach_max = prm.get_bool ("compute laplacian coeff from Mach max");
