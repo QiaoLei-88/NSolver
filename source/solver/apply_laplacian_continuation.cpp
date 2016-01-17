@@ -168,14 +168,27 @@ namespace NSFEMSolver
                   DFADD residual = 0.0;
                   const unsigned int c = fe_v.get_fe().system_to_component_index (i).first;
 
-                  for (unsigned int q=0; q<n_q_points; ++q)
+                  if (parameters->use_conservative_variables_for_time_diff)
                     {
-                      EulerEquations<dim>::compute_conservative_vector (W[q], w_conservative);
-                      EulerEquations<dim>::compute_conservative_vector (W_old[q], w_conservative_old);
-                      residual += local_time_coeff *
-                                  (w_conservative[c] - w_conservative_old[c]) *
-                                  fe_v.shape_value_component (i, q, c) *
-                                  fe_v.JxW (q);
+                      for (unsigned int q=0; q<n_q_points; ++q)
+                        {
+                          EulerEquations<dim>::compute_conservative_vector (W[q], w_conservative);
+                          EulerEquations<dim>::compute_conservative_vector (W_old[q], w_conservative_old);
+                          residual += local_time_coeff *
+                                      (w_conservative[c] - w_conservative_old[c]) *
+                                      fe_v.shape_value_component (i, q, c) *
+                                      fe_v.JxW (q);
+                        }
+                    }
+                  else
+                    {
+                      for (unsigned int q=0; q<n_q_points; ++q)
+                        {
+                          residual += local_time_coeff *
+                                      (W[q][c] - W_old[q][c]) *
+                                      fe_v.shape_value_component (i, q, c) *
+                                      fe_v.JxW (q);
+                        }
                     }
 
                   system_matrix.add (dof_indices[i], dof_indices.size(),
