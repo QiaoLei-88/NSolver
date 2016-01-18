@@ -552,6 +552,7 @@ namespace NSFEMSolver
             pcout << " *** laplacian step ***" << std::endl;
           }
         // Set up continuation coefficients for pseudo time component and laplacian component
+        pcout << "continuation_coefficient = " << continuation_coefficient << std::endl;
         switch (parameters->continuation_type)
           {
           case Parameters::StabilizationParameters<dim>::CT_timeCFL:
@@ -889,8 +890,6 @@ namespace NSFEMSolver
               (continuation_coefficient < 1e-100);
 
             pcout << "res_norm_total = " << res_norm_total << std::endl;
-            pcout << "continuation_coefficient = " << continuation_coefficient << std::endl;
-
             /******************** Integrate field error norm ******************/
             std_cxx11::array<double, EquationComponents<dim>::n_components> time_advance_l2_norm;
             for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
