@@ -1098,10 +1098,14 @@ namespace NSFEMSolver
 
             if (parameters->laplacian_continuation > 0.0)
               {
-                time_march_converged =
-                  (n_time_step > n_step_laplacian_vanished + parameters->max_refine_level)
-                  &&
-                  (res_norm < 1e-11);
+                time_march_converged = res_norm < 1e-11;
+                unsigned int terminal_n_time_step = n_step_laplacian_vanished;
+                if (parameters->max_refine_time > 0.0)
+                  {
+                    terminal_n_time_step += parameters->max_refine_level;
+                  }
+                time_march_converged = time_march_converged &&
+                                       n_time_step > terminal_n_time_step;
               }
 
             if (swith_flux)
