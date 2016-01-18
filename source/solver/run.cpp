@@ -1047,7 +1047,13 @@ namespace NSFEMSolver
                               referencing_continuation_coeff *
                               std::pow (physical_residual_ratio, parameters->continuation_decrease_residual_power));
 
-                  if (continuation_coefficient < parameters->laplacian_zero * mean_artificial_viscosity)
+                  const double terminal_continuation_coefficient =
+                    parameters->laplacian_zero > 0.0 ?
+                    parameters->laplacian_zero
+                    :
+                    std::pow (10.0, parameters->laplacian_zero) * mean_artificial_viscosity;
+
+                  if (continuation_coefficient < terminal_continuation_coefficient)
                     {
                       if (n_step_laplacian_vanished > 65500)
                         {
