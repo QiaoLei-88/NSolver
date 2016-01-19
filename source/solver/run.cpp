@@ -1104,18 +1104,18 @@ namespace NSFEMSolver
               }
 
             /*------------ Determine termination of time stepping -------------*/
+            if (parameters->physical_residual_l2_tolerance >= 0.0)
+              {
+                time_march_converged = time_march_converged &&
+                                       physical_res_norm < parameters->physical_residual_l2_tolerance;
+              }
+            else
+              {
+                time_march_converged = time_march_converged &&
+                                       std::log10 (physical_residual_ratio) < parameters->physical_residual_l2_tolerance;
+              }
             if (parameters->laplacian_continuation > 0.0)
               {
-                if (parameters->physical_residual_l2_tolerance >= 0.0)
-                  {
-                    time_march_converged = time_march_converged &&
-                                           physical_res_norm < parameters->physical_residual_l2_tolerance;
-                  }
-                else
-                  {
-                    time_march_converged = time_march_converged &&
-                                           std::log10 (physical_residual_ratio) < parameters->physical_residual_l2_tolerance;
-                  }
                 unsigned int terminal_n_time_step = n_step_laplacian_vanished;
                 if (parameters->max_refine_time > 0.0)
                   {
