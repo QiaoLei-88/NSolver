@@ -36,6 +36,7 @@ namespace NSFEMSolver
       double final_time;
       unsigned int max_Newton_iter;
       double solution_update_l2_tolerance;
+      double physical_residual_l2_tolerance;
 
       /**
        * The tolerance to end Newton iteration. This parameter will be interpreted
