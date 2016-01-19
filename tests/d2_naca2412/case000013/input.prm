@@ -85,6 +85,8 @@ subsection time stepping
   set theta scheme value            = 1.0
   set solution extrapolation length = 0.0
   set nonlinear tolerance           = 10
+  set solution update l2 tolerance  = 1e+10
+  set physical residual l2 tolerance = 1e-11
 end
 
 subsection linear solver
