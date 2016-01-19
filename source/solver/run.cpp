@@ -1064,7 +1064,8 @@ namespace NSFEMSolver
                 }
               }
 
-            /************************* Switch Flux type ************************/
+            /****************** Gather and output error norms ******************/
+            /*----------------------- Switch Flux type ------------------------*/
             // Only try to switch flux type when current and target flux
             // types are different.
             bool swith_flux =
@@ -1094,10 +1095,15 @@ namespace NSFEMSolver
                 swith_flux = swith_flux &&
                              (l2_norm < parameters->tolerance_to_switch_flux);
               }
+            pcout << std::endl;
             time_advance_history_file << std::setw (15)
                                       << std::sqrt (total_time_march_norm) << '\n';
-            pcout << std::endl;
+            if (swith_flux)
+              {
+                parameters_modifier->numerical_flux_type = parameters->flux_type_switch_to;
+              }
 
+            /*------------ Determine termination of time stepping -------------*/
             if (parameters->laplacian_continuation > 0.0)
               {
                 if (parameters->physical_residual_l2_tolerance >= 0.0)
@@ -1119,10 +1125,6 @@ namespace NSFEMSolver
                                        n_time_step > terminal_n_time_step;
               }
 
-            if (swith_flux)
-              {
-                parameters_modifier->numerical_flux_type = parameters->flux_type_switch_to;
-              }
             terminate_time_stepping = terminate_time_stepping ||
                                       (parameters->is_steady &&
                                        time_march_converged);
