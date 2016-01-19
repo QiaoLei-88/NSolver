@@ -527,6 +527,7 @@ namespace NSFEMSolver
 
         double res_norm;
         double res_norm_infty;
+        double physical_res_norm;
         double newton_update_norm;
         std::pair<unsigned int, double> convergence;
 
@@ -644,7 +645,7 @@ namespace NSFEMSolver
             res_norm = right_hand_side.l2_norm();
             solution_diverged = std::isnan (res_norm);
             res_norm_total += res_norm;
-            const double physical_res_norm = physical_residual.l2_norm();
+            physical_res_norm = physical_residual.l2_norm();
 
             res_norm_infty = right_hand_side.linfty_norm();
             res_norm_infty_total += res_norm_infty;
@@ -1099,7 +1100,16 @@ namespace NSFEMSolver
 
             if (parameters->laplacian_continuation > 0.0)
               {
-                time_march_converged = res_norm < 1e-11;
+                if (parameters->physical_residual_l2_tolerance >= 0.0)
+                  {
+                    time_march_converged = time_march_converged &&
+                                           physical_res_norm < parameters->physical_residual_l2_tolerance;
+                  }
+                else
+                  {
+                    time_march_converged = time_march_converged &&
+                                           std::log10 (physical_residual_ratio) < parameters->physical_residual_l2_tolerance;
+                  }
                 unsigned int terminal_n_time_step = n_step_laplacian_vanished;
                 if (parameters->max_refine_time > 0.0)
                   {
