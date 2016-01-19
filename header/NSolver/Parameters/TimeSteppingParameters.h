@@ -31,11 +31,11 @@ namespace NSFEMSolver
        * Unsteady run only terminates when final time is arrived.
        * Steady run terminates when number of Newton iterations reaches
        * <code>max_Newton_iter</code> or time marching L2 norm is
-       * below <code>time_march_tolerance<code>.
+       * below <code>solution_update_l2_tolerance<code>.
        */
       double final_time;
       unsigned int max_Newton_iter;
-      double time_march_tolerance;
+      double solution_update_l2_tolerance;
 
       /**
        * The tolerance to end Newton iteration. This parameter will be interpreted

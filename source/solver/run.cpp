@@ -1073,7 +1073,7 @@ namespace NSFEMSolver
             // before switching to the target flux type.
             bool time_march_converged =
               ! (swith_flux &&
-                 parameters->tolerance_to_switch_flux > parameters->time_march_tolerance);
+                 parameters->tolerance_to_switch_flux > parameters->solution_update_l2_tolerance);
             time_march_converged = time_march_converged &&
                                    continuation_coefficient_vanished;
 
@@ -1086,11 +1086,12 @@ namespace NSFEMSolver
                 time_advance_l2_norm[ic] = receive_sum;
                 total_time_march_norm += time_advance_l2_norm[ic];
                 double const log_norm = 0.5 * std::log10 (time_advance_l2_norm[ic]);
+                double const l2_norm = std::sqrt (time_advance_l2_norm[ic]);
                 pcout << log_norm << ' ';
                 time_march_converged = time_march_converged &&
-                                       (log_norm < parameters->time_march_tolerance);
+                                       (l2_norm < parameters->solution_update_l2_tolerance);
                 swith_flux = swith_flux &&
-                             (log_norm < parameters->tolerance_to_switch_flux);
+                             (l2_norm < parameters->tolerance_to_switch_flux);
               }
             time_advance_history_file << std::setw (15)
                                       << std::sqrt (total_time_march_norm) << '\n';
