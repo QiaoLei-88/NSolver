@@ -32,7 +32,7 @@ namespace NSFEMSolver
         prm.declare_entry ("solution update l2 tolerance", "1e-10",
                            Patterns::Double(),
                            "Terminate time marching when L2 norm of solution update is less than this value");
-        prm.declare_entry ("physical residual l2 tolerance", "1e-10",
+        prm.declare_entry ("physical residual l2 tolerance", "1e+10",
                            Patterns::Double(),
                            "Terminate time marching when L2 norm of physical residual is less than this value");
 
