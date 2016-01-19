@@ -72,7 +72,6 @@ subsection time stepping
   set CFL number                    = 1000
   set CFL number max                = 100000
   set iter in stage1                = 3
-  set time march tolerance          = -10
   set final time                    = 100 # simulation end time
   set reference time step           = -1 # simulation time step
   set solution extrapolation length = 0.0
@@ -111,7 +110,7 @@ end
 subsection flux
  # Numerical flux type
  set flux type  = LaxFriedrichs # Roe LaxFriedrichs
- set tolerance to switch flux = -5
+ set tolerance to switch flux = 1e-5
  set flux type switch to = Roe
  set stab = constant # constant or mesh, only used in LaxFriedrichs flux
  set stab value = 1.0 # only used in LaxFriedrichs flux
