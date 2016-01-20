@@ -89,7 +89,7 @@ namespace NSFEMSolver
                     const double entroy_old = EulerEquations<dim>::template compute_entropy (W_old[q]);
 
                     double D_h1 (0.0),D_h2 (0.0);
-                    if (!parameters->turn_off_time_marching)
+                    if (parameters->entropy_with_solution_diff)
                       {
                         D_h1 = (entropy.val() - entroy_old)/dt;
                         D_h2 = (W[q][EquationComponents<dim>::density_component] - W_old[q][EquationComponents<dim>::density_component])/dt;
