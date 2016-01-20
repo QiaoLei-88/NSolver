@@ -558,6 +558,8 @@ namespace NSFEMSolver
           {
           case Parameters::StabilizationParameters<dim>::CT_timeCFL:
           {
+            AssertThrow (parameters->laplacian_continuation < 0.0,
+                         ExcMessage ("Laplacian continuation should be disabled in timeCFL mode!"));
             // Works are done by calc_time_step().
             // Nothing needs to do here.
             break;
