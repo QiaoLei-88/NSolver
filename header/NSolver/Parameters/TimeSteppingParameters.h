@@ -20,13 +20,6 @@ namespace NSFEMSolver
     struct TimeStepping
     {
       /**
-       * If true, not time term will be added to linear system.
-       * This is used when other continuation method such as Laplacian continuation is employed.
-       * By default the value is false.
-       */
-      bool turn_off_time_marching;
-
-      /**
        * Parameters for when to terminate time stepping.
        * Unsteady run only terminates when final time is arrived.
        * Steady run terminates when number of Newton iterations reaches

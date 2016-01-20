@@ -18,10 +18,6 @@ namespace NSFEMSolver
     {
       prm.enter_subsection ("time stepping");
       {
-        prm.declare_entry ("turn off time marching", "false",
-                           Patterns::Bool(),
-                           "Do not use pseudo time marching");
-
         prm.declare_entry ("final time", "10.0",
                            Patterns::Double (0),
                            "simulation end time");
@@ -109,7 +105,6 @@ namespace NSFEMSolver
     {
       prm.enter_subsection ("time stepping");
       {
-        turn_off_time_marching = prm.get_bool ("turn off time marching");
         final_time = prm.get_double ("final time");
         max_Newton_iter = prm.get_integer ("max Newton iter per time step");
         solution_update_l2_tolerance = prm.get_double ("solution update l2 tolerance");
