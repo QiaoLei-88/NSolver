@@ -19,6 +19,7 @@ subsection stabilization parameters
   set entropy use global h min = false #false #true
   set entropy visc cLinear = 1e+3 # 0.007
   set entropy visc cE = 0.015
+  set entropy with solution diff = false
   set diffusion power = 2.0
   set diffusion coefficient  = 0.0
   set CountArtiViscInResPhy  = true
@@ -75,7 +76,6 @@ end
 # --------------------------------------------------
 # Time stepping control
 subsection time stepping
-  set turn off time marching        = true
   set rigid reference time step     = true
   set CFL number                    = 1e+100
   set minimum step increasing ratio stage2 = 1.0
