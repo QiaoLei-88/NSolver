@@ -764,6 +764,21 @@ namespace NSFEMSolver
                     pcout << "  Newton iteration not converge in " << nonlin_iter_threshold << " steps.\n";
                   }
               }
+
+            if (parameters->is_steady &&
+                newton_iter_converged &&
+                parameters->laplacian_continuation <= 0.0 &&
+                // Physical residual and algebra residual are close to each other
+                std::abs (res_norm - physical_res_norm) <= 0.1 * physical_res_norm &&
+                // Solution is not converged to demanded final tolerance
+                terminal_res > parameters->physical_residual_l2_tolerance)
+              {
+                // This means the local problem is close enough to the real problem,
+                // we should keep doing the Newton iteration to the demanded final tolerance.
+                newton_iter_converged = false;
+                terminate_newton_iteration = false;
+                terminal_res = parameters->physical_residual_l2_tolerance;
+              }
             computing_timer.leave_subsection ("5:Postprocess Newton solution");
           } // End of Newton iteration loop
 
