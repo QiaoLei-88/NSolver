@@ -436,6 +436,7 @@ namespace NSFEMSolver
     predictor = old_solution;
 
     bool CFL_number_increased (false);
+    bool remove_continuation = false;
     int index_linear_search_length (0);
     const double linear_search_length[12] = {1.0, 0.8, 0.6, 0.4, 0.2, 0.1, 0.05, 0.025, 0.0125, 1.2, 1.5, 2.0};
     unsigned int converged_newton_iters (0);
@@ -767,7 +768,8 @@ namespace NSFEMSolver
 
             if (parameters->is_steady &&
                 newton_iter_converged &&
-                parameters->laplacian_continuation <= 0.0 &&
+                (parameters->continuation_type == Parameters::StabilizationParameters<dim>::CT_timeCFL ||
+                 parameters->continuation_type == Parameters::StabilizationParameters<dim>::CT_timeCFL2) &&
                 // Physical residual and algebra residual are close to each other
                 std::abs (res_norm - physical_res_norm) <= 0.1 * physical_res_norm &&
                 // Solution is not converged to demanded final tolerance
@@ -778,6 +780,7 @@ namespace NSFEMSolver
                 newton_iter_converged = false;
                 terminate_newton_iteration = false;
                 terminal_res = parameters->physical_residual_l2_tolerance;
+                remove_continuation = true;
               }
             computing_timer.leave_subsection ("5:Postprocess Newton solution");
           } // End of Newton iteration loop
@@ -893,6 +896,10 @@ namespace NSFEMSolver
                         CFL_number *= ratio;
                       }
                     CFL_number = std::min (CFL_number, parameters->CFL_number_max);
+                    if (remove_continuation)
+                      {
+                        CFL_number = std::numeric_limits<double>::max();
+                      }
                   }
               }
             else if ((converged_newton_iters%10 == 0) &&
