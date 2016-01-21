@@ -673,7 +673,11 @@ namespace NSFEMSolver
                       }
                     else
                       {
-                        terminal_res = 1e-11;
+                        terminal_res =
+                          parameters->physical_residual_l2_tolerance >= 0.0 ?
+                          parameters->physical_residual_l2_tolerance
+                          :
+                          physical_residual_first * std::pow (10.0, parameters->physical_residual_l2_tolerance);
                       }
                   }
               }
