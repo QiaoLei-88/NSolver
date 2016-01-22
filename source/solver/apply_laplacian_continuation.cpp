@@ -92,6 +92,14 @@ namespace NSFEMSolver
                                  :
                                  1.0/global_time_step_size;
             }
+          if (parameters->continuation_type == Parameters::StabilizationParameters<dim>::CT_timeCFL2)
+            {
+              local_laplacian_coeff = 0.0;
+              local_time_coeff = parameters->use_local_time_step_size ?
+                                 continuation_coefficient/local_time_step_size[cell->active_cell_index()]
+                                 :
+                                 continuation_coefficient/global_time_step_size;
+            }
           if (local_laplacian_coeff > 0.0)
             {
               std::vector<std::vector<Tensor<1,dim> > > grad_W (n_q_points,

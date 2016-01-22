@@ -565,6 +565,14 @@ namespace NSFEMSolver
             // Nothing needs to do here.
             break;
           }
+          case Parameters::StabilizationParameters<dim>::CT_timeCFL2:
+          {
+            AssertThrow (CFL_number == 1.0,
+                         ExcMessage ("CFL number should be 1.0 in timeCFL2 mode!"));
+            // Works are done by calc_time_step().
+            // Nothing needs to do here.
+            break;
+          }
           case Parameters::StabilizationParameters<dim>::CT_time:
           {
             continuation_coeff_time = continuation_coefficient;
