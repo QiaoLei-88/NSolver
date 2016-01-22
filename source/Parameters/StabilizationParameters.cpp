@@ -155,6 +155,10 @@ namespace NSFEMSolver
             {
               continuation_type = CT_timeCFL;
             }
+          else if (prm_buf == "timeCFL2")
+            {
+              continuation_type = CT_timeCFL2;
+            }
           else if (prm_buf == "time")
             {
               continuation_type = CT_time;

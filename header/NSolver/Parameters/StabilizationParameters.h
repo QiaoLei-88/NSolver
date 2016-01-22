@@ -40,6 +40,7 @@ namespace NSFEMSolver
       enum ContinuationType
       {
         CT_timeCFL,
+        CT_timeCFL2,
         CT_time,
         CT_laplacian,
         CT_switch,
