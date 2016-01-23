@@ -904,7 +904,8 @@ namespace NSFEMSolver
                         CFL_number *= ratio;
                       }
                     CFL_number = std::min (CFL_number, parameters->CFL_number_max);
-                    if (remove_continuation)
+                    if (remove_continuation &&
+                        parameters->continuation_type == Parameters::StabilizationParameters<dim>::CT_timeCFL)
                       {
                         CFL_number = std::numeric_limits<double>::max();
                       }
