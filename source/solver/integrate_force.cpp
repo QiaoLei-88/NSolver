@@ -24,6 +24,12 @@ namespace NSFEMSolver
     FEFaceValues<dim> fe_v_face (*mapping_ptr, fe, face_quadrature,face_update_flags);
     wall_force.clear();
 
+    const std::string file_name = "boundaryData.slot-"
+                                  + Utilities::int_to_string (myid,4)
+                                  + ".raw";
+    std::ofstream boundary_data_out (file_name.c_str());
+    boundary_data_out << std::setw (13) << parameters->Mach << std::endl;
+
     std::vector<Vector<double> > solution_values;
     typename DoFHandler<dim>::active_cell_iterator
     cell = dof_handler.begin_active(),
@@ -55,6 +61,12 @@ namespace NSFEMSolver
                                    wall_norm[id] * fe_v_face.JxW (q);
                         wall_force.force[id] += f_ds[id];
                         moment_arm[id] = wall_position[id] - parameters->moment_center[id];
+                        boundary_data_out << std::setw (13) << wall_position[id] << ' ';
+                      }
+
+                    for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
+                      {
+                        boundary_data_out << std::setw (13) << solution_values[q][ic] << ' ';
                       }
 
                     {
@@ -71,7 +83,7 @@ namespace NSFEMSolver
                       wall_force.moment[z] -= f_ds[x]*moment_arm[y];
                       wall_force.moment[z] += f_ds[y]*moment_arm[x];
                     }
-
+                    boundary_data_out << std::endl;
                   }
               }
     wall_force.mpi_sum (mpi_communicator);
@@ -98,6 +110,8 @@ namespace NSFEMSolver
     double const cos_aoa = std::cos (parameters->angle_of_attack);
     wall_force.lift = cos_aoa*wall_force.force[1] - sin_aoa*wall_force.force[0];
     wall_force.drag = cos_aoa*wall_force.force[0] + sin_aoa*wall_force.force[1];
+
+    boundary_data_out.close();
 
     return;
   }
