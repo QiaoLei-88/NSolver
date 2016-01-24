@@ -317,6 +317,8 @@ namespace NSFEMSolver
           right_hand_side (dof_indices[i]) -= R_i.val();
           physical_residual (dof_indices[i]) -= R_i.val();
         }
+
+    return;
   }
 
 #include "NSolver.inst"

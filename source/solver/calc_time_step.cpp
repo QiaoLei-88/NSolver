@@ -68,6 +68,8 @@ namespace NSFEMSolver
             }
         global_time_step_size = Utilities::MPI::min (min_time_step, mpi_communicator);
       }
+
+    return;
   }
 
 #include "NSolver.inst"

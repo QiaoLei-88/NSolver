@@ -53,6 +53,8 @@ namespace NSFEMSolver
         break;
       }
       }
+
+    return;
   }
 
 #include "NSolver.inst"

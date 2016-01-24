@@ -77,6 +77,8 @@ namespace NSFEMSolver
                                         newton_update,
                                         right_hand_side,
                                         /*const bool  eliminate_columns = */ false);
+
+    return;
   }
 
 #include "NSolver.inst"

@@ -159,6 +159,8 @@ namespace NSFEMSolver
     artificial_thermal_conductivity.reinit (triangulation.n_active_cells());
     refinement_indicators.reinit (triangulation.n_active_cells());
     laplacian_indicator.reinit (triangulation.n_active_cells());
+
+    return;
   }
 
 #include "NSolver.inst"

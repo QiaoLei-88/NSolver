@@ -1221,6 +1221,8 @@ namespace NSFEMSolver
         delete spherical_boundary;
         spherical_boundary = 0;
       }
+
+    return;
   }
 
 #include "NSolver.inst"

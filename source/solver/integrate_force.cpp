@@ -98,6 +98,8 @@ namespace NSFEMSolver
     double const cos_aoa = std::cos (parameters->angle_of_attack);
     wall_force.lift = cos_aoa*wall_force.force[1] - sin_aoa*wall_force.force[0];
     wall_force.drag = cos_aoa*wall_force.force[0] + sin_aoa*wall_force.force[1];
+
+    return;
   }
 
 #include "NSolver.inst"

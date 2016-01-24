@@ -253,6 +253,7 @@ namespace NSFEMSolver
       {
         refinement_indicators = laplacian_indicator;
       }
+
     return;
   } // End function
 

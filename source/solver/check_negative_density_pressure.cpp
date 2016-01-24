@@ -34,6 +34,8 @@ namespace NSFEMSolver
               AssertThrow (pressure > 0.0, ExcMessage ("Negative pressure encountered!"));
             }
         }
+
+    return;
   }
 
 #include "NSolver.inst"

@@ -125,6 +125,8 @@ namespace NSFEMSolver
       }
 
     ++field_output_counter;
+
+    return;
   }
 
 #include "NSolver.inst"
