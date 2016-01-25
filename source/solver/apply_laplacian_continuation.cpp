@@ -48,6 +48,7 @@ namespace NSFEMSolver
     const double global_h_min = Utilities::MPI::min (local_h_min, mpi_communicator);
 
     unsigned int n_laplacian = 0;
+    bool write_paper_data = true;
     typename DoFHandler<dim>::active_cell_iterator
     cell = dof_handler.begin_active(),
     endc = dof_handler.end();
@@ -100,6 +101,19 @@ namespace NSFEMSolver
                                  :
                                  continuation_coefficient/global_time_step_size;
             }
+
+          if (write_paper_data)
+            {
+              // Write out paper data only once.
+              // Can't do output outside for loop because effective continuation
+              // coefficients are computed inside for loop.
+              paper_data_out
+                  <<  std::setw (13) << std::max (continuation_coefficient, 1.0e-99) << ' '
+                  <<  std::setw (13) << std::max (local_time_coeff, 1.0e-99) << ' '
+                  <<  std::setw (13) << std::max (local_laplacian_coeff, 1.0e-99) << ' ';
+              write_paper_data = false;
+            }
+
           if (local_laplacian_coeff > 0.0)
             {
               std::vector<std::vector<Tensor<1,dim> > > grad_W (n_q_points,

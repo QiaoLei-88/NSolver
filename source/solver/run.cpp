@@ -632,6 +632,10 @@ namespace NSFEMSolver
         bool newton_iter_converged = false;
         for (bool terminate_newton_iteration = false; !terminate_newton_iteration;)
           {
+            paper_data_out
+                << std::setw (10) << n_total_iter+1 << ' '
+                << std::setw (10) << n_time_step+1 << ' ';
+
             computing_timer.enter_subsection ("3:Assemble Newton system");
             system_matrix = 0;
             right_hand_side = 0;
@@ -657,6 +661,10 @@ namespace NSFEMSolver
             solution_diverged = std::isnan (res_norm);
             res_norm_total += res_norm;
             physical_res_norm = physical_residual.l2_norm();
+
+            paper_data_out
+                <<  std::setw (13) << res_norm << ' '
+                <<  std::setw (13) << physical_res_norm << ' ';
 
             res_norm_infty = right_hand_side.linfty_norm();
             res_norm_infty_total += res_norm_infty;
@@ -790,6 +798,7 @@ namespace NSFEMSolver
                 terminal_res = parameters->physical_residual_l2_tolerance;
                 remove_continuation = true;
               }
+            paper_data_out << std::endl;
             computing_timer.leave_subsection ("5:Postprocess Newton solution");
           } // End of Newton iteration loop
 

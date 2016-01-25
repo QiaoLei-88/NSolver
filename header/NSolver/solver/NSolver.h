@@ -277,6 +277,8 @@ namespace NSFEMSolver
     Parameters::AllParameters<dim> *const                     parameters_modifier;
     ConditionalOStream              verbose_cout;
     ConditionalOStream              pcout;
+    std::ofstream                   paper_data_std;
+    ConditionalOStream              paper_data_out;
     TimerOutput                     computing_timer;
 
     //Introduce MMS

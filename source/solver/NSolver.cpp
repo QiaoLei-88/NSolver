@@ -73,6 +73,7 @@ namespace NSFEMSolver
     pcout (std::cout,
            (Utilities::MPI::this_mpi_process (mpi_communicator)
             == 0)),
+    paper_data_out (paper_data_std, I_am_host),
     computing_timer (MPI_COMM_WORLD,
                      pcout,
                      TimerOutput::summary,
@@ -109,6 +110,24 @@ namespace NSFEMSolver
         AssertThrow (false, ExcNotImplemented());
         break;
       }
+      }
+
+    if (I_am_host)
+      {
+        paper_data_std.open ("paper_data.txt");
+        Assert (paper_data_std, ExcFileNotOpen ("paper_data.txt"));
+        paper_data_std.setf (std::ios::scientific);
+        paper_data_std.precision (6);
+        unsigned int column = 0;
+
+        paper_data_out << "#" << ++column << "  n_iter  ";
+        paper_data_out << "#" << ++column << " n_step  ";
+        paper_data_out << "#" << ++column << " C_conti..  ";
+        paper_data_out << "#" << ++column << " C_time     ";
+        paper_data_out << "#" << ++column << " C_lapla..  ";
+        paper_data_out << "#" << ++column << " L2_res     ";
+        paper_data_out << "#" << ++column << " L2_resPhy";
+        paper_data_out << std::endl;
       }
 
     EulerEquations<dim>::set_parameter (parameters);
@@ -247,6 +266,7 @@ namespace NSFEMSolver
   template <int dim>
   NSolver<dim>::~NSolver()
   {
+    paper_data_std.close();
     delete mapping_ptr;
   }
 
