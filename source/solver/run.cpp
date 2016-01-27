@@ -541,8 +541,6 @@ namespace NSFEMSolver
         res_norm_infty_total = 0.0;
 
         double physical_residual_ratio = 0.0;
-        double log_res_last = 0.0;
-        bool quadratic_converge = true;
         calc_artificial_viscosity();
         calc_laplacian_indicator();
         if (! (parameters->dodge_mesh_adaptation) || is_refine_step)
@@ -670,7 +668,6 @@ namespace NSFEMSolver
             res_norm_infty_total += res_norm_infty;
             if (nonlin_iter == 0)
               {
-                log_res_last = std::log (res_norm);
                 if (n_time_step == 0)
                   {
                     physical_residual_first = physical_res_norm;
@@ -698,14 +695,7 @@ namespace NSFEMSolver
                       }
                   }
               }
-            else
-              {
-                const double log_res = std::log (res_norm);
-                // This only works when log_res<0 && log_res_last<0.
-                quadratic_converge =
-                  (log_res < log_res_last * parameters->laplacian_newton_quadratic);
-                log_res_last = log_res;
-              }
+
             physical_residual_ratio = physical_res_norm/physical_residual_first;
 
             computing_timer.leave_subsection ("3:Assemble Newton system");
@@ -1066,15 +1056,6 @@ namespace NSFEMSolver
                 {
                   n_step_laplacian_vanished += (continuation_coefficient>0.0);
                   double laplacian_ratio_min = parameters->continuation_min_decrease_rate;
-                  if (quadratic_converge && parameters->Mach < 0.5)
-                    {
-                      laplacian_ratio_min =
-                        std::min (laplacian_ratio_min,
-                                  std::pow (continuation_coefficient,
-                                            parameters->laplacian_decrease_rate - 1.0)
-                                 );
-                    }
-
                   double referencing_continuation_coeff
                     =  parameters->laplacian_continuation;
                   if (parameters->compute_laplacian_coeff_from_Mach_max)
