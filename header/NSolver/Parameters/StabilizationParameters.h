@@ -85,21 +85,9 @@ namespace NSFEMSolver
       double laplacian_zero;
 
       /**
-       * If Newton iteration achieved a convergence rate larger or equal than
-       * this parameter, it be recognized as quadratic convergence.
-       */
-      double laplacian_newton_quadratic;
-
-      /**
        * Relative Newton iteration tolerance comparing with Laplacian coefficient.
        */
       double laplacian_newton_tolerance;
-
-      /**
-       * If Newton iteration achieved quadratic convergence, decrease
-       * Laplacian coefficient with this rate.
-       */
-      double laplacian_decrease_rate;
 
       /**
        * SUPG stabilization factor. A non-positive value will disable the SUPG term.
