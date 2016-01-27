@@ -32,7 +32,6 @@ subsection stabilization parameters
   set continuation decrease residual power = 1.25
   set continuation min decrease rate = 0.3
   set Laplacian Newton tolerance = 0.1
-  set Laplacian Newton quadratic = 1.5
 end
 
 # --------------------------------------------------
