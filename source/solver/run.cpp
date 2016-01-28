@@ -359,6 +359,28 @@ namespace NSFEMSolver
                 }
               triangulation.execute_coarsening_and_refinement();
             }
+          if (parameters->NACA_cheating_refinement > 0)
+            {
+              // Refine cell in larger elliptic around the foil once more for
+              // all cheating cases.
+              for (typename Triangulation<dim>::active_cell_iterator
+                   cell = triangulation.begin_active();
+                   cell != triangulation.end();
+                   ++cell)
+                {
+                  const double center_x=0.7;
+                  const double center_y=0.0;
+                  const double half_axi_long  = 1.2;
+                  const double half_axi_short = 0.9;
+                  const double a = (cell->center()[0] - center_x)/half_axi_long;
+                  const double b = (cell->center()[1] - center_y)/half_axi_short;
+                  if ((a*a+b*b) < 1.0)
+                    {
+                      cell->set_refine_flag();
+                    }
+                }
+              triangulation.execute_coarsening_and_refinement();
+            }
         }
       if (parameters->n_global_refinement > 0)
         {
