@@ -674,6 +674,66 @@ namespace NSFEMSolver
       }
       } // End switch case
 
+    if (parameters->smooth_artificial_viscosity &&
+        parameters->diffusion_type != Parameters::AllParameters<dim>::diffu_const)
+      {
+        unsmoothed_artificial_viscosity.swap (artificial_viscosity);
+
+        typename DoFHandler<dim>::active_cell_iterator cell =
+          dof_handler.begin_active();
+        const typename DoFHandler<dim>::active_cell_iterator endc =
+          dof_handler.end();
+        for (; cell!=endc; ++cell)
+          {
+            if (!cell->is_locally_owned())
+              {
+                continue;
+              }
+            double max_visc = unsmoothed_artificial_viscosity[cell->active_cell_index()];
+            // Loop through all neighbors of cell, and find out maximum value
+            // of artificial viscosity;
+            for (unsigned int face_no=0; face_no<GeometryInfo<dim>::faces_per_cell; ++face_no)
+              {
+                if (cell->at_boundary (face_no))
+                  {
+                    continue;
+                  }
+
+                const typename DoFHandler<dim>::cell_iterator &neighbor =
+                  cell->neighbor (face_no);
+                if (neighbor->active())
+                  {
+                    // Neighbor cell is on same level or coarser
+                    if (neighbor->is_locally_owned())
+                      {
+                        max_visc = std::max (max_visc, unsmoothed_artificial_viscosity[neighbor->active_cell_index()]);
+                      }
+                  }
+                else
+                  {
+                    // Neighbor cell is finer, need to loop through all subfaces
+                    const unsigned int n_subfaces = cell->face (face_no)->n_children();
+                    for (unsigned int subface_no=0; subface_no < n_subfaces; ++subface_no)
+                      {
+                        const typename DoFHandler<dim>::active_cell_iterator &neighbor_child =
+                          cell->neighbor_child_on_subface (face_no, subface_no);
+
+                        // Make sure we find the right neighbor cell
+                        Assert (neighbor_child->face (cell->neighbor_of_neighbor (face_no)) ==
+                                cell->face (face_no)->child (subface_no),
+                                ExcInternalError());
+                        if (neighbor_child->is_locally_owned() && neighbor_child->active())
+                          {
+                            max_visc = std::max (max_visc, unsmoothed_artificial_viscosity[neighbor_child->active_cell_index()]);
+                          }
+                      }
+                  } // if (neighbor->is_active())
+              } // for all faces
+
+            artificial_viscosity[cell->active_cell_index()] = max_visc;
+          } // for all cells
+      } // if (need do smooth)
+
     return;
   } // End function
 
