@@ -246,6 +246,7 @@ namespace NSFEMSolver
 
     Vector<double>       local_time_step_size;
     Vector<double>       artificial_viscosity;
+    Vector<double>       unsmoothed_artificial_viscosity;
     Vector<double>       old_artificial_viscosity;
     bool                 blend_artificial_viscosity;
     double               mean_artificial_viscosity;

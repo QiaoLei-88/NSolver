@@ -154,6 +154,7 @@ namespace NSFEMSolver
 
     local_time_step_size.reinit (triangulation.n_active_cells());
     artificial_viscosity.reinit (triangulation.n_active_cells());
+    unsmoothed_artificial_viscosity.reinit (triangulation.n_active_cells());
     dominant_viscosity.reinit (triangulation.n_active_cells());
     old_artificial_viscosity.reinit (triangulation.n_active_cells());
     artificial_thermal_conductivity.reinit (triangulation.n_active_cells());
