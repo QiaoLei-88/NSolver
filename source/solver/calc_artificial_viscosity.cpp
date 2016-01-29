@@ -169,24 +169,6 @@ namespace NSFEMSolver
           }
         pcout << "l2_blended_mu = " << artificial_viscosity.l2_norm() << std::endl
               << std::endl;
-
-        // Next, compute global mean value of artificial viscosity.
-        double local_sum_v = 0.0;
-        {
-          typename DoFHandler<dim>::active_cell_iterator
-          cell = dof_handler.begin_active(),
-          endc = dof_handler.end();
-          for (; cell!=endc; ++cell)
-            if (cell->is_locally_owned())
-              {
-                local_sum_v += artificial_viscosity[cell->active_cell_index()];
-              }
-        }
-        mean_artificial_viscosity = Utilities::MPI::sum (local_sum_v, mpi_communicator) /
-                                    static_cast<double> (triangulation.n_global_active_cells());
-
-        pcout << "mean artificial_viscosity = " << mean_artificial_viscosity << std::endl
-              << std::endl;
         break;
       }
       case Parameters::AllParameters<dim>::diffu_entropy_DRB:
@@ -607,24 +589,6 @@ namespace NSFEMSolver
                                                 entropy_max-entropy_mean);
         pcout << "scale_Guermond = " << scale_Guermond << std::endl
               << std::endl;
-
-        // Next, compute global mean value of artificial viscosity.
-        double local_sum_v = 0.0;
-        {
-          typename DoFHandler<dim>::active_cell_iterator
-          cell = dof_handler.begin_active(),
-          endc = dof_handler.end();
-          for (; cell!=endc; ++cell)
-            if (cell->is_locally_owned())
-              {
-                local_sum_v += artificial_viscosity[cell->active_cell_index()];
-              }
-        }
-        mean_artificial_viscosity = Utilities::MPI::sum (local_sum_v, mpi_communicator) /
-                                    static_cast<double> (triangulation.n_global_active_cells());
-
-        pcout << "mean artificial_viscosity = " << mean_artificial_viscosity << std::endl
-              << std::endl;
         break;
       }
       case Parameters::AllParameters<dim>::diffu_cell_size:
@@ -733,6 +697,24 @@ namespace NSFEMSolver
             artificial_viscosity[cell->active_cell_index()] = max_visc;
           } // for all cells
       } // if (need do smooth)
+
+    // Next, compute global mean value of artificial viscosity.
+    double local_sum_v = 0.0;
+    {
+      typename DoFHandler<dim>::active_cell_iterator
+      cell = dof_handler.begin_active(),
+      endc = dof_handler.end();
+      for (; cell!=endc; ++cell)
+        if (cell->is_locally_owned())
+          {
+            local_sum_v += artificial_viscosity[cell->active_cell_index()];
+          }
+    }
+    mean_artificial_viscosity = Utilities::MPI::sum (local_sum_v, mpi_communicator) /
+                                static_cast<double> (triangulation.n_global_active_cells());
+
+    pcout << "mean artificial_viscosity = " << mean_artificial_viscosity << std::endl
+          << std::endl;
 
     return;
   } // End function
