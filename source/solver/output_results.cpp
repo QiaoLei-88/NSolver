@@ -45,6 +45,16 @@ namespace NSFEMSolver
                                 DataOut<dim>::type_cell_data);
     }
     {
+      if (parameters->smooth_artificial_viscosity &&
+          parameters->diffusion_type != Parameters::AllParameters<dim>::diffu_const)
+        {
+          const std::string data_name ("unsmoothed_artificial_viscosity");
+          data_out.add_data_vector (unsmoothed_artificial_viscosity,
+                                    data_name,
+                                    DataOut<dim>::type_cell_data);
+        }
+    }
+    {
       const std::string data_name ("refinement_indicators");
       data_out.add_data_vector (refinement_indicators,
                                 data_name,
