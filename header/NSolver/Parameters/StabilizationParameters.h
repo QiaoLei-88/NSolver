@@ -64,6 +64,7 @@ namespace NSFEMSolver
       bool   entropy_use_global_h_min;
       bool   entropy_with_rho_max;
       bool   entropy_with_solution_diff;
+      bool   smooth_artificial_viscosity;
       double diffusion_factor[EquationComponents<dim>::n_components];
       double laplacian_continuation;
       bool compute_laplacian_coeff_from_Mach_max;

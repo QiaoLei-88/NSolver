@@ -44,6 +44,10 @@ namespace NSFEMSolver
                            Patterns::Bool(),
                            "Compute entropy viscosity with solution difference");
 
+        prm.declare_entry ("smooth artificial viscosity", "false",
+                           Patterns::Bool(),
+                           "Smooth artificial viscosity via setting value to maximum among its neighbors.");
+
         prm.declare_entry ("continuation type", "timeCFL",
                            Patterns::Anything(),
                            "continuation type");
@@ -142,6 +146,8 @@ namespace NSFEMSolver
         entropy_use_global_h_min = prm.get_bool ("entropy use global h min");
         entropy_with_rho_max = prm.get_bool ("entropy with rho max");
         entropy_with_solution_diff = prm.get_bool ("entropy with solution diff");
+
+        smooth_artificial_viscosity = prm.get_bool ("smooth artificial viscosity");
 
         {
           const std::string prm_buf = prm.get ("continuation type");
