@@ -32,6 +32,7 @@ namespace NSFEMSolver
          * for details.
          */
         diffu_entropy_DRB,
+        diffu_gradient,
         diffu_cell_size,
         diffu_const
       };
