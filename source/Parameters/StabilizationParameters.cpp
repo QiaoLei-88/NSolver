@@ -129,6 +129,10 @@ namespace NSFEMSolver
             {
               diffusion_type = diffu_entropy_DRB;
             }
+          else if (prm_buf == "oscillation")
+            {
+              diffusion_type = diffu_oscillation;
+            }
           else if (prm_buf == "cell size")
             {
               diffusion_type = diffu_cell_size;
