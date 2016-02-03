@@ -645,10 +645,11 @@ namespace NSFEMSolver
                   std::log10 (top_order_inner_product/solution_inner_product);
                 const double &visc_ceiling = parameters->diffusion_coefficoent;
                 const double &visc_ground  = parameters->diffusion_power;
-                artificial_viscosity[cell->active_cell_index()] = 1.0e-7;
+                artificial_viscosity[cell->active_cell_index()] = parameters->entropy_visc_cE;
                 if (oscillation_indicator >= visc_ceiling)
                   {
                     artificial_viscosity[cell->active_cell_index()] =
+                      parameters->entropy_visc_cLinear *
                       0.5 * cell->diameter();
                   }
                 else if (oscillation_indicator > visc_ground)
@@ -656,6 +657,7 @@ namespace NSFEMSolver
                     const double gap  = visc_ceiling - visc_ground;
                     const double mean = 0.5 * (visc_ceiling + visc_ground);
                     artificial_viscosity[cell->active_cell_index()] =
+                      parameters->entropy_visc_cLinear *
                       0.25 * cell->diameter() *
                       (1.0 + std::sin (numbers::PI * (oscillation_indicator - mean) / gap));
                   }
