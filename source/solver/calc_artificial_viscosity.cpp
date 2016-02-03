@@ -645,7 +645,7 @@ namespace NSFEMSolver
                   std::log10 (top_order_inner_product/solution_inner_product);
                 const double &visc_ceiling = parameters->diffusion_coefficoent;
                 const double &visc_ground  = parameters->diffusion_power;
-                artificial_viscosity[cell->active_cell_index()] = 0.0;
+                artificial_viscosity[cell->active_cell_index()] = 1.0e-7;
                 if (oscillation_indicator >= visc_ceiling)
                   {
                     artificial_viscosity[cell->active_cell_index()] =
