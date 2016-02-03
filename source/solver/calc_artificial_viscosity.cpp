@@ -670,7 +670,7 @@ namespace NSFEMSolver
               << "this_mu_l2 = " << this_mu_l2 << std::endl
               << std::endl;
         blend_artificial_viscosity = blend_artificial_viscosity || (this_mu_l2 < old_mu_l2);
-        if (blend_artificial_viscosity && Mach_max > 0.95)
+        if (blend_artificial_viscosity && Mach_max > -1.0)
           {
             // Scaling and addition of vector, i.e. *this.sadd(s,a,V) = s*(*this)+a*V.
             artificial_viscosity.sadd (0.5, 0.5, old_artificial_viscosity);
