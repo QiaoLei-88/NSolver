@@ -568,6 +568,116 @@ namespace NSFEMSolver
               << std::endl;
         break;
       }
+      case Parameters::AllParameters<dim>::diffu_oscillation:
+      {
+        FEValues<dim> fe_values (fe,
+                                 quadrature,
+                                 update_values |
+                                 update_JxW_values);
+
+        const unsigned int n_q_points = quadrature.size();
+        std::vector<Vector<double> > W (n_q_points, Vector<double> (EquationComponents<dim>::n_components));
+
+        double Mach_max = 0.0;
+        typename DoFHandler<dim>::active_cell_iterator cell =
+          dof_handler.begin_active();
+        const typename DoFHandler<dim>::active_cell_iterator endc =
+          dof_handler.end();
+        for (; cell!=endc; ++cell)
+          {
+            if (cell->is_locally_owned())
+              {
+                fe_values.reinit (cell);
+                fe_values.get_function_values (current_solution, W);
+
+                std_cxx11::array<double, EquationComponents<dim>::n_components> cell_average;
+                std::fill (cell_average.begin(), cell_average.end(), 0.0);
+                const double cell_measure = cell->measure();
+
+                double characteristic_speed_max = 0.0;
+                if (parameters->oscillation_with_characteristic_speed)
+                  {
+                    for (unsigned int q=0; q<n_q_points; ++q)
+                      {
+                        const double sound_speed
+                          = EulerEquations<dim>::compute_sound_speed (W[q]);
+                        const double velocity
+                          = EulerEquations<dim>::compute_velocity_magnitude (W[q]);
+                        characteristic_speed_max = std::max (characteristic_speed_max, velocity + sound_speed);
+                      }
+                  }
+
+                for (unsigned int c=0; c<EquationComponents<dim>::n_components; ++c)
+                  {
+                    for (unsigned int q=0; q<n_q_points; ++q)
+                      {
+                        cell_average[c] += W[q][c] * fe_values.JxW (q);
+                      }
+                    cell_average[c] /= cell_measure;
+                  }
+
+                double top_order_inner_product = 0.0;
+                double solution_inner_product = 0.0;
+                for (unsigned int c=0; c<EquationComponents<dim>::n_components; ++c)
+                  {
+                    for (unsigned int q=0; q<n_q_points; ++q)
+                      {
+                        top_order_inner_product +=
+                          (W[q][c] - cell_average[c]) *
+                          (W[q][c] - cell_average[c]) *
+                          fe_values.JxW (q);
+                        solution_inner_product +=
+                          W[q][c] * W[q][c] *
+                          fe_values.JxW (q);
+                      }
+                  }
+                const double oscillation_indicator =
+                  std::log10 (top_order_inner_product/solution_inner_product);
+                const double &visc_ceiling = parameters->oscillation_visc_ceiling;
+                const double &visc_ground  = parameters->oscillation_visc_ground;
+                const double h = std::min (cell->diameter(), global_effective_h_max);
+                double &oscillation_visc = artificial_viscosity[cell->active_cell_index()];
+                oscillation_visc = parameters->oscillation_visc_background;
+                if (oscillation_indicator >= visc_ceiling)
+                  {
+                    oscillation_visc =
+                      parameters->oscillation_visc_coefficient *
+                      0.5 * h;
+                  }
+                else if (oscillation_indicator > visc_ground)
+                  {
+                    const double gap  = visc_ceiling - visc_ground;
+                    const double mean = 0.5 * (visc_ceiling + visc_ground);
+                    oscillation_visc =
+                      parameters->oscillation_visc_coefficient *
+                      0.25 * h *
+                      (1.0 + std::sin (numbers::PI * (oscillation_indicator - mean) / gap));
+                  }
+                if (parameters->oscillation_with_characteristic_speed)
+                  {
+                    oscillation_visc *= characteristic_speed_max;
+                  }
+                dominant_viscosity[cell->active_cell_index()] = oscillation_indicator;
+              } // End if cell is locally owned
+          } // End for active cells
+
+        // blend refinement indicators with previous time step
+        const double old_mu_l2 = old_artificial_viscosity.l2_norm();
+        const double this_mu_l2 = artificial_viscosity.l2_norm();
+        pcout << "old_mu_l2 = " << old_mu_l2 << std::endl
+              << "this_mu_l2 = " << this_mu_l2 << std::endl
+              << std::endl;
+        blend_artificial_viscosity = blend_artificial_viscosity || (this_mu_l2 < old_mu_l2);
+        if (blend_artificial_viscosity && Mach_max > -1.0)
+          {
+            // Scaling and addition of vector, i.e. *this.sadd(s,a,V) = s*(*this)+a*V.
+            artificial_viscosity.sadd (0.5, 0.5, old_artificial_viscosity);
+            artificial_thermal_conductivity = artificial_viscosity;
+          }
+        pcout << "l2_blended_mu = " << artificial_viscosity.l2_norm() << std::endl
+              << std::endl;
+        break;
+      }
       case Parameters::AllParameters<dim>::diffu_cell_size:
       {
         typename DoFHandler<dim>::active_cell_iterator cell =
