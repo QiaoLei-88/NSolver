@@ -43,6 +43,9 @@ namespace NSFEMSolver
         prm.declare_entry ("entropy with solution diff", "true",
                            Patterns::Bool(),
                            "Compute entropy viscosity with solution difference");
+        prm.declare_entry ("entropy with oscillation shock capture", "false",
+                           Patterns::Bool(),
+                           "Enhance entropy viscosity with oscillation based shock capturing.");
 
         prm.declare_entry ("oscillation visc ceiling", "-3",
                            Patterns::Double(),
@@ -163,6 +166,8 @@ namespace NSFEMSolver
         entropy_use_global_h_min = prm.get_bool ("entropy use global h min");
         entropy_with_rho_max = prm.get_bool ("entropy with rho max");
         entropy_with_solution_diff = prm.get_bool ("entropy with solution diff");
+        entropy_with_oscillation_shock_capture =
+          prm.get_bool ("entropy with oscillation shock capture");
 
         oscillation_visc_ceiling = prm.get_double ("oscillation visc ceiling");
         oscillation_visc_ground = prm.get_double ("oscillation visc ground");

@@ -65,6 +65,7 @@ namespace NSFEMSolver
       bool   entropy_use_global_h_min;
       bool   entropy_with_rho_max;
       bool   entropy_with_solution_diff;
+      bool   entropy_with_oscillation_shock_capture;
       double oscillation_visc_ceiling;
       double oscillation_visc_ground;
       double oscillation_visc_background;
