@@ -65,6 +65,10 @@ namespace NSFEMSolver
       bool   entropy_use_global_h_min;
       bool   entropy_with_rho_max;
       bool   entropy_with_solution_diff;
+      double oscillation_visc_ceiling;
+      double oscillation_visc_ground;
+      double oscillation_visc_background;
+      double oscillation_visc_coefficient;
       bool   smooth_artificial_viscosity;
       double diffusion_factor[EquationComponents<dim>::n_components];
       double laplacian_continuation;
