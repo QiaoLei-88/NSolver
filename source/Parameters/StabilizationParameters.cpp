@@ -44,6 +44,19 @@ namespace NSFEMSolver
                            Patterns::Bool(),
                            "Compute entropy viscosity with solution difference");
 
+        prm.declare_entry ("oscillation visc ceiling", "-3",
+                           Patterns::Double(),
+                           "Ceiling value of oscillation indicator to evaluate artificial viscosity");
+        prm.declare_entry ("oscillation visc ground", "-4",
+                           Patterns::Double(),
+                           "Ceiling value of oscillation indicator to evaluate artificial viscosity");
+        prm.declare_entry ("oscillation visc background", "1.0e-8",
+                           Patterns::Double(),
+                           "Background value of artificial viscosity for under ground oscillation");
+        prm.declare_entry ("oscillation visc coefficient", "1.0",
+                           Patterns::Double(),
+                           "Scale factor of artificial viscosity for under ground oscillation");
+
         prm.declare_entry ("smooth artificial viscosity", "false",
                            Patterns::Bool(),
                            "Smooth artificial viscosity via setting value to maximum among its neighbors.");
@@ -153,6 +166,11 @@ namespace NSFEMSolver
         entropy_use_global_h_min = prm.get_bool ("entropy use global h min");
         entropy_with_rho_max = prm.get_bool ("entropy with rho max");
         entropy_with_solution_diff = prm.get_bool ("entropy with solution diff");
+
+        oscillation_visc_ceiling = prm.get_double ("oscillation visc ceiling");
+        oscillation_visc_ground = prm.get_double ("oscillation visc ground");
+        oscillation_visc_background = prm.get_double ("oscillation visc background");
+        oscillation_visc_coefficient = prm.get_double ("oscillation visc coefficient");
 
         smooth_artificial_viscosity = prm.get_bool ("smooth artificial viscosity");
 
