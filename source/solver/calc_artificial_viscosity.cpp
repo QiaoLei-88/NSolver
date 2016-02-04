@@ -591,7 +591,7 @@ namespace NSFEMSolver
               << std::endl;
         break;
       }
-      case Parameters::AllParameters<dim>::diffu_gradient:
+      case Parameters::AllParameters<dim>::diffu_oscillation:
       {
         FEValues<dim> fe_values (fe,
                                  quadrature,
