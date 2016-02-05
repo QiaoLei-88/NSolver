@@ -13,30 +13,31 @@ namespace NSFEMSolver
   template <int dim>
   void NSolver<dim>::calc_artificial_viscosity()
   {
+    // Find out global minimum cell size
+    double local_h_min (std::numeric_limits<double>::max());
+
+    typename DoFHandler<dim>::active_cell_iterator cell =
+      dof_handler.begin_active();
+    const typename DoFHandler<dim>::active_cell_iterator endc =
+      dof_handler.end();
+    for (; cell!=endc; ++cell)
+      {
+        if (cell->is_locally_owned())
+          {
+            local_h_min = std::min (cell->diameter(), local_h_min);
+          }
+      }
+
+    const double global_h_min = Utilities::MPI::min (local_h_min, mpi_communicator);
+    // This is to say local_h_min will never be used here after.
+    (void)local_h_min;
+    const double global_effective_h_max = global_h_min * parameters->h_ceiling_ratio;
+
     switch (parameters->diffusion_type)
       {
       case Parameters::AllParameters<dim>::diffu_entropy:
       {
         // Entropy viscosity
-        double local_h_min (std::numeric_limits<double>::max());
-        if (parameters->entropy_use_global_h_min)
-          {
-            typename DoFHandler<dim>::active_cell_iterator cell =
-              dof_handler.begin_active();
-            const typename DoFHandler<dim>::active_cell_iterator endc =
-              dof_handler.end();
-            for (; cell!=endc; ++cell)
-              {
-                if (cell->is_locally_owned())
-                  {
-                    local_h_min = std::min (cell->diameter(), local_h_min);
-                  }
-              }
-          }
-        const double global_h_min = Utilities::MPI::min (local_h_min, mpi_communicator);
-        // This is to say local_h_min will never be used here after.
-        (void)local_h_min;
-
         FEValues<dim> fe_values (fe,
                                  quadrature,
                                  update_values |
@@ -131,9 +132,8 @@ namespace NSFEMSolver
                     Mach_max = std::max (Mach_max, velocity/sound_speed);
                   }
 
-                const double h = parameters->entropy_use_global_h_min
-                                 ? global_h_min
-                                 : cell->diameter();
+                const double h = std::min (cell->diameter(), global_effective_h_max);
+
                 const double entropy_visc
                   = parameters->entropy_visc_cE *
                     h * h * D_h_max;
@@ -177,26 +177,6 @@ namespace NSFEMSolver
         const unsigned int &icp = EquationComponents<dim>::pressure_component;
         const unsigned int &icr = EquationComponents<dim>::density_component;
         const unsigned int &iv0 = EquationComponents<dim>::first_velocity_component;
-
-        // Compute global min cell size
-        double local_h_min (std::numeric_limits<double>::max());
-        if (parameters->entropy_use_global_h_min)
-          {
-            typename DoFHandler<dim>::active_cell_iterator cell =
-              dof_handler.begin_active();
-            const typename DoFHandler<dim>::active_cell_iterator endc =
-              dof_handler.end();
-            for (; cell!=endc; ++cell)
-              {
-                if (cell->is_locally_owned())
-                  {
-                    local_h_min = std::min (cell->diameter(), local_h_min);
-                  }
-              }
-          }
-        const double global_h_min = Utilities::MPI::min (local_h_min, mpi_communicator);
-        // This is to say local_h_min will never be used here after.
-        (void)local_h_min;
 
         double Mach_max (std::numeric_limits<double>::min());
         // Begin computing artificial viscosity.
@@ -251,11 +231,8 @@ namespace NSFEMSolver
             // of artificial viscosity. Mean while, numerical examples in
             // literatures usually carried out on uniform mesh, thus h is
             // equivalent to its global min.
-            const double h = parameters->entropy_use_global_h_min
-                             ?
-                             global_h_min
-                             :
-                             cell->diameter();
+            const double h = std::min (cell->diameter(), global_effective_h_max);
+
             {
               // Here we start evaluation of cell entropy production,
               // first order viscosity as upper bound of artificial viscosity,
