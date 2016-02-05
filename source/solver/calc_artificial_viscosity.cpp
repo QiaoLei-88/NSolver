@@ -192,7 +192,7 @@ namespace NSFEMSolver
                       {
                         oscillation_visc =
                           parameters->oscillation_visc_coefficient *
-                          0.5 * cell->diameter();
+                          0.5 * h;
                       }
                     else if (oscillation_indicator > visc_ground)
                       {
@@ -200,7 +200,7 @@ namespace NSFEMSolver
                         const double mean = 0.5 * (visc_ceiling + visc_ground);
                         oscillation_visc =
                           parameters->oscillation_visc_coefficient *
-                          0.25 * cell->diameter() *
+                          0.25 * h *
                           (1.0 + std::sin (numbers::PI * (oscillation_indicator - mean) / gap));
                       }
                     if (oscillation_visc > artificial_viscosity[cell->active_cell_index()])
