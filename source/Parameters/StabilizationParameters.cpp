@@ -24,10 +24,13 @@ namespace NSFEMSolver
         prm.declare_entry ("diffusion power", "2.0",
                            Patterns::Double(),
                            "power of mesh size for diffusion");
-
         prm.declare_entry ("diffusion coefficient", "1.0",
                            Patterns::Double(),
                            "predefined diffusion coefficient");
+        prm.declare_entry ("h ceiling ratio", "1e+100",
+                           Patterns::Double(),
+                           "Ratio of maximum effective cell size with respect to global minimum cell size.");
+
         prm.declare_entry ("entropy visc cE", "1.0",
                            Patterns::Double (0.0),
                            "Scale factor on entropy viscosity");
@@ -161,6 +164,8 @@ namespace NSFEMSolver
         }
         diffusion_power = prm.get_double ("diffusion power");
         diffusion_coefficoent = prm.get_double ("diffusion coefficient");
+        h_ceiling_ratio  = prm.get_double ("h ceiling ratio");
+
         entropy_visc_cE = prm.get_double ("entropy visc cE");
         entropy_visc_cLinear = prm.get_double ("entropy visc cLinear");
         entropy_use_global_h_min = prm.get_bool ("entropy use global h min");
