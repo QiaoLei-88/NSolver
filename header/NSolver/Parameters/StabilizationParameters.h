@@ -61,6 +61,7 @@ namespace NSFEMSolver
 
       double diffusion_power;
       double diffusion_coefficoent;
+      double h_ceiling_ratio;
       double entropy_visc_cE;
       double entropy_visc_cLinear;
       bool   entropy_use_global_h_min;
