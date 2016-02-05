@@ -63,7 +63,6 @@ namespace NSFEMSolver
       double h_ceiling_ratio;
       double entropy_visc_cE;
       double entropy_visc_cLinear;
-      bool   entropy_use_global_h_min;
       bool   entropy_with_rho_max;
       bool   entropy_with_solution_diff;
       bool   entropy_with_oscillation_shock_capture;
