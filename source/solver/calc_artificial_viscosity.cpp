@@ -203,6 +203,10 @@ namespace NSFEMSolver
                           0.25 * h *
                           (1.0 + std::sin (numbers::PI * (oscillation_indicator - mean) / gap));
                       }
+                    if (parameters->oscillation_with_characteristic_speed)
+                      {
+                        oscillation_visc *= characteristic_speed_max;
+                      }
                     if (oscillation_visc > artificial_viscosity[cell->active_cell_index()])
                       {
                         artificial_viscosity[cell->active_cell_index()] = oscillation_visc;
