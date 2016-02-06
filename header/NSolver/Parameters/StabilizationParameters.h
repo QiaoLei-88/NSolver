@@ -70,6 +70,7 @@ namespace NSFEMSolver
       double oscillation_visc_ground;
       double oscillation_visc_background;
       double oscillation_visc_coefficient;
+      bool   oscillation_with_characteristic_speed;
       bool   smooth_artificial_viscosity;
       double diffusion_factor[EquationComponents<dim>::n_components];
       double laplacian_continuation;
