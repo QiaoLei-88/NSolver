@@ -56,6 +56,9 @@ namespace NSFEMSolver
         prm.declare_entry ("oscillation visc coefficient", "1.0",
                            Patterns::Double(),
                            "Scale factor of artificial viscosity for under ground oscillation");
+        prm.declare_entry ("oscillation with characteristic speed", "false",
+                           Patterns::Bool(),
+                           "Scale oscillation visc with characteristic speed");
 
         prm.declare_entry ("smooth artificial viscosity", "false",
                            Patterns::Bool(),
@@ -172,6 +175,7 @@ namespace NSFEMSolver
         oscillation_visc_ground = prm.get_double ("oscillation visc ground");
         oscillation_visc_background = prm.get_double ("oscillation visc background");
         oscillation_visc_coefficient = prm.get_double ("oscillation visc coefficient");
+        oscillation_with_characteristic_speed =  prm.get_bool ("oscillation with characteristic speed");
 
         smooth_artificial_viscosity = prm.get_bool ("smooth artificial viscosity");
 
