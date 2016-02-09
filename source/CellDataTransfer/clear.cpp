@@ -11,8 +11,8 @@
 namespace NSFEMSolver
 {
 
-  template<int dim, typename Number>
-  void CellDataTransfer<dim, Number>::clear()
+  template<int dim, typename InternalValueType>
+  void CellDataTransfer<dim, InternalValueType>::clear()
   {
     for (unsigned int i=0; i<vector_data_ptr.size(); ++i)
       {

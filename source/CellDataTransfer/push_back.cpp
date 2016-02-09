@@ -11,18 +11,18 @@
 namespace NSFEMSolver
 {
 
-  template<int dim, typename Number>
-  template <typename ValueType>
+  template<int dim, typename InternalValueType>
+  template <typename UserValueType>
   unsigned int
-  CellDataTransfer<dim, Number>::push_back (ValueType *const data_src,
-                                            const size_type  size)
+  CellDataTransfer<dim, InternalValueType>::push_back (UserValueType *const data_src,
+                                                       const size_type  size)
   {
     Assert (size >= tria.n_active_cells(), ExcMessage ("Not enough data."));
 
     const size_type new_position = vector_data_ptr.size();
     const size_type active_size = std::min (size, tria.n_active_cells());
 
-    vector_data_ptr.push_back (std::vector<Number> (active_size));
+    vector_data_ptr.push_back (std::vector<InternalValueType> (active_size));
     std::copy (data_src, data_src+active_size, vector_data_ptr[new_position].begin());
 
     return (new_position);

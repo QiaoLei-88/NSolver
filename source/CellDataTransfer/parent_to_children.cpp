@@ -11,8 +11,8 @@
 namespace NSFEMSolver
 {
 
-  template<int dim, typename Number>
-  void CellDataTransfer<dim, Number>::
+  template<int dim, typename InternalValueType>
+  void CellDataTransfer<dim, InternalValueType>::
   parent_to_children (const typename Triangulation<dim>::cell_iterator &cell)
   {
     // Distribute parent values to children
@@ -24,8 +24,8 @@ namespace NSFEMSolver
       }
 
     const size_type parent_index = cell->user_index();
-    const Number parent_measure = cell->measure();
-    std::vector<Number> parent_mean (n_vector);
+    const InternalValueType parent_measure = cell->measure();
+    std::vector<InternalValueType> parent_mean (n_vector);
     for (size_type i=0; i<n_vector; ++i)
       {
         parent_mean[i] = vector_data_ptr[i][parent_index] / parent_measure;
@@ -35,7 +35,7 @@ namespace NSFEMSolver
         Assert (cell->child (i_child)->active(),
                 ExcMessage ("A just refined cell should have active children."));
         const size_type next_position = vector_data_ptr[0].size();
-        const Number child_measure = cell->child (i_child)->measure();
+        const InternalValueType child_measure = cell->child (i_child)->measure();
         // Store values of child cells
         for (size_type i=0; i<n_vector; ++i)
           {

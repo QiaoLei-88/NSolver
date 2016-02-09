@@ -17,7 +17,7 @@ namespace NSFEMSolver
 {
   using namespace dealii;
 
-  template<int dim, typename Number = double>
+  template<int dim, typename InternalValueType = double>
   class CellDataTransfer
   {
   public:
@@ -57,12 +57,12 @@ namespace NSFEMSolver
      * @note It is safe to destroy vector @p data_src after this function call.
      * All its data in range [0, tria.n_active_cell()) will be cached internally.
      *
-     * @note Instantiated ValueType types are <tt>double</tt> and <tt>float</tt>.
+     * @note Instantiated UserValueType types are <tt>double</tt> and <tt>float</tt>.
      * All the data will be implicitly converted to and store internally in
-     * type <tt>Number</tt>.
+     * type <tt>InternalValueType</tt>.
      */
-    template <typename ValueType>
-    unsigned int push_back (ValueType *const data_src, const size_type size);
+    template <typename UserValueType>
+    unsigned int push_back (UserValueType *const data_src, const size_type size);
 
     /**
      * Retrieve transfered data of index @index to vector with starting address @p data_src.
@@ -73,11 +73,11 @@ namespace NSFEMSolver
      * @note You can receive one vector multiple times. This is not a pop operation.
      *
      * @note Variable type of the receiving vector does not have to be same to
-     * the type of Number or corresponding provided vector. Implicit type conversion
+     * the type of InternalValueType or corresponding provided vector. Implicit type conversion
      * applies.
      */
-    template <typename ValueType>
-    void get_transfered_data (const unsigned int index, ValueType *data_dest) const;
+    template <typename UserValueType>
+    void get_transfered_data (const unsigned int index, UserValueType *data_dest) const;
 
     /**
      * Free all internally allocated memory. You can call this function
@@ -113,7 +113,7 @@ namespace NSFEMSolver
      * Internal cache for all handed-in data and transfered data.
      */
     // TODO: use vector of pointer for efficiency.
-    std::vector<std::vector<Number> > vector_data_ptr;
+    std::vector<std::vector<InternalValueType> > vector_data_ptr;
 
     /**
      * A constant reference to the related triangulation that used to loop through

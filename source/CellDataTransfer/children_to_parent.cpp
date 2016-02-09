@@ -11,8 +11,8 @@
 namespace NSFEMSolver
 {
 
-  template<int dim, typename Number>
-  void CellDataTransfer<dim, Number>::
+  template<int dim, typename InternalValueType>
+  void CellDataTransfer<dim, InternalValueType>::
   children_to_parent (const typename Triangulation<dim>::cell_iterator &cell)
   {
     // Collect children values to parent cell
@@ -23,7 +23,7 @@ namespace NSFEMSolver
         return;
       }
 
-    std::vector<Number> children_sum (n_vector, 0.0);
+    std::vector<InternalValueType> children_sum (n_vector, 0.0);
     for (unsigned int i_child=0; i_child < cell->n_children(); ++i_child)
       {
         Assert (cell->child (i_child)->active(),

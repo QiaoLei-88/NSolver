@@ -11,10 +11,11 @@
 namespace NSFEMSolver
 {
 
-  template<int dim, typename Number>
-  template <typename ValueType>
-  void CellDataTransfer<dim, Number>::get_transfered_data (const unsigned int index,
-                                                           ValueType         *data_dest) const
+  template<int dim, typename InternalValueType>
+  template <typename UserValueType>
+  void CellDataTransfer<dim, InternalValueType>::get_transfered_data (
+    const unsigned int index,
+    UserValueType     *data_dest) const
   {
     Assert (index < vector_data_ptr.size(),
             ExcMessage ("You are asking for data that never turned in"));
