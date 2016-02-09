@@ -16,7 +16,7 @@ namespace NSFEMSolver
   {
     for (unsigned int i=0; i<vector_data_ptr.size(); ++i)
       {
-        vector_data_ptr.clear();
+        vector_data_ptr[i].clear();
       }
     vector_data_ptr.clear();
 
