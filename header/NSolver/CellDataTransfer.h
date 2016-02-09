@@ -10,6 +10,7 @@
 #define NSolver_CellDataTransfer_h
 
 #include <deal.II/grid/tria.h>
+#include <deal.II/base/types.h>
 #include <deal.II/base/std_cxx11/bind.h>
 
 namespace NSFEMSolver
@@ -20,7 +21,7 @@ namespace NSFEMSolver
   class CellDataTransfer
   {
   public:
-    typedef unsigned int size_type;
+    typedef dealii::types::global_dof_index size_type;
 
     /**
      * The constructor first set all user indices on active cells of @p tria_in
