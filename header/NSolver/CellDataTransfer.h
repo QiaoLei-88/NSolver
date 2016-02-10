@@ -120,6 +120,13 @@ namespace NSFEMSolver
      * all cells.
      */
     const Triangulation<dim> &tria;
+
+    /**
+     * Signal connections between the related triangulation. We need to store them
+     * in order to disconnect before destruction.
+     */
+    boost::signals2::connection refine_listener;
+    boost::signals2::connection coarsen_listener;
   };
 }
 #endif

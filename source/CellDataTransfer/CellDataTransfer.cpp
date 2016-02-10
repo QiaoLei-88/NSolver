@@ -30,21 +30,25 @@ namespace NSFEMSolver
         cell->set_user_index (cell->active_cell_index());
       }
 
-    tria_in.signals.pre_coarsening_on_cell.connect
-    (std_cxx11::bind (&CellDataTransfer<dim, InternalValueType>::children_to_parent,
-                      this,
-                      std_cxx11::placeholders::_1));
+    coarsen_listener =
+      tria_in.signals.pre_coarsening_on_cell.connect
+      (std_cxx11::bind (&CellDataTransfer<dim, InternalValueType>::children_to_parent,
+                        this,
+                        std_cxx11::placeholders::_1));
 
-    tria_in.signals.post_refinement_on_cell.connect
-    (std_cxx11::bind (&CellDataTransfer<dim, InternalValueType>::parent_to_children,
-                      this,
-                      std_cxx11::placeholders::_1));
+    refine_listener =
+      tria_in.signals.post_refinement_on_cell.connect
+      (std_cxx11::bind (&CellDataTransfer<dim, InternalValueType>::parent_to_children,
+                        this,
+                        std_cxx11::placeholders::_1));
   }
 
 
   template<int dim, typename InternalValueType>
   CellDataTransfer<dim, InternalValueType>::~CellDataTransfer()
   {
+    refine_listener.disconnect();
+    coarsen_listener.disconnect();
     clear();
   }
 
