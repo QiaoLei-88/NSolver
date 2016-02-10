@@ -131,8 +131,8 @@ namespace NSFEMSolver
                             }
                           // And the shock region
                           if (parameters->NACA_cheating_refinement == 2)
-                            if (cell->center()[0] > 0.25 &&
-                                cell->center()[0] < 0.50 &&
+                            if (cell->center()[0] > 0.1 &&
+                                cell->center()[0] < 0.6 &&
                                 cell->center()[1] < 1.0)
                               {
                                 cell->set_refine_flag();
@@ -159,8 +159,8 @@ namespace NSFEMSolver
                         }
                       // And the shock region
                       if (parameters->NACA_cheating_refinement == 2)
-                        if (cell->center()[0] > 0.30 &&
-                            cell->center()[0] < 0.45 &&
+                        if (cell->center()[0] > 0.15 &&
+                            cell->center()[0] < 0.55 &&
                             cell->center()[1] < 1.0)
                           {
                             cell->set_refine_flag();
