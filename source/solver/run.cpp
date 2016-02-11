@@ -897,10 +897,18 @@ namespace NSFEMSolver
                       }
                     else
                       {
-                        double const
-                        ratio = std::max (parameters->minimum_step_increasing_ratio_stage2,
-                                          std::pow (res_norm_total_previous/res_norm_total, parameters->step_increasing_power_stage2));
-                        CFL_number *= ratio;
+                        if (parameters->step_with_physical_residual)
+                          {
+                            CFL_number = std::max (CFL_number * parameters->minimum_step_increasing_ratio_stage2,
+                                                   parameters->CFL_number * std::pow (1.0/physical_residual_ratio, parameters->step_increasing_power_stage2));
+                          }
+                        else
+                          {
+                            double const
+                            ratio = std::max (parameters->minimum_step_increasing_ratio_stage2,
+                                              std::pow (res_norm_total_previous/res_norm_total, parameters->step_increasing_power_stage2));
+                            CFL_number *= ratio;
+                          }
                       }
                     CFL_number = std::min (CFL_number, parameters->CFL_number_max);
                     if (remove_continuation &&
