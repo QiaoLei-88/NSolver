@@ -24,7 +24,7 @@ namespace NSFEMSolver
     typedef dealii::types::global_dof_index size_type;
 
     /**
-     * The constructor first set all user indices on active cells of @p tria_in
+     * The constructor first sets all user indices on active cells in @p tria_in
      * to @p active_cell_index, then connect proper member function to
      * corresponding signals of @p tria_in. So that data attached to active cells
      * could be transfered during cell refinement and coarsening.
