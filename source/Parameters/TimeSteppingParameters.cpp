@@ -96,6 +96,10 @@ namespace NSFEMSolver
                            Patterns::Integer (0,8),
                            "largest index of linear search length could try. "
                            "value of linear search length is defined internally.");
+
+        prm.declare_entry ("step with physical residual", "false",
+                           Patterns::Bool(),
+                           "Evolute CFL number according to physical residual.");
       }
       prm.leave_subsection();
     }
@@ -154,6 +158,7 @@ namespace NSFEMSolver
         solution_extrapolation_length = prm.get_double ("solution extrapolation length");
 
         newton_linear_search_length_try_limit = prm.get_integer ("newton linear search length try limit");
+        step_with_physical_residual = prm.get_bool ("step with physical residual");
       }
       prm.leave_subsection();
     }

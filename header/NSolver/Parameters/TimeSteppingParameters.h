@@ -113,6 +113,7 @@ namespace NSFEMSolver
        */
       int newton_linear_search_length_try_limit;
 
+      bool step_with_physical_residual;
 
       static void declare_parameters (ParameterHandler &prm);
       void parse_parameters (ParameterHandler &prm);
