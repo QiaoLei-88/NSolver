@@ -22,6 +22,9 @@ DEAL_II_ENABLE_EXTRA_DIAGNOSTICS
 using namespace dealii;
 using namespace NSFEMSolver;
 
+/**
+ * An ILU preconditioner with Minimum Discarded Fill (MDF) ordering.
+ */
 class MDFILU : public Epetra_Operator
 {
 //
