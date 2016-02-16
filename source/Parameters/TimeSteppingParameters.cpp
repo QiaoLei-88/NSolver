@@ -74,7 +74,7 @@ namespace NSFEMSolver
 
 
         prm.declare_entry ("iter in stage1", "5",
-                           Patterns::Integer (1),
+                           Patterns::Integer (0),
                            "number of iterations in stage one for time step increasing in steady case");
         prm.declare_entry ("step increasing ratio stage1", "1.0",
                            Patterns::Double (0),
