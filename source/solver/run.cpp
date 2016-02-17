@@ -703,7 +703,12 @@ namespace NSFEMSolver
             computing_timer.enter_subsection ("4:Solve Newton system");
             if (!solution_diverged)
               {
-                convergence = solve (newton_update);
+                const double absolute_linear_tolerance =
+                  parameters->linear_residual >=0 ?
+                  parameters->linear_residual
+                  :
+                  std::pow (10.0, parameters->linear_residual) * res_norm;
+                convergence = solve (newton_update, absolute_linear_tolerance);
               }
             computing_timer.leave_subsection ("4:Solve Newton system");
 

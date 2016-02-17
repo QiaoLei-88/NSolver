@@ -21,7 +21,7 @@ namespace NSFEMSolver
 
   template <int dim>
   std::pair<unsigned int, double>
-  NSolver<dim>::solve (NSVector &newton_update)
+  NSolver<dim>::solve (NSVector &newton_update, const double absolute_linear_tolerance)
   {
     std::pair<unsigned int, double> return_value (-1, -1);
     switch (parameters->solver)
@@ -249,7 +249,7 @@ namespace NSFEMSolver
           {
             solver.SetPrecOperator (preconditioner_ptr);
           }
-        solver.Iterate (parameters->max_iterations, parameters->linear_residual);
+        solver.Iterate (parameters->max_iterations, absolute_linear_tolerance);
 
         return_value.first = solver.NumIters();
         return_value.second = solver.TrueResidual();

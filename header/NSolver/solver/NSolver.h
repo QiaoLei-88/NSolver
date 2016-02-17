@@ -171,7 +171,8 @@ namespace NSFEMSolver
                              const double                     face_diameter);
     void apply_strong_boundary_condtions();
 
-    std::pair<unsigned int, double> solve (NSVector &solution);
+    std::pair<unsigned int, double> solve (NSVector &solution,
+                                           const double absolute_linear_tolerance);
 
     void integrate_force (WallForce &wall_force) const;
 
