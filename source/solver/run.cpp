@@ -467,6 +467,7 @@ namespace NSFEMSolver
     double res_norm_total_previous (0.0);
     double res_norm_infty_total (0.0);
     double physical_residual_first (0.0);
+    double continuation_mu_blend_weight (0.0);
     double old_continuation_coefficient = continuation_coefficient;
     unsigned int n_step_laplacian_vanished = 65535;
     bool is_refine_step = false;
@@ -613,9 +614,17 @@ namespace NSFEMSolver
           }
           case Parameters::StabilizationParameters<dim>::CT_blend:
           {
-            // TODO: risk of dividing zero.
+            if (n_time_step == 1)
+              {
+                continuation_mu_blend_weight =
+                  continuation_coefficient /
+                  (parameters-> continuation_blend_starting_ratio * mean_artificial_viscosity);
+              }
             const double weight
-              = (0.5 * continuation_coefficient) / ((0.5 * continuation_coefficient) + mean_artificial_viscosity);
+              = continuation_coefficient /
+                (continuation_coefficient +
+                 continuation_mu_blend_weight * mean_artificial_viscosity);
+
             continuation_coeff_time      = (1.0-weight) * continuation_coefficient;
             continuation_coeff_laplacian = weight       * continuation_coefficient;
             break;
