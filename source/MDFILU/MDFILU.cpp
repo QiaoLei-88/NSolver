@@ -1,5 +1,6 @@
 
 #include <NSolver/MDFILU/MDFILU.h>
+#ifndef USE_PETSC_LA
 
 const char MDFILU::label[] = "Epetra_Operator_MDFILU";
 const MDFILU::data_type MDFILU::very_large_number
@@ -825,3 +826,5 @@ int MDFILU::ApplyInverse (const Epetra_MultiVector &in, Epetra_MultiVector &out)
 
   return (0);
 }
+
+#endif
