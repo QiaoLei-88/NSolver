@@ -50,6 +50,7 @@ namespace NSFEMSolver
       ContinuationType continuation_type;
       double continuation_min_decrease_rate;
       double continuation_decrease_residual_power;
+      double continuation_blend_starting_ratio;
       double continuation_switch_threshold;
 
       bool use_local_laplacian_coefficient;

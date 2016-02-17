@@ -72,6 +72,9 @@ namespace NSFEMSolver
         prm.declare_entry ("continuation decrease residual power","2.0",
                            Patterns::Double(),
                            "Power on relative residual for computing new continuation coefficient");
+        prm.declare_entry ("continuation blend starting ratio","40.0",
+                           Patterns::Double(),
+                           "Staring Laplacian to time ratio of blending continuation");
         prm.declare_entry ("switch threshold","10.0",
                            Patterns::Double(),
                            "Ratio threshold to switch from laplacian to time continuation");
@@ -186,6 +189,7 @@ namespace NSFEMSolver
         }
         continuation_min_decrease_rate = prm.get_double ("continuation min decrease rate");
         continuation_decrease_residual_power = prm.get_double ("continuation decrease residual power");
+        continuation_blend_starting_ratio = prm.get_double ("continuation blend starting ratio");
         continuation_switch_threshold = prm.get_double ("switch threshold");
 
         use_local_laplacian_coefficient
