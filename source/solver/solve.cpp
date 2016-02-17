@@ -84,7 +84,17 @@ namespace NSFEMSolver
       case Parameters::Solver::gmres:
       {
 #ifdef USE_PETSC_LA
-        AssertThrow (false, ExcMessage ("PETSc GMRES solver is not implemented."));
+        SolverControl solver_control (parameters->max_iterations,
+                                      absolute_linear_tolerance);
+        PETScWrappers::SolverGMRES solver (solver_control, mpi_communicator);
+
+        PETScWrappers::PreconditionBlockJacobi preconditioner (system_matrix);
+
+        solver.solve (system_matrix, newton_update, right_hand_side,
+                      preconditioner);
+
+        return_value.first = solver_control.last_step();
+        return_value.second = solver_control.last_value();
 #else
         Epetra_Vector x (View, system_matrix.trilinos_matrix().DomainMap(),
                          newton_update.begin());
