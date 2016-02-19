@@ -606,6 +606,10 @@ namespace NSFEMSolver
                         characteristic_speed_max = std::max (characteristic_speed_max, velocity + sound_speed);
                       }
                   }
+                else
+                  {
+                    characteristic_speed_max = 1.0;
+                  }
 
                 for (unsigned int c=0; c<EquationComponents<dim>::n_components; ++c)
                   {
@@ -641,6 +645,7 @@ namespace NSFEMSolver
                 if (oscillation_indicator >= visc_ceiling)
                   {
                     oscillation_visc +=
+                      characteristic_speed_max *
                       parameters->oscillation_visc_coefficient *
                       0.5 * h;
                   }
@@ -649,13 +654,10 @@ namespace NSFEMSolver
                     const double gap  = visc_ceiling - visc_ground;
                     const double mean = 0.5 * (visc_ceiling + visc_ground);
                     oscillation_visc +=
+                      characteristic_speed_max *
                       parameters->oscillation_visc_coefficient *
                       0.25 * h *
                       (1.0 + std::sin (numbers::PI * (oscillation_indicator - mean) / gap));
-                  }
-                if (parameters->oscillation_with_characteristic_speed)
-                  {
-                    oscillation_visc *= characteristic_speed_max;
                   }
                 dominant_viscosity[cell->active_cell_index()] = oscillation_indicator;
               } // End if cell is locally owned
