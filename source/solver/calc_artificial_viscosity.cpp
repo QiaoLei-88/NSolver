@@ -640,7 +640,7 @@ namespace NSFEMSolver
                 oscillation_visc = parameters->oscillation_visc_background;
                 if (oscillation_indicator >= visc_ceiling)
                   {
-                    oscillation_visc =
+                    oscillation_visc +=
                       parameters->oscillation_visc_coefficient *
                       0.5 * h;
                   }
@@ -648,7 +648,7 @@ namespace NSFEMSolver
                   {
                     const double gap  = visc_ceiling - visc_ground;
                     const double mean = 0.5 * (visc_ceiling + visc_ground);
-                    oscillation_visc =
+                    oscillation_visc +=
                       parameters->oscillation_visc_coefficient *
                       0.25 * h *
                       (1.0 + std::sin (numbers::PI * (oscillation_indicator - mean) / gap));
