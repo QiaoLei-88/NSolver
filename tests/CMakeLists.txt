@@ -8,31 +8,39 @@ SET (_para_copy -s )
 
 SET (_exec_mpi mpirun)
 
-# Find and set diff executable. Use numdiff if it exits, otherwise use standard diff
-# instead. If non of them exits, abort building.
+# Find and set diff executable. Use numdiff if it exits, otherwise use standard
+# diff instead. If non of them exits, abort building.
+# Note: FIND_PROGRAM will nor run when '_exec_diff' is defined.
 FIND_PROGRAM(_exec_diff
   NAMES numdiff
   HINTS ${NUMDIFF_DIR}
   PATH_SUFFIXES bin
   )
-
 IF( _exec_diff MATCHES "-NOTFOUND")
   FIND_PROGRAM(_exec_diff
     NAMES diff
     HINTS ${DIFF_DIR}
     PATH_SUFFIXES bin
     )
-  IF( _exec_diff MATCHES "-NOTFOUND")
-    MESSAGE(FATAL_ERROR "heheh"
-    "Could not find diff or numdiff. One of those are required for running the testsuite.\n"
-    "Please specify DIFF_DIR or NUMDIFF_DIR to a location containing the binaries."
-    )  
-  ENDIF()
-  # numdiff not found but diff found
-  SET (_para_diff "" )
+ENDIF()
+
+IF( _exec_diff MATCHES "-NOTFOUND")
+  MESSAGE(FATAL_ERROR "FATAL ERROR:\n"
+  "Could not find diff or numdiff. One of those are required for running the testsuite.\n"
+  "Please specify DIFF_DIR or NUMDIFF_DIR to the path of comparison tools."
+  )
+ENDIF()
+
+IF( _exec_diff MATCHES "numdiff")
+  MESSAGE(STATUS "Finding comparison tool: numdiff found at ${_exec_diff}")
+  SET (_para_diff -a 1e-8 -r 1e-8 -s  "' \\t\\n:<>=,\(\)[]\;'")
+ELSEIF( _exec_diff MATCHES "diff")
+  MESSAGE(STATUS "Finding comparison tool: diff found at ${_exec_diff}")
+  SET (_para_diff "")
 ELSE()
-  # numdiff found
-  SET (_para_diff  -a 1e-8 -r 1e-8 -s  "' \\t\\n:<>=,\(\)[]\;'")
+  MESSAGE(FATAL_ERROR "FATAL ERROR:\n"
+  "Unknown value for comparison tool.\n"
+  )
 ENDIF()
 # End find and set diff
 
