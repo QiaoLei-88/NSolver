@@ -47,7 +47,7 @@ int main (int argc, char *argv[])
           ParameterHandler prm;
 
           solver_parameters.declare_parameters (prm);
-          prm.read_input (input_file);
+          prm.parse_input (input_file);
           solver_parameters.parse_parameters (prm);
         }
         if (solver_parameters.space_dimension == dimension)
@@ -66,7 +66,7 @@ int main (int argc, char *argv[])
             ParameterHandler prm;
 
             solver_parameters.declare_parameters (prm);
-            prm.read_input (input_file);
+            prm.parse_input (input_file);
             solver_parameters.parse_parameters (prm);
           }
           if (solver_parameters.space_dimension == dimension)
