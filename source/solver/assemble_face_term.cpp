@@ -220,7 +220,9 @@ namespace NSFEMSolver
         Assert (false, ExcNotImplemented());
         alpha = 1;
       }
-    if (external_face && parameters->laplacian_continuation > 0.0)
+    if (external_face && (
+          (parameters->laplacian_continuation > 0.0) or
+          (parameters->n_mms == 1)))
       {
         for (unsigned int q=0; q<n_q_points; ++q)
           {
