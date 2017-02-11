@@ -320,7 +320,9 @@ namespace NSFEMSolver
                      fe_v.shape_value_component (i, point, component_i) *
                      fe_v.JxW (point);
             }
-
+          pcout << "R_i.size: " << R_i.size()
+           << ", dof_indices.size: " << dof_indices.size()
+           << std::endl;
           system_matrix.add (dof_indices[i], dof_indices.size(),
                              &dof_indices[0], & (R_i.fastAccessDx (0)));
           if (external_face == false)
