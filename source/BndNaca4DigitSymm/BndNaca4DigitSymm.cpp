@@ -179,7 +179,7 @@ namespace NSFEMSolver
   template<>
   void
   BndNaca4DigitSymm<2>::get_normals_at_vertices (const typename Triangulation<2>::face_iterator &face,
-                                                 typename dealii::Boundary<2,2>::FaceVertexNormals &face_vertex_normals) const
+                                                 typename dealii::Manifold<2,2>::FaceVertexNormals &face_vertex_normals) const
   {
     for (unsigned int v=0; v<GeometryInfo<2>::vertices_per_face; ++v)
       {
@@ -250,7 +250,7 @@ namespace NSFEMSolver
   template<>
   void
   BndNaca4DigitSymm<3>::get_normals_at_vertices (const typename Triangulation<3>::face_iterator &,
-                                                 typename dealii::Boundary<3,3>::FaceVertexNormals &) const
+                                                 typename dealii::Manifold<3,3>::FaceVertexNormals &) const
   {
     AssertThrow (false, ExcNotImplemented());
     return;

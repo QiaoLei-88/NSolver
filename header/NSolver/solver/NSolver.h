@@ -33,7 +33,6 @@
 #include <deal.II/grid/tria_iterator.h>
 #include <deal.II/grid/grid_in.h>
 #include <deal.II/grid/manifold_lib.h>
-#include <deal.II/grid/tria_boundary_lib.h>
 
 #include <deal.II/dofs/dof_handler.h>
 #include <deal.II/dofs/dof_accessor.h>
@@ -198,8 +197,8 @@ namespace NSFEMSolver
     MPI_Comm                                  mpi_communicator;
     // Must appear before Triangulation to make it initialized before triangulation
     // and destroyed after triangulation.
-    const HyperBallBoundary<dim> *spherical_boundary;
-    const StraightBoundary<dim> straight_boundary;
+    const SphericalManifold<dim> *spherical_boundary;
+    const FlatManifold<dim> straight_boundary;
     const BndNaca4DigitSymm<dim> NACA_foil_boundary;
 
     parallel::distributed::Triangulation<dim> triangulation;

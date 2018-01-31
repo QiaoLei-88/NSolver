@@ -11,7 +11,6 @@
 #define __BndNaca4DigitSymm__H__
 
 #include <deal.II/grid/manifold_lib.h>
-#include <deal.II/grid/tria_boundary_lib.h>
 
 // On OS X  system, you need to include this header;
 // On Linux, you don't.
@@ -34,7 +33,7 @@ namespace NSFEMSolver
   using namespace dealii;
 
   template<int dim>
-  class BndNaca4DigitSymm: public StraightBoundary<dim, dim>
+  class BndNaca4DigitSymm: public FlatManifold<dim, dim>
   {
   public:
     BndNaca4DigitSymm (const unsigned int number,
@@ -51,7 +50,7 @@ namespace NSFEMSolver
     get_new_point_on_line (const typename Triangulation<dim>::line_iterator &line) const;
 
     // /**
-    //  * Gives <tt>n=points.size()</tt> points that splits the StraightBoundary
+    //  * Gives <tt>n=points.size()</tt> points that splits the FlatManifold
     //  * line into $n+1$ partitions of equal lengths.
     //  *
     //  * Refer to the general documentation of this class and the documentation of
@@ -82,7 +81,7 @@ namespace NSFEMSolver
     virtual
     void
     get_normals_at_vertices (const typename Triangulation<dim>::face_iterator &face,
-                             typename dealii::Boundary<dim, dim>::FaceVertexNormals &face_vertex_normals) const;
+                             typename dealii::Manifold<dim, dim>::FaceVertexNormals &face_vertex_normals) const;
 
     /**
      * Given a candidate point and a line segment characterized by the iterator,

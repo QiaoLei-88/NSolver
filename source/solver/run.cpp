@@ -89,14 +89,14 @@ namespace NSFEMSolver
           if (parameters->manifold_circle == 1)
             {
               // Circle
-              spherical_boundary = new HyperBallBoundary<dim> (Point<dim>()/*=(0,0,...)*/,/*radius=*/0.5);
+              spherical_boundary = new SphericalManifold<dim> (/*Center*/Point<dim>()/*=(0,0,...)*/);
             }
           else if (parameters->manifold_circle == 2)
             {
               //GAMM Channel
-              spherical_boundary = new HyperBallBoundary<dim> (Point<dim> (0.0, -1.2), /*radius=*/1.3);
+              spherical_boundary = new SphericalManifold<dim> (Point<dim> (0.0, -1.2));
             }
-          triangulation.set_boundary (2, *spherical_boundary);
+          triangulation.set_manifold (2, *spherical_boundary);
 
           if (parameters->manifold_circle == 2)
             {
@@ -189,7 +189,7 @@ namespace NSFEMSolver
                       cell->face (f)->set_manifold_id (1);
                     }
                 }
-          triangulation.set_boundary (1, NACA_foil_boundary);
+          triangulation.set_manifold (1, NACA_foil_boundary);
 
           if (parameters->NACA_cheating_refinement == 1)
             {
@@ -1283,10 +1283,10 @@ namespace NSFEMSolver
 // on its destruction.
 // computing_timer.print_summary();
 
-// Clean run time allocated HyperBallBoundary object.
+// Clean run time allocated SphericalManifold object.
     if (parameters->manifold_circle > 0)
       {
-        triangulation.set_boundary (2, straight_boundary);
+        triangulation.set_manifold (2, straight_boundary);
         delete spherical_boundary;
         spherical_boundary = 0;
       }
