@@ -32,7 +32,7 @@ namespace NSFEMSolver
       }
     for (unsigned int i_child=0; i_child < cell->n_children(); ++i_child)
       {
-        Assert (cell->child (i_child)->active(),
+        Assert (cell->child (i_child)->is_active(),
                 ExcMessage ("A just refined cell should have active children."));
         const size_type next_position = vector_data_ptr[0].size();
         const InternalValueType child_measure = cell->child (i_child)->measure();

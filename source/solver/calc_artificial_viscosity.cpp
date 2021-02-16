@@ -754,7 +754,7 @@ namespace NSFEMSolver
 
                 const typename DoFHandler<dim>::cell_iterator &neighbor =
                   cell->neighbor (face_no);
-                if (neighbor->active())
+                if (neighbor->is_active())
                   {
                     // Neighbor cell is on same level or coarser
                     if (neighbor->is_locally_owned())
@@ -775,7 +775,7 @@ namespace NSFEMSolver
                         Assert (neighbor_child->face (cell->neighbor_of_neighbor (face_no)) ==
                                 cell->face (face_no)->child (subface_no),
                                 ExcInternalError());
-                        if (neighbor_child->is_locally_owned() && neighbor_child->active())
+                        if (neighbor_child->is_locally_owned() && neighbor_child->is_active())
                           {
                             max_visc = std::max (max_visc, unsmoothed_artificial_viscosity[neighbor_child->active_cell_index()]);
                           }
