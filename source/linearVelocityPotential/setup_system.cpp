@@ -33,7 +33,7 @@ namespace velocityPotential
           {
             VectorTools::interpolate_boundary_values (dof_handler,
                                                       boundary_id,
-                                                      ZeroFunction<dim>(),
+                                                      Functions::ZeroFunction<dim>(),
                                                       constraints);
           }
       }

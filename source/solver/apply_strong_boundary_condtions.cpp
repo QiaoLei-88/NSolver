@@ -40,7 +40,7 @@ namespace NSFEMSolver
             interpolate_boundary_values (*mapping_ptr,
                                          dof_handler,
                                          i_boundary,
-                                         ZeroFunction<dim> (EquationComponents<dim>::n_components),
+                                         Functions::ZeroFunction<dim> (EquationComponents<dim>::n_components),
                                          boundary_values,
                                          component_mask);
             break;
@@ -55,7 +55,7 @@ namespace NSFEMSolver
                 interpolate_boundary_values (*mapping_ptr,
                                              dof_handler,
                                              i_boundary,
-                                             ZeroFunction<dim> (EquationComponents<dim>::n_components),
+                                             Functions::ZeroFunction<dim> (EquationComponents<dim>::n_components),
                                              boundary_values,
                                              component_mask);
               }
