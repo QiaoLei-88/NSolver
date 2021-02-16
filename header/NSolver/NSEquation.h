@@ -9,7 +9,6 @@
 #ifndef __NSolver__NSEquation__
 #define __NSolver__NSEquation__
 
-#include <deal.II/base/std_cxx11/array.h>
 #include <deal.II/base/quadrature_lib.h>
 #include <deal.II/base/point.h>
 #include <deal.II/dofs/dof_handler.h>
@@ -42,6 +41,7 @@ DEAL_II_ENABLE_EXTRA_DIAGNOSTICS
 #include <iostream>
 #include <vector>
 #include <string>
+#include <array>
 
 namespace NSFEMSolver
 {
@@ -108,7 +108,7 @@ namespace NSFEMSolver
     static
     void
     compute_conservative_vector (const InputVector &W,
-                                 std_cxx11::array
+                                 std::array
                                  <typename InputVector::value_type,
                                  EquationComponents<dim>::n_components>
                                  &conservative_vector);
@@ -161,7 +161,7 @@ namespace NSFEMSolver
     template <typename InputVector>
     static
     void compute_inviscid_flux (const InputVector &W,
-                                std_cxx11::array <std_cxx11::array
+                                std::array <std::array
                                 <typename InputVector::value_type, dim>,
                                 EquationComponents<dim>::n_components> &flux);
 
@@ -178,7 +178,7 @@ namespace NSFEMSolver
     static
     void compute_viscous_flux (const InputVector &W,
                                const InputMatrix &grad_w,
-                               std_cxx11::array <std_cxx11::array
+                               std::array <std::array
                                <typename InputVector::value_type, dim>,
                                EquationComponents<dim>::n_components> &flux,
                                const double artificial_dynamic_viscosity,
@@ -196,7 +196,7 @@ namespace NSFEMSolver
                                 const InputVector                  &Wplus,
                                 const InputVector                  &Wminus,
                                 const double                        alpha,
-                                std_cxx11::array < typename InputVector::value_type,
+                                std::array < typename InputVector::value_type,
                                 EquationComponents<dim>::n_components> &normal_flux,
                                 NumericalFlux::Type const &flux_type);
 
@@ -213,7 +213,7 @@ namespace NSFEMSolver
     template <typename InputVector>
     static
     void compute_forcing_vector (const InputVector &W,
-                                 std_cxx11::array
+                                 std::array
                                  <typename InputVector::value_type,
                                  EquationComponents<dim>::n_components>
                                  &forcing);

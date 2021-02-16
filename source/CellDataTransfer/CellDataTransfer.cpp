@@ -32,15 +32,15 @@ namespace NSFEMSolver
 
     coarsen_listener =
       tria_in.signals.pre_coarsening_on_cell.connect
-      (std_cxx11::bind (&CellDataTransfer<dim, InternalValueType>::children_to_parent,
+      (std::bind (&CellDataTransfer<dim, InternalValueType>::children_to_parent,
                         this,
-                        std_cxx11::placeholders::_1));
+                        std::placeholders::_1));
 
     refine_listener =
       tria_in.signals.post_refinement_on_cell.connect
-      (std_cxx11::bind (&CellDataTransfer<dim, InternalValueType>::parent_to_children,
+      (std::bind (&CellDataTransfer<dim, InternalValueType>::parent_to_children,
                         this,
-                        std_cxx11::placeholders::_1));
+                        std::placeholders::_1));
   }
 
 

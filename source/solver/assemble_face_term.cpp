@@ -201,9 +201,9 @@ namespace NSFEMSolver
     // w^-, \mathbf n)$ for each quadrature point. Before calling the function
     // that does so, we also need to determine the Lax-Friedrich's stability
     // parameter:
-    std::vector< std_cxx11::array < Sacado::Fad::DFad<double>, EquationComponents<dim>::n_components> >  normal_fluxes (
+    std::vector< std::array < Sacado::Fad::DFad<double>, EquationComponents<dim>::n_components> >  normal_fluxes (
       n_q_points);
-    std::vector< std_cxx11::array < double, EquationComponents<dim>::n_components> >  normal_fluxes_old (n_q_points);
+    std::vector< std::array < double, EquationComponents<dim>::n_components> >  normal_fluxes_old (n_q_points);
 
 
     double alpha;
@@ -226,10 +226,10 @@ namespace NSFEMSolver
           {
             typedef Sacado::Fad::DFad<double> DFAD;
             const Tensor<1,dim> &normal_vector = fe_v.normal_vector (q);
-            std_cxx11::array <std_cxx11::array <DFAD, dim>, EquationComponents<dim>::n_components > oflux;
+            std::array <std::array <DFAD, dim>, EquationComponents<dim>::n_components > oflux;
             EulerEquations<dim>::compute_inviscid_flux (Wminus[q], oflux);
 
-            std_cxx11::array <std_cxx11::array <double, dim>, EquationComponents<dim>::n_components > oflux_old;
+            std::array <std::array <double, dim>, EquationComponents<dim>::n_components > oflux_old;
             EulerEquations<dim>::compute_inviscid_flux (Wminus_old[q], oflux_old);
 
             for (unsigned int c=0; c<EquationComponents<dim>::n_components; ++c)
@@ -274,7 +274,7 @@ namespace NSFEMSolver
           {
             typedef Sacado::Fad::DFad<double> DFAD;
             const Tensor<1,dim> &normal_vector = fe_v.normal_vector (q);
-            std_cxx11::array <std_cxx11::array <DFAD, dim>, EquationComponents<dim>::n_components > visc_flux;
+            std::array <std::array <DFAD, dim>, EquationComponents<dim>::n_components > visc_flux;
             EulerEquations<dim>::compute_viscous_flux (Wminus[q], grad_W[q], visc_flux, mu, kappa);
             for (unsigned int c=0; c<EquationComponents<dim>::n_components; ++c)
               {

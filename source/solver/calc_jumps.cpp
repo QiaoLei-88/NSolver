@@ -19,7 +19,7 @@ namespace NSFEMSolver
   {
     const unsigned int n_q_points = fe_v_face_this.n_quadrature_points;
 
-    std_cxx11::array<double, EquationComponents<dim>::n_components> max_jump;
+    std::array<double, EquationComponents<dim>::n_components> max_jump;
     max_jump.fill (0.0);
 
     if (accumulate_grad_jump)
@@ -34,7 +34,7 @@ namespace NSFEMSolver
           n_q_points,
           std::vector<Tensor<1,dim> > (EquationComponents<dim>::n_components));
 
-        std_cxx11::array<double, EquationComponents<dim>::n_components> max_grad_jump;
+        std::array<double, EquationComponents<dim>::n_components> max_grad_jump;
 
         fe_v_face_this.get_function_gradients (current_solution, grad_W);
         fe_v_face_neighbor.get_function_gradients (current_solution, grad_W_neighbor);
@@ -68,7 +68,7 @@ namespace NSFEMSolver
             fe_v_face_neighbor.get_function_values (current_solution, W_neighbor);
           }
 
-        std_cxx11::array<double, EquationComponents<dim>::n_components> max_value_jump;
+        std::array<double, EquationComponents<dim>::n_components> max_value_jump;
         max_value_jump.fill (0.0);
         for (unsigned int q=0; q<n_q_points; ++q)
           {

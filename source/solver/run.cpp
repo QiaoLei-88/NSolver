@@ -972,7 +972,7 @@ namespace NSFEMSolver
 
             pcout << "res_norm_total = " << res_norm_total << std::endl;
             /******************** Integrate field error norm ******************/
-            std_cxx11::array<double, EquationComponents<dim>::n_components> time_advance_l2_norm;
+            std::array<double, EquationComponents<dim>::n_components> time_advance_l2_norm;
             for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
               {
                 mms_error_l2[ic] = 0.0;

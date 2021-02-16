@@ -11,7 +11,6 @@
 
 #include <deal.II/grid/tria.h>
 #include <deal.II/base/types.h>
-#include <deal.II/base/std_cxx11/bind.h>
 
 namespace NSFEMSolver
 {

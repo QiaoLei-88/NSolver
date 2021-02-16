@@ -4,7 +4,6 @@
 
 #include <deal.II/lac/sparse_matrix_ez.h>
 #include <deal.II/lac/vector.h>
-#include <deal.II/base/std_cxx11/array.h>
 DEAL_II_DISABLE_EXTRA_DIAGNOSTICS
 #include <Epetra_Operator.h>
 #include <Sacado.hpp>
@@ -12,6 +11,7 @@ DEAL_II_ENABLE_EXTRA_DIAGNOSTICS
 #include <deal.II/base/timer.h>
 
 #include <fstream>
+#include <array>
 
 #include <NSolver/types.h>
 #include <NSolver/MDFILU/MapMatrix.h>

@@ -52,7 +52,7 @@ namespace NSFEMSolver
 
       case Parameters::AllParameters<dim>::FreeStream :
       {
-        std_cxx11::array<double, EquationComponents<dim>::n_components> free_stream_condition;
+        std::array<double, EquationComponents<dim>::n_components> free_stream_condition;
         // Compute free stream condition.
         // Axi definition:
         //   X in flow direction
@@ -60,7 +60,7 @@ namespace NSFEMSolver
         //   Z side
 
         // Compute all three velocity components no matter how may space dimensions there are.
-        std_cxx11::array<double,3> velocity_infty;
+        std::array<double,3> velocity_infty;
         velocity_infty[2] = parameters->Mach * std::sin (parameters->angle_of_side_slip);
         const double velocity_in_symm_plan =
           parameters->Mach * std::cos (parameters->angle_of_side_slip);

@@ -79,7 +79,7 @@ namespace NSFEMSolver
                   {
                     // Here, we need to evaluate the derivatives of entropy flux respect to Euler equation independent variables $w$
                     // rather than the unknown vector $W$. So we have to set up a new Sacado::Fad::DFad system.
-                    std_cxx11::array<Sacado::Fad::DFad<double>, EquationComponents<dim>::n_components> w_for_entropy_flux;
+                    std::array<Sacado::Fad::DFad<double>, EquationComponents<dim>::n_components> w_for_entropy_flux;
                     for (unsigned int c=0; c<EquationComponents<dim>::n_components; ++c)
                       {
                         w_for_entropy_flux[c] = W[q][c];
@@ -590,7 +590,7 @@ namespace NSFEMSolver
                 fe_values.reinit (cell);
                 fe_values.get_function_values (current_solution, W);
 
-                std_cxx11::array<double, EquationComponents<dim>::n_components> cell_average;
+                std::array<double, EquationComponents<dim>::n_components> cell_average;
                 std::fill (cell_average.begin(), cell_average.end(), 0.0);
                 const double cell_measure = cell->measure();
 

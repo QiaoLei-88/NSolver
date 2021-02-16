@@ -77,23 +77,15 @@ namespace NSFEMSolver
     Function<dim, double> (EquationComponents<dim>::n_components),
     initialized (mms_in.initialized),
     is_NS (mms_in.is_NS)
-    // TODO: It seems now the deal.II provided std_cxx11::array does not
-    // support copying initialization, so do it by 'for loop'.
   {
-    for (unsigned int i=0; i<EquationComponents<dim>::n_components; ++i)
-      {
-        c[i] = mms_in.c[i];
-      }
+    c= mms_in.c;
   }
 
   template<int dim>
   void MMS<dim>::reinit
-  (std_cxx11::array<Coeff, EquationComponents<dim>::n_components> &c_in)
+  (std::array<Coeff, EquationComponents<dim>::n_components> &c_in)
   {
-    for (unsigned int ic=0; ic<EquationComponents<dim>::n_components; ++ic)
-      {
-        c[ic] = c_in[ic];
-      }
+    c = c_in;
     initialized = true;
     return;
   }
@@ -130,7 +122,7 @@ namespace NSFEMSolver
                           const unsigned int component) const
   {
     double rv (0.0);
-    std_cxx11::array<double, dim> p_array;
+    std::array<double, dim> p_array;
     for (unsigned int d=0; d<dim; ++d)
       {
         p_array[d] = p[d];
@@ -188,7 +180,7 @@ namespace NSFEMSolver
   {
     Assert (initialized, ExcMessage ("run MMS::reinit(...) before MMS::evaluation(...)."));
 
-    std_cxx11::array<FADD, dim> p_array;
+    std::array<FADD, dim> p_array;
     for (unsigned int d=0; d<dim; ++d)
       {
         p_array[d] = p[d];
@@ -255,7 +247,7 @@ namespace NSFEMSolver
 
   template<>
   template<typename Number>
-  void MMS<2>::value_at_point (const std_cxx11::array<Number,2> &p,
+  void MMS<2>::value_at_point (const std::array<Number,2> &p,
                                const unsigned int component,
                                Number &result) const
   {
@@ -300,7 +292,7 @@ namespace NSFEMSolver
 
   template<>
   template<typename Number>
-  void MMS<3>::value_at_point (const std_cxx11::array<Number,3> &p,
+  void MMS<3>::value_at_point (const std::array<Number,3> &p,
                                const unsigned int component,
                                Number &result) const
   {

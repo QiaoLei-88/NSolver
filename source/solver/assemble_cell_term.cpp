@@ -171,21 +171,21 @@ namespace NSFEMSolver
     // autodifferentiation variables, so that the Jacobian contributions can
     // later easily be computed from it:
     std::vector <
-    std_cxx11::array <std_cxx11::array <Sacado::Fad::DFad<double>, dim>, EquationComponents<dim>::n_components >
+    std::array <std::array <Sacado::Fad::DFad<double>, dim>, EquationComponents<dim>::n_components >
     > flux (n_q_points);
 
     std::vector <
-    std_cxx11::array <std_cxx11::array <Sacado::Fad::DFad<double>, dim>, EquationComponents<dim>::n_components >
+    std::array <std::array <Sacado::Fad::DFad<double>, dim>, EquationComponents<dim>::n_components >
     > visc_flux (n_q_points);
 
     std::vector <
-    std_cxx11::array <std_cxx11::array <double, dim>, EquationComponents<dim>::n_components >
+    std::array <std::array <double, dim>, EquationComponents<dim>::n_components >
     > flux_old (n_q_points);
 
-    std::vector < std_cxx11::array< Sacado::Fad::DFad<double>, EquationComponents<dim>::n_components> > forcing (
+    std::vector < std::array< Sacado::Fad::DFad<double>, EquationComponents<dim>::n_components> > forcing (
       n_q_points);
 
-    std::vector < std_cxx11::array< double, EquationComponents<dim>::n_components> > forcing_old (n_q_points);
+    std::vector < std::array< double, EquationComponents<dim>::n_components> > forcing_old (n_q_points);
 
     //MMS: evaluate source term
     std::vector <typename MMS<dim>::F_V> mms_source (n_q_points);
@@ -273,8 +273,8 @@ namespace NSFEMSolver
 
         for (unsigned int q=0; q<fe_v.n_quadrature_points; ++q)
           {
-            std_cxx11::array <FADD, nc> w;
-            std_cxx11::array <FADD, dim> flux_c;
+            std::array <FADD, nc> w;
+            std::array <FADD, dim> flux_c;
             for (unsigned int ic=0; ic<nc; ++ic)
               {
                 w[ic] = W[q][ic].val();

@@ -68,16 +68,16 @@ namespace NSFEMSolver
   public:
     typedef Sacado::Fad::DFad<double> FADD;
     // Fluid vector
-    typedef std_cxx11::array<double, EquationComponents<dim>::n_components>  F_V;
+    typedef std::array<double, EquationComponents<dim>::n_components>  F_V;
     // Fluid tensor
-    typedef std_cxx11::array <std_cxx11::array <double, dim>,
+    typedef std::array <std::array <double, dim>,
             EquationComponents<dim>::n_components > F_T;
 
-    typedef std_cxx11::array<FADD, EquationComponents<dim>::n_components> FADD_V;
-    typedef std_cxx11::array <std_cxx11::array <FADD, dim>,
+    typedef std::array<FADD, EquationComponents<dim>::n_components> FADD_V;
+    typedef std::array <std::array <FADD, dim>,
             EquationComponents<dim>::n_components > FADD_T;
     // coefficient vector
-    typedef std_cxx11::array<Coeff, EquationComponents<dim>::n_components> C_V;
+    typedef std::array<Coeff, EquationComponents<dim>::n_components> C_V;
   public:
     /**
      * Default constructor
@@ -149,7 +149,7 @@ namespace NSFEMSolver
     bool is_NS;
 
     template<typename Number>
-    void value_at_point (const std_cxx11::array<Number, dim> &p,
+    void value_at_point (const std::array<Number, dim> &p,
                          const unsigned int component,
                          Number &result) const;
   };

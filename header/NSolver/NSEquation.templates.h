@@ -59,7 +59,7 @@ template <int dim>
 template <typename InputVector>
 void
 EulerEquations<dim>::compute_conservative_vector (const InputVector &W,
-                                                  std_cxx11::array
+                                                  std::array
                                                   <typename InputVector::value_type,
                                                   EquationComponents<dim>::n_components>
                                                   &conservative_vector)
@@ -139,7 +139,7 @@ EulerEquations<dim>::compute_entropy (const InputVector &W)
 template <int dim>
 template <typename InputVector>
 void EulerEquations<dim>::compute_inviscid_flux (const InputVector &W,
-                                                 std_cxx11::array <std_cxx11::array
+                                                 std::array <std::array
                                                  <typename InputVector::value_type, dim>,
                                                  EquationComponents<dim>::n_components > &flux)
 {
@@ -177,7 +177,7 @@ template <int dim>
 template <typename InputVector, typename InputMatrix>
 void EulerEquations<dim>::compute_viscous_flux (const InputVector &W,
                                                 const InputMatrix &grad_w,
-                                                std_cxx11::array <std_cxx11::array
+                                                std::array <std::array
                                                 <typename InputVector::value_type, dim>,
                                                 EquationComponents<dim>::n_components> &flux,
                                                 const double artificial_dynamic_viscosity,
@@ -202,7 +202,7 @@ void EulerEquations<dim>::compute_viscous_flux (const InputVector &W,
 
   // First evaluate viscous flux's contribution to momentum equations.
   // At the first of first we evaluate shear stress tensor
-  std_cxx11::array <std_cxx11::array <typename InputVector::value_type, dim>, dim> stress_tensor;
+  std::array <std::array <typename InputVector::value_type, dim>, dim> stress_tensor;
 
   typename InputVector::value_type bolk_strain = 0;
   for (unsigned int k=0; k<dim; ++k)
@@ -283,13 +283,13 @@ void EulerEquations<dim>::numerical_normal_flux (const Tensor<1,dim>            
                                                  const InputVector                  &Wplus,
                                                  const InputVector                  &Wminus,
                                                  const double                        alpha,
-                                                 std_cxx11::array < typename InputVector::value_type,
+                                                 std::array < typename InputVector::value_type,
                                                  EquationComponents<dim>::n_components> &normal_flux,
                                                  NumericalFlux::Type const &flux_type)
 {
   typedef typename InputVector::value_type VType;
 
-  std_cxx11::array <std_cxx11::array <VType, dim>, n_components > iflux, oflux;
+  std::array <std::array <VType, dim>, n_components > iflux, oflux;
   compute_inviscid_flux (Wplus, iflux);
   compute_inviscid_flux (Wminus, oflux);
 
@@ -441,7 +441,7 @@ void EulerEquations<dim>::numerical_normal_flux (const Tensor<1,dim>            
 template <int dim>
 template <typename InputVector>
 void EulerEquations<dim>::compute_forcing_vector (const InputVector &W,
-                                                  std_cxx11::array
+                                                  std::array
                                                   <typename InputVector::value_type,
                                                   EquationComponents<dim>::n_components>
                                                   &forcing)
@@ -491,7 +491,7 @@ EulerEquations<dim>::compute_Wminus (const Boundary::Type &boundary_kind,
 {
   Assert (parameters, ExcMessage ("Null pointer encountered!"));
   typedef typename DataVector::value_type VType;
-  std_cxx11::array<VType, n_components> requested_boundary_values;
+  std::array<VType, n_components> requested_boundary_values;
   bool need_Riemman_correction = false;
 
   switch (boundary_kind)
@@ -529,7 +529,7 @@ EulerEquations<dim>::compute_Wminus (const Boundary::Type &boundary_kind,
       int const x=0;
       int const y=1;
       int const z=2;
-      std_cxx11::array<double, 3> velocity_infty;
+      std::array<double, 3> velocity_infty;
       velocity_infty[z] = parameters->Mach *
                           std::sin (parameters->angle_of_side_slip);
       double const velocity_in_symm = parameters->Mach *
@@ -710,7 +710,7 @@ EulerEquations<dim>::compute_Wminus (const Boundary::Type &boundary_kind,
                                              - 2.0 * sound_speed_incoming/ (gas_gamma - 1.0);
 
           VType entropy_boundary;
-          std_cxx11::array<VType,dim> tangential_velocity;
+          std::array<VType,dim> tangential_velocity;
           if (normal_velocity_incoming <= 0.0)
             {
               // v_n <= 0

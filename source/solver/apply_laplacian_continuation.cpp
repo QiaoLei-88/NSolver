@@ -161,8 +161,8 @@ namespace NSFEMSolver
                   independent_local_dof_values[i].diff (i, dofs_per_cell);
                 }
               // Use mass matrix, i.e., pseudo time continuation
-              std_cxx11::array<DFADD, EquationComponents<dim>::n_components> w_conservative;
-              std_cxx11::array<double, EquationComponents<dim>::n_components> w_conservative_old;
+              std::array<DFADD, EquationComponents<dim>::n_components> w_conservative;
+              std::array<double, EquationComponents<dim>::n_components> w_conservative_old;
 
               {
                 // Get function values
