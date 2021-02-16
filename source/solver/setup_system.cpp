@@ -118,7 +118,7 @@ namespace NSFEMSolver
       }
 
     SparsityTools::distribute_sparsity_pattern (sparsity_pattern,
-                                                dof_handler.n_locally_owned_dofs_per_processor(),
+                                                dof_handler.locally_owned_dofs(),
                                                 mpi_communicator,
                                                 locally_relevant_dofs);
     if (parameters->output_sparsity_pattern &&
