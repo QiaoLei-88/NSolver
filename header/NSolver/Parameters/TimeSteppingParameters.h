@@ -104,7 +104,7 @@ namespace NSFEMSolver
        * predicted_solution =  current_solution * (1+solution_extrapolation_length)
        *                      -old_solution * solution_extrapolation_length;
        */
-      bool solution_extrapolation_length;
+      double solution_extrapolation_length;
 
       /**
        * There is an array defined in NSolver::run() that contains a list of
