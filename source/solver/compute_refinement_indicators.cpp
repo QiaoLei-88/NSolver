@@ -36,7 +36,7 @@ namespace NSFEMSolver
       {
         KellyErrorEstimator<dim>::estimate (dof_handler,
                                             QGauss<dim-1> (3),
-                                            typename FunctionMap<dim>::type(),
+                                            std::map<types::boundary_id, const Function<dim, typename NSVector::value_type> *>(),
                                             tmp_vector,
                                             refinement_indicators,
                                             parameters->component_mask);
