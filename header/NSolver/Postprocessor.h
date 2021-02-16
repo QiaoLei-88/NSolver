@@ -65,11 +65,7 @@ namespace NSFEMSolver
 
     virtual
     void
-    compute_derived_quantities_vector (const std::vector<Vector<double> >              &uh,
-                                       const std::vector<std::vector<Tensor<1,dim> > > &duh,
-                                       const std::vector<std::vector<Tensor<2,dim> > > &dduh,
-                                       const std::vector<Point<dim> >                  &normals,
-                                       const std::vector<Point<dim> >                  &evaluation_points,
+    evaluate_vector_field (const DataPostprocessorInputs::Vector<dim> &inputs,
                                        std::vector<Vector<double> >                    &computed_quantities) const;
 
     virtual std::vector<std::string> get_names() const;

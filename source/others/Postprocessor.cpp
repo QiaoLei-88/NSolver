@@ -35,11 +35,7 @@ namespace NSFEMSolver
   template <int dim>
   void
   Postprocessor<dim>::
-  compute_derived_quantities_vector (const std::vector<Vector<double> >              &uh,
-                                     const std::vector<std::vector<Tensor<1,dim> > > &duh,
-                                     const std::vector<std::vector<Tensor<2,dim> > > &/*dduh*/,
-                                     const std::vector<Point<dim> >                  &/*normals*/,
-                                     const std::vector<Point<dim> >                  &points,
+  evaluate_vector_field (const DataPostprocessorInputs::Vector<dim> &inputs,
                                      std::vector<Vector<double> >                    &computed_quantities) const
   {
     // At the beginning of the function, let us make sure that all variables
@@ -50,14 +46,14 @@ namespace NSFEMSolver
     // we say so in the <code>get_needed_update_flags()</code> function
     // below). For the inner vectors, we check that at least the first element
     // of the outer vector has the correct inner size:
-    const unsigned int n_quadrature_points = static_cast<const unsigned int> (uh.size());
+    const unsigned int n_quadrature_points = inputs.solution_values.size();
 
     if (do_schlieren_plot)
       {
-        Assert (duh.size() == n_quadrature_points, ExcInternalError());
+        Assert (inputs.solution_gradients.size() == n_quadrature_points, ExcInternalError());
       }
     Assert (computed_quantities.size() == n_quadrature_points, ExcInternalError());
-    Assert (uh[0].size() == EquationComponents<dim>::n_components, ExcInternalError());
+    Assert (inputs.solution_values[0].size() == EquationComponents<dim>::n_components, ExcInternalError());
 
     //MMS: Extra memory space
     Vector<double>::size_type expected_size = dim+2;
@@ -81,22 +77,22 @@ namespace NSFEMSolver
     for (unsigned int q=0; q<n_quadrature_points; ++q)
       {
         int i_out = 0;
-        const double density = uh[q][EquationComponents<dim>::density_component];
+        const double density = inputs.solution_values[q][EquationComponents<dim>::density_component];
 
         for (unsigned int d=0; d<dim; ++d, ++i_out)
           computed_quantities[q][i_out]
-            = uh[q][EquationComponents<dim>::first_momentum_component+d] * density;
+            = inputs.solution_values[q][EquationComponents<dim>::first_momentum_component+d] * density;
 
-        computed_quantities[q][i_out] = EulerEquations<dim>::compute_energy_density (uh[q]);
+        computed_quantities[q][i_out] = EulerEquations<dim>::compute_energy_density (inputs.solution_values[q]);
         ++i_out;
-        computed_quantities[q][i_out] = EulerEquations<dim>::compute_velocity_magnitude (uh[q]) /
-                                        EulerEquations<dim>::compute_sound_speed (uh[q]);
+        computed_quantities[q][i_out] = EulerEquations<dim>::compute_velocity_magnitude (inputs.solution_values[q]) /
+                                        EulerEquations<dim>::compute_sound_speed (inputs.solution_values[q]);
         ++i_out;
 
         if (do_schlieren_plot)
           {
-            computed_quantities[q][i_out] = duh[q][EquationComponents<dim>::density_component] *
-                                            duh[q][EquationComponents<dim>::density_component];
+            computed_quantities[q][i_out] = inputs.solution_gradients[q][EquationComponents<dim>::density_component] *
+                                            inputs.solution_gradients[q][EquationComponents<dim>::density_component];
             ++i_out;
           }
 
@@ -105,7 +101,7 @@ namespace NSFEMSolver
             typename MMS<dim>::F_V sol;
             typename MMS<dim>::F_V src;
             typename MMS<dim>::F_T grad;
-            mms_x->evaluate (points[q],sol,grad,src,true);
+            mms_x->evaluate (inputs.evaluation_points[q],sol,grad,src,true);
 
             for (unsigned int ic = 0; ic < EquationComponents<dim>::n_components; ++ic, ++i_out)
               {
@@ -117,7 +113,7 @@ namespace NSFEMSolver
               }
             for (unsigned int ic = 0; ic < EquationComponents<dim>::n_components; ++ic, ++i_out)
               {
-                computed_quantities[q][i_out] = sol[ic] - uh[q][ic];
+                computed_quantities[q][i_out] = sol[ic] - inputs.solution_values[q][ic];
               }
           } // End if (output_mms)
       }
