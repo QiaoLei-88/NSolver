@@ -30,7 +30,7 @@ namespace NSFEMSolver
                                                             mpi_communicator);
         DoFTools::make_sparsity_pattern (dof_handler,
                                          sparsity_pattern,
-                                         /*const ConstraintMatrix constraints = */ ConstraintMatrix(),
+                                         /*const AffineConstraints constraints = */ AffineConstraints<typename NSVector::value_type>(),
                                          /*const bool keep_constrained_dofs = */ true,
                                          Utilities::MPI::this_mpi_process (mpi_communicator));
         sparsity_pattern.compress();
@@ -100,7 +100,7 @@ namespace NSFEMSolver
     DynamicSparsityPattern sparsity_pattern (locally_relevant_dofs);
     DoFTools::make_sparsity_pattern (dof_handler,
                                      sparsity_pattern,
-                                     /*const ConstraintMatrix constraints = */ ConstraintMatrix(),
+                                     /*const AffineConstraints constraints = */ AffineConstraints<typename NSVector::value_type>(),
                                      /*const bool keep_constrained_dofs = */ true,
                                      myid);
     if (parameters->max_refine_time > 0.0)
