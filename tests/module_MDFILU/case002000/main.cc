@@ -133,20 +133,24 @@ main(int argc, char *argv[])
     MDFVector o(v);
     mdfilu.apply(o, o);
     std::ofstream fout("apply.out", std::fstream::app);
+    fout.precision(3);
+    fout << std::scientific;
     fout << "Vector v:" << std::endl;
-    fout << v;
+    fout << v << std::endl;
     fout << "Vector (LU)*v:" << std::endl;
-    fout << o << std::endl;
+    fout << o << std::endl << std::endl;
     fout.close();
   }
   {
     MDFVector o(v);
     mdfilu.apply_inverse(o, o);
     std::ofstream fout("apply.out", std::fstream::app);
+    fout.precision(3);
+    fout << std::scientific;
     fout << "Vector v:" << std::endl;
-    fout << v;
+    fout << v << std::endl;
     fout << "Vector ((LU)^-1)*v:" << std::endl;
-    fout << o << std::endl;
+    fout << o << std::endl << std::endl;
     fout.close();
   }
 
@@ -155,20 +159,24 @@ main(int argc, char *argv[])
     MDFVector o(v);
     mdfilu.apply(o, o);
     std::ofstream fout("apply.out", std::fstream::app);
+    fout.precision(3);
+    fout << std::scientific;
     fout << "Vector v:" << std::endl;
-    fout << v;
+    fout << v << std::endl;
     fout << "Vector ((LU)^T)*v:" << std::endl;
-    fout << o << std::endl;
+    fout << o << std::endl << std::endl;
     fout.close();
   }
   {
     MDFVector o(v);
     mdfilu.apply_inverse(o, o);
     std::ofstream fout("apply.out", std::fstream::app);
+    fout.precision(3);
+    fout << std::scientific;
     fout << "Vector v:" << std::endl;
-    fout << v;
+    fout << v << std::endl;
     fout << "Vector (((LU)^-1)^T)*v:" << std::endl;
-    fout << o << std::endl;
+    fout << o << std::endl << std::endl;
     fout.close();
   }
   // Set flags
