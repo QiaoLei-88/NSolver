@@ -183,75 +183,64 @@ main(int argc, char *argv[])
   mdfilu.SetUseTranspose(use_tranpose_init_stats);
   //[END]// //--------- Deal.II native Vector ---------//
   //--------- Deal.II wrapped Trilinos Vector ---------//
-  mdfilu.SetUseTranspose(false);
   {
-    NSVector o;
-    o = v;
-    mdfilu.apply(o, o);
-    std::ofstream fout("apply.out", std::fstream::app);
-    fout << "Vector v:" << std::endl;
-    fout << v;
-    fout << "NSVector (LU)*v:" << std::endl;
-    fout.precision(3);
-    fout << std::scientific;
-    for (global_index_type i = 0; i < degree; ++i)
-      {
-        fout << o[i] << ' ';
-      }
-    fout << std::endl << std::endl;
-    fout.close();
-  }
-  {
-    NSVector o;
-    o = v;
-    mdfilu.apply_inverse(o, o);
-    std::ofstream fout("apply.out", std::fstream::app);
-    fout << "Vector v:" << std::endl;
-    fout << v;
-    fout << "NSVector ((LU)^-1)*v:" << std::endl;
-    fout.precision(3);
-    fout << std::scientific;
-    for (global_index_type i = 0; i < degree; ++i)
-      {
-        fout << o[i] << ' ';
-      }
-    fout << std::endl << std::endl;
-    fout.close();
-  }
+    mdfilu.SetUseTranspose(false);
 
-  mdfilu.SetUseTranspose(true);
-  {
-    NSVector o;
+    std::ofstream fout("apply.out", std::fstream::app);
+    fout.precision(3);
+    fout << std::scientific;
+
+    IndexSet idxset(degree);
+    idxset.add_range(0, degree);
+    NSVector o(idxset);
+
     o = v;
     mdfilu.apply(o, o);
-    std::ofstream fout("apply.out", std::fstream::app);
     fout << "Vector v:" << std::endl;
-    fout << v;
-    fout << "NSVector ((LU)^T)*v:" << std::endl;
-    fout.precision(3);
-    fout << std::scientific;
+    fout << v << std::endl;
+    fout << "NSVector (LU)*v:" << std::endl;
     for (global_index_type i = 0; i < degree; ++i)
       {
         fout << o[i] << ' ';
       }
     fout << std::endl << std::endl;
-    fout.close();
-  }
-  {
-    NSVector o;
+
     o = v;
     mdfilu.apply_inverse(o, o);
-    std::ofstream fout("apply.out", std::fstream::app);
     fout << "Vector v:" << std::endl;
-    fout << v;
-    fout << "NSVector (((LU)^-1)^T)*v:" << std::endl;
-    fout.precision(3);
-    fout << std::scientific;
+    fout << v << std::endl;
+    fout << "NSVector ((LU)^-1)*v:" << std::endl;
     for (global_index_type i = 0; i < degree; ++i)
       {
         fout << o[i] << ' ';
       }
     fout << std::endl << std::endl;
+
+    // Begain transplose
+    mdfilu.SetUseTranspose(true);
+
+    o = v;
+    mdfilu.apply(o, o);
+    fout << "Vector v:" << std::endl;
+    fout << v << std::endl;
+    fout << "NSVector ((LU)^T)*v:" << std::endl;
+    for (global_index_type i = 0; i < degree; ++i)
+      {
+        fout << o[i] << ' ';
+      }
+    fout << std::endl << std::endl;
+
+    o = v;
+    mdfilu.apply_inverse(o, o);
+    fout << "Vector v:" << std::endl;
+    fout << v << std::endl;
+    fout << "NSVector (((LU)^-1)^T)*v:" << std::endl;
+    for (global_index_type i = 0; i < degree; ++i)
+      {
+        fout << o[i] << ' ';
+      }
+    fout << std::endl << std::endl;
+
     fout.close();
   }
   mdfilu.SetUseTranspose(use_tranpose_init_stats);
