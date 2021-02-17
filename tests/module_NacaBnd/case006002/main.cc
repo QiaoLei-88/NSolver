@@ -32,7 +32,7 @@ int main()
         {
           if (cell->face (f)->boundary_id() == 1)
             {
-              typename Boundary<2,2>::FaceVertexNormals face_vertex_normals;
+              typename Manifold<2,2>::FaceVertexNormals face_vertex_normals;
               NACA_foil_boundary.get_normals_at_vertices (cell->face (f),
                                                           face_vertex_normals);
               for (unsigned int v=0; v<GeometryInfo<2>::vertices_per_face; ++v)
