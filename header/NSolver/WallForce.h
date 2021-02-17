@@ -10,8 +10,8 @@
 #ifndef __NSolver__WallForce__
 #define __NSolver__WallForce__
 
-#include <deal.II/base/point.h>
 #include <deal.II/base/mpi.h>
+#include <deal.II/base/point.h>
 
 namespace NSFEMSolver
 {
@@ -19,14 +19,17 @@ namespace NSFEMSolver
 
   struct WallForce
   {
-    void clear();
-    void mpi_sum (MPI_Comm const &mpi_communicator);
-    WallForce operator+ (WallForce const &op_r);
+    void
+    clear();
+    void
+    mpi_sum(MPI_Comm const &mpi_communicator);
+    WallForce
+    operator+(WallForce const &op_r);
 
-    double lift;
-    double drag;
+    double   lift;
+    double   drag;
     Point<3> force;
     Point<3> moment;
   };
-}
+} // namespace NSFEMSolver
 #endif

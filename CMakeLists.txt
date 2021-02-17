@@ -15,7 +15,7 @@ ENDIF()
 #
 # Are all dependencies fullfilled?
 #
-SET (_depend_features TRILINOS P4EST MPI) 
+SET (_depend_features TRILINOS P4EST MPI)
 FOREACH (_feature ${_depend_features})
 IF(NOT DEAL_II_WITH_${_feature})
   MESSAGE(FATAL_ERROR "\n"
@@ -83,8 +83,8 @@ ADD_CUSTOM_TARGET(distclean
   )
 
 # Define a reset target to regenerate the cmake files:
-# This target just do distclean plus ${CMAKE_COMMAND} ${CMAKE_SOURCE_DIR}, but we 
-# cannot make it depending on target distclean because after distclean there will 
+# This target just do distclean plus ${CMAKE_COMMAND} ${CMAKE_SOURCE_DIR}, but we
+# cannot make it depending on target distclean because after distclean there will
 # be no rule to make target reset.
 ADD_CUSTOM_TARGET(reset
   COMMAND ${CMAKE_COMMAND} -E remove_directory CMakeFiles

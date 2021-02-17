@@ -1,5 +1,5 @@
 MACRO(SETUP_TEST_CASE)
-# The execution flow of this macro is driven by dependency relationship 
+# The execution flow of this macro is driven by dependency relationship
 # and runs from bottom to top.
 
   ENABLE_TESTING()
@@ -40,7 +40,7 @@ MACRO(SETUP_TEST_CASE)
       # Remove dependency on the project main target to avoid race condition
       # in parallel testing.
       # Always build the executable before run cTest.
-      # ${PRJ_NAME} 
+      # ${PRJ_NAME}
       ${_extra_depends_for_output}
     VERBATIM
     )

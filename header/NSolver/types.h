@@ -20,14 +20,14 @@ namespace LA
 #else
   using namespace dealii::LinearAlgebraTrilinos;
 #endif
-}
+} // namespace LA
 
 namespace NSFEMSolver
 {
   using namespace dealii;
 
-  typedef LA::MPI::Vector NSVector;
+  typedef LA::MPI::Vector       NSVector;
   typedef LA::MPI::SparseMatrix NSMatrix;
-}
+} // namespace NSFEMSolver
 
 #endif

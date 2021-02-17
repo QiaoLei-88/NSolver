@@ -20,18 +20,19 @@
 // the face to which the flux is applied, and $\delta T$ the current time
 // step.
 
-#include <deal.II/base/parameter_handler.h>
 #include <deal.II/base/function_parser.h>
+#include <deal.II/base/parameter_handler.h>
+#include <deal.II/base/subscriptor.h>
+
 #include <deal.II/fe/component_mask.h>
 
-#include <NSolver/Parameters/FEParameters.h>
-#include <NSolver/Parameters/PhysicalParameters.h>
 #include <NSolver/BoundaryType.h>
 #include <NSolver/EquationComponents.h>
 #include <NSolver/NumericalFlux.h>
-#include <NSolver/Parameters/TimeSteppingParameters.h>
+#include <NSolver/Parameters/FEParameters.h>
+#include <NSolver/Parameters/PhysicalParameters.h>
 #include <NSolver/Parameters/StabilizationParameters.h>
-#include <deal.II/base/subscriptor.h>
+#include <NSolver/Parameters/TimeSteppingParameters.h>
 
 namespace NSFEMSolver
 {
@@ -67,10 +68,18 @@ namespace NSFEMSolver
     // <code>declare_parameters()</code>.
     struct Solver
     {
-      enum SolverType { gmres, direct };
+      enum SolverType
+      {
+        gmres,
+        direct
+      };
       SolverType solver;
 
-      enum  OutputType { quiet, verbose };
+      enum OutputType
+      {
+        quiet,
+        verbose
+      };
       OutputType output;
 
       enum Preconditioner
@@ -81,20 +90,22 @@ namespace NSFEMSolver
         MDFILU
       };
       Preconditioner prec_type;
-      int ILU_level;
+      int            ILU_level;
 
       double linear_residual;
-      int max_iterations;
+      int    max_iterations;
 
-      int AZ_RCM_reorder;
-      int AZ_Krylov_space;
+      int    AZ_RCM_reorder;
+      int    AZ_Krylov_space;
       double ilut_fill;
       double ilut_atol;
       double ilut_rtol;
       double ilut_drop;
 
-      static void declare_parameters (ParameterHandler &prm);
-      void parse_parameters (ParameterHandler &prm);
+      static void
+      declare_parameters(ParameterHandler &prm);
+      void
+      parse_parameters(ParameterHandler &prm);
     };
 
     // @sect4{Parameters::Refinement}
@@ -102,7 +113,7 @@ namespace NSFEMSolver
     // Similarly, here are a few parameters that determine how the mesh is to
     // be refined (and if it is to be refined at all). For what exactly the
     // shock parameters do, see the mesh refinement functions further down.
-    template<int dim>
+    template <int dim>
     struct Refinement
     {
       enum Indicator
@@ -130,17 +141,18 @@ namespace NSFEMSolver
       double max_cells;
       double max_refine_level;
       /**
-       * Stop mesh refinement after max_refine_time. The limit is compared against
-       * n_time_step in steady case and against time in unsteady case.
-       * The default value is zero, in which case no mesh adaptation will happen.
+       * Stop mesh refinement after max_refine_time. The limit is compared
+       * against n_time_step in steady case and against time in unsteady case.
+       * The default value is zero, in which case no mesh adaptation will
+       * happen.
        *
        * Negative input value will disable this limit.
        */
       double max_refine_time;
       /**
-       * when refinement flag is true, mesh cell with size larger than max_cell_size
-       * will be forced to refine. The relevant cell size is obtained by
-       * TriaAccessor::minimum_vertex_distance()
+       * when refinement flag is true, mesh cell with size larger than
+       * max_cell_size will be forced to refine. The relevant cell size is
+       * obtained by TriaAccessor::minimum_vertex_distance()
        *
        * Negative input value will disable this limit.
        * @warning Zero input value will not disable this limit, which will turn
@@ -148,9 +160,9 @@ namespace NSFEMSolver
        */
       double max_cell_size;
       /**
-       * when refinement flag is true, mesh cell with size smaller than min_cell_size
-       * will never be refined. The relevant cell size is obtained by
-       * TriaAccessor::minimum_vertex_distance()
+       * when refinement flag is true, mesh cell with size smaller than
+       * min_cell_size will never be refined. The relevant cell size is obtained
+       * by TriaAccessor::minimum_vertex_distance()
        *
        * Negative input value will disable this limit.
        * @note Zero value will not be escaped. But this doesn't hurt in normal cases.
@@ -160,8 +172,10 @@ namespace NSFEMSolver
       ComponentMask component_mask;
 
       Refinement();
-      static void declare_parameters (ParameterHandler &prm);
-      void parse_parameters (ParameterHandler &prm);
+      static void
+      declare_parameters(ParameterHandler &prm);
+      void
+      parse_parameters(ParameterHandler &prm);
     };
 
     // @sect4{Parameters::Flux}
@@ -178,16 +192,22 @@ namespace NSFEMSolver
     // step.
     struct Flux
     {
-      enum StabilizationKind { constant, mesh_dependent };
+      enum StabilizationKind
+      {
+        constant,
+        mesh_dependent
+      };
       StabilizationKind stabilization_kind;
 
       NumericalFlux::Type numerical_flux_type;
       NumericalFlux::Type flux_type_switch_to;
-      double stabilization_value;
-      double tolerance_to_switch_flux;
+      double              stabilization_value;
+      double              tolerance_to_switch_flux;
 
-      static void declare_parameters (ParameterHandler &prm);
-      void parse_parameters (ParameterHandler &prm);
+      static void
+      declare_parameters(ParameterHandler &prm);
+      void
+      parse_parameters(ParameterHandler &prm);
     };
 
     // @sect4{Parameters::Output}
@@ -198,11 +218,13 @@ namespace NSFEMSolver
     // want an output file every time step.
     struct Output
     {
-      bool schlieren_plot;
+      bool   schlieren_plot;
       double output_step;
 
-      static void declare_parameters (ParameterHandler &prm);
-      void parse_parameters (ParameterHandler &prm);
+      static void
+      declare_parameters(ParameterHandler &prm);
+      void
+      parse_parameters(ParameterHandler &prm);
     };
 
     // @sect4{Parameters::AllParameters}
@@ -252,24 +274,22 @@ namespace NSFEMSolver
     // <code>AllParameters</code> class that at least initializes the other
     // FunctionParser object, i.e. the one describing initial conditions.
     template <int dim>
-    struct AllParameters
-      :
-      public PhysicalParameters,
-      public TimeStepping,
-      public Solver,
-      public Refinement<dim>,
-      public Flux,
-      public Output,
-      public FEParameters,
-      public StabilizationParameters<dim>,
-      public Subscriptor
+    struct AllParameters : public PhysicalParameters,
+                           public TimeStepping,
+                           public Solver,
+                           public Refinement<dim>,
+                           public Flux,
+                           public Output,
+                           public FEParameters,
+                           public StabilizationParameters<dim>,
+                           public Subscriptor
     {
       static const unsigned int max_n_boundaries = 10;
 
       struct BoundaryConditions
       {
         typename Boundary::Type kind;
-        FunctionParser<dim> values;
+        FunctionParser<dim>     values;
 
         BoundaryConditions();
       };
@@ -287,8 +307,8 @@ namespace NSFEMSolver
         format_ucd
       };
       MeshFormat mesh_format;
-      double scale_mesh;
-      int n_global_refinement;
+      double     scale_mesh;
+      int        n_global_refinement;
 
       enum RenumberDofs
       {
@@ -297,9 +317,9 @@ namespace NSFEMSolver
         RCM_WithStartPoint
       };
       RenumberDofs renumber_dofs;
-      Point<3> renumber_start_point;
-      bool output_sparsity_pattern;
-      bool output_system_matrix;
+      Point<3>     renumber_start_point;
+      bool         output_sparsity_pattern;
+      bool         output_system_matrix;
 
       enum InitMethod
       {
@@ -315,20 +335,22 @@ namespace NSFEMSolver
        * Degree less than 1 will be reset to 1 without warning;
        * Degree larger than 8 will cause an exception and abort the program.
        **/
-      int init_fe_degree;
+      int                 init_fe_degree;
       FunctionParser<dim> initial_conditions;
 
-      BoundaryConditions  boundary_conditions[max_n_boundaries];
-      bool sum_force[max_n_boundaries];
+      BoundaryConditions boundary_conditions[max_n_boundaries];
+      bool               sum_force[max_n_boundaries];
 
-      static void declare_parameters (ParameterHandler &prm);
-      void parse_parameters (ParameterHandler &prm);
+      static void
+      declare_parameters(ParameterHandler &prm);
+      void
+      parse_parameters(ParameterHandler &prm);
 
-      int n_mms;
+      int  n_mms;
       bool mms_use_strong_BC;
-      int manifold_circle;
-      int NACA_foil;
-      int NACA_cheating_refinement;
+      int  manifold_circle;
+      int  NACA_foil;
+      int  NACA_cheating_refinement;
     };
 
   } /* End of namespace Parameters */

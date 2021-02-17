@@ -9,21 +9,20 @@ namespace NSFEMSolver
   using namespace dealii;
   namespace Tools
   {
-
     template <int dim>
-    void set_coarsen_mask (const parallel::distributed::Triangulation<dim>          &tria,
-                           const SmartPointer<Parameters::AllParameters<dim> const> &parameters,
-                           std::vector<short int>                                   &coarsen_mask)
+    void
+    set_coarsen_mask(
+      const parallel::distributed::Triangulation<dim> &         tria,
+      const SmartPointer<Parameters::AllParameters<dim> const> &parameters,
+      std::vector<short int> &                                  coarsen_mask)
     {
       typedef typename parallel::distributed::Triangulation<dim> TypeTria;
 
-      Assert (coarsen_mask.size() == tria.n_active_cells(),
-              ExcMessage ("unexpected coarsen_mask size."));
+      Assert(coarsen_mask.size() == tria.n_active_cells(),
+             ExcMessage("unexpected coarsen_mask size."));
 
-      typename TypeTria::active_cell_iterator
-      cell = tria.begin_active();
-      const typename TypeTria::active_cell_iterator
-      endc = tria.end();
+      typename TypeTria::active_cell_iterator       cell = tria.begin_active();
+      const typename TypeTria::active_cell_iterator endc = tria.end();
       for (; cell != endc; ++cell)
         if (cell->is_locally_owned())
           {
@@ -52,14 +51,16 @@ namespace NSFEMSolver
     }
 
     // Instantiation
-    template
-    void set_coarsen_mask (const parallel::distributed::Triangulation<2>          &tria,
-                           const SmartPointer<Parameters::AllParameters<2> const> &parameters,
-                           std::vector<short int>                                 &coarsen_mask);
-    template
-    void set_coarsen_mask (const parallel::distributed::Triangulation<3>          &tria,
-                           const SmartPointer<Parameters::AllParameters<3> const> &parameters,
-                           std::vector<short int>                                 &coarsen_mask);
+    template void
+    set_coarsen_mask(
+      const parallel::distributed::Triangulation<2> &         tria,
+      const SmartPointer<Parameters::AllParameters<2> const> &parameters,
+      std::vector<short int> &                                coarsen_mask);
+    template void
+    set_coarsen_mask(
+      const parallel::distributed::Triangulation<3> &         tria,
+      const SmartPointer<Parameters::AllParameters<3> const> &parameters,
+      std::vector<short int> &                                coarsen_mask);
 
   } // NAMESPACE Tools
 } // NAMESPACE NSFEMSolver

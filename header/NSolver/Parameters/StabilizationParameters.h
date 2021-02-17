@@ -9,6 +9,7 @@
 
 #include <deal.II/base/parameter_handler.h>
 #include <deal.II/base/utilities.h>
+
 #include <NSolver/EquationComponents.h>
 
 namespace NSFEMSolver
@@ -49,10 +50,10 @@ namespace NSFEMSolver
         CT_blend
       };
       ContinuationType continuation_type;
-      double continuation_min_decrease_rate;
-      double continuation_decrease_residual_power;
-      double continuation_blend_starting_ratio;
-      double continuation_switch_threshold;
+      double           continuation_min_decrease_rate;
+      double           continuation_decrease_residual_power;
+      double           continuation_blend_starting_ratio;
+      double           continuation_switch_threshold;
 
       bool use_local_laplacian_coefficient;
       bool count_solution_diff_in_residual;
@@ -74,7 +75,7 @@ namespace NSFEMSolver
       bool   smooth_artificial_viscosity;
       double diffusion_factor[EquationComponents<dim>::n_components];
       double laplacian_continuation;
-      bool compute_laplacian_coeff_from_Mach_max;
+      bool   compute_laplacian_coeff_from_Mach_max;
       /**
        * Use laplacian continuation only in region with large indicators.
        */
@@ -93,18 +94,22 @@ namespace NSFEMSolver
       double laplacian_zero;
 
       /**
-       * Relative Newton iteration tolerance comparing with Laplacian coefficient.
+       * Relative Newton iteration tolerance comparing with Laplacian
+       * coefficient.
        */
       double laplacian_newton_tolerance;
 
       /**
-       * SUPG stabilization factor. A non-positive value will disable the SUPG term.
+       * SUPG stabilization factor. A non-positive value will disable the SUPG
+       * term.
        */
       double SUPG_factor;
 
-      static void declare_parameters (ParameterHandler &prm);
-      void parse_parameters (ParameterHandler &prm);
+      static void
+      declare_parameters(ParameterHandler &prm);
+      void
+      parse_parameters(ParameterHandler &prm);
     };
-  }
-}
+  } // namespace Parameters
+} // namespace NSFEMSolver
 #endif

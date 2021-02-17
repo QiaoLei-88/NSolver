@@ -7,4 +7,3 @@ apply_inverse,
 apply_transpose,
 apply_transpose_inverse,
 use as preconditioner.
-

@@ -7,11 +7,12 @@
 #define __NSolver__Postprocessor__
 
 
-#include <deal.II/numerics/data_postprocessor.h>
 #include <deal.II/numerics/data_component_interpretation.h>
+#include <deal.II/numerics/data_postprocessor.h>
+
+#include <NSolver/MMS.h>
 #include <NSolver/NSEquation.h>
 #include <NSolver/Parameters/AllParameters.h>
-#include <NSolver/MMS.h>
 
 namespace NSFEMSolver
 {
@@ -60,27 +61,29 @@ namespace NSFEMSolver
   class Postprocessor : public DataPostprocessor<dim>
   {
   public:
-    Postprocessor (Parameters::AllParameters<dim> const *const para_ptr_in,
-                   MMS<dim> const *const mms_ptr_in);
+    Postprocessor(Parameters::AllParameters<dim> const *const para_ptr_in,
+                  MMS<dim> const *const                       mms_ptr_in);
 
-    virtual
-    void
-    evaluate_vector_field (const DataPostprocessorInputs::Vector<dim> &inputs,
-                                       std::vector<Vector<double> >                    &computed_quantities) const;
+    virtual void
+    evaluate_vector_field(
+      const DataPostprocessorInputs::Vector<dim> &inputs,
+      std::vector<Vector<double>> &               computed_quantities) const;
 
-    virtual std::vector<std::string> get_names() const;
+    virtual std::vector<std::string>
+    get_names() const;
 
-    virtual
-    std::vector<DataComponentInterpretation::DataComponentInterpretation>
+    virtual std::vector<
+      DataComponentInterpretation::DataComponentInterpretation>
     get_data_component_interpretation() const;
 
-    virtual UpdateFlags get_needed_update_flags() const;
+    virtual UpdateFlags
+    get_needed_update_flags() const;
 
   private:
-    Parameters::AllParameters<dim>const *const parameters;
-    MMS<dim> const *const mms_x;
-    bool const do_schlieren_plot;
-    bool const output_mms;
+    Parameters::AllParameters<dim> const *const parameters;
+    MMS<dim> const *const                       mms_x;
+    bool const                                  do_schlieren_plot;
+    bool const                                  output_mms;
   };
-}
+} // namespace NSFEMSolver
 #endif

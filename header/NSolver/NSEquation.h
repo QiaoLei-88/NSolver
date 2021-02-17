@@ -9,11 +9,14 @@
 #ifndef __NSolver__NSEquation__
 #define __NSolver__NSEquation__
 
-#include <deal.II/base/quadrature_lib.h>
 #include <deal.II/base/point.h>
+#include <deal.II/base/quadrature_lib.h>
+
 #include <deal.II/dofs/dof_handler.h>
-#include <deal.II/fe/mapping_q1.h>
+
 #include <deal.II/fe/fe_values.h>
+#include <deal.II/fe/mapping_q1.h>
+
 #include <deal.II/lac/vector.h>
 
 
@@ -29,19 +32,19 @@ DEAL_II_DISABLE_EXTRA_DIAGNOSTICS
 // Recover diagnostic checks for the rest of code.
 DEAL_II_ENABLE_EXTRA_DIAGNOSTICS
 
-#include <NSolver/types.h>
 #include <NSolver/BoundaryType.h>
-#include <NSolver/NumericalFlux.h>
 #include <NSolver/EquationComponents.h>
+#include <NSolver/NumericalFlux.h>
 #include <NSolver/Parameters/AllParameters.h>
+#include <NSolver/types.h>
 
 
 // And this again is C++:
+#include <array>
 #include <cmath>
 #include <iostream>
-#include <vector>
 #include <string>
-#include <array>
+#include <vector>
 
 namespace NSFEMSolver
 {
@@ -71,7 +74,8 @@ namespace NSFEMSolver
      * The EulerEquations class needs to know free stream conditions, diffusion
      * constant and gravity from the run time parameter.
      */
-    static void set_parameter (const Parameters::AllParameters<dim> *const para_ptr_in);
+    static void
+    set_parameter(const Parameters::AllParameters<dim> *const para_ptr_in);
 
     // In the following, we will need to compute the kinetic energy and the
     // pressure from a vector of conserved variables. This we can do based on
@@ -80,56 +84,47 @@ namespace NSFEMSolver
     // variables contain the momentum components $\rho v_i$, not the
     // velocities $v_i$).
     template <typename InputVector>
-    static
-    typename InputVector::value_type
-    compute_kinetic_energy (const InputVector &W);
+    static typename InputVector::value_type
+    compute_kinetic_energy(const InputVector &W);
 
 
     template <typename InputVector>
-    static
-    typename InputVector::value_type
-    compute_pressure (const InputVector &W);
+    static typename InputVector::value_type
+    compute_pressure(const InputVector &W);
 
 
     // Compute total energy density := pressure/(\gamma-1) + 0.5 * \rho * |v|^2
     template <typename InputVector>
-    static
-    typename InputVector::value_type
-    compute_energy_density (const InputVector &W);
+    static typename InputVector::value_type
+    compute_energy_density(const InputVector &W);
 
 
     template <typename InputVector>
-    static
-    typename InputVector::value_type
-    compute_velocity_magnitude (const InputVector &W);
+    static typename InputVector::value_type
+    compute_velocity_magnitude(const InputVector &W);
 
 
     template <typename InputVector>
-    static
-    void
-    compute_conservative_vector (const InputVector &W,
-                                 std::array
-                                 <typename InputVector::value_type,
-                                 EquationComponents<dim>::n_components>
-                                 &conservative_vector);
+    static void
+    compute_conservative_vector(
+      const InputVector &                                W,
+      std::array<typename InputVector::value_type,
+                 EquationComponents<dim>::n_components> &conservative_vector);
 
 
     template <typename InputVector>
-    static
-    typename InputVector::value_type
-    compute_temperature (const InputVector &W);
+    static typename InputVector::value_type
+    compute_temperature(const InputVector &W);
 
 
     template <typename InputVector>
-    static
-    typename InputVector::value_type
-    compute_molecular_viscosity (const InputVector &W);
+    static typename InputVector::value_type
+    compute_molecular_viscosity(const InputVector &W);
 
 
     template <typename InputVector>
-    static
-    typename InputVector::value_type
-    compute_sound_speed (const InputVector &W);
+    static typename InputVector::value_type
+    compute_sound_speed(const InputVector &W);
 
 
     // Calculate entropy according to
@@ -137,9 +132,8 @@ namespace NSFEMSolver
     // S(p,\rho)=\frac{\rho}{\gamma -1}log(\frac{p}{\rho ^ \gamma})
     // @f}
     template <typename InputVector>
-    static
-    typename InputVector::value_type
-    compute_entropy (const InputVector &W);
+    static typename InputVector::value_type
+    compute_entropy(const InputVector &W);
 
 
     // @sect4{EulerEquations::compute_inviscid_flux}
@@ -159,11 +153,11 @@ namespace NSFEMSolver
     // the function with different input vector data types, so we templatize
     // on it as well:
     template <typename InputVector>
-    static
-    void compute_inviscid_flux (const InputVector &W,
-                                std::array <std::array
-                                <typename InputVector::value_type, dim>,
-                                EquationComponents<dim>::n_components> &flux);
+    static void
+    compute_inviscid_flux(
+      const InputVector &                                W,
+      std::array<std::array<typename InputVector::value_type, dim>,
+                 EquationComponents<dim>::n_components> &flux);
 
     // Compute viscous flux according to provided @p extra_dynamic_viscosity.
     // @p extra_thermal_conductivity. If equation is in Euler mode, no physical
@@ -175,14 +169,14 @@ namespace NSFEMSolver
     // as a Sacado::FAD:DFAD<> type, otherwise you can declare the viscosity
     // as a regular double type.
     template <typename InputVector, typename InputMatrix>
-    static
-    void compute_viscous_flux (const InputVector &W,
-                               const InputMatrix &grad_w,
-                               std::array <std::array
-                               <typename InputVector::value_type, dim>,
-                               EquationComponents<dim>::n_components> &flux,
-                               const double artificial_dynamic_viscosity,
-                               const double artificial_thermal_conductivity);
+    static void
+    compute_viscous_flux(
+      const InputVector &                                W,
+      const InputMatrix &                                grad_w,
+      std::array<std::array<typename InputVector::value_type, dim>,
+                 EquationComponents<dim>::n_components> &flux,
+      const double artificial_dynamic_viscosity,
+      const double artificial_thermal_conductivity);
 
     // @sect4{EulerEquations::compute_normal_flux}
 
@@ -191,14 +185,15 @@ namespace NSFEMSolver
     // is the basic Lax-Friedrich's flux with a stabilization parameter
     // $\alpha$. It's form has also been given already in the introduction:
     template <typename InputVector>
-    static
-    void numerical_normal_flux (const Tensor<1,dim>                &normal,
-                                const InputVector                  &Wplus,
-                                const InputVector                  &Wminus,
-                                const double                        alpha,
-                                std::array < typename InputVector::value_type,
-                                EquationComponents<dim>::n_components> &normal_flux,
-                                NumericalFlux::Type const &flux_type);
+    static void
+    numerical_normal_flux(
+      const Tensor<1, dim> &                             normal,
+      const InputVector &                                Wplus,
+      const InputVector &                                Wminus,
+      const double                                       alpha,
+      std::array<typename InputVector::value_type,
+                 EquationComponents<dim>::n_components> &normal_flux,
+      NumericalFlux::Type const &                        flux_type);
 
     // @sect4{EulerEquations::compute_forcing_vector}
 
@@ -211,12 +206,11 @@ namespace NSFEMSolver
     // consider only $\mathbf g=(0,0,-1)^T$ in 3d, or $\mathbf g=(0,-1)^T$ in
     // 2d. This naturally leads to the following function:
     template <typename InputVector>
-    static
-    void compute_forcing_vector (const InputVector &W,
-                                 std::array
-                                 <typename InputVector::value_type,
-                                 EquationComponents<dim>::n_components>
-                                 &forcing);
+    static void
+    compute_forcing_vector(
+      const InputVector &                                W,
+      std::array<typename InputVector::value_type,
+                 EquationComponents<dim>::n_components> &forcing);
 
     // @sect4{Dealing with boundary conditions}
 
@@ -239,13 +233,12 @@ namespace NSFEMSolver
     // = w^+_c$. These two simple cases are handled first in the function
     // below.
     template <typename DataVector>
-    static
-    void
-    compute_Wminus (const Boundary::Type &boundary_kind,
-                    const Tensor<1,dim>  &normal_vector,
-                    const DataVector     &Wplus,
-                    const Vector<double> &boundary_values,
-                    DataVector           &Wminus);
+    static void
+    compute_Wminus(const Boundary::Type &boundary_kind,
+                   const Tensor<1, dim> &normal_vector,
+                   const DataVector &    Wplus,
+                   const Vector<double> &boundary_values,
+                   DataVector &          Wminus);
 
     // @sect4{EulerEquations::compute_refinement_indicators}
 
@@ -262,20 +255,25 @@ namespace NSFEMSolver
     //
     // There are certainly a number of equally reasonable refinement
     // indicators, but this one does, and it is easy to compute:
-    static
-    void
-    compute_refinement_indicators (DoFHandler<dim> const &dof_handler,
-                                   Mapping<dim>    const &mapping,
-                                   NSVector        const &solution,
-                                   Vector<float>         &refinement_indicators,
-                                   ComponentMask   const &component_mask);
+    static void
+    compute_refinement_indicators(DoFHandler<dim> const &dof_handler,
+                                  Mapping<dim> const &   mapping,
+                                  NSVector const &       solution,
+                                  Vector<float> &        refinement_indicators,
+                                  ComponentMask const &  component_mask);
+
   private:
-    static unsigned const n_components             = EquationComponents<dim>::n_components            ;
-    static unsigned const first_momentum_component = EquationComponents<dim>::first_momentum_component;
-    static unsigned const first_velocity_component = EquationComponents<dim>::first_velocity_component;
-    static unsigned const density_component        = EquationComponents<dim>::density_component       ;
-    static unsigned const energy_component         = EquationComponents<dim>::energy_component        ;
-    static unsigned const pressure_component       = EquationComponents<dim>::pressure_component      ;
+    static unsigned const n_components = EquationComponents<dim>::n_components;
+    static unsigned const first_momentum_component =
+      EquationComponents<dim>::first_momentum_component;
+    static unsigned const first_velocity_component =
+      EquationComponents<dim>::first_velocity_component;
+    static unsigned const density_component =
+      EquationComponents<dim>::density_component;
+    static unsigned const energy_component =
+      EquationComponents<dim>::energy_component;
+    static unsigned const pressure_component =
+      EquationComponents<dim>::pressure_component;
 
     static Parameters::AllParameters<dim> const *parameters;
     /**

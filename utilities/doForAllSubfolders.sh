@@ -14,4 +14,3 @@ for fold in $(ls -d */); do
 #    patch input.prm < ../input.patch
   popd > /dev/null
 done
-

@@ -7,16 +7,17 @@
 namespace velocityPotential
 {
   template <int dim>
-  void LinearVelocityPotential<dim>::compute()
+  void
+  LinearVelocityPotential<dim>::compute()
   {
-    pcout << "  Solving linearized velocity potential euqation for initial value" << std::endl;
+    pcout
+      << "  Solving linearized velocity potential euqation for initial value"
+      << std::endl;
     setup_system();
 
     pcout << "   Number of active cells:       "
-          << triangulation->n_global_active_cells()
-          << std::endl
-          << "   Number of degrees of freedom: "
-          << dof_handler.n_dofs()
+          << triangulation->n_global_active_cells() << std::endl
+          << "   Number of degrees of freedom: " << dof_handler.n_dofs()
           << std::endl;
 
     assemble_system();
@@ -26,4 +27,4 @@ namespace velocityPotential
   }
 
 #include "linearVelocityPotential.inst"
-}
+} // namespace velocityPotential

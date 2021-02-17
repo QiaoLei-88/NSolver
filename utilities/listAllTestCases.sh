@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # This script generates lists for each particular test category.
-# 
+#
 # Usage: execute this script inside the test category.
 # For example, form the root directory of this repository, execute commands:
 # $ ./utilities/listCases.sh
@@ -22,29 +22,29 @@ for category in $(ls -d */); do
   if [ -e test_cases.sum ]; then
     rm test_cases.sum
   fi
-  
+
   for fold in $(ls -d */); do
     echo ${fold%%/} >> test_cases.sum
     cd ${fold}
-  
+
     echo  "  builds-on:" >>  ../test_cases.sum
     while read p; do
     	echo "    "$p  >>  ../test_cases.sum
     done < builds-on
-  
+
     echo  "  introduction:" >>  ../test_cases.sum
     while read p; do
     	echo "    "$p  >>  ../test_cases.sum
     done < intro.dox
-  
+
     read compar < builds-on
     if [ ! -z "$compar" ] && [ -f input.prm ]; then
   	 echo  "  diff in inp:" >>  ../test_cases.sum
    	 diff ../${compar}/input.prm input.prm >> ../test_cases.sum
     fi
-  
+
     echo -e '\n'  >> ../test_cases.sum
-  
+
     cd $WPATH
   done
 

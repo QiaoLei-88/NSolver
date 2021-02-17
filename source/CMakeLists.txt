@@ -25,7 +25,7 @@ ADD_EXECUTABLE(${PRJ_NAME}
 # gcc only search for dependency in one direction during linking,
 # so we add the library list twice to make sure gcc can always
 # find what it want.
-TARGET_LINK_LIBRARIES(${PRJ_NAME} 
+TARGET_LINK_LIBRARIES(${PRJ_NAME}
   ${_static_lib_list}
   ${_static_lib_list})
 
