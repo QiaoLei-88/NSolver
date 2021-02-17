@@ -33,7 +33,7 @@ ENDIF()
 
 IF( _exec_diff MATCHES "numdiff")
   MESSAGE(STATUS "Finding comparison tool: numdiff found at ${_exec_diff}")
-  SET (_para_diff -a 1e-8 -r 1e-8 -s  "' \\t\\n:<>=,\(\)[]\;'")
+  SET (_para_diff " ")
 ELSEIF( _exec_diff MATCHES "diff")
   MESSAGE(STATUS "Finding comparison tool: diff found at ${_exec_diff}")
   SET (_para_diff "")
