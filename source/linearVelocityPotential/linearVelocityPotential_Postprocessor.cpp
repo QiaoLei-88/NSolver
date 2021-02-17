@@ -9,16 +9,12 @@ namespace velocityPotential
   template <int dim>
   void
   LinearVelocityPotential<dim>::Postprocessor::
-  compute_derived_quantities_scalar (const std::vector<double>             &uh,
-                                     const std::vector<Tensor<1,dim> >     &duh,
-                                     const std::vector<Tensor<2,dim> >     &/*dduh*/,
-                                     const std::vector<Point<dim> >        &/*normals*/,
-                                     const std::vector<Point<dim> >        &/*points*/,
+  evaluate_scalar_field (const DataPostprocessorInputs::Scalar<dim> &inputs,
                                      std::vector<Vector<double> >          &computed_quantities) const
   {
-    const unsigned int n_quadrature_points = static_cast<const unsigned int> (uh.size());
+    const unsigned int n_quadrature_points = static_cast<const unsigned int> (inputs.solution_values.size());
 
-    Assert (duh.size() == n_quadrature_points, ExcInternalError());
+    Assert (inputs.solution_gradients.size() == n_quadrature_points, ExcInternalError());
     Assert (computed_quantities.size() == n_quadrature_points, ExcInternalError());
     Assert (computed_quantities[0].size() == dim + 2, ExcInternalError());
 
@@ -27,7 +23,7 @@ namespace velocityPotential
         double Mach_local = 0;
         for (unsigned int d=0; d<dim; ++d)
           {
-            computed_quantities[q][d] = velocity_infty[d] + duh[q][d];
+            computed_quantities[q][d] = velocity_infty[d] + inputs.solution_gradients[q][d];
             Mach_local += computed_quantities[q][d] * computed_quantities[q][d];
           }
 

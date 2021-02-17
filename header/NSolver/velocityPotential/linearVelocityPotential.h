@@ -103,11 +103,7 @@ namespace velocityPotential
     public:
       Postprocessor (const Point<3> velocity_infty_in);
 
-      virtual void compute_derived_quantities_scalar (const std::vector<double>             &uh,
-                                                      const std::vector<Tensor<1,dim> >     &duh,
-                                                      const std::vector<Tensor<2,dim> >     &dduh,
-                                                      const std::vector<Point<dim> >        &normals,
-                                                      const std::vector<Point<dim> >        &points,
+      virtual void evaluate_scalar_field (const DataPostprocessorInputs::Scalar<dim> &inputs,
                                                       std::vector<Vector<double> >          &computed_quantities) const;
 
       virtual std::vector<std::string> get_names() const;
