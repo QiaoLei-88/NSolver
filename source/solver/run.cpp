@@ -400,18 +400,23 @@ namespace NSFEMSolver
     computing_timer.leave_subsection("0:Read grid");
     computing_timer.enter_subsection("1:Initialization");
 
-    if (parameters->max_cells < 0.0)
-      {
-        parameters_modifier->max_cells =
-          std::max(1.0, -(parameters->max_cells));
-        parameters_modifier->max_cells *= triangulation.n_global_active_cells();
-      }
-    else
-      {
-        parameters_modifier->max_cells =
-          std::max(parameters->max_cells,
-                   static_cast<double>(triangulation.n_global_active_cells()));
-      }
+    // set effective cell number upper limit to the smaller one among
+    // ratio_max_cells and max_cells.
+    {
+      const double ratio_test =
+        static_cast<double>(parameters_modifier->max_cells) /
+        triangulation.n_global_active_cells();
+      if (ratio_test <= parameters->ratio_max_cells)
+        {
+          parameters_modifier->ratio_max_cells = ratio_test;
+        }
+      else
+        {
+          parameters_modifier->max_cells =
+            static_cast<unsigned int>(parameters_modifier->ratio_max_cells *
+                                      triangulation.n_global_active_cells());
+        }
+    }
 
     // Always count solution difference in residual in time accurate run.
     parameters_modifier->count_solution_diff_in_residual =

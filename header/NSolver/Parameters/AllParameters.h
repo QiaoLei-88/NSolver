@@ -131,14 +131,16 @@ namespace NSFEMSolver
       double coarsen_fraction;
 
       /**
-       * upper limit of number of cells during mesh adaptation.
-       * If max_cells is provided with a negative value, its absolute value will
-       * be interpreted as multiplier to calculate the cell number limit.
-       * Note that the initial mesh can not be coarsen. Incompatible input value
-       * of max_cells will be ignored without warning.
-       * By default, number of cell can increase to four times of initial mesh.
+       * <code>max_cells</code> upper limit of number of cells during mesh
+       * adaptation. <code>ratio_max_cells</code> multiplier on initial mesh
+       * number to calculate the cell number limit. The lower value resulted
+       * from the two parameters will take effect. Note that the initial mesh
+       * can not be coarsen. Incompatible input value of max_cells will be
+       * ignored without warning. By default, number of cell can increase to
+       * four times of initial mesh.
        */
-      double max_cells;
+      double       ratio_max_cells;
+      unsigned int max_cells;
 
       /**
        * maximun refinement level during mesh adaptive.

@@ -180,10 +180,14 @@ namespace NSFEMSolver
                           Patterns::Double(),
                           "stop mesh refinement after this number of step");
         prm.declare_entry(
-          "max cells",
-          "-4.0",
-          Patterns::Double(),
-          "maximum number (positive value) or maximum number ratio (negative value) of cells");
+          "ratio of max cells",
+          "4.0",
+          Patterns::Double(0.0),
+          "ratio of maximum number of cells with respect to initial grid during grid refinement");
+        prm.declare_entry("max cells",
+                          "1000000000",
+                          Patterns::Integer(),
+                          "maximum number of cells during grid refinement");
         prm.declare_entry("max cell size",
                           "-1.0",
                           Patterns::Double(),
@@ -229,7 +233,8 @@ namespace NSFEMSolver
         do_refine_on_initial_field = prm.get_bool("do initial refine");
         refine_fraction            = prm.get_double("refine fraction");
         coarsen_fraction           = prm.get_double("coarsen fraction");
-        max_cells                  = prm.get_double("max cells");
+        ratio_max_cells            = prm.get_double("ratio of max cells");
+        max_cells = static_cast<unsigned int>(prm.get_integer("max cells"));
         {
           unsigned const mask_int = prm.get_integer("component mask");
           for (unsigned int ic = 0; ic < EquationComponents<dim>::n_components;
