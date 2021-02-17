@@ -58,8 +58,8 @@ namespace NSFEMSolver
       const MPI_Comm     mpi_communicator = tria.get_communicator();
       const unsigned int master_mpi_rank  = 0;
 
-      const unsigned int n_target_cells =
-        target_fraction * tria.n_global_active_cells();
+      const unsigned int n_target_cells = static_cast<unsigned int>(
+        target_fraction * tria.n_global_active_cells());
 
       // The mark-all and mark-none cases are handle above, the result threshold
       // can never lay on the extreme value of indicator. so it is safe to use

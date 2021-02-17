@@ -222,8 +222,8 @@ namespace NSFEMSolver
           (1.0 * continuation_coefficient) /
           ((1.0 * continuation_coefficient) + mean_artificial_viscosity);
 
-        const unsigned int n_target_cells =
-          triangulation.n_global_active_cells() * fraction;
+        const unsigned int n_target_cells = static_cast<unsigned int>(
+          triangulation.n_global_active_cells() * fraction);
         const unsigned int master_mpi_rank      = 0;
         double             interesting_range[2] = {min_v, max_v};
         unsigned int       total_count          = 0;

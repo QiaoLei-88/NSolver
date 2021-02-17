@@ -255,7 +255,7 @@ MDFILU::compute_discarded_value(const unsigned int row_to_factor,
           const data_type         value_of_row_pivot =
             LU.el(i_row, row_to_factor) * pivot_inv;
           const level_type fill_level_of_row_pivot =
-            fill_in_level.el(i_row, row_to_factor);
+            static_cast<level_type>(fill_in_level.el(i_row, row_to_factor));
           for (global_index_type j = 0; j < n_row_need_update; ++j)
             {
               const global_index_type j_col = incides_need_update[j].column;
@@ -419,7 +419,7 @@ MDFILU::MDF_reordering_and_ILU_factoring()
                  /*elide_zero_values=*/false);
 
           const level_type fill_level_of_row_pivot =
-            fill_in_level.el(i_row, row_to_factor);
+            static_cast<level_type>(fill_in_level.el(i_row, row_to_factor));
           // Update the remaining matrix
           for (global_index_type j = 0; j < n_row_need_update; ++j)
             {

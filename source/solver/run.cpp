@@ -1292,7 +1292,8 @@ namespace NSFEMSolver
                 unsigned int terminal_n_time_step = n_step_laplacian_vanished;
                 if (parameters->max_refine_time > 0.0)
                   {
-                    terminal_n_time_step += parameters->max_refine_level;
+                    terminal_n_time_step +=
+                      static_cast<unsigned int>(parameters->max_refine_level);
                   }
                 time_march_converged =
                   time_march_converged && n_time_step > terminal_n_time_step;
