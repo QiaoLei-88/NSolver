@@ -139,7 +139,12 @@ namespace NSFEMSolver
        * By default, number of cell can increase to four times of initial mesh.
        */
       double max_cells;
-      double max_refine_level;
+
+      /**
+       * maximun refinement level during mesh adaptive.
+       */
+      int max_refine_level;
+
       /**
        * Stop mesh refinement after max_refine_time. The limit is compared
        * against n_time_step in steady case and against time in unsteady case.

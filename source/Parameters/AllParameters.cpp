@@ -172,8 +172,8 @@ namespace NSFEMSolver
                           Patterns::Double(),
                           "value for shock indicator");
         prm.declare_entry("max refine level",
-                          "3.0",
-                          Patterns::Double(),
+                          "3",
+                          Patterns::Integer(0, 65535),
                           "number of max refinement levels");
         prm.declare_entry("max refine time",
                           "0",
@@ -239,7 +239,7 @@ namespace NSFEMSolver
             }
         }
         shock_val        = prm.get_double("shock value");
-        max_refine_level = prm.get_double("max refine level");
+        max_refine_level = prm.get_integer("max refine level");
         max_refine_time  = prm.get_double("max refine time");
         if (max_refine_time < 0.0)
           {
