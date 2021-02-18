@@ -58,7 +58,7 @@ FOREACH(__sub_dir ${_static_lib_list})
   LIST(APPEND _static_lib_for_modele_test ${__sub_dir}_for_modele_test)
 ENDFOREACH()
 UNSET(__sub_dir)
-SET(_addtional_solver_outputs *.vtu *.pvtu *_runtime.error run.success time_history.out)
+SET(_addtional_solver_outputs *.vtu *.pvtu *_runtime.error run.success time_history.out paper_data.txt boundaryData.slot-*.raw)
 
 # Set up clean target
 LIST_ALL_SUBDIRECTORIES (__sub_dir_list ${CMAKE_CURRENT_SOURCE_DIR})
