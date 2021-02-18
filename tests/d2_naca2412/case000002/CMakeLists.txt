@@ -25,7 +25,7 @@ SET (_test_src_directory ${CMAKE_CURRENT_SOURCE_DIR})
 # SET (_comparison_file screen.log.reference)
 
 # SET (_exec_run ${CMAKE_BINARY_DIR}/bin/${PRJ_NAME})
- SET (_para_run  input.prm 2>&1 > screen.log || true)
+# SET (_para_run  input.prm)
 
 
 # _test_name_prefix is setted in the parent CMakeList.txt.
