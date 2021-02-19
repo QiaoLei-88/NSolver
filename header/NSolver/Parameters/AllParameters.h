@@ -137,7 +137,7 @@ namespace NSFEMSolver
        * from the two parameters will take effect. Note that the initial mesh
        * can not be coarsen. Incompatible input value of max_cells will be
        * ignored without warning. By default, number of cell can increase to
-       * four times of initial mesh.
+       * ten times of initial mesh.
        */
       double       ratio_max_cells;
       unsigned int max_cells;

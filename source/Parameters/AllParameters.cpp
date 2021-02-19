@@ -181,7 +181,7 @@ namespace NSFEMSolver
                           "stop mesh refinement after this number of step");
         prm.declare_entry(
           "ratio of max cells",
-          "4.0",
+          "10.0",
           Patterns::Double(0.0),
           "ratio of maximum number of cells with respect to initial grid during grid refinement");
         prm.declare_entry("max cells",
