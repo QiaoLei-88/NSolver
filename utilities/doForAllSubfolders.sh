@@ -1,3 +1,4 @@
+#!/bin/bash
 #
 # A script for doing something in all sub-folders.
 # May be usefull in updating testcases.
