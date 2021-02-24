@@ -16,7 +16,7 @@ MACRO(LIST_ALL_SUBDIRECTORIES result curdir)
 
   SET(${result} ${__dir_list})
   UNSET(__dir_list)
-  
+
 ENDMACRO()
 
 

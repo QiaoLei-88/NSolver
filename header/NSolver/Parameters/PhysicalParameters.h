@@ -22,8 +22,8 @@ namespace NSFEMSolver
     struct PhysicalParameters
     {
       unsigned int space_dimension;
-      double Mach;
-      double Reynolds;
+      double       Mach;
+      double       Reynolds;
 
       enum EqautionType
       {
@@ -51,9 +51,11 @@ namespace NSFEMSolver
 
       Point<3> gravity;
 
-      static void declare_parameters (ParameterHandler &prm);
-      void parse_parameters (ParameterHandler &prm);
+      static void
+      declare_parameters(ParameterHandler &prm);
+      void
+      parse_parameters(ParameterHandler &prm);
     };
-  }
-}
+  } // namespace Parameters
+} // namespace NSFEMSolver
 #endif

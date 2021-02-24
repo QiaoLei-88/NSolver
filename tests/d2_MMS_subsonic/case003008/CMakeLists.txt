@@ -2,7 +2,7 @@ SET (_test_directory ${CMAKE_CURRENT_BINARY_DIR})
 SET (_test_src_directory ${CMAKE_CURRENT_SOURCE_DIR})
 
 
-## The commented variables are put here just as a reminder. 
+## The commented variables are put here just as a reminder.
 ## They are setted in the upper level CMakeList.txt and will
 ## be used inside macro SETUP_TEST_CASE below.
 ## You can uncomment some of them and over write their value
@@ -25,7 +25,7 @@ SET (_test_src_directory ${CMAKE_CURRENT_SOURCE_DIR})
 # SET (_comparison_file screen.log.reference)
 
 SET (_exec_run  ${_exec_mpi})
-SET (_para_run  -n 3 ${CMAKE_BINARY_DIR}/bin/${PRJ_NAME} ${_input_file_list} > screen.log 2>&1)
+SET (_para_run  -n 3 ${CMAKE_BINARY_DIR}/bin/${PRJ_NAME} ${_input_file_list})
 
 # _test_name_prefix is setted in the parent CMakeList.txt.
 GET_FILENAME_COMPONENT(_current_dir_name ${CMAKE_CURRENT_SOURCE_DIR} NAME)

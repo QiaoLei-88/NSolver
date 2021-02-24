@@ -15,9 +15,9 @@ namespace NSFEMSolver
   {
     enum Type
     {
-      Symmetry = 0,
-      FarField = 1,
-      SlipWall = Symmetry,
+      Symmetry    = 0,
+      FarField    = 1,
+      SlipWall    = Symmetry,
       NonSlipWall = 2,
       AllPrimitiveValues,
       PressureOutlet,
@@ -25,5 +25,5 @@ namespace NSFEMSolver
       MMS_BC
     };
   }
-}
+} // namespace NSFEMSolver
 #endif

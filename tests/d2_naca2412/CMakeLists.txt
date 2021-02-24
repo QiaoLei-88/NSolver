@@ -3,4 +3,3 @@
 # Just keep one copy of these files.
 SET(_shared_input_file_list 2412.msh)
 SETUP_TEST_CATEGORY()
-

@@ -1,5 +1,5 @@
 MACRO(SETUP_TEST_CASE)
-# The execution flow of this macro is driven by dependency relationship 
+# The execution flow of this macro is driven by dependency relationship
 # and runs from bottom to top.
 
   ENABLE_TESTING()
@@ -31,8 +31,9 @@ MACRO(SETUP_TEST_CASE)
   UNSET(__file)
 
   # Run test case
+  STRING(REPLACE ";" " " _para_run_str "${_para_run}")
   ADD_CUSTOM_COMMAND(OUTPUT ${_test_directory}/${_output_file}
-    COMMAND  ${_exec_run} ${_para_run}
+    COMMAND ${CMAKE_SOURCE_DIR}/utilities/script/regTestDriver.sh ${_exec_run} "${_para_run_str}" ${_comparison_file} ${_output_file}
     WORKING_DIRECTORY
       ${_test_directory}
     DEPENDS
@@ -40,10 +41,12 @@ MACRO(SETUP_TEST_CASE)
       # Remove dependency on the project main target to avoid race condition
       # in parallel testing.
       # Always build the executable before run cTest.
-      # ${PRJ_NAME} 
+      # ${PRJ_NAME}
       ${_extra_depends_for_output}
+      ${_test_directory}/${_comparison_file}
     VERBATIM
     )
+  UNSET(_para_run_str)
 
   # Bring ${_comparison_file} into ${_test_directory} for possible manual comparison.
   ADD_CUSTOM_COMMAND(OUTPUT ${_test_directory}/${_comparison_file}
@@ -54,22 +57,18 @@ MACRO(SETUP_TEST_CASE)
       ${_test_src_directory}/${_comparison_file}
     VERBATIM
     )
+
   # Compare output
-  ADD_CUSTOM_COMMAND(OUTPUT ${_test_directory}/output.diff
-    COMMAND ${_exec_diff} ${_para_diff} ${_test_directory}/${_output_file}  ${_test_directory}/${_comparison_file} > output.diff 2>&1
+  STRING(REPLACE ";" " " _para_diff_str "${_para_diff}")
+  ADD_CUSTOM_TARGET(diff_${_test_name}
+    COMMAND ${CMAKE_SOURCE_DIR}/utilities/script/compareOutput.sh ${_exec_diff} "${_para_diff_str}" ${_comparison_file} ${_output_file}
     WORKING_DIRECTORY
       ${_test_directory}
     DEPENDS
       ${_test_directory}/${_output_file}
       ${_test_directory}/${_comparison_file}
     )
-
-  ADD_CUSTOM_TARGET(diff_${_test_name}
-    WORKING_DIRECTORY
-      ${_test_directory}
-    DEPENDS
-      ${_test_directory}/output.diff
-    )
+  UNSET(_para_diff_str)
 
   # Finally add test target. This will be invoked by the ctest command.
   ADD_TEST(NAME ${_test_name}

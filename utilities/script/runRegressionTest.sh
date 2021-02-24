@@ -22,7 +22,7 @@ function run_tests() {
 	make -j16 || bdie "$LINENO" "make failed."
 	(
 		START_TIME=`date`
-		touch ${TEST_RUNNING} 
+		touch ${TEST_RUNNING}
 		ctest -j16 >> ctest.output
 		rm ${TEST_RUNNING}
 		echo ${START_TIME} > ${TEST_FINISHED}
@@ -76,11 +76,11 @@ pushd . >> /dev/null
 cd ${TEST_DIR}
 if [ ! -d ${LAST_LOCAL_VER} ]; then
 	LAST_LOCAL_VER_TESTED=false
-else 
+else
 	cd ${LAST_LOCAL_VER}
 	if [ -e ${TEST_FINISHED} ]; then
 		LAST_LOCAL_VER_TESTED=true
-	else 
+	else
 		if [ -e ${TEST_RUNNING} ]; then
 			bdie "$LINENO" "It seems there is an unfinished test."
 		fi

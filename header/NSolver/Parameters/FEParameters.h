@@ -17,9 +17,11 @@ namespace NSFEMSolver
     struct FEParameters
     {
       FEParameters();
-      FEParameters (const FEParameters &para_in);
-      static void declare_parameters (ParameterHandler &prm);
-      void parse_parameters (ParameterHandler &prm);
+      FEParameters(const FEParameters &para_in);
+      static void
+      declare_parameters(ParameterHandler &prm);
+      void
+      parse_parameters(ParameterHandler &prm);
 
       enum MappingType
       {
@@ -35,7 +37,7 @@ namespace NSFEMSolver
       int error_quadrature_degree;
     };
 
-  }
-}
+  } // namespace Parameters
+} // namespace NSFEMSolver
 
 #endif

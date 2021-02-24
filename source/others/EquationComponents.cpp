@@ -30,9 +30,9 @@ namespace NSFEMSolver
   std::vector<std::string>
   EquationComponents<dim>::component_names()
   {
-    std::vector<std::string> names (dim, "velocity");
-    names.push_back ("density");
-    names.push_back ("pressure");
+    std::vector<std::string> names(dim, "velocity");
+    names.push_back("density");
+    names.push_back("pressure");
 
     return names;
   }
@@ -43,16 +43,16 @@ namespace NSFEMSolver
   EquationComponents<dim>::component_interpretation()
   {
     std::vector<DataComponentInterpretation::DataComponentInterpretation>
-    data_component_interpretation
-    (dim, DataComponentInterpretation::component_is_part_of_vector);
-    data_component_interpretation
-    .push_back (DataComponentInterpretation::component_is_scalar);
-    data_component_interpretation
-    .push_back (DataComponentInterpretation::component_is_scalar);
+      data_component_interpretation(
+        dim, DataComponentInterpretation::component_is_part_of_vector);
+    data_component_interpretation.push_back(
+      DataComponentInterpretation::component_is_scalar);
+    data_component_interpretation.push_back(
+      DataComponentInterpretation::component_is_scalar);
 
     return data_component_interpretation;
   }
 
   template class EquationComponents<2>;
   template class EquationComponents<3>;
-}
+} // namespace NSFEMSolver

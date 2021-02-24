@@ -72,31 +72,32 @@ namespace NSFEMSolver
   // residual:
   template <int dim>
   void
-  NSolver<dim>::
-  assemble_cell_term (const FEValues<dim>             &fe_v,
-                      const std::vector<types::global_dof_index> &dof_indices)
+  NSolver<dim>::assemble_cell_term(
+    const FEValues<dim> &                       fe_v,
+    const std::vector<types::global_dof_index> &dof_indices)
   {
     const unsigned int dofs_per_cell = fe_v.dofs_per_cell;
     const unsigned int n_q_points    = fe_v.n_quadrature_points;
 
-    Table<2,Sacado::Fad::DFad<double> >
-    W (n_q_points, EquationComponents<dim>::n_components);
+    Table<2, Sacado::Fad::DFad<double>> W(
+      n_q_points, EquationComponents<dim>::n_components);
 
-    Table<2,double>
-    W_old (n_q_points, EquationComponents<dim>::n_components);
+    Table<2, double> W_old(n_q_points, EquationComponents<dim>::n_components);
 
-    Table<3,Sacado::Fad::DFad<double> >
-    grad_W (n_q_points, EquationComponents<dim>::n_components, dim);
-    Table<3,double>
-    grad_W_old (n_q_points, EquationComponents<dim>::n_components, dim);
+    Table<3, Sacado::Fad::DFad<double>> grad_W(
+      n_q_points, EquationComponents<dim>::n_components, dim);
+    Table<3, double> grad_W_old(n_q_points,
+                                EquationComponents<dim>::n_components,
+                                dim);
 
     // Next, we have to define the independent variables that we will try to
     // determine by solving a Newton step. These independent variables are the
     // values of the local degrees of freedom which we extract here:
-    std::vector<Sacado::Fad::DFad<double> > independent_local_dof_values (dofs_per_cell);
-    for (unsigned int i=0; i<dofs_per_cell; ++i)
+    std::vector<Sacado::Fad::DFad<double>> independent_local_dof_values(
+      dofs_per_cell);
+    for (unsigned int i = 0; i < dofs_per_cell; ++i)
       {
-        independent_local_dof_values[i] = current_solution (dof_indices[i]);
+        independent_local_dof_values[i] = current_solution(dof_indices[i]);
       }
 
     // The next step incorporates all the magic: we declare a subset of the
@@ -110,15 +111,16 @@ namespace NSFEMSolver
     // trick, marking <code>independent_local_dof_values[i]</code> as the
     // $i$th independent variable out of a total of
     // <code>dofs_per_cell</code>:
-    for (unsigned int i=0; i<dofs_per_cell; ++i)
+    for (unsigned int i = 0; i < dofs_per_cell; ++i)
       {
-        independent_local_dof_values[i].diff (i, dofs_per_cell);
+        independent_local_dof_values[i].diff(i, dofs_per_cell);
       }
 
     // After all these declarations, let us actually compute something. First,
     // the values of <code>W</code>, <code>W_old</code>, <code>grad_W</code>
-    // and <code>grad_W_old</code>, which we can compute from the local DoF values
-    // by using the formula $W(x_q)=\sum_i \mathbf W_i \Phi_i(x_q)$, where
+    // and <code>grad_W_old</code>, which we can compute from the local DoF
+    // values by using the formula $W(x_q)=\sum_i \mathbf W_i \Phi_i(x_q)$,
+    // where
     // $\mathbf W_i$ is the $i$th entry of the (local part of the) solution
     // vector, and $\Phi_i(x_q)$ the value of the $i$th vector-valued shape
     // function evaluated at quadrature point $x_q$. The gradient can be
@@ -131,34 +133,35 @@ namespace NSFEMSolver
     // fad types, only the local cell variables, we explicitly code the loop
     // above. Before this, we add another loop that initializes all the fad
     // variables to zero:
-    for (unsigned int q=0; q<n_q_points; ++q)
-      for (unsigned int c=0; c<EquationComponents<dim>::n_components; ++c)
+    for (unsigned int q = 0; q < n_q_points; ++q)
+      for (unsigned int c = 0; c < EquationComponents<dim>::n_components; ++c)
         {
-          W[q][c]       = 0;
-          W_old[q][c]   = 0;
-          for (unsigned int d=0; d<dim; ++d)
+          W[q][c]     = 0;
+          W_old[q][c] = 0;
+          for (unsigned int d = 0; d < dim; ++d)
             {
-              grad_W[q][c][d] = 0;
+              grad_W[q][c][d]     = 0;
               grad_W_old[q][c][d] = 0;
             }
         }
 
-    for (unsigned int q=0; q<n_q_points; ++q)
-      for (unsigned int i=0; i<dofs_per_cell; ++i)
+    for (unsigned int q = 0; q < n_q_points; ++q)
+      for (unsigned int i = 0; i < dofs_per_cell; ++i)
         {
-          const unsigned int c = fe_v.get_fe().system_to_component_index (i).first;
+          const unsigned int c =
+            fe_v.get_fe().system_to_component_index(i).first;
 
           W[q][c] += independent_local_dof_values[i] *
-                     fe_v.shape_value_component (i, q, c);
-          W_old[q][c] += old_solution (dof_indices[i]) *
-                         fe_v.shape_value_component (i, q, c);
+                     fe_v.shape_value_component(i, q, c);
+          W_old[q][c] +=
+            old_solution(dof_indices[i]) * fe_v.shape_value_component(i, q, c);
 
           for (unsigned int d = 0; d < dim; d++)
             {
               grad_W[q][c][d] += independent_local_dof_values[i] *
-                                 fe_v.shape_grad_component (i, q, c)[d];
-              grad_W_old[q][c][d] += old_solution (dof_indices[i]) *
-                                     fe_v.shape_grad_component (i, q, c)[d];
+                                 fe_v.shape_grad_component(i, q, c)[d];
+              grad_W_old[q][c][d] += old_solution(dof_indices[i]) *
+                                     fe_v.shape_grad_component(i, q, c)[d];
             }
         }
 
@@ -170,55 +173,64 @@ namespace NSFEMSolver
     // that we compute the flux matrices and right hand sides in terms of
     // autodifferentiation variables, so that the Jacobian contributions can
     // later easily be computed from it:
-    std::vector <
-    std_cxx11::array <std_cxx11::array <Sacado::Fad::DFad<double>, dim>, EquationComponents<dim>::n_components >
-    > flux (n_q_points);
+    std::vector<std::array<std::array<Sacado::Fad::DFad<double>, dim>,
+                           EquationComponents<dim>::n_components>>
+      flux(n_q_points);
 
-    std::vector <
-    std_cxx11::array <std_cxx11::array <Sacado::Fad::DFad<double>, dim>, EquationComponents<dim>::n_components >
-    > visc_flux (n_q_points);
+    std::vector<std::array<std::array<Sacado::Fad::DFad<double>, dim>,
+                           EquationComponents<dim>::n_components>>
+      visc_flux(n_q_points);
 
-    std::vector <
-    std_cxx11::array <std_cxx11::array <double, dim>, EquationComponents<dim>::n_components >
-    > flux_old (n_q_points);
+    std::vector<std::array<std::array<double, dim>,
+                           EquationComponents<dim>::n_components>>
+      flux_old(n_q_points);
 
-    std::vector < std_cxx11::array< Sacado::Fad::DFad<double>, EquationComponents<dim>::n_components> > forcing (
-      n_q_points);
+    std::vector<std::array<Sacado::Fad::DFad<double>,
+                           EquationComponents<dim>::n_components>>
+      forcing(n_q_points);
 
-    std::vector < std_cxx11::array< double, EquationComponents<dim>::n_components> > forcing_old (n_q_points);
+    std::vector<std::array<double, EquationComponents<dim>::n_components>>
+      forcing_old(n_q_points);
 
-    //MMS: evaluate source term
-    std::vector <typename MMS<dim>::F_V> mms_source (n_q_points);
-    std::vector <typename MMS<dim>::F_V> mms_value (n_q_points);
-    std::vector <typename MMS<dim>::F_T> mms_grad (n_q_points);
+    // MMS: evaluate source term
+    std::vector<typename MMS<dim>::F_V> mms_source(n_q_points);
+    std::vector<typename MMS<dim>::F_V> mms_value(n_q_points);
+    std::vector<typename MMS<dim>::F_T> mms_grad(n_q_points);
     if (parameters->n_mms == 1)
       {
-        for (unsigned int q=0; q<n_q_points; ++q)
+        for (unsigned int q = 0; q < n_q_points; ++q)
           {
-            mms.evaluate (fe_v.quadrature_point (q), mms_value[q], mms_grad[q], mms_source[q], /* const bool need_source = */ true);
+            mms.evaluate(fe_v.quadrature_point(q),
+                         mms_value[q],
+                         mms_grad[q],
+                         mms_source[q],
+                         /* const bool need_source = */ true);
           }
       }
     // TODO:
     // viscosity_old needed here.
-    // Vector for viscosity should be sized to n_dof rather than n_active_cell, only entropy viscosity is
-    // cellwise, while physical viscosity is per-dof.
+    // Vector for viscosity should be sized to n_dof rather than n_active_cell,
+    // only entropy viscosity is cellwise, while physical viscosity is per-dof.
 
     {
       const double mu =
         artificial_viscosity[fe_v.get_cell()->active_cell_index()];
       const double prandtlNumber = 0.72;
-      double kappa = mu / (prandtlNumber * (parameters->gas_gamma - 1.0));
-      // if (parameters->diffusion_type == Parameters::AllParameters<dim>::diffu_entropy_DRB)
+      double       kappa = mu / (prandtlNumber * (parameters->gas_gamma - 1.0));
+      // if (parameters->diffusion_type ==
+      // Parameters::AllParameters<dim>::diffu_entropy_DRB)
       //   {
-      //     kappa = artificial_thermal_conductivity[fe_v.get_cell()->active_cell_index()];
+      //     kappa =
+      //     artificial_thermal_conductivity[fe_v.get_cell()->active_cell_index()];
       //   }
-      for (unsigned int q=0; q<n_q_points; ++q)
+      for (unsigned int q = 0; q < n_q_points; ++q)
         {
-          EulerEquations<dim>::compute_inviscid_flux (W_old[q], flux_old[q]);
-          EulerEquations<dim>::compute_forcing_vector (W_old[q], forcing_old[q]);
-          EulerEquations<dim>::compute_inviscid_flux (W[q], flux[q]);
-          EulerEquations<dim>::compute_viscous_flux (W[q], grad_W[q], visc_flux[q], mu, kappa);
-          EulerEquations<dim>::compute_forcing_vector (W[q], forcing[q]);
+          EulerEquations<dim>::compute_inviscid_flux(W_old[q], flux_old[q]);
+          EulerEquations<dim>::compute_forcing_vector(W_old[q], forcing_old[q]);
+          EulerEquations<dim>::compute_inviscid_flux(W[q], flux[q]);
+          EulerEquations<dim>::compute_viscous_flux(
+            W[q], grad_W[q], visc_flux[q], mu, kappa);
+          EulerEquations<dim>::compute_forcing_vector(W[q], forcing[q]);
         }
     }
     // Avoid waring on unused parameter
@@ -248,9 +260,10 @@ namespace NSFEMSolver
     // \\ &+& \sum_{d=1}^{\text{dim}} h^{\eta} \left( \theta \frac{\partial
     // \mathbf{w^k_{n+1}}_{\text{component\_i}}}{\partial x_d} + (1-\theta)
     // \frac{\partial \mathbf{w_n}_{\text{component\_i}}}{\partial x_d} ,
-    // \frac{\partial (\mathbf{z}_i)_{\text{component\_i}}}{\partial x_d} \right)_K
-    // \\ &-& \left( \theta\mathbf{G}({\mathbf{w}^k_n+1} )_{\text{component\_i}} +
-    // (1-\theta)\mathbf{G}({\mathbf{w}_n} )_{\text{component\_i}} ,
+    // \frac{\partial (\mathbf{z}_i)_{\text{component\_i}}}{\partial x_d}
+    // \right)_K
+    // \\ &-& \left( \theta\mathbf{G}({\mathbf{w}^k_n+1} )_{\text{component\_i}}
+    // + (1-\theta)\mathbf{G}({\mathbf{w}_n} )_{\text{component\_i}} ,
     // (\mathbf{z}_i)_{\text{component\_i}} \right)_K ,
     // @f}
     // where integrals are
@@ -262,113 +275,107 @@ namespace NSFEMSolver
     // this residual.
 
     Sacado::Fad::DFad<double> SUPG_residual = 0.0;
-    if (parameters->SUPG_factor > 0.0 &&
-        n_time_step != 0)
+    if (parameters->SUPG_factor > 0.0 && n_time_step != 0)
       {
         typedef Sacado::Fad::DFad<double> FADD;
         const unsigned int nc = EquationComponents<dim>::n_components;
-        const unsigned int v0c = EquationComponents<dim>::first_momentum_component;
+        const unsigned int v0c =
+          EquationComponents<dim>::first_momentum_component;
         const unsigned int rc = EquationComponents<dim>::density_component;
         const unsigned int pc = EquationComponents<dim>::pressure_component;
 
-        for (unsigned int q=0; q<fe_v.n_quadrature_points; ++q)
+        for (unsigned int q = 0; q < fe_v.n_quadrature_points; ++q)
           {
-            std_cxx11::array <FADD, nc> w;
-            std_cxx11::array <FADD, dim> flux_c;
-            for (unsigned int ic=0; ic<nc; ++ic)
+            std::array<FADD, nc>  w;
+            std::array<FADD, dim> flux_c;
+            for (unsigned int ic = 0; ic < nc; ++ic)
               {
                 w[ic] = W[q][ic].val();
-                w[ic].diff (ic,nc);
+                w[ic].diff(ic, nc);
               }
             // I don't want to compute the entire flux matrix.
             {
               const unsigned int c = rc;
-              for (unsigned int d=0; d<dim; ++d)
+              for (unsigned int d = 0; d < dim; ++d)
                 {
-                  flux_c[d] = w[c] * w[v0c+d];
+                  flux_c[d] = w[c] * w[v0c + d];
                 }
             }
             {
               const unsigned int c = pc;
-              for (unsigned int d=0; d<dim; ++d)
+              for (unsigned int d = 0; d < dim; ++d)
                 {
                   flux_c[d] =
-                    (EulerEquations<dim>::compute_energy_density (w) + w[c]) *
-                    w[v0c+d];
+                    (EulerEquations<dim>::compute_energy_density(w) + w[c]) *
+                    w[v0c + d];
                 }
             }
-            for (unsigned int c=v0c; c<v0c+dim; ++c)
+            for (unsigned int c = v0c; c < v0c + dim; ++c)
               {
-                for (unsigned int d=0; d<dim; ++d)
+                for (unsigned int d = 0; d < dim; ++d)
                   {
-                    flux_c[d] = w[c] * w[rc] * w[v0c+d];
+                    flux_c[d] = w[c] * w[rc] * w[v0c + d];
                   }
-                flux_c[c-v0c] += w[pc];
+                flux_c[c - v0c] += w[pc];
               }
 
             FADD flux_divergence;
             FADD streamwise_grad;
             FADD SUPG_residual_q = 0.0;
-            for (unsigned int ic=0; ic<nc; ++ic)
+            for (unsigned int ic = 0; ic < nc; ++ic)
               {
                 flux_divergence = 0.0;
                 streamwise_grad = 0.0;
-                for (unsigned int d=0; d<dim; ++d)
+                for (unsigned int d = 0; d < dim; ++d)
                   {
                     flux_divergence +=
-                      flux_c[d].fastAccessDx (ic) *
-                      grad_W[q][ic][d];
+                      flux_c[d].fastAccessDx(ic) * grad_W[q][ic][d];
                     streamwise_grad +=
-                      W[q][v0c+d] *
-                      fe_v.shape_grad_component (ic, q, ic)[d];
+                      W[q][v0c + d] * fe_v.shape_grad_component(ic, q, ic)[d];
                   }
-                SUPG_residual_q +=
-                  flux_divergence * streamwise_grad;
+                SUPG_residual_q += flux_divergence * streamwise_grad;
               }
 
             double velocity_magnitude = 0.0;
-            for (unsigned int d=0; d<dim; ++d)
+            for (unsigned int d = 0; d < dim; ++d)
               {
-                velocity_magnitude +=
-                  w[v0c+d].val() * w[v0c+d].val();
+                velocity_magnitude += w[v0c + d].val() * w[v0c + d].val();
               }
-            SUPG_residual +=
-              SUPG_residual_q /
-              (std::sqrt (velocity_magnitude) + 1e-6) *
-              fe_v.JxW (q);
+            SUPG_residual += SUPG_residual_q /
+                             (std::sqrt(velocity_magnitude) + 1e-6) *
+                             fe_v.JxW(q);
           } // End for all quadrature points
 
-        SUPG_residual *=
-          parameters->SUPG_factor *
-          fe_v.get_cell()->diameter();
+        SUPG_residual *= parameters->SUPG_factor * fe_v.get_cell()->diameter();
       } // End of if (parameters->SUPG_factor > 0.0)
 
-    for (unsigned int i=0; i<fe_v.dofs_per_cell; ++i)
+    for (unsigned int i = 0; i < fe_v.dofs_per_cell; ++i)
       {
         Sacado::Fad::DFad<double> R_i = 0;
         R_i += SUPG_residual;
         double cell_physical_residual = 0.0;
 
-        const unsigned int
-        component_i = fe_v.get_fe().system_to_component_index (i).first;
+        const unsigned int component_i =
+          fe_v.get_fe().system_to_component_index(i).first;
 
         // The residual for each row (i) will be accumulating into this fad
         // variable.  At the end of the assembly for this row, we will query
         // for the sensitivities to this variable and add them into the
         // Jacobian.
 
-        for (unsigned int point=0; point<fe_v.n_quadrature_points; ++point)
+        for (unsigned int point = 0; point < fe_v.n_quadrature_points; ++point)
           {
-            Sacado::Fad::DFad<double> R_i_q = 0.0;
-            double cell_physical_residual_q = 0.0;
+            Sacado::Fad::DFad<double> R_i_q                    = 0.0;
+            double                    cell_physical_residual_q = 0.0;
 
-            for (unsigned int d=0; d<dim; d++)
+            for (unsigned int d = 0; d < dim; d++)
               {
                 {
                   const Sacado::Fad::DFad<double> tmp =
                     (parameters->theta * flux[point][component_i][d] +
-                     (1.0-parameters->theta) * flux_old[point][component_i][d]) *
-                    fe_v.shape_grad_component (i, point, component_i)[d];
+                     (1.0 - parameters->theta) *
+                       flux_old[point][component_i][d]) *
+                    fe_v.shape_grad_component(i, point, component_i)[d];
                   R_i_q -= tmp;
                   cell_physical_residual_q -= tmp.val();
                 }
@@ -376,9 +383,10 @@ namespace NSFEMSolver
                 {
                   const Sacado::Fad::DFad<double> tmp =
                     visc_flux[point][component_i][d] *
-                    fe_v.shape_grad_component (i, point, component_i)[d];
+                    fe_v.shape_grad_component(i, point, component_i)[d];
                   R_i_q += tmp;
-                  if (parameters->count_artificial_visc_term_in_phisical_residual)
+                  if (parameters
+                        ->count_artificial_visc_term_in_phisical_residual)
                     {
                       cell_physical_residual_q += tmp.val();
                     }
@@ -387,24 +395,24 @@ namespace NSFEMSolver
 
             {
               const Sacado::Fad::DFad<double> tmp =
-                (parameters->theta  * forcing[point][component_i] +
+                (parameters->theta * forcing[point][component_i] +
                  (1.0 - parameters->theta) * forcing_old[point][component_i]) *
-                fe_v.shape_value_component (i, point, component_i);
+                fe_v.shape_value_component(i, point, component_i);
               R_i_q -= tmp;
               cell_physical_residual_q -= tmp.val();
             }
             if (parameters->n_mms == 1)
               {
-                //MMS: apply MMS source term
+                // MMS: apply MMS source term
                 const Sacado::Fad::DFad<double> tmp =
                   mms_source[point][component_i] *
-                  fe_v.shape_value_component (i, point, component_i);
+                  fe_v.shape_value_component(i, point, component_i);
                 R_i_q -= tmp;
                 cell_physical_residual_q -= tmp.val();
               }
 
-            R_i_q *= fe_v.JxW (point);
-            cell_physical_residual_q *= fe_v.JxW (point);
+            R_i_q *= fe_v.JxW(point);
+            cell_physical_residual_q *= fe_v.JxW(point);
 
             R_i += R_i_q;
             cell_physical_residual += cell_physical_residual_q;
@@ -414,14 +422,16 @@ namespace NSFEMSolver
         // subtract the residual from the right hand side.
         // Trilinos FAD data type stores all the derivatives in an array.
         // We can pass them to the system matrix directly.
-        system_matrix.add (dof_indices[i], dof_indices.size(),
-                           & (dof_indices[0]), & (R_i.fastAccessDx (0)));
-        right_hand_side (dof_indices[i]) -= R_i.val();
-        physical_residual (dof_indices[i]) -= cell_physical_residual;
+        system_matrix.add(dof_indices[i],
+                          dof_indices.size(),
+                          &(dof_indices[0]),
+                          &(R_i.fastAccessDx(0)));
+        right_hand_side(dof_indices[i]) -= R_i.val();
+        physical_residual(dof_indices[i]) -= cell_physical_residual;
       }
 
     return;
   }
 
 #include "NSolver.inst"
-}
+} // namespace NSFEMSolver

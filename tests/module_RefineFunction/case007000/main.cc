@@ -2,19 +2,22 @@
 
 #define dim 2
 
-int main (int argc, char *argv[])
+int
+main(int argc, char *argv[])
 {
   typedef typename parallel::distributed::Triangulation<dim> TypeTria;
-  Utilities::MPI::MPI_InitFinalize mpi_initialization (argc, argv, /* int max_num_threads */ 1);
+  Utilities::MPI::MPI_InitFinalize                           mpi_initialization(
+    argc, argv, /* int max_num_threads */ 1);
 
-  const unsigned int dimension (2);
-  const MPI_Comm mpi_communicator = MPI_COMM_WORLD;
-  const bool I_am_host = Utilities::MPI::this_mpi_process (mpi_communicator) == 0;
-  const unsigned int myid = Utilities::MPI::this_mpi_process (mpi_communicator);
+  const unsigned int dimension(2);
+  const MPI_Comm     mpi_communicator = MPI_COMM_WORLD;
+  const bool         I_am_host =
+    Utilities::MPI::this_mpi_process(mpi_communicator) == 0;
+  const unsigned int myid = Utilities::MPI::this_mpi_process(mpi_communicator);
 
   // parsing input parameter
-  char *input_file (0);
-  char default_input_file[10] = "input.prm";
+  char *input_file(0);
+  char  default_input_file[10] = "input.prm";
 
   if (argc < 2)
     {
@@ -25,39 +28,41 @@ int main (int argc, char *argv[])
       input_file = argv[1];
     }
 
-  Parameters::AllParameters<dimension> solver_parameters;
-  SmartPointer<Parameters::AllParameters<dimension> const> prt_parameters (&solver_parameters);
+  Parameters::AllParameters<dimension>                     solver_parameters;
+  SmartPointer<Parameters::AllParameters<dimension> const> prt_parameters(
+    &solver_parameters);
   {
     ParameterHandler prm;
 
-    solver_parameters.declare_parameters (prm);
-    prm.read_input (input_file);
-    solver_parameters.parse_parameters (prm);
+    solver_parameters.declare_parameters(prm);
+    prm.parse_input(input_file);
+    solver_parameters.parse_parameters(prm);
   }
 
   // generate initial mesh
-  TypeTria triangulation (mpi_communicator,
-                          Triangulation<dim>::none,
-                          parallel::distributed::Triangulation<dim>::no_automatic_repartitioning);
+  TypeTria triangulation(
+    mpi_communicator,
+    Triangulation<dim>::none,
+    parallel::distributed::Triangulation<dim>::no_automatic_repartitioning);
   {
     std::vector<unsigned int> repetitions;
-    repetitions.push_back (11);
-    repetitions.push_back (15);
+    repetitions.push_back(11);
+    repetitions.push_back(15);
     // repetitions.push_back (17);
 
-    const Point<dim> p1 (0, 0);
-    const Point<dim> p2 (11,15);
+    const Point<dim> p1(0, 0);
+    const Point<dim> p2(11, 15);
 
-    GridGenerator::subdivided_hyper_rectangle (triangulation,
-                                               repetitions,
-                                               p1,
-                                               p2);
+    GridGenerator::subdivided_hyper_rectangle(triangulation,
+                                              repetitions,
+                                              p1,
+                                              p2);
   }
 
   std::ofstream fout;
   if (I_am_host)
     {
-      fout.open ("output.out");
+      fout.open("output.out");
     }
   Vector<float> criteria;
   Vector<float> refine_mark;
@@ -66,19 +71,19 @@ int main (int argc, char *argv[])
   unsigned int counter = 0;
   if (I_am_host)
     {
-      fout << counter << '\t'
-           << triangulation.n_global_active_cells() << std::endl;
+      fout << counter << '\t' << triangulation.n_global_active_cells()
+           << std::endl;
     }
 
   while (counter < prt_parameters->max_refine_level + 3)
     {
       // fabricate a refine criteria
       {
-        criteria.reinit (triangulation.n_active_cells());
-        typename TypeTria::active_cell_iterator
-        cell = triangulation.begin_active();
-        const typename TypeTria::active_cell_iterator
-        endc = triangulation.end();
+        criteria.reinit(triangulation.n_active_cells());
+        typename TypeTria::active_cell_iterator cell =
+          triangulation.begin_active();
+        const typename TypeTria::active_cell_iterator endc =
+          triangulation.end();
         for (; cell != endc; ++cell)
           if (cell->is_locally_owned())
             {
@@ -88,84 +93,74 @@ int main (int argc, char *argv[])
       }
 
       // mark refine and coarsen
-      NSFEMSolver::Tools::refine_and_coarsen_fixed_number (triangulation,
-                                                           criteria,
-                                                           prt_parameters);
+      NSFEMSolver::Tools::refine_and_coarsen_fixed_number(triangulation,
+                                                          criteria,
+                                                          prt_parameters);
       triangulation.prepare_coarsening_and_refinement();
 
       {
-        refine_mark.reinit (triangulation.n_active_cells());
-        coarsen_mark.reinit (triangulation.n_active_cells());
+        refine_mark.reinit(triangulation.n_active_cells());
+        coarsen_mark.reinit(triangulation.n_active_cells());
 
-        typename TypeTria::active_cell_iterator
-        cell = triangulation.begin_active();
-        const typename TypeTria::active_cell_iterator
-        endc = triangulation.end();
+        typename TypeTria::active_cell_iterator cell =
+          triangulation.begin_active();
+        const typename TypeTria::active_cell_iterator endc =
+          triangulation.end();
         for (; cell != endc; ++cell)
           if (cell->is_locally_owned())
             {
               refine_mark[cell->active_cell_index()] =
-                (cell->refine_flag_set()
-                 ?
-                 1.0
-                 :
-                 0.0);
+                (cell->refine_flag_set() ? 1.0 : 0.0);
               coarsen_mark[cell->active_cell_index()] =
-                (cell->coarsen_flag_set()
-                 ?
-                 1.0
-                 :
-                 0.0);
+                (cell->coarsen_flag_set() ? 1.0 : 0.0);
             }
       }
 
       {
         DataOut<dim> data_out;
-        data_out.attach_triangulation (triangulation);
+        data_out.attach_triangulation(triangulation);
         {
-          const std::string data_name ("indicator");
-          data_out.add_data_vector (criteria,
-                                    data_name,
-                                    DataOut<dim>::type_cell_data);
+          const std::string data_name("indicator");
+          data_out.add_data_vector(criteria,
+                                   data_name,
+                                   DataOut<dim>::type_cell_data);
         }
         {
-          const std::string data_name ("refine_flag");
-          data_out.add_data_vector (refine_mark,
-                                    data_name,
-                                    DataOut<dim>::type_cell_data);
+          const std::string data_name("refine_flag");
+          data_out.add_data_vector(refine_mark,
+                                   data_name,
+                                   DataOut<dim>::type_cell_data);
         }
         {
-          const std::string data_name ("coarsen_flag");
-          data_out.add_data_vector (coarsen_mark,
-                                    data_name,
-                                    DataOut<dim>::type_cell_data);
+          const std::string data_name("coarsen_flag");
+          data_out.add_data_vector(coarsen_mark,
+                                   data_name,
+                                   DataOut<dim>::type_cell_data);
         }
 
         data_out.build_patches();
 
-        const std::string output_tag = "grid-" +
-                                       Utilities::int_to_string (counter, 4);
-        const std::string slot_itag = ".slot-" + Utilities::int_to_string (myid, 4);
+        const std::string output_tag =
+          "grid-" + Utilities::int_to_string(counter, 4);
+        const std::string slot_itag =
+          ".slot-" + Utilities::int_to_string(myid, 4);
 
-        std::ofstream output ((output_tag + slot_itag + ".vtu").c_str());
-        data_out.write_vtu (output);
+        std::ofstream output((output_tag + slot_itag + ".vtu").c_str());
+        data_out.write_vtu(output);
 
         if (I_am_host)
           {
             std::vector<std::string> filenames;
-            for (unsigned int i=0;
-                 i<Utilities::MPI::n_mpi_processes (mpi_communicator);
+            for (unsigned int i = 0;
+                 i < Utilities::MPI::n_mpi_processes(mpi_communicator);
                  ++i)
               {
-                filenames.push_back (output_tag +
-                                     ".slot-" +
-                                     Utilities::int_to_string (i, 4) +
-                                     ".vtu");
+                filenames.push_back(output_tag + ".slot-" +
+                                    Utilities::int_to_string(i, 4) + ".vtu");
               }
-            std::ofstream master_output ((output_tag + ".pvtu").c_str());
-            data_out.write_pvtu_record (master_output, filenames);
+            std::ofstream master_output((output_tag + ".pvtu").c_str());
+            data_out.write_pvtu_record(master_output, filenames);
           }
-
       }
 
       triangulation.execute_coarsening_and_refinement();
@@ -174,8 +169,8 @@ int main (int argc, char *argv[])
 
       if (I_am_host)
         {
-          fout << counter << '\t'
-               << triangulation.n_global_active_cells() << std::endl;
+          fout << counter << '\t' << triangulation.n_global_active_cells()
+               << std::endl;
         }
     };
   fout.close();

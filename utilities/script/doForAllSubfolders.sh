@@ -1,3 +1,4 @@
+#!/bin/bash
 #
 # A script for doing something in all sub-folders.
 # May be usefull in updating testcases.
@@ -13,4 +14,3 @@ for fold in $(ls -d */); do
 #    patch input.prm < ../input.patch
   popd > /dev/null
 done
-

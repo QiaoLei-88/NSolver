@@ -20,7 +20,7 @@ namespace NSFEMSolver
       Roe
     };
   }
-}
+} // namespace NSFEMSolver
 
 
 #endif /* defined(__NSolver__NumericalFlux__) */

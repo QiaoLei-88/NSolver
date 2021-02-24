@@ -50,74 +50,74 @@ namespace NSFEMSolver
   // There is nothing much to say about the constructor. Essentially, it reads
   // the input file and fills the parameter object with the parsed values:
   template <int dim>
-  NSolver<dim>::NSolver (Parameters::AllParameters<dim> *const para_ptr_in)
-    :
-    mpi_communicator (MPI_COMM_WORLD),
-    spherical_boundary (0),
-    NACA_foil_boundary (para_ptr_in->NACA_foil, 1.0),
-    triangulation (mpi_communicator,
-                   typename Triangulation<dim>::MeshSmoothing
-                   (Triangulation<dim>::smoothing_on_refinement |
-                    Triangulation<dim>::smoothing_on_coarsening)),
-    mapping_ptr (0),
-    fe (FE_Q<dim> (para_ptr_in->fe_degree), EquationComponents<dim>::n_components),
-    dof_handler (triangulation),
-    quadrature (para_ptr_in->quadrature_degree),
-    face_quadrature (para_ptr_in->face_quadrature_degree),
-    blend_artificial_viscosity (false),
-    I_am_host (Utilities::MPI::this_mpi_process (mpi_communicator) == 0),
-    myid (Utilities::MPI::this_mpi_process (mpi_communicator)),
-    parameters (para_ptr_in),
-    parameters_modifier (para_ptr_in),
-    verbose_cout (std::cout, false),
-    pcout (std::cout,
-           (Utilities::MPI::this_mpi_process (mpi_communicator)
-            == 0)),
-    paper_data_out (paper_data_std, I_am_host),
-    computing_timer (MPI_COMM_WORLD,
-                     pcout,
-                     TimerOutput::summary,
-                     TimerOutput::cpu_and_wall_times),
-    CFL_number (para_ptr_in->CFL_number),
-    n_sparsity_pattern_out (-1),
-    field_output_counter (0)
+  NSolver<dim>::NSolver(Parameters::AllParameters<dim> *const para_ptr_in)
+    : mpi_communicator(MPI_COMM_WORLD)
+    , spherical_boundary(0)
+    , NACA_foil_boundary(para_ptr_in->NACA_foil, 1.0)
+    , triangulation(mpi_communicator,
+                    typename Triangulation<dim>::MeshSmoothing(
+                      Triangulation<dim>::smoothing_on_refinement |
+                      Triangulation<dim>::smoothing_on_coarsening))
+    , mapping_ptr(0)
+    , fe(FE_Q<dim>(para_ptr_in->fe_degree),
+         EquationComponents<dim>::n_components)
+    , dof_handler(triangulation)
+    , quadrature(para_ptr_in->quadrature_degree)
+    , face_quadrature(para_ptr_in->face_quadrature_degree)
+    , blend_artificial_viscosity(false)
+    , I_am_host(Utilities::MPI::this_mpi_process(mpi_communicator) == 0)
+    , myid(Utilities::MPI::this_mpi_process(mpi_communicator))
+    , parameters(para_ptr_in)
+    , parameters_modifier(para_ptr_in)
+    , verbose_cout(std::cout, false)
+    , pcout(std::cout,
+            (Utilities::MPI::this_mpi_process(mpi_communicator) == 0))
+    , paper_data_out(paper_data_std, I_am_host)
+    , computing_timer(MPI_COMM_WORLD,
+                      pcout,
+                      TimerOutput::summary,
+                      TimerOutput::cpu_and_wall_times)
+    , CFL_number(para_ptr_in->CFL_number)
+    , n_sparsity_pattern_out(-1)
+    , field_output_counter(0)
   {
-    Assert (parameters, ExcMessage ("Null pointer encountered!"));
+    Assert(parameters, ExcMessage("Null pointer encountered!"));
 
-    continuation_coefficient = std::max (0.0, parameters->laplacian_continuation);
+    continuation_coefficient =
+      std::max(0.0, parameters->laplacian_continuation);
 
     switch (parameters->mapping_type)
       {
-      case Parameters::FEParameters::MappingQ:
-      {
-        if (parameters->mapping_degree == 1)
+        case Parameters::FEParameters::MappingQ:
           {
-            mapping_ptr = new MappingQ1<dim>();
+            if (parameters->mapping_degree == 1)
+              {
+                mapping_ptr = new MappingQ1<dim>();
+              }
+            else
+              {
+                mapping_ptr = new MappingQ<dim>(parameters->mapping_degree);
+              }
+            break;
           }
-        else
+        case Parameters::FEParameters::MappingC1:
           {
-            mapping_ptr = new MappingQ<dim> (parameters->mapping_degree);
+            mapping_ptr = new MappingC1<dim>();
+            break;
           }
-        break;
-      }
-      case Parameters::FEParameters::MappingC1:
-      {
-        mapping_ptr = new MappingC1<dim>();
-        break;
-      }
-      default:
-      {
-        AssertThrow (false, ExcNotImplemented());
-        break;
-      }
+        default:
+          {
+            AssertThrow(false, ExcNotImplemented());
+            break;
+          }
       }
 
     if (I_am_host)
       {
-        paper_data_std.open ("paper_data.txt");
-        Assert (paper_data_std, ExcFileNotOpen ("paper_data.txt"));
-        paper_data_std.setf (std::ios::scientific);
-        paper_data_std.precision (6);
+        paper_data_std.open("paper_data.txt");
+        Assert(paper_data_std, ExcFileNotOpen("paper_data.txt"));
+        paper_data_std.setf(std::ios::scientific);
+        paper_data_std.precision(6);
         unsigned int column = 0;
 
         paper_data_out << "#" << ++column << "  n_iter  ";
@@ -130,14 +130,15 @@ namespace NSFEMSolver
         paper_data_out << std::endl;
       }
 
-    EulerEquations<dim>::set_parameter (parameters);
+    EulerEquations<dim>::set_parameter(parameters);
 
-    verbose_cout.set_condition (parameters->output == Parameters::Solver::verbose);
+    verbose_cout.set_condition(parameters->output ==
+                               Parameters::Solver::verbose);
 
     if (parameters->n_mms == 1)
       {
         // Setup coefficients for MMS
-        std_cxx11::array<Coeff, EquationComponents<dim>::n_components> coeffs;
+        std::array<Coeff, EquationComponents<dim>::n_components> coeffs;
         if (dim == 2)
           {
             // // component u:
@@ -155,7 +156,7 @@ namespace NSFEMSolver
             coeffs[1].cy  = 0.04;
             coeffs[1].cxy = 0;
             coeffs[1].ax  = 0.5;
-            coeffs[1].ay  = 2.0/3.0;
+            coeffs[1].ay  = 2.0 / 3.0;
             coeffs[1].axy = 0;
 
             // component density:
@@ -168,7 +169,7 @@ namespace NSFEMSolver
             coeffs[2].axy = 0;
 
             // component pressure:
-            coeffs[3].c0  = 1.0/1.4;
+            coeffs[3].c0  = 1.0 / 1.4;
             coeffs[3].cx  = 0.2;
             coeffs[3].cy  = 0.5;
             coeffs[3].cxy = 0;
@@ -228,7 +229,7 @@ namespace NSFEMSolver
             coeffs[1].cy = 0.004;
             coeffs[1].cz = -0.0015;
             coeffs[1].ax = 0.5;
-            coeffs[1].ay = 2.0/3.0;
+            coeffs[1].ay = 2.0 / 3.0;
             coeffs[1].az = 1.25;
 
             // component w:
@@ -236,7 +237,7 @@ namespace NSFEMSolver
             coeffs[2].cx = 0.0036;
             coeffs[2].cy = -0.002;
             coeffs[2].cz = -0.0011;
-            coeffs[2].ax = 1.0/3.0;
+            coeffs[2].ax = 1.0 / 3.0;
             coeffs[2].ay = 1.5;
             coeffs[2].az = 1.0;
 
@@ -250,16 +251,16 @@ namespace NSFEMSolver
             coeffs[3].az = 1.5;
 
             // component pressure:
-            coeffs[4].c0 = 1.0/1.4;
+            coeffs[4].c0 = 1.0 / 1.4;
             coeffs[4].cx = 0.0013;
             coeffs[4].cy = 0.005;
             coeffs[4].cz = -0.002;
             coeffs[4].ax = 2.0;
             coeffs[4].ay = 1.0;
-            coeffs[4].az = 1.0/3.0;
+            coeffs[4].az = 1.0 / 3.0;
           }
         // Initialize MMS
-        mms.reinit (coeffs);
+        mms.reinit(coeffs);
       }
   }
 
@@ -271,5 +272,4 @@ namespace NSFEMSolver
   }
 
 #include "NSolver.inst"
-}
-
+} // namespace NSFEMSolver

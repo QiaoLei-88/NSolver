@@ -26,16 +26,17 @@ namespace NSFEMSolver
        * <code>max_Newton_iter</code> or time marching L2 norm is
        * below <code>solution_update_l2_tolerance<code>.
        */
-      double final_time;
+      double       final_time;
       unsigned int max_Newton_iter;
-      double solution_update_l2_tolerance;
-      double physical_residual_l2_tolerance;
+      double       solution_update_l2_tolerance;
+      double       physical_residual_l2_tolerance;
 
       /**
-       * The tolerance to end Newton iteration. This parameter will be interpreted
-       * into different means according to its sign. If a positive value is passed in,
-       * it will be used as absolute tolerance. If a negative value is passed in,
-       * it will be used as a relative order to drop.
+       * The tolerance to end Newton iteration. This parameter will be
+       * interpreted into different means according to its sign. If a positive
+       * value is passed in, it will be used as absolute tolerance. If a
+       * negative value is passed in, it will be used as a relative order to
+       * drop.
        */
       double nonlinear_tolerance;
 
@@ -48,20 +49,21 @@ namespace NSFEMSolver
       double theta;
 
       /**
-       * If <code>rigid_reference_time_step</code> is true, reference time step size
-       * is set to the value specified in the input file, otherwise the reference
-       * time step size is calculated according to CFL condition.
-       * This flag is set to true by default.
+       * If <code>rigid_reference_time_step</code> is true, reference time step
+       * size is set to the value specified in the input file, otherwise the
+       * reference time step size is calculated according to CFL condition. This
+       * flag is set to true by default.
        */
       bool rigid_reference_time_step;
       /**
        * Negative <code>reference_time_step</code> will be recognized as steady
        * simulation. For steady cases, CFL number is evaluated in a special way.
        *
-       * If reference_time_step is provided as zero, an exception will be thrown.
+       * If reference_time_step is provided as zero, an exception will be
+       * thrown.
        */
       double reference_time_step;
-      bool is_steady;
+      bool   is_steady;
 
       /**
        * Flag to use local time step size. Only effective in steady case.
@@ -92,19 +94,19 @@ namespace NSFEMSolver
        * Please refer to John Gatsis's Phd thesis for details.
        */
       unsigned int n_iter_stage1;
-      double step_increasing_ratio_stage1;
-      double minimum_step_increasing_ratio_stage2;
-      double step_increasing_power_stage2;
+      double       step_increasing_ratio_stage1;
+      double       minimum_step_increasing_ratio_stage2;
+      double       step_increasing_power_stage2;
 
 
       /**
-       * Predict solution of next time step by making a linear extrapolation from current
-       * and last time step. This parameter controls the relative length of the
-       * forward extrapolation. Specifically,
-       * predicted_solution =  current_solution * (1+solution_extrapolation_length)
-       *                      -old_solution * solution_extrapolation_length;
+       * Predict solution of next time step by making a linear extrapolation
+       * from current and last time step. This parameter controls the relative
+       * length of the forward extrapolation. Specifically, predicted_solution =
+       * current_solution * (1+solution_extrapolation_length) -old_solution *
+       * solution_extrapolation_length;
        */
-      bool solution_extrapolation_length;
+      double solution_extrapolation_length;
 
       /**
        * There is an array defined in NSolver::run() that contains a list of
@@ -115,11 +117,12 @@ namespace NSFEMSolver
 
       bool step_with_physical_residual;
 
-      static void declare_parameters (ParameterHandler &prm);
-      void parse_parameters (ParameterHandler &prm);
-
+      static void
+      declare_parameters(ParameterHandler &prm);
+      void
+      parse_parameters(ParameterHandler &prm);
     };
-  }
-}
+  } // namespace Parameters
+} // namespace NSFEMSolver
 
 #endif /* defined(__NSolver__TimeSteppingParameters__) */

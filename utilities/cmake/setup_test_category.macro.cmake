@@ -46,8 +46,8 @@ MACRO(SETUP_TEST_CATEGORY)
   ENDIF()
 
   IF(NOT DEFINED _para_run)
-    SET (_para_run ${_input_file_list} > screen.log 2>&1)
-    LIST (APPEND _additional_clean_up_files "screen.log")
+    SET (_para_run ${_input_file_list})
+    LIST (APPEND _additional_clean_up_files "screen.log" "exec.exit")
   ENDIF()
   UNSET(_current_dir_name)
 

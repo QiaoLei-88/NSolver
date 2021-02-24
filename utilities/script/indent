@@ -1,0 +1,88 @@
+#!/bin/bash
+## ---------------------------------------------------------------------
+##
+## Copyright (C) 2018 - 2020 by the deal.II authors
+##
+## This file is part of the deal.II library.
+##
+## The deal.II library is free software; you can use it, redistribute
+## it, and/or modify it under the terms of the GNU Lesser General
+## Public License as published by the Free Software Foundation; either
+## version 2.1 of the License, or (at your option) any later version.
+## The full text of the license can be found in the file LICENSE at
+## the top level of the deal.II distribution.
+##
+## ---------------------------------------------------------------------
+
+#
+# This script does the same thing as utilities/indent-all but only
+# reformats files which have changed (or have been added but neither
+# staged/committed) since the last merge commit to the master branch.
+#
+# The script needs to be executed as
+#   ./utilities/script/indent
+# from the top-level directory of the source tree
+#
+# The script can be invoked with DEAL_II_CLANG_FORMAT to change
+# the default version of clang-format. For example:
+#   DEAL_II_CLANG_FORMAT=clang-format-6.0 ./utilities/indent
+# or,
+#   make DEAL_II_CLANG_FORMAT="clang-format-6.0" indent
+#
+# Note: If the script is invoked with REPORT_ONLY=true set,
+#   REPORT_ONLY=true ./utilities/script/indent
+# or,
+#   make REPORT_ONLY=true indent
+# then indentation errors will only be reported without any actual file
+# changes.
+#
+
+if [ ! -f utilities/script/indent_common.sh ]; then
+  echo "*** This script must be run from the top-level directory of NSolver."
+  exit 1
+fi
+
+source utilities/script/indent_common.sh
+
+#
+# Run sanity checks:
+#
+
+checks
+
+if [ "x$1" == "xall" ]; then
+  EXECMD=process
+else
+  EXECMD=process_changed
+fi
+
+#
+# process all source and header files:
+#
+
+${EXECMD} "source header tests" ".*\.(cc|cpp|h|cu|cuh)" format_file
+${EXECMD} "source" ".*\.inst.in" format_inst
+
+#
+# Fix permissions and convert to unix line ending if necessary:
+#
+
+${EXECMD} "source header tests ./CMakeLists.txt" \
+  ".*\.(cc|cpp|h|cu|cuh|inst.in|output.*|cmake|dox|txt)" fix_permissions
+
+${EXECMD} "source header tests utilities ./CMakeLists.txt" \
+  ".*\.(cc|cpp|h|cu|cuh|inst.in|cmake|dox|txt|sh)" dos_to_unix
+
+#
+# Removing trailing whitespace
+#
+
+${EXECMD} "source header tests utilities ./CMakeLists.txt" \
+  ".*\.(cc|cpp|h|cu|cuh|cmake|dox|txt|sh)" remove_trailing_whitespace
+
+#
+# Ensure only a single newline at end of files
+#
+
+${EXECMD} "source header tests utilities ./CMakeLists.txt" \
+  ".*\.(cc|cpp|h|cu|cuh|html|dox|txt|sh)" ensure_single_trailing_newline

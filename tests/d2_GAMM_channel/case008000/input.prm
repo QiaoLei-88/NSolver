@@ -75,6 +75,7 @@ subsection time stepping
   set theta scheme value            = 1.0
   set iter in stage1                = 5
   set minimum step increasing ratio stage2 = 1.0
+  set step increasing power stage2  = 1.0
   set solution extrapolation length = 0.0
   set nonlinear tolerance           = 1e-2
   set local time step               = true

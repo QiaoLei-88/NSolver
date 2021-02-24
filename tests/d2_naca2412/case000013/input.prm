@@ -16,7 +16,7 @@ set scale mesh = 0.001
 
 subsection stabilization parameters
   set diffusion type           = const # entropy # entropy_DRB # const
-  set entropy use global h min = false #false #true
+  # set entropy use global h min = false #false #true
   set entropy visc cLinear = 1e+3 # 0.007
   set entropy visc cE = 0.015
   set entropy with solution diff = false
