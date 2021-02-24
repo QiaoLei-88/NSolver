@@ -58,16 +58,21 @@ ENDIF()
 
 PROJECT(${PRJ_NAME})
 
+IF(NOT DEFINED N_BUILD_JOBS)
+  INCLUDE(ProcessorCount)
+  ProcessorCount(N_BUILD_JOBS)
+ENDIF()
+MESSAGE(STATUS "\n   set build parallel level to ${N_BUILD_JOBS}\n")
 
 ADD_CUSTOM_TARGET(debug
   COMMAND ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=Debug ${CMAKE_SOURCE_DIR}
-  COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target all
+  COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target all -- -j${N_BUILD_JOBS}
   COMMENT "Switch CMAKE_BUILD_TYPE to Debug"
   )
 
 ADD_CUSTOM_TARGET(release
   COMMAND ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=Release ${CMAKE_SOURCE_DIR}
-  COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target all
+  COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target all -- -j${N_BUILD_JOBS}
   COMMENT "Switch CMAKE_BUILD_TYPE to Release"
   )
 
