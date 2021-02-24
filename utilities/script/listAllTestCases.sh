@@ -4,7 +4,7 @@
 #
 # Usage: execute this script inside the test category.
 # For example, form the root directory of this repository, execute commands:
-# $ ./utilities/listCases.sh
+# $ ./utilities/script/listCases.sh
 
 if test ! -d tests ; then
   echo "*** This script must be run from the top-level directory."

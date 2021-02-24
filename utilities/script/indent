@@ -20,10 +20,8 @@
 # staged/committed) since the last merge commit to the master branch.
 #
 # The script needs to be executed as
-#   ./utilities/indent
-# from the top-level directory of the source tree, or via
-#   make indent
-# from a build directory.
+#   ./utilities/script/indent
+# from the top-level directory of the source tree
 #
 # The script can be invoked with DEAL_II_CLANG_FORMAT to change
 # the default version of clang-format. For example:
@@ -32,19 +30,19 @@
 #   make DEAL_II_CLANG_FORMAT="clang-format-6.0" indent
 #
 # Note: If the script is invoked with REPORT_ONLY=true set,
-#   REPORT_ONLY=true ./utilities/indent
+#   REPORT_ONLY=true ./utilities/script/indent
 # or,
 #   make REPORT_ONLY=true indent
 # then indentation errors will only be reported without any actual file
 # changes.
 #
 
-if [ ! -f utilities/indent_common.sh ]; then
-  echo "*** This script must be run from the top-level directory of deal.II."
+if [ ! -f utilities/script/indent_common.sh ]; then
+  echo "*** This script must be run from the top-level directory of NSolver."
   exit 1
 fi
 
-source utilities/indent_common.sh
+source utilities/script/indent_common.sh
 
 #
 # Run sanity checks:
@@ -88,4 +86,3 @@ ${EXECMD} "source header tests utilities ./CMakeLists.txt" \
 
 ${EXECMD} "source header tests utilities ./CMakeLists.txt" \
   ".*\.(cc|cpp|h|cu|cuh|html|dox|txt|sh)" ensure_single_trailing_newline
-
